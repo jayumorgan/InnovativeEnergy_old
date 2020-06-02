@@ -1,0 +1,18 @@
+{
+    "PALLET_CONFIG": {
+        "LAYER_CENTROIDS": [{"x":0, "y": 377.8, "z": 287, "i": 0}],
+        "BOX_ORIENTATION": [],
+        "PALLET_SIZE": {"x" : 20, "y" : 20},
+        "BOX_DIMENSIONS": {"x": 50, "y": 50, "z": 50} 
+    },
+    "OPERATING_PARAMETERS": {
+        "TRAVEL": {
+            "SPEED": 400,
+            "ACCELERATION": 400
+        },
+        "APPROACH": {
+            "SPEED": 200,
+            "ACCELERATION": 200
+        }
+    }
+}

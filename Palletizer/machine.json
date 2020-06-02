@@ -1,0 +1,26 @@
+{
+    "PICK_CONFIG": {
+        "PICK_ORIGIN": {"x" : 100, "y" : 100, "z" : 100},
+        "LIFT_CLEARANCE": {"z" : 0},
+        "PALLET_ORIGIN": {"x" : 0, "y" : 0}
+    },
+    "AXES_CONFIG": {
+        "AXES_DIRECTIONS": {"x" : 2, "y" : 3, "z" : 1},
+        "AXES_GAINS": {"x" : 150, "y" : 150, "z" : 150},
+        "AXES_TRAVEL": {"x" : 500, "y" : 500, "z" : 500}
+    },
+    "DETECTOR_CONFIG": {
+        "BOX_MODULE_ADDRESS": "12345",
+        "BOX_INPUT_CHANNEL": 1,
+        "PALLET_MODULE_ADDRESS": "54321",
+        "PALLET_INPUT_CHANNEL": 2,
+        "PRESSURE_MODULE_ADDRESS": "6789",
+        "PRESSURE_INPUT_CHANNEL": 3
+    },
+    "NETWORK_CONFIG": {
+        "CONTROLLER_IP_ADDRESS": "192.168.7.2",
+        "CONTROLLER_GATEWAY": "192.168.0.1",
+        "CONTROLLER_NETMASK": "255.255.255.0"
+    }
+}
+
