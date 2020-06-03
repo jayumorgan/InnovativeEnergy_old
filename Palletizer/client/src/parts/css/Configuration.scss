@@ -6,10 +6,12 @@
 .Configuration {
     width: 100%;
     height: 100%;
-    min-height: 67vh;
+    max-height: 67vh;
     display: flex;
     justify-content: center;
     align-items: stretch;
+    color: $dark-blue;
+    font-weight: $bold-font;
 }
 
 
@@ -20,13 +22,16 @@
     margin-right: $margin;
     margin-bottom: $double-margin;
     width: 50%;
+    height: 100%;
     // height: 100%;
+    // height: 60pt;
     border-radius: $border-radius;
     border: $container-border;
-    display: flex;
+    // display: flex;
     // align-items: flex-start;
-    justify-content: flex-start;
-    flex-direction: column;
+    // align-items: center;
+    // justify-content: flex-start;
+    // flex-direction: column;
     
 }
 
@@ -34,7 +39,8 @@
     // width: 100%; 
     background-color: $light-blue;
     display: flex;
-    // height: 10%;
+    height: 14%;
+    min-height: 4vh;
     align-items: center;
     justify-content: flex-start;
     // pa-left: $double-margin;
@@ -50,13 +56,18 @@
     // width: 100%;
     // padding-left: $margin;
     // padding-right: $margin;
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    flex-direction: column;
+    // display: flex;
+    // align-items: stretch;
+    // max-height: 30vh;
+    height: 70%;
+    max-height: 60vh;
+    // justify-content: center;
+    // flex-direction: column;
     padding-left: $double-margin;
     padding-right: $double-margin;
     padding-top: $margin;
+    padding-bottom: $margin;
+    overflow-y: auto;
     
 }
 
@@ -66,27 +77,75 @@
     border-radius: $border-radius;
     padding-left: $margin;
     padding-right: $margin;
-    padding-top: $margin;
-    padding-bottom: $margin;
+    padding-top: $double-margin;
+    padding-bottom: $double-margin;
     margin-top: $margin;
     background-color: $off-white;
+
+    // margin:auto;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
     // margin: $margin;
 }
 
+.ConfigCell span{
+    font-weight: $bold-font;
+}
 
+.EditConfigButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: $margin;
+    text-decoration: underline;
+}
+
+.EditConfigButton span {
+    font-weight:$normal-font; 
+}
+
+
+.DeleteConfigButton {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    color:red;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+
+.DeleteConfigButton span {
+    text-decoration: underline;
+    font-weight:$normal-font; 
+}
+
+
+.AddContainer {
+    height: 20%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: $margin;
+    padding-bottom: $margin;
+}
 
 .AddConfigButton {
     background-color: $dark-blue;
     color:white;
-    align-self: center;
-    
+    // align-self: center;
+    // height: 20%;
+    // height: 20%;
     border-radius: $border-radius;
-    padding-left: $double-margin;
-    padding-right: $double-margin;
+    padding-left: $octa-margin;
+    padding-right: $octa-margin;
     padding-top: $double-margin;
     padding-bottom: $double-margin;
-    margin-top:auto;
-    margin-bottom: $margin;
+    // margin-top:auto;
+    // margin-bottom: $margin;
     cursor: pointer;
     
     // align-self: flex;

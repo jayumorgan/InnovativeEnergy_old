@@ -13,14 +13,15 @@ class AddConfigButton extends Component<AddConfigButtonProps> {
         title.toLowerCase();
         title = "Add " + title;
         return(
+            <div className="AddContainer" >
             <div className="AddConfigButton" >
                 <span> {title} </span>
             </div>
+                </div>
         )
     }
     
 }
-
 
 
 interface ConfigCellProps {
@@ -33,7 +34,15 @@ class ConfigCell extends Component<ConfigCellProps> {
         let {title} = this.props;
         return (
             <div className="ConfigCell">
-                <span> {title} </span> 
+                <span> {title} </span>
+                <div className="EditConfigButton" >
+                    <span> Edit </span>
+                </div>
+                <div className="DeleteConfigButton">
+                    <span>
+                        Delete
+                    </span>
+                </div>
             </div>
         );
     }
@@ -67,8 +76,14 @@ class HalfContainer extends Component<HalfContainerProps> {
 
 class Configuration extends Component {
     render(){
-        let pallet_configs = ['Pallet 1', 'Pallet 2', 'Pallet 3'];
-        let machine_configs = ['Machine 1', 'Machine 2', 'Machine 3'];
+        let pallet_configs = [] as string[];
+        let machine_configs = [] as string[];
+        for (let i = 0; i< 20; i++){
+            pallet_configs.push("Pallet configuration "+String(i+1));
+            machine_configs.push("Machine configuration " + String(i+1));
+        }
+        // let pallet_configs = ['Pallet 1', 'Pallet 2', 'Pallet 3'];
+        // let machine_configs = ['Machine 1', 'Machine 2', 'Machine 3'];
         return(
             <div className="Configuration" >
                 <HalfContainer title={"Pallet Configuration"} configs={pallet_configs} />

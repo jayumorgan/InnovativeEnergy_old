@@ -22,8 +22,18 @@ $margin: 8pt;
 
 $double-margin: #{$margin * 2};
 $quad-margin: #{$margin * 4};
+$octa-margin: #{$margin * 8};
 // Border:
 $border: 1pt solid white;
 $grey-border: 2pt solid $light-grey; 
 
 $container-border: 1pt solid $light-grey;
+
+
+$bold-font: 700;
+$normal-font: 400;
+
+
+$large-font: 1.5em;
+
+$medium-font: 1.3em;

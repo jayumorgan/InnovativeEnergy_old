@@ -39,8 +39,8 @@ class Header extends Component {
         return (
             <div className="Header">
                 <BackButton />
-                <span>
-                Palletizer MachineApp 
+                <span id="title">
+                    Palletizer MachineApp 
                 </span>
                 <StopButton />
             </div>

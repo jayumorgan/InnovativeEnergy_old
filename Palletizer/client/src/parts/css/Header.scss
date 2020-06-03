@@ -4,15 +4,21 @@
 .Header {
     background-color: $dark-blue;
     // width: 100%;
-    height: 13vh;
+    height: 8vh;
+    // min-height: 100pt;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color:white;
     padding-left: $margin;
     padding-right: $margin;
+    font-weight: $bold-font;
 }
 
+
+#title{
+    font-size: $medium-font;
+}
 
 .StopButton {
     background-color: red;
