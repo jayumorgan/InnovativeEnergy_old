@@ -1,0 +1,56 @@
+@import '../../master.scss';
+
+
+
+$hover-border-bottom: 3pt solid $dark-grey;
+$invisible-border-bottom: 3pt solid transparent;
+$green-border-bottom: 3pt solid $green;
+.NavBarContainer {
+    // width: 100%;
+    // height: 10%;
+    min-height: 10vh; 
+    max-height: 10vh;
+    border-bottom: $grey-border;
+    margin-right: $double-margin;
+    margin-left: $double-margin;
+    display: flex;
+    align-items: stretch;
+    // margin-top: 1pt;
+    // margin-bottom: -1pt;
+    // align-items: center;
+    // Introduce padding for the bottom line
+}
+
+// This is fundamentally a router.
+// So how do we organize this...... 
+.NavBarItem {
+    // width: 10%;
+    // height: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: $double-margin;
+    padding-left: $double-margin;
+    cursor: pointer;
+    border-bottom: $invisible-border-bottom;
+    text-decoration: none;
+    color: black;
+}
+
+.NavBarItem a {
+    text-decoration: none;
+    color: black;
+}
+
+.NavBarItem:hover {
+    border-bottom: $hover-border-bottom;
+}
+
+.selected {
+    border-bottom: $green-border-bottom;
+}
+
+// Do nothing when hovering the selected one.
+.selected:hover {
+    border-bottom: $green-border-bottom;
+}

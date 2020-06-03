@@ -1,0 +1,29 @@
+// Declare shared styles here
+
+
+$dark-blue: rgb(43,62,85);
+
+$light-grey: rgb(212,217,226);
+
+$green: rgb(91,196,126);
+
+$light-blue: rgb(239,242,247);
+
+$dark-grey: rgb(135, 135, 135);
+
+$off-white: rgb(251,251,251);
+// Border-radius
+$border-radius: 4pt;
+
+
+// Margin
+$margin: 8pt;
+
+
+$double-margin: #{$margin * 2};
+$quad-margin: #{$margin * 4};
+// Border:
+$border: 1pt solid white;
+$grey-border: 2pt solid $light-grey; 
+
+$container-border: 1pt solid $light-grey;
