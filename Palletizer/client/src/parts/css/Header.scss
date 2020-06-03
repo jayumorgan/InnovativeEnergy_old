@@ -15,6 +15,17 @@
     font-weight: $bold-font;
 }
 
+.HeaderLogo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.HeaderLogo img {
+    height: auto;
+    width: 20pt;
+    padding-right: $margin;
+}
 
 #title{
     font-size: $medium-font;

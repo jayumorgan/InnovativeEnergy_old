@@ -16,6 +16,7 @@ $green-border-bottom: 3pt solid $green;
     display: flex;
     align-items: stretch;
     font-weight: $bold-font;
+    color:$dark-blue;
     // margin-top: 1pt;
     // margin-bottom: -1pt;
     // align-items: center;
@@ -35,12 +36,13 @@ $green-border-bottom: 3pt solid $green;
     cursor: pointer;
     border-bottom: $invisible-border-bottom;
     text-decoration: none;
-    color: black;
+    // color: black;
 }
 
 .NavBarItem a {
     text-decoration: none;
-    color: black;
+    // color: black;
+    color:$dark-blue;
 }
 
 .NavBarItem:hover {

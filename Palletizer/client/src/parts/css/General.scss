@@ -1,0 +1,80 @@
+@import '../../master.scss';
+
+
+.GeneralContainer {
+    // width: 100%;
+    height: 100%;
+    padding: $double-margin;
+    color: $dark-blue;
+}
+
+
+.StatusContainer{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.StatusContainer img {
+    width: 30%;
+    height: auto;
+    padding: $margin;
+}
+
+   
+
+.Status {
+    width: 100%;
+    margin-top: $margin;
+    // padding: $margin;
+    border-radius: $border-radius;
+    border: $container-border; 
+    // width: 70%; 
+}
+
+.StatusTitle {
+    background-color: $light-blue;
+    display: flex;
+    height: 14%;
+    min-height: 4vh;
+    align-items: center;
+    justify-content: flex-start;
+    font-weight: $bold-font;
+    // pa-left: $double-margin;
+    padding-top: $margin;
+    padding-bottom: $margin;
+    // margin-top: $margin;
+    // padding-bottom: $margin;
+    padding-left: $double-margin;
+}
+
+.StatusBlock {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+
+.StatusItem {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $double-margin;
+}
+
+.StatusItem span {
+    font-size: $medium-font;
+}
+
+
+.StatusValue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: $bold-font;
+    font-size: $large-font;
+    padding-top: $double-margin;
+}

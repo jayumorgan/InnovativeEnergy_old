@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 
 
+import logo from "../images/white-logo.png";
+
 // Styles
 import "./css/Header.scss";
 
@@ -33,15 +35,27 @@ class StopButton extends Component {
     }
 }
 
+class HeaderLogo extends Component {
+    render() {
+        return(
+            <div className="HeaderLogo">
+                <img src={logo} alt="Vention Logo" />
+                <span id="title">
+                    {"Palletizer MachineApp"}
+                </span>
+            </div>
+        )
+    }
+}
+
+
 
 class Header extends Component {
     render() {
         return (
             <div className="Header">
                 <BackButton />
-                <span id="title">
-                    Palletizer MachineApp 
-                </span>
+                <HeaderLogo />
                 <StopButton />
             </div>
         )
