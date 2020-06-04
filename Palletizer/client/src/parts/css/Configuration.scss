@@ -36,19 +36,12 @@
 }
 
 .HalfHeader {
-    // width: 100%; 
     background-color: $light-blue;
     display: flex;
-    height: 14%;
-    min-height: 4vh;
     align-items: center;
     justify-content: flex-start;
-    // pa-left: $double-margin;
-    padding-top: $margin;
-    padding-bottom: $margin;
-    // margin-top: $margin;
-    // padding-bottom: $margin;
-    padding-left: $double-margin;
+    padding: $double-margin;
+    font-size: $medium-font;
 }
 
 
@@ -92,6 +85,7 @@
 
 .ConfigCell span{
     font-weight: $bold-font;
+    // font-size: $medium-font;
 }
 
 .EditConfigButton {
@@ -117,6 +111,9 @@
     cursor: pointer;
 }
 
+// .DeleteConfigButton:hover{
+//     @include shadow();
+// }
 
 .DeleteConfigButton span {
     text-decoration: underline;
@@ -151,4 +148,8 @@
     
     // align-self: flex;
     // align-self: flex-end;
+}
+
+.AddConfigButton:hover {
+    @include shadow();
 }

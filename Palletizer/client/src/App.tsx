@@ -5,10 +5,13 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 //Components
 import Header from "./parts/Header";
 import NavBar from "./parts/NavBar";
-
+import Footer from "./parts/Footer";
 // Main Components
 import General from "./parts/General";
 import Configuration from "./parts/Configuration";
+
+
+
 // Styles
 import './App.scss';
 
@@ -49,6 +52,7 @@ class App extends Component<AppProps, AppState> {
                 <General />
               </Route>
           </Switch>
+          <Footer />
         </div>
       </Router>
     );

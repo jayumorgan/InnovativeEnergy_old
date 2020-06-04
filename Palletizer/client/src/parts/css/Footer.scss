@@ -1,0 +1,17 @@
+@import '../../master.scss';
+
+.Footer {
+    padding-left: $double-margin;
+    padding-right: $double-margin;
+    color: $dark-blue;
+    display:flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+
+.Footer span {
+    // padding: $margin;
+    color: $light-grey;
+}

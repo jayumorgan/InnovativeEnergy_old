@@ -46,17 +46,11 @@
 .StatusTitle {
     background-color: $light-blue;
     display: flex;
-    height: 10%;
-    min-height: 4vh;
     align-items: center;
     justify-content: flex-start;
     font-weight: $bold-font;
-    // pa-left: $double-margin;
-    padding-top: $margin;
-    padding-bottom: $margin;
-    // margin-top: $margin;
-    // padding-bottom: $margin;
-    padding-left: $double-margin;
+    padding: $double-margin;
+    font-size: $medium-font;
 }
 
 .StatusBlock {
@@ -183,6 +177,10 @@
     width: 20%;
     font-weight: $bold-font;
     cursor: pointer;
+}
+
+.ControlButton:hover {
+    @include shadow();
 }
 
 .ControlButton.start{
