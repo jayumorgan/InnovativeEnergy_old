@@ -17,8 +17,17 @@
     flex-direction: row;
 }
 
+
+.StatusImageContainer {
+    margin: $double-margin;
+    width: 40%;
+    padding: $margin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .StatusContainer img {
-    width: 30%;
+    width: 100%;
     height: auto;
     padding: $margin;
 }
@@ -37,7 +46,7 @@
 .StatusTitle {
     background-color: $light-blue;
     display: flex;
-    height: 14%;
+    height: 10%;
     min-height: 4vh;
     align-items: center;
     justify-content: flex-start;
@@ -77,4 +86,139 @@
     font-weight: $bold-font;
     font-size: $large-font;
     padding-top: $double-margin;
+}
+
+
+
+.BottomContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    
+}
+.ExecuteContainer {
+    width: 30%; 
+    margin: $margin;
+    border-radius: $border-radius;
+    border: $container-border;
+}
+.InformationContainer {
+    // width: 100%;
+    width: 70%;
+    margin-left: $margin;
+    margin-top: $margin;
+    margin-bottom: $margin;
+    // margin: $margin;
+    // margin-left: $double-margin;
+    // margin-top: $margin;
+    // margin-right: $margin;
+    // margin-bottom: $margin;
+    border-radius: $border-radius;
+    border: $container-border;
+}
+
+
+.SelectCell {
+    // width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: $double-margin;
+    padding-top: $double-margin;
+    padding-bottom: $double-margin;
+    padding-right: $double-margin;
+}
+.SelectCell span {
+    font-weight: $bold-font;
+}
+
+.SelectCell input {
+    border-radius: $border-radius;
+    color: $dark-blue;
+    border: $container-border;
+    font-size: 1em;
+    width: 35%;
+    padding:$margin;
+}
+
+
+.SelectCell select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none; 
+    border-radius: $border;
+    border: $container-border;
+    color: $dark-blue;
+    font-size: 1em;
+    width: 40%;
+    padding: $margin;
+}
+
+
+.MachineControls {
+    // width: 100%;
+    
+    margin-left: $double-margin;
+    margin-right: $double-margin;
+    margin-top: $double-margin;
+    margin-bottom: $double-margin;
+    padding-bottom: $double-margin;
+    
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ControlButton {
+    border-radius: $border-radius;
+    display:flex;
+    flex-direction: column;
+    padding: $double-margin;
+    align-items: center;
+    justify-content: center;
+    background-color: $dark-blue;
+    color: white;
+    width: 20%;
+    font-weight: $bold-font;
+    cursor: pointer;
+}
+
+.ControlButton.start{
+    background-color: $green;
+}
+
+.ErrorLogContainer {
+    width: 100%;
+    overflow-y: auto;
+    max-height: 40vh;
+}
+
+.ErrorLog {
+    display: flex; 
+    justify-content: space-between;
+    border-bottom: $container-border;
+    padding: $double-margin;
+    
+}
+.ErrorLogDate {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+}
+.ErrorLogDate span {
+    text-align: left;
+    padding-bottom: $margin;
+}
+
+.ErrorLogDate #DateString {
+    font-weight: $bold-font;
+    padding-bottom: 0;
+} 
+
+.ErrorDismiss {
+    text-decoration: underline;
+    cursor: pointer;
 }
