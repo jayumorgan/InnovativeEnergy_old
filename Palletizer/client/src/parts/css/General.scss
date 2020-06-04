@@ -64,15 +64,6 @@ $bottom-height: 70%;
     
 }
 
-
-@mixin container-style() {
-    width: 100%;
-    height: 100%;
-    border-radius: $border-radius;
-    border: $container-border;
-}
-
-
 .StackContainer {
     @include container-style();
     .StackTitle {
@@ -91,41 +82,27 @@ $bottom-height: 70%;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    .StatusItem {
+        width: 25%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: $double-margin;
+        span {
+            font-size: $medium-font;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .StatusValue {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: $bold-font;
+            font-size: $large-font;
+            padding-top: $double-margin;
+        }
+    }
 }
-
-
-.StatusItem {
-    width: 25%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: $double-margin;
-}
-
-.StatusItem span {
-    font-size: $medium-font;
-}
-
-
-.StatusValue {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: $bold-font;
-    font-size: $large-font;
-    padding-top: $double-margin;
-}
-
-
-
-.BottomContainer {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    
-}
-
 
 .SelectCell {
     // width: 100%;
@@ -136,112 +113,101 @@ $bottom-height: 70%;
     padding-top: $double-margin;
     padding-bottom: $double-margin;
     padding-right: $double-margin;
-}
-.SelectCell span {
-    font-weight: $bold-font;
-}
-
-.SelectCell input {
-    border-radius: $border-radius;
-    color: $dark-blue;
-    border: $container-border;
-    font-size: 1em;
-    width: 35%;
-    padding:$margin;
-}
-
-
-.SelectCell select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none; 
-    border-radius: $border;
-    border: $container-border;
-    color: $dark-blue;
-    font-size: 1em;
-    width: 40%;
-    padding: $margin;
+    span {
+        font-weight: $bold-font;
+    }
+    input {
+        border-radius: $border-radius;
+        color: $dark-blue;
+        border: $container-border;
+        font-size: 1em;
+        width: 35%;
+        padding:$margin;
+    }
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none; 
+        border-radius: $border;
+        border: $container-border;
+        color: $dark-blue;
+        font-size: 1em;
+        width: 40%;
+        padding: $margin;
+    }
 }
 
 
 .MachineControls {
-    // width: 100%;
-    
     margin-left: $double-margin;
     margin-right: $double-margin;
     margin-top: $double-margin;
-    // margin-bottom: $double-margin;
     padding-bottom: $double-margin;
-    
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    .ControlButton {
+        border-radius: $border-radius;
+        display:flex;
+        flex-direction: column;
+        padding: $double-margin;
+        align-items: center;
+        justify-content: center;
+        background-color: $dark-blue;
+        color: white;
+        width: 20%;
+        font-weight: $bold-font;
+        cursor: pointer;
+        span {
+            font-size: $huge-font;
+        }
+        #button-text {
+            padding-top: $margin;
+            font-size: $normal-font-size;
+        }
+    }
+    .ControlButton:hover {
+        @include shadow();
+    }
+    .ControlButton.start{
+        background-color: $green;
+    }
 }
 
-.ControlButton {
-    border-radius: $border-radius;
-    display:flex;
-    flex-direction: column;
-    padding: $double-margin;
-    align-items: center;
-    justify-content: center;
-    background-color: $dark-blue;
-    color: white;
-    width: 20%;
-    font-weight: $bold-font;
-    cursor: pointer;
-}
-
-.ControlButton span {
-    font-size: $huge-font;
-}
-
-.ControlButton #button-text {
-    padding-top: $margin;
-    font-size: $normal-font-size;
-}
-
-.ControlButton:hover {
-    @include shadow();
-}
-
-.ControlButton.start{
-    background-color: $green;
-}
 
 .ErrorLogContainer {
     width: 100%;
     overflow-y: auto;
     max-height: inherit;
     max-height: 46vh;
+    .ErrorLog {
+        display: flex; 
+        justify-content: space-between;
+        border-bottom: $container-border;
+        padding: $double-margin;
+        align-items: center;
+        .ErrorLogDate {
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+            justify-content: center;
+            span {
+                text-align: left;
+                padding-bottom: $margin;
+            }
+            #DateString {
+                font-weight: $bold-font;
+                padding-bottom: 0;
+            }
+        }
+
+        .ErrorDismiss {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    }
 }
 
-.ErrorLog {
-    display: flex; 
-    justify-content: space-between;
-    border-bottom: $container-border;
-    padding: $double-margin;
-    align-items: center;
-    
-}
-.ErrorLogDate {
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    justify-content: center;
-}
-.ErrorLogDate span {
-    text-align: left;
-    padding-bottom: $margin;
-}
 
-.ErrorLogDate #DateString {
-    font-weight: $bold-font;
-    padding-bottom: 0;
-} 
 
-.ErrorDismiss {
-    text-decoration: underline;
-    cursor: pointer;
-}

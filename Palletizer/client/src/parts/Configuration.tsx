@@ -57,15 +57,15 @@ interface HalfContainerProps {
     configs: string[];
 }
 
-class HalfContainer extends Component<HalfContainerProps> {
+class ConfigContainer extends Component<HalfContainerProps> {
     render() {
         let {title, configs} = this.props;
         return(
-            <div className="HalfContainer">
-                <div className="HalfHeader">
+            <div className="StackContainer">
+                <div className="StackTitle">
                     <span> {title} </span>
                 </div>
-                <div className="HalfConfigContainer" >
+                <div className="StackScroll" >
                     {configs.map((title, index)=>{
                         return (<ConfigCell title={title} key={index} />)
                     })}
@@ -76,23 +76,34 @@ class HalfContainer extends Component<HalfContainerProps> {
     }
 }
 
+
+
 class Configuration extends Component {
-    render(){
+
+    render() {
         let pallet_configs = [] as string[];
         let machine_configs = [] as string[];
         for (let i = 0; i< 20; i++){
             pallet_configs.push("Pallet configuration "+String(i+1));
             machine_configs.push("Machine configuration " + String(i+1));
         }
-        // let pallet_configs = ['Pallet 1', 'Pallet 2', 'Pallet 3'];
-        // let machine_configs = ['Machine 1', 'Machine 2', 'Machine 3'];
-        return(
-            <div className="Configuration" >
-                <HalfContainer title={"Pallet Configuration"} configs={pallet_configs} />
-                <HalfContainer title={"Machine Configuration"} configs={machine_configs} />
+        return (
+            <div className="ConfigGrid">
+                <div className="PalletConfig">
+                    <ConfigContainer title={"Pallet Configuration"} configs={pallet_configs} />
+                </div>
+                <div className="MachineConfig">
+                    <ConfigContainer title={"Machine Configuration"} configs={machine_configs} />
+                </div>
             </div>
-        );
+        )
     }
 }
+
+
+
+
+
+
 
 export default Configuration;

@@ -161,7 +161,6 @@ interface SelectCellProps {
 }
 
 class SelectCell extends Component<SelectCellProps> {
-    
     render() {
         let {title, options} = this.props;
         return(
@@ -177,85 +176,6 @@ class SelectCell extends Component<SelectCellProps> {
     }
 }
 
-interface InputCellProps {
-    title: string;
-}
-
-class InputCell extends Component<InputCellProps> {
-    render() {
-        let {title} = this.props;
-        return(
-            <div className="SelectCell" >
-                <span> {title} </span>
-                <input type="text" name={title} />
-            </div>
-        );
-    }
-}
-
-
-interface ControlButtonProps {
-    button_type: string;
-}
-
-class ControlButton extends Component<ControlButtonProps> {
-    render() {
-        let {button_type} = this.props;
-        button_type = button_type.toUpperCase();
-        let title : string;
-        let color: string;
-        let icon: string;
-        switch(button_type){
-            case "START": {
-                color = " start";
-                title = "START";
-                icon = "icon-play";
-                break;
-            }
-            case "PAUSE": {
-                color = "";
-                title = "PAUSE";
-                icon = "icon-pause";
-                break;
-            }
-            case "STOP":{
-                color = "";
-                title = "STOP"
-                icon = "icon-stop";
-                break;
-            }
-            default:{
-                title = "STOP";
-                color = "";
-                icon = "icon-stop";
-                break;
-            }
-        }
-        
-        return (
-            <div className={"ControlButton" + color}>
-                <span className={icon}> </span>
-                <span id="button-text">{title} </span>    
-            </div>
-        );
-    }
-}
-
-
-class MachineControls extends Component {
-    render() {
-        let buttons = ["Start", "Pause", "Stop"];
-        return (
-            <div className="MachineControls" >
-                {buttons.map((name, index)=>{
-                    return (<ControlButton button_type={name} key={index} />)
-                })}
-                </div>
-        )
-    }
-}
-
-
 
 class Execute extends Component {
     render() {
@@ -264,6 +184,9 @@ class Execute extends Component {
             "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
         } as any;
         let input_title = "Start from box";
+        let buttons = ["Start", "Pause", "Stop"];
+        let icons = ["icon-play", "icon-pause", "icon-stop"];
+        let colors = [" start", "", ""];
         return (
             <div className="StackContainer">
                 <div className="StackTitle">
@@ -273,8 +196,20 @@ class Execute extends Component {
                     let options = select_options[title];
                     return (<SelectCell title={title} options={options} key={index}/> )
                 })}
-                <InputCell title={input_title} />
-                <MachineControls />
+                <div className="SelectCell" >
+                    <span> {input_title} </span>
+                    <input type="text" name={input_title} />
+                </div>
+                <div className="MachineControls" >
+                    {buttons.map((name, index)=>{
+                        return (
+                            <div className={"ControlButton" + colors[index]} key={index} >
+                                <span className={icons[index]}> </span>
+                                <span id="button-text">{name}</span>    
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
         );
     }
