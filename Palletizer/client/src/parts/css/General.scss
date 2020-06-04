@@ -1,5 +1,7 @@
 @import '../../master.scss';
 
+$bottom-height-max: 55vh;
+
 
 .GeneralContainer {
     // width: 100%;
@@ -93,21 +95,21 @@
 }
 .ExecuteContainer {
     width: 30%; 
-    margin: $margin;
+    // margin: $margin;
+    max-height: $bottom-height-max;
+    margin-top: $margin;
+    margin-left: $margin;
+    margin-right: $margin;
     border-radius: $border-radius;
     border: $container-border;
+    overflow-y: auto;
 }
 .InformationContainer {
     // width: 100%;
     width: 70%;
+    max-height: $bottom-height-max;
     margin-left: $margin;
     margin-top: $margin;
-    // margin-bottom: $margin;
-    // margin: $margin;
-    // margin-left: $double-margin;
-    // margin-top: $margin;
-    // margin-right: $margin;
-    // margin-bottom: $margin;
     border-radius: $border-radius;
     border: $container-border;
 }
@@ -156,7 +158,7 @@
     margin-left: $double-margin;
     margin-right: $double-margin;
     margin-top: $double-margin;
-    margin-bottom: $double-margin;
+    // margin-bottom: $double-margin;
     padding-bottom: $double-margin;
     
     display: flex;
@@ -179,6 +181,15 @@
     cursor: pointer;
 }
 
+.ControlButton span {
+    font-size: $huge-font;
+}
+
+.ControlButton #button-text {
+    padding-top: $margin;
+    font-size: $normal-font;
+}
+
 .ControlButton:hover {
     @include shadow();
 }
@@ -189,8 +200,13 @@
 
 .ErrorLogContainer {
     width: 100%;
+
     overflow-y: auto;
-    max-height: 40vh;
+    max-height: inherit;
+    max-height: 46vh;
+    // padding-bottom: $margin;
+    // max-height: 40vh;
+    // height: 100%;
 }
 
 .ErrorLog {

@@ -67,6 +67,9 @@
     cursor: pointer;
 }
 
+.BackButton #button-text {
+    padding-left: $margin;
+}
 .BackButton:hover{
     @include shadow();
 }

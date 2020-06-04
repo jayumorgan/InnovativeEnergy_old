@@ -14,7 +14,8 @@ class BackButton extends Component {
     render() {
         return (
             <div className="BackButton" onClick={this.handle_back}>
-                <span> Back to App Launcher </span>
+                <span className="icon-arrow-left"></span>
+                <span id="button-text"> Back to App Launcher </span>
             </div>
         )
     }

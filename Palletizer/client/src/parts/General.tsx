@@ -209,32 +209,38 @@ class ControlButton extends Component<ControlButtonProps> {
         button_type = button_type.toUpperCase();
         let title : string;
         let color: string;
+        let icon: string;
         switch(button_type){
             case "START": {
                 color = " start";
                 title = "START";
+                icon = "icon-play";
                 break;
             }
             case "PAUSE": {
                 color = "";
                 title = "PAUSE";
+                icon = "icon-pause";
                 break;
             }
             case "STOP":{
                 color = "";
                 title = "STOP"
+                icon = "icon-stop";
                 break;
             }
             default:{
                 title = "STOP";
                 color = "";
+                icon = "icon-stop";
                 break;
             }
         }
         
         return (
             <div className={"ControlButton" + color}>
-                <span>{title} </span>    
+                <span className={icon}> </span>
+                <span id="button-text">{title} </span>    
             </div>
         );
     }
