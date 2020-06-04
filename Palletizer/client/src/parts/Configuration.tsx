@@ -39,7 +39,9 @@ class ConfigCell extends Component<ConfigCellProps> {
                     <span> Edit </span>
                 </div>
                 <div className="DeleteConfigButton">
-                    <span>
+                <span className="icon-delete">
+                </span>
+                    <span id="button-text">
                         Delete
                     </span>
                 </div>

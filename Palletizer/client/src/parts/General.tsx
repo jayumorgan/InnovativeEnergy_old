@@ -45,12 +45,8 @@ class StatusContainer extends Component<StatusContainerProps>{
     render() {
         let {status_items} = this.props;
         return (
-            <div className="StatusContainer">
-                <div className="StatusImageContainer">
-                    <img src={logo} alt="Vention Logo" />
-                </div>
-                <div className="Status">
-                    <div className="StatusTitle" >
+                <div className="StackContainer">
+                    <div className="StackTitle" >
                         <span>
                         {"System Status"}
                         </span>
@@ -60,7 +56,6 @@ class StatusContainer extends Component<StatusContainerProps>{
                             return(<DisplayItem item={item} key={index} />)
                         })}
                     </div>
-                </div>
             </div>
         );
     }
@@ -146,8 +141,8 @@ class Information extends Component {
             errors.push(item);
         }
         return(
-            <div className="InformationContainer" >
-                <div className="StatusTitle">
+            <div className="StackContainer" >
+                <div className="StackTitle">
                     <span> {"Information Console"} </span>
                 </div>
                 <div className="ErrorLogContainer">
@@ -270,8 +265,8 @@ class Execute extends Component {
         } as any;
         let input_title = "Start from box";
         return (
-            <div className="ExecuteContainer">
-                <div className="StatusTitle">
+            <div className="StackContainer">
+                <div className="StackTitle">
                     <span> {"Execute"} </span>
                 </div>
                 {Object.keys(select_options).map((title, index)=>{
@@ -285,11 +280,6 @@ class Execute extends Component {
     }
 }
 
-
-
-
-
-
 class General extends Component {
     render() {
         let items = [] as StatusItem[];
@@ -297,17 +287,27 @@ class General extends Component {
         items.push({title: "Cycle Count", get_function: cycle_count});
         items.push({title: "Current Box", get_function: current_box});
         items.push({title: "Time To Completion", get_function: time_to_completion});
-        return(
-            <div className="GeneralContainer">
-                <StatusContainer status_items={items} />
-                <div className="BottomContainer" >
-                <Execute />
-                <Information />
+        return (
+            <div className="GridContainer" >
+                <div className="TopLeft" >
+                    <div className="ImageContainer" >
+                        <img src={logo} alt="Vention Logo" />
+                    </div>
                 </div>
-            </div>
-        );
+                <div className="TopRight">
+                    <StatusContainer status_items={items} />
+                </div>
+                <div className="BottomLeft">
+                    <Execute />
+                </div>
+                <div className="BottomRight">
+                    <Information />
+                </div>
+            </div> 
+        )
     }
 }
+
 
 
 export default General;

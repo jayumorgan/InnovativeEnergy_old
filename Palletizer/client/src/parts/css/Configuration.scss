@@ -105,9 +105,11 @@
     justify-content: center;
     padding-left: $margin;
     text-decoration: underline;
+    cursor: pointer;
 }
 
 .EditConfigButton span {
+    
     font-weight:$normal-font; 
 }
 
@@ -127,8 +129,12 @@
 // }
 
 .DeleteConfigButton span {
-    text-decoration: underline;
+    // text-decoration: non
     font-weight:$normal-font; 
+}
+.DeleteConfigButton #button-text {
+    text-decoration: underline;
+    padding-left: $margin;
 }
 
 

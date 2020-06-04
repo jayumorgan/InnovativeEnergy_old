@@ -1,8 +1,20 @@
 
 // Declare shared styles here
 
+
+@mixin grid-coordinate($row, $col) {
+    grid-column-start: $col;
+    grid-column-end: $col;
+    grid-row-start: $row;
+    grid-row-end: $row;
+    padding: $double-margin;
+    display: flex;
+    align-items: center;
+}
+
 $bottom-height-max: 55vh;
 
+// Colors... 
 
 
 $dark-blue: rgb(43,62,85);
@@ -23,9 +35,10 @@ $border-radius: 4pt;
 // Margin
 $margin: 8pt;
 
-
 $double-margin: #{$margin * 2};
+
 $quad-margin: #{$margin * 4};
+
 $octa-margin: #{$margin * 8};
 // Border:
 $border: 1pt solid white;
@@ -49,7 +62,7 @@ $large-font: 1.5em;
 $huge-font: 2em;
 
 $medium-font: 1.3em;
-$normal-font: 1em;
+$normal-font-size: 1em;
 
 
 

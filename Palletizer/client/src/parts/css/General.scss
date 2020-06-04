@@ -1,57 +1,90 @@
 @import '../../master.scss';
 
+// Fix the structure here at some point... -- Should be divided into side by size stacks.
+// Left stack and right stack.
+// Then fille these up with the upper and lower containers.
+// This allows for control of symmetry and positioning.
 
 
-.GeneralContainer {
-    // width: 100%;
+$left-width: 30%;
+$right-width: 70%;
+$top-height: 30%;
+$bottom-height: 70%;
+
+
+// Create a grid to hold everthing
+.GridContainer {
+    width: 100%;
     height: 100%;
-    padding: $double-margin;
-    color: $dark-blue;
+    min-height: 70vh;
+    display: grid;
+    grid-template-rows: $top-height $bottom-height;
+    grid-template-columns: $left-width $right-width;
 }
 
 
-.StatusContainer{
-    width: 100%;
+.TopLeft {
+    @include grid-coordinate(1,1);
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    flex-direction: row;
-}
-
-
-.StatusImageContainer {
-    margin: $double-margin;
-    width: 40%;
-    padding: $margin;
-    display: flex;
     justify-content: center;
-    align-items: center;
-}
-.StatusContainer img {
-    width: 100%;
-    height: auto;
-    padding: $margin;
+    .ImageContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        img {
+            width: 90%;
+            height: auto;
+        }
+    }
 }
 
-   
+
+.TopRight {
+    @include grid-coordinate(1,2);
+}
+
 
 .Status {
     width: 100%;
-    margin-top: $margin;
+    height: 100%;
+    // margin-top: $margin;
     // padding: $margin;
     border-radius: $border-radius;
     border: $container-border; 
     // width: 70%; 
 }
 
-.StatusTitle {
-    background-color: $light-blue;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    font-weight: $bold-font;
-    padding: $double-margin;
-    font-size: $medium-font;
+.BottomLeft {
+    @include grid-coordinate(2,1);
+}
+
+.BottomRight {
+    @include grid-coordinate(2,2);
+    
+}
+
+
+@mixin container-style() {
+    width: 100%;
+    height: 100%;
+    border-radius: $border-radius;
+    border: $container-border;
+}
+
+
+.StackContainer {
+    @include container-style();
+    .StackTitle {
+        background-color: $light-blue;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-weight: $bold-font;
+        padding: $double-margin;
+        font-size: $medium-font;
+    }
+
 }
 
 .StatusBlock {
@@ -91,26 +124,6 @@
     display: flex;
     flex-direction: row;
     
-}
-.ExecuteContainer {
-    width: 30%; 
-    // margin: $margin;
-    max-height: $bottom-height-max;
-    margin-top: $margin;
-    margin-left: $margin;
-    margin-right: $margin;
-    border-radius: $border-radius;
-    border: $container-border;
-    overflow-y: auto;
-}
-.InformationContainer {
-    // width: 100%;
-    width: 70%;
-    max-height: $bottom-height-max;
-    margin-left: $margin;
-    margin-top: $margin;
-    border-radius: $border-radius;
-    border: $container-border;
 }
 
 
@@ -186,7 +199,7 @@
 
 .ControlButton #button-text {
     padding-top: $margin;
-    font-size: $normal-font;
+    font-size: $normal-font-size;
 }
 
 .ControlButton:hover {
@@ -199,13 +212,9 @@
 
 .ErrorLogContainer {
     width: 100%;
-
     overflow-y: auto;
     max-height: inherit;
     max-height: 46vh;
-    // padding-bottom: $margin;
-    // max-height: 40vh;
-    // height: 100%;
 }
 
 .ErrorLog {
@@ -213,6 +222,7 @@
     justify-content: space-between;
     border-bottom: $container-border;
     padding: $double-margin;
+    align-items: center;
     
 }
 .ErrorLogDate {
