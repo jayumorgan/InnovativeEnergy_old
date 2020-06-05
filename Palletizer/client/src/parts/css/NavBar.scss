@@ -9,6 +9,9 @@ $green-border-bottom: $border-h solid $green;
 
 $grey-border: 1pt solid $light-grey; 
 
+$small-med-font-size: 1.2em;
+
+
 .NavBarContainer {
     border-bottom: $grey-border;
     margin-right: $double-margin;
@@ -26,7 +29,7 @@ $grey-border: 1pt solid $light-grey;
         padding-bottom: $margin;
         cursor: pointer;
         border-bottom: $invisible-border-bottom;
-        font-size: $medium-font;
+        font-size: $small-med-font-size;
 
     }
     a {
