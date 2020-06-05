@@ -7,6 +7,7 @@ interface NavBarProps {
     selected_index: number;
 }
 
+                    // <div className={class_name}>
 let NavBar : FunctionComponent<NavBarProps> = ({tabs, selected_index} : NavBarProps)=>{
     return (
         <div className="NavBarContainer" >
@@ -14,11 +15,9 @@ let NavBar : FunctionComponent<NavBarProps> = ({tabs, selected_index} : NavBarPr
                 let class_name = "NavBarItem";
                 class_name += index==selected_index ? " selected" : "";
                 return (
-                    <div className={class_name}>
-                        <Link to={"/" + item.toLowerCase()}>
+                        <Link className={class_name} to={"/" + item.toLowerCase()}>
                             {item}
                         </Link>
-                    </div>
                     )
             })}
         </div>

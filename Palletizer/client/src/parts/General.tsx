@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 
 
 // Styles
@@ -6,7 +6,23 @@ import "./css/General.scss";
 
 import logo from "../images/vention_logo.png";
 
+// Support Functions:
+function make_time_string(hours:number, minute:number) : string {
+    let hour_string = String(hours);
+    let minute_string = minute < 10 ? `0${minute}` : String(minute);
+    return hour_string + ":" + minute_string;
+}
 
+function make_date_string(day: number, month: number, year: number){
+    month += 1;
+    let day_string = day < 10 ? `0${day}` : String(day);
+    let month_string = month < 10 ? `0${month}` : String(month);
+    let year_string = String(year);
+    return year_string + "/" + month_string + "/" + day_string;
+}
+
+
+// Status Item Interfaces...
 interface StatusItem {
     title: string;
     get_function(): any;
@@ -17,49 +33,49 @@ interface DisplayItemProps {
     item: StatusItem;
 }
 
-class DisplayItem extends Component<DisplayItemProps> {
-    render() {
-        let {item} = this.props;
-        item.title = item.title.toUpperCase();
-        return (
-            <div className="StatusItem">
-                <span>
-                    {item.title}
-                </span>
-                <div className="StatusValue">
-                    <span>
-                        {item.get_function()}
-                    </span>
-                </div>
-            </div>
-        );
-    }
-}
-
 
 interface StatusContainerProps {
     status_items: StatusItem[];
 }
 
-class StatusContainer extends Component<StatusContainerProps>{
-    render() {
-        let {status_items} = this.props;
-        return (
-                <div className="StackContainer">
-                    <div className="StackTitle" >
-                        <span>
-                        {"System Status"}
-                        </span>
-                    </div>
-                    <div className="StatusBlock" >
-                        {status_items.map((item, index)=>{
-                            return(<DisplayItem item={item} key={index} />)
-                        })}
-                    </div>
+
+function DisplayItem(props: DisplayItemProps) {
+    let {item} = props;
+    item.title = item.title.toUpperCase();
+    return (
+        <div className="StatusItem">
+            <span>
+                {item.title}
+            </span>
+            <div className="StatusValue">
+                <span>
+                    {item.get_function()}
+                </span>
             </div>
-        );
-    }
+        </div>
+    );
 }
+
+function StatusContainer(props: StatusContainerProps) {
+    let {status_items} = props;
+    return (
+            <div className="StackContainer">
+                <div className="StackTitle" >
+                    <span>
+                    {"System Status"}
+                    </span>
+                </div>
+                <div className="StatusBlock" >
+                    {status_items.map((item, index)=>{
+                        return(<DisplayItem item={item} key={index} />)
+                    })}
+                </div>
+        </div>
+    );
+}
+
+
+// Garbage functions -- temporary.
 
 function get_status() {
     return "Running";
@@ -77,82 +93,70 @@ function time_to_completion(){
     return "100 Hours";
 }
 
+
+// Error Logs
+
 interface ErrorLogProps {
     time: Date;
     description: string;
 }
 
-function make_time_string(hours:number, minute:number) : string {
-    let hour_string = String(hours);
-    let minute_string = minute < 10 ? `0${minute}` : String(minute);
-    return hour_string + ":" + minute_string;
-}
 
-function make_date_string(day: number, month: number, year: number){
-    month += 1;
-    let day_string = day < 10 ? `0${day}` : String(day);
-    let month_string = month < 10 ? `0${month}` : String(month);
-    let year_string = String(year);
-    return year_string + "/" + month_string + "/" + day_string;
-}
-
-class ErrorLog extends Component<ErrorLogProps> {
-    render() {
-        let {time, description} = this.props;
-        let hours = time.getHours();
-        let minutes = time.getMinutes();
-        let day = time.getDate();
-        let month = time.getMonth();
-        let year = time.getFullYear();
-        let date_string =  make_date_string(day, month, year);
-        let time_string = make_time_string(hours, minutes);
-        return (
-            <div className="ErrorLog">
-                <div className="ErrorLogDate">
-                    <span>{time_string}</span>
-                <span id="DateString"> {date_string} </span>
-                </div>
-                <span>
-                {description}
-                </span>
-                <div className="ErrorDismiss">
-                    <span>
-                        {"Dismiss"}
-                    </span>
-                </div>
+function ErrorLog(props: ErrorLogProps) {
+    let {time, description} = props;
+    let hours = time.getHours();
+    let minutes = time.getMinutes();
+    let day = time.getDate();
+    let month = time.getMonth();
+    let year = time.getFullYear();
+    let date_string =  make_date_string(day, month, year);
+    let time_string = make_time_string(hours, minutes);
+    return (
+        <div className="ErrorLog">
+            <div className="ErrorLogDate">
+                <span>{time_string}</span>
+            <span id="DateString"> {date_string} </span>
             </div>
-        );
-    }
+            <span>
+            {description}
+            </span>
+            <div className="ErrorDismiss">
+                <span>
+                    {"Dismiss"}
+                </span>
+            </div>
+        </div>
+    );
 }
 
 
+// Temporary interface for quick error test...
 interface Temp {
     date: Date;
     description: string;
 }
 
-class Information extends Component {
-    render(){
-        let errors = [] as Temp[];
-        for (let i = 0; i < 15; i++){
-            let date = new Date();
-            let description = "./"+String(i)+" Segmentation fault (core dumped)";
-            let item = {"date": date, description: description};
-            errors.push(item);
-        }
-        return(
-            <div className="StackContainer" >
-                <div className="StackTitle">
-                    <span> {"Information Console"} </span>
-                </div>
-                <div className="ErrorLogContainer">
-                {errors.map((item, index)=>{
-                    return (<ErrorLog time={item.date} description={item.description} key={index} /> )
-                })}
-                </div>
-            </div> 
-        );
+
+function Information() {
+    let errors = [] as Temp[];
+    for (let i = 0; i < 15; i++){
+        let date = new Date();
+        let description = "./"+String(i)+" Segmentation fault (core dumped)";
+        let item = {"date": date, description: description};
+        errors.push(item);
     }
+    return(
+        <div className="StackContainer" >
+            <div className="StackTitle">
+                <span> {"Information Console"} </span>
+            </div>
+            <div className="ErrorLogContainer">
+            {errors.map((item, index)=>{
+                return (<ErrorLog time={item.date} description={item.description} key={index} /> )
+            })}
+            </div>
+        </div> 
+    );
 }
 
 interface SelectCellProps {
@@ -160,89 +164,86 @@ interface SelectCellProps {
     options: string[];
 }
 
-class SelectCell extends Component<SelectCellProps> {
-    render() {
-        let {title, options} = this.props;
-        return(
+function SelectCell(props: SelectCellProps) {
+    let {title, options} = props;
+    return(
+        <div className="SelectCell" >
+            <span> {title} </span>
+            <select>
+            {options.map((item, index)=>{
+                return (<option value={item} key={index} > {item} </option>)
+            })}
+            </select>
+        </div>
+    );
+}
+
+
+
+function Execute() {
+    let select_options = {
+        "Machine Configuration": ["configuration 1", "configuration 2", "configuration 3"],
+        "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
+    } as any;
+    let input_title = "Start from box";
+    let buttons = ["Start", "Pause", "Stop"];
+    let icons = ["icon-play", "icon-pause", "icon-stop"];
+    let colors = [" start", "", ""];
+    return (
+        <div className="StackContainer">
+            <div className="StackTitle">
+                <span> {"Execute"} </span>
+            </div>
+            {Object.keys(select_options).map((title, index)=>{
+                let options = select_options[title];
+                return (<SelectCell title={title} options={options} key={index}/> )
+            })}
             <div className="SelectCell" >
-                <span> {title} </span>
-                <select>
-                {options.map((item, index)=>{
-                    return (<option value={item} key={index} > {item} </option>)
-                })}
-                </select>
+                <span> {input_title} </span>
+                <input type="text" name={input_title} />
             </div>
-        );
-    }
+            <div className="MachineControls" >
+                {buttons.map((name, index)=>{
+                    return (
+                        <div className={"ControlButton" + colors[index]} key={index} >
+                            <span className={icons[index]}> </span>
+                            <span id="button-text">{name}</span>    
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+    );
 }
 
 
-class Execute extends Component {
-    render() {
-        let select_options = {
-            "Machine Configuration": ["configuration 1", "configuration 2", "configuration 3"],
-            "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
-        } as any;
-        let input_title = "Start from box";
-        let buttons = ["Start", "Pause", "Stop"];
-        let icons = ["icon-play", "icon-pause", "icon-stop"];
-        let colors = [" start", "", ""];
-        return (
-            <div className="StackContainer">
-                <div className="StackTitle">
-                    <span> {"Execute"} </span>
-                </div>
-                {Object.keys(select_options).map((title, index)=>{
-                    let options = select_options[title];
-                    return (<SelectCell title={title} options={options} key={index}/> )
-                })}
-                <div className="SelectCell" >
-                    <span> {input_title} </span>
-                    <input type="text" name={input_title} />
-                </div>
-                <div className="MachineControls" >
-                    {buttons.map((name, index)=>{
-                        return (
-                            <div className={"ControlButton" + colors[index]} key={index} >
-                                <span className={icons[index]}> </span>
-                                <span id="button-text">{name}</span>    
-                            </div>
-                        )
-                    })}
+
+function General() {
+    // Make some temporary data to display..
+    let items = [] as StatusItem[];
+    items.push({title: "Status", get_function: get_status});
+    items.push({title: "Cycle Count", get_function: cycle_count});
+    items.push({title: "Current Box", get_function: current_box});
+    items.push({title: "Time To Completion", get_function: time_to_completion});
+    return (
+        <div className="GridContainer" >
+            <div className="TopLeft" >
+                <div className="ImageContainer" >
+                    <img src={logo} alt="Vention Logo" />
                 </div>
             </div>
-        );
-    }
+            <div className="TopRight">
+                <StatusContainer status_items={items} />
+            </div>
+            <div className="BottomLeft">
+                <Execute />
+            </div>
+            <div className="BottomRight">
+                <Information />
+            </div>
+        </div> 
+    );
 }
-
-class General extends Component {
-    render() {
-        let items = [] as StatusItem[];
-        items.push({title: "Status", get_function: get_status});
-        items.push({title: "Cycle Count", get_function: cycle_count});
-        items.push({title: "Current Box", get_function: current_box});
-        items.push({title: "Time To Completion", get_function: time_to_completion});
-        return (
-            <div className="GridContainer" >
-                <div className="TopLeft" >
-                    <div className="ImageContainer" >
-                        <img src={logo} alt="Vention Logo" />
-                    </div>
-                </div>
-                <div className="TopRight">
-                    <StatusContainer status_items={items} />
-                </div>
-                <div className="BottomLeft">
-                    <Execute />
-                </div>
-                <div className="BottomRight">
-                    <Information />
-                </div>
-            </div> 
-        )
-    }
-}
-
 
 
 export default General;
