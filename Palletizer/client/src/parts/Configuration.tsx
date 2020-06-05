@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 
 
-import "./css/Configuration.scss"
-
+import "./css/Configuration.scss";
+import "./css/Login.scss";
 interface AddConfigButtonProps {
     title: string;
 }
@@ -52,6 +52,7 @@ class ConfigCell extends Component<ConfigCellProps> {
 
 
 
+
 interface HalfContainerProps {
     title: string;
     configs: string[];
@@ -95,7 +96,7 @@ class Configuration extends Component {
                 <div className="MachineConfig">
                     <ConfigContainer title={"Machine Configuration"} configs={machine_configs} />
                 </div>
-            </div>
+                </div>
         )
     }
 }

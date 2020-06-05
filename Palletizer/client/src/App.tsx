@@ -45,7 +45,9 @@ class App extends Component<AppProps, AppState> {
             <Switch>
               <Route path="/Configuration">
                 <NavBar tabs={tab_options} selected_index={config_index}/>
+        <div className="LargeContainer">
                 <Configuration />
+        </div>
               </Route>
               <Route path="/">
                 <NavBar tabs={tab_options} selected_index={general_index}/>

@@ -1,0 +1,16 @@
+
+
+@import "../../_master.scss";
+
+
+.LoginCover {
+  height: 100%; /* changed for demo */
+  width: 100%;
+  position: fixed;
+  z-index: 100;
+  // top: 0;
+  // left: 0;
+  background-color: rgba(0, 0, 0, .5);
+  overflow-y: hidden;
+  // transition: 1s;
+}
