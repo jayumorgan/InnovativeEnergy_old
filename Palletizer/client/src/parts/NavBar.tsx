@@ -1,48 +1,28 @@
-import React, {Component} from 'react';
+import React, {FunctionComponent} from 'react';
 import {Link} from "react-router-dom";
 import "./css/NavBar.scss";
-
-
-
-interface NavBarItemProps {
-    title: string;
-    selected: boolean;
-}
-
-class NavBarItem extends Component<NavBarItemProps> {
-    
-    render() {
-        let {title, selected} = this.props;
-        let class_name = "NavBarItem";
-        class_name += selected ? " selected" : "";
-        return (
-            <div className={class_name}>
-                <Link to={"/" + title}>
-                    {title}
-                </Link>
-            </div>
-        )
-    }
-}
-
 
 interface NavBarProps {
     tabs: string[];
     selected_index: number;
 }
 
-
-class NavBar extends Component<NavBarProps> {
-    render() {
-        let {tabs, selected_index } = this.props;
-        return (
-            <div className="NavBarContainer" >
-                {tabs.map((item, index)=>{
-                    return (<NavBarItem title={item} selected={index == selected_index} key={index} />)  
-                })}
-            </div>
-        ); 
-    }
+let NavBar : FunctionComponent<NavBarProps> = ({tabs, selected_index} : NavBarProps)=>{
+    return (
+        <div className="NavBarContainer" >
+            {tabs.map((item, index)=>{
+                let class_name = "NavBarItem";
+                class_name += index==selected_index ? " selected" : "";
+                return (
+                    <div className={class_name}>
+                        <Link to={"/" + item.toLowerCase()}>
+                            {item}
+                        </Link>
+                    </div>
+                    )
+            })}
+        </div>
+    );
 }
 
 export default NavBar;
