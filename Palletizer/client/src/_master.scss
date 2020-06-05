@@ -5,7 +5,8 @@ $bottom-height-max: 55vh;
 
 // Colors... 
 
-$dark-blue: rgb(43,62,85);
+$medium-blue: rgb(43,62,85);
+$dark-blue: rgb(22,35,56);
 
 $light-grey: rgb(212,217,226);
 
@@ -17,6 +18,9 @@ $dark-grey: rgb(135, 135, 135);
 
 $off-white: rgb(251,251,251);
 
+$blue-gradient:radial-gradient(circle, $medium-blue 40%, $dark-blue 100%);
+$left-gradient: liner-gradient(90deg, $medium-blue 10%, $dark-blue 100%);
+  // linear-gradient(90deg, rgba(43,62,85,1) 0%, rgba(2,0,36,1)100%);
 
 // Border-radius
 
@@ -73,6 +77,27 @@ $normal-font-size: 1em;
     border: $container-border;
 }
 
+.StackContainer {
+    @include container-style();
+    .StackTitle {
+        // border-radius: $border-radius;
+        border-radius: $border-radius $border-radius 0 0;
+        border-bottom: $container-border;
+        background-color: $medium-blue;
+        background-color: rgb(50,73,102);
+        // background: $left-gradient;
+        color:white;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+            letter-spacing: 1pt;
+        // font-weight: $bold-font;
+        // background: linear-gradient(90deg, rgba(217,231,255,1) 0%, rgba(108,145,191,1) 100%);
+        padding: $double-margin;
+        font-size: $medium-font;
+    }
+
+}
 
 // Fonts:
 

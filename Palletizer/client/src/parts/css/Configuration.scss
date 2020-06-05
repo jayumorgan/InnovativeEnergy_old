@@ -23,15 +23,15 @@ $half-width: 50%;
 
 .StackContainer {
     @include container-style();
-    .StackTitle {
-        background-color: $light-blue;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        font-weight: $bold-font;
-        padding: $double-margin;
-        font-size: $medium-font;
-    }
+    // .StackTitle {
+    //     background-color: $light-blue;
+    //     display: flex;
+    //     align-items: center;
+    //     justify-content: flex-start;
+    //     font-weight: $bold-font;
+    //     padding: $double-margin;
+    //     font-size: $medium-font;
+    // }
     .StackScroll {
         height: 100%;
         max-height: 55vh;
