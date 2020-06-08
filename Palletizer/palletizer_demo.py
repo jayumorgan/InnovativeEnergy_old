@@ -153,14 +153,6 @@ def get_demo_pickups():
 
 # Make a fractional representation of the coordinate motion.
 
-class MQTTRelay:
-    def __init__(self, *args):
-        print(args)
-
-
-    def 
-
-
 class Palletizer:
     def __init__(self, machine_json, pallet_json):
         print(machine_json)
