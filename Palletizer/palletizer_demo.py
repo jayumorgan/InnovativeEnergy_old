@@ -152,25 +152,32 @@ def get_demo_pickups():
 
 
 # Make a fractional representation of the coordinate motion.
-# 
+
+class MQTTRelay:
+    def __init__(self, *args):
+        print(args)
+
+
+    def 
+
 
 class Palletizer:
-    # Input configuration.
     def __init__(self, machine_json, pallet_json):
         print(machine_json)
         print(pallet_json)
         # Gcode callback.
-        callback =  None
+        callback = None
         #logging.debug("Controller GCode response: {data}")
 
         # Init machine motion.
         # (Fake MM for now...)
-        #self.mm = FakeMachineMotion(DEFAULT_IP_ADDRESS.usb_windowcallback)
+        self.mm = FakeMachineMotion(DEFAULT_IP_ADDRESS.usb_windowcallback)
+        # self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, silence)
+        # self.rotation_mm = MachineMotion(self.rotation_mm, silence)
         self.rotationMMIP = "192.168.1.6"
-        self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, silence)
-        sleep(2)
-        # implement the second machine motion ip address.
-        self.rotation_mm = MachineMotion(self.rotation_mm, silence)
+        self.rotation_mm = FakeMachineMotion(self.rotationMMIP, silence)
+    
+        sleep(3) # Wait for the Machine Motions to boot up.. 
 
         # MACHINE configuration ------------------------------
         
