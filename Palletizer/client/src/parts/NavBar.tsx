@@ -13,9 +13,9 @@ let NavBar : FunctionComponent<NavBarProps> = ({tabs, selected_index} : NavBarPr
         <div className="NavBarContainer" >
             {tabs.map((item, index)=>{
                 let class_name = "NavBarItem";
-                class_name += index==selected_index ? " selected" : "";
+                class_name += index===selected_index ? " selected" : "";
                 return (
-                        <Link className={class_name} to={"/" + item.toLowerCase()}>
+                    <Link className={class_name} to={"/" + item.toLowerCase()} key={index}>
                             {item}
                         </Link>
                     )
