@@ -2,3 +2,4 @@
 Palletizer/.DS_STORE
 Palletizer/client/node_modules/
 Palletizer/ServerMQTT/node_modules/
+Palletizer/ServerMQTT/dist/
