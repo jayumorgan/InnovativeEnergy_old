@@ -9,6 +9,8 @@ const cors = require('cors');
 
 app.use(cors());
 app.use(express.static(`${staticPath}`));
+
+
 app.get('/', (req, res) => res.sendFile(`${staticPath}/${index || 'index.html'}`));
 
 app.listen(port, () => console.log(`server running on port ${port}`));
