@@ -1,9 +1,16 @@
+#!/usr/bin/env python3
+
 import sys
 import json
 import random
 from threading import Thread
 import logging
 from time import sleep
+
+
+# Demo data functions.
+from demo_data import  get_demo_pickups, get_demo_centroids 
+
 
 # Setup proper logging.
 logging.basicConfig(level=logging.DEBUG,format='(%(threadName)-9s) %(message)s',)
@@ -21,10 +28,11 @@ with open('pallet.json') as config:
     PALLET_CONFIG = data
 
 # Import Machine Motion.
-sys.path.append("../python-api")
+sys.path.append("..")
 from MachineMotion import *
 
 ## ----------------------------------
+
 
 # mm = MachineMotion("192.168.7.2", None)
 # mm.setContinuousMove(CONVEYOR_AXIS, 100, 50)
@@ -34,6 +42,7 @@ class FakeMachineMotion:
 
     def configAxis(self, axis, uStep, mechGain):
         pass
+
     def releaseEstop(self):
         pass
 
@@ -51,30 +60,36 @@ class FakeMachineMotion:
         print(mode, ip, gateway, mask)
 
     def emitAbsoluteMove(self, axis, position):
-        print(f"Moving axis:{axis} to {position}")
+        print("Moving axis:{axis} to {position}")
 
     def emitCombinedAxesAbsoluteMove(self, axes, positions):
-        print(f"Moving axes:{axes} to {positions}")
+        print("Moving axes:{axes} to {positions}")
         
     def digitalWrite(self, deviceNetworkId, pin, value):
-        print(f"Writing to pin {pin} with id {deviceNetworkId}, value {value}.")
+        print("Writing to (pin,networkID) ",pin, deviceNetworkId, " value ", value)
 
         
 # Palletizer ----------------
+def silence(data):
+    pass
 
-        
 class Palletizer:
-    # Input configuration.
     def __init__(self, machine_json, pallet_json):
         print(machine_json)
         print(pallet_json)
         # Gcode callback.
-        callback = lambda data : logging.debug(f"Controller GCode response: {data}")
+        callback = None
+        #logging.debug("Controller GCode response: {data}")
 
         # Init machine motion.
         # (Fake MM for now...)
-        self.mm = FakeMachineMotion(DEFAULT_IP_ADDRESS.usb_windows, callback)
-        # self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, callback)
+        self.mm = FakeMachineMotion(DEFAULT_IP_ADDRESS.usb_windowcallback)
+        # self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, silence)
+        # self.rotation_mm = MachineMotion(self.rotation_mm, silence)
+        self.rotationMMIP = "192.168.1.6"
+        self.rotation_mm = FakeMachineMotion(self.rotationMMIP, silence)
+    
+        sleep(3) # Wait for the Machine Motions to boot up.. 
 
         # MACHINE configuration ------------------------------
         
@@ -135,12 +150,24 @@ class Palletizer:
         pallet_config = pallet_json['PALLET_CONFIG']
         operating_params = pallet_json['OPERATING_PARAMETERS']
         
+        # Speed + Acceleration Setup
+        travel_config = operating_params['TRAVEL']
+        approach_config = operating_params["APPROACH"]
+        
+        self.mm.emitSpeed(travel_config['SPEED'])
+        self.mm.emitAcceleration(travel_config['ACCELERATION'])
+        
         self.layer_centroids = pallet_config['LAYER_CENTROIDS']
         self.box_orientation = pallet_config['BOX_ORIENTATION']
         self.pallet_size = pallet_config['PALLET_SIZE']
         self.box_dimensions = pallet_config['BOX_DIMENSIONS']
 
-        # The box height, for stacking.
+        # -----------Demonstration Data ----------------
+        self.layer_centroids = get_demo_centroids()
+        self.layer_pickups = get_demo_pickups()
+            
+        print(self.layer_centroids)
+            
         self.box_height = self.box_dimensions["z"]
 
         # The current layer index. 
@@ -184,7 +211,9 @@ class Palletizer:
     def move_to_pick_point(self):
         logging.debug("Moving to pick point...")
         # self.pick_origin = pick_config["PICK_ORIGIN"]
-        xy_coords = [self.pick_origin["x"], self.pick_origin["y"]]
+        pick_point = self.layer_pickups[self.layer_index]
+        xy_coords = [pick_point["x"], pick_point["y"]]
+        # xy_coords = [self.pick_origin["x"], self.pick_origin["y"]]
         xy_axes = [self.x, self.y]
         self.mm.emitCombinedAxesAbsoluteMove(xy_axes, xy_coords)
 
@@ -276,7 +305,7 @@ class Palletizer:
     def check_for_start(self):
         ## If a start signal.
         ## Prompt for start as a demo.
-        pr = input("Start machine motion? (y/n): ")
+        pr = raw_input("Start machine motion? (y/n): ")
         return pr == "y"
         # return random.random() > 0.99999
 
@@ -323,7 +352,7 @@ class Palletizer:
         self.monitor_thread.join()
         
     def monitor_interupt(self):
-        monitor_thread = Thread(target=self.monitor_loop, daemon=True)
+        monitor_thread = Thread(target=self.monitor_loop)
         monitor_thread.start()
         
 
@@ -351,10 +380,12 @@ class Palletizer:
     # Wait for motion sequence to complete.
     def wait_for_motion(self):
         self.mm.waitForMotionCompletion()
+
+
 if __name__ == "__main__":
     Palletizer(MACHINE_CONFIG, PALLET_CONFIG)
     # print("Palletizer Running")
+    # 
 
-# Call Palletizer.mm.myMqttCklient.loop_stop() to prevent error at the end.
+# Call Palletizer.mm.myMqttClient.loop_stop() to prevent error at the end.
 # 
-    

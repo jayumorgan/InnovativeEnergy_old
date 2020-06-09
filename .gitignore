@@ -1,5 +1,5 @@
 .DS_STORE
-Palletizer/.DS_STORE
-Palletizer/client/node_modules/
-Palletizer/ServerMQTT/node_modules/
-Palletizer/ServerMQTT/dist/
+palletizer/.DS_STORE
+palletizer/client/node_modules/
+palletizer/server-mqtt/node_modules/
+palletizer/server-mqtt/dist/
