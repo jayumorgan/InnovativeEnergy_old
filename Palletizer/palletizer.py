@@ -8,6 +8,9 @@ import logging
 from time import sleep
 
 
+from machine_mqtt import MQTTRelay
+
+
 # Demo data functions.
 from demo_data import  get_demo_pickups, get_demo_centroids 
 
@@ -19,11 +22,11 @@ MACHINE_CONFIG = None
 PALLET_CONFIG = None
 
 # Load configurations. -- path.
-with open('machine.json') as config:
+with open('./config/machine.json') as config:
     data = json.load(config)
     MACHINE_CONFIG = data
 
-with open('pallet.json') as config:
+with open('./config/pallet.json') as config:
     data = json.load(config)
     PALLET_CONFIG = data
 
@@ -32,7 +35,6 @@ sys.path.append("..")
 from MachineMotion import *
 
 ## ----------------------------------
-
 
 # mm = MachineMotion("192.168.7.2", None)
 # mm.setContinuousMove(CONVEYOR_AXIS, 100, 50)

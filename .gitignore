@@ -3,3 +3,4 @@ palletizer/.DS_STORE
 palletizer/client/node_modules/
 palletizer/server-mqtt/node_modules/
 palletizer/server-mqtt/dist/
+*.pyc

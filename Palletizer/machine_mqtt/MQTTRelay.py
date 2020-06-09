@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
-from time import sleep
+# from time import sleep
 # https://pypi.org/project/paho-mqtt/#connect-reconnect-disconnect
 
 PALLETIZER_TOPIC = "palletizer/state"
