@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 
+# functional version is sitting on the physical device.
+
 
 box_width = 80
 box_height = 50
 center_box = box_width/2
 
+x_max = 319.9
+y_max = 377.8
+z_max = 287.6
 
 def get_demo_centroids():
     centroids = []
@@ -13,9 +18,6 @@ def get_demo_centroids():
     # box_width = 80
     # box_height = 50
     # center_box = box_width/2
-    x_max = 319.9
-    y_max = 377.8
-    z_max = 287.6
 
     x_left = (x_max - 3*box_width) / 2
 
@@ -55,11 +57,7 @@ def get_demo_centroids():
         current_z -= box_height
         centroids.append(item)
 
-
-        # Pickup from two stacks.
-        # Then we have to make the pyramid algorithmn work.
-        # This is key.
-        # Then we have to get going on the multiple machine motion configurations. 
+    return centroids
 
 def get_demo_pickups():
     pickups = []
@@ -70,10 +68,10 @@ def get_demo_pickups():
     z_current = z_max - box_height
     # Three stacks of height = 4
     for i in range(12):
-        item = {"x": current_x, "y": current_y, "z": current_z}
+        item = {"x": x_current, "y": y_current, "z": z_current}
         # print(i)
         if (i+1) % 4 == 0:
-            current_z -= box_height
+            z_current -= box_height
 
         x_current = (i + 1 % 3) * x_left + center_box
         pickups.append(item)

@@ -31,8 +31,9 @@ with open('./config/pallet.json') as config:
     PALLET_CONFIG = data
 
 # Import Machine Motion.
-sys.path.append("..")
-from MachineMotion import *
+print("Uncomment machine motion shortly..")
+# sys.path.append("./mm-vention-control")
+# from MachineMotion import *
 
 ## ----------------------------------
 
@@ -51,6 +52,12 @@ class FakeMachineMotion:
     def resetSystem(self):
         pass
 
+    def emitSpeed(self, speed):
+        pass
+
+    def emitAcceleration(self, accel):
+        pass
+
     def waitForMotionCompletion(self):
         sleep(1)
         logging.debug("Wait for motion completion...")
@@ -63,12 +70,15 @@ class FakeMachineMotion:
 
     def emitAbsoluteMove(self, axis, position):
         print("Moving axis:{axis} to {position}")
+        sleep(10)
 
     def emitCombinedAxesAbsoluteMove(self, axes, positions):
         print("Moving axes:{axes} to {positions}")
+        sleep(10)
         
     def digitalWrite(self, deviceNetworkId, pin, value):
         print("Writing to (pin,networkID) ",pin, deviceNetworkId, " value ", value)
+        sleep(10)
 
         
 # Palletizer ----------------
@@ -85,11 +95,14 @@ class Palletizer:
 
         # Init machine motion.
         # (Fake MM for now...)
-        self.mm = FakeMachineMotion(DEFAULT_IP_ADDRESS.usb_windowcallback)
+        self.mm = FakeMachineMotion("Some IP address")
         # self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, silence)
         # self.rotation_mm = MachineMotion(self.rotation_mm, silence)
         self.rotationMMIP = "192.168.1.6"
         self.rotation_mm = FakeMachineMotion(self.rotationMMIP, silence)
+
+        # publish events for the client..
+        self.mqtt_pub = MQTTRelay.MQTTPublisher()
     
         sleep(3) # Wait for the Machine Motions to boot up.. 
 
@@ -115,7 +128,9 @@ class Palletizer:
         axes_gains = axes_config['AXES_GAINS']
 
         # uStep
-        uStep = MICRO_STEPS.ustep_8
+        # uStep = MICRO_STEPS.ustep_8
+        print("Set micro steps on machine..")
+        uStep = 8
 
         # Configure the axes within Machine Motion
         for axis, gain in axes_gains.items():
@@ -307,7 +322,8 @@ class Palletizer:
     def check_for_start(self):
         ## If a start signal.
         ## Prompt for start as a demo.
-        pr = raw_input("Start machine motion? (y/n): ")
+        ## If python2, use raw_input
+        pr = input("Start machine motion? (y/n): ")
         return pr == "y"
         # return random.random() > 0.99999
 
@@ -375,7 +391,7 @@ class Palletizer:
         # Call the operation.
         operation()
         #Wait here -- (will do nothin for IO)
-        self.mm.waitForMotionCompletion()
+        # self.mm.waitForMotionCompletion()
         self.wait_for_motion()
             # Execute next instruction.
 

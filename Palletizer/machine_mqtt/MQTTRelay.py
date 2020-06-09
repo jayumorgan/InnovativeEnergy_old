@@ -3,7 +3,7 @@ import json
 # from time import sleep
 # https://pypi.org/project/paho-mqtt/#connect-reconnect-disconnect
 
-PALLETIZER_TOPIC = "palletizer/state"
+PALLETIZER_TOPIC = "palletizer/"
 MQTT_IP = "127.0.0.1"
 MQTT_PORT = 1883
 MQTT_TIMEOUT = 60
@@ -36,14 +36,17 @@ class MQTTSubscriber:
 class MQTTPublisher:
     def __init__(self):
         self.client = mqtt.Client()
-        self.status_topic = PALLETIZER_TOPIC
+        self.status_topic = PALLETIZER_TOPIC + "state"
+        self.error_topix = PALLETIZER_TOPIC + "error"
 
-    def publish(self,status, cycles, box, time):
-        data = {"Status": status, "Cycles": cycles, "Box": box, "Time": time}
+    def publish_state(self,status, cycles, box, time):
+        data = {"status": status, "cycles": cycles, "box": box, "time": time}
         data = json.dumps(data)
         self.client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
         pub = self.client.publish(self.status_topic, data)
         self.client.disconnect()
+    def publish_error(self, error):
+        print("Fill in details...")
         
 
 if __name__ == "__main__":

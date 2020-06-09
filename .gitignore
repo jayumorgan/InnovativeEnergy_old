@@ -1,6 +1,8 @@
 .DS_STORE
 palletizer/.DS_STORE
 palletizer/client/node_modules/
-palletizer/server-mqtt/node_modules/
-palletizer/server-mqtt/dist/
+palletizer/server_mqtt/node_modules/
+palletizer/server_mqtt/dist/
 *.pyc
+palletizer/node_modules/
+palletizer/__pycache__/
