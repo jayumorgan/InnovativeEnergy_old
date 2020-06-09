@@ -2,7 +2,7 @@ import React, {createContext, useReducer, useEffect} from 'react';
 
 // For server sent events -- see server.js for further details.
 
-import {PalletizerState} from "../types/Types";
+import {PalletizerState, PalletizerError} from "../types/Types";
 
 type ReducerAction = {
     type_of: string;
@@ -30,7 +30,7 @@ function AppState(props: any) {
         current_box: 0,
         total_box: 0,
         time: 10,
-        errors: [] as string[] // This will change to a structured format.
+        errors: [] as PalletizerError[] // This will change to a structured format.
     };
 
     const [state, dispatch] = useReducer(PalletizerReducer, initial_state);

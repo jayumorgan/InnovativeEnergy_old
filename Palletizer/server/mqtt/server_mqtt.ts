@@ -8,10 +8,10 @@ const TOPIC = "palletizer/";
 
 // MQTT example: https://www.cloudamqp.com/docs/nodejs_mqtt.html
 
-function MQTTRelay(handle_error: any, handle_state: any) : mqtt.MqttClient {
+function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient {
 
     let options = {
-        clientId: "server-MQTTRelay"
+        clientId: "server-MQTTSubscriber"
     };
 
     let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
@@ -42,6 +42,7 @@ function MQTTRelay(handle_error: any, handle_state: any) : mqtt.MqttClient {
             }
                 
             case TOPIC + "error" : {
+                // Error has a specific type - see /client/src/types/Types
                 console.log("Error update: ", topic, message);
                 handle_error(message);
                 break;
@@ -58,4 +59,41 @@ function MQTTRelay(handle_error: any, handle_state: any) : mqtt.MqttClient {
 
 // MQTTRelay(console.log, console.log);
 
-export default MQTTRelay;
+
+function MQTTControl() {
+// Return an object with function in it.
+    let options = {
+        clientId: "server-MQTTControl"
+    };
+    let topic = TOPIC + "control";
+
+    let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
+
+    client.on("connect",()=> {
+       console.log("Connected to control MQTT server."); 
+    });
+
+    let stop_command = "STOP";
+    let start_command = "START";
+    let pause_command = "PAUSE";
+    
+    let stop = () => {
+        client.publish(topic, stop_command);
+    };
+
+    let start = () => {
+        client.publish(topic, start_command);
+    };
+
+    let pause = () => {
+        client.publish(topic, pause_command);
+    };
+    
+    return {start, stop, pause};
+}
+
+
+
+
+
+export {MQTTSubscriber, MQTTControl};

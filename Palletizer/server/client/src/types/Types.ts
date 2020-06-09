@@ -1,9 +1,15 @@
 
+export type PalletizerError = {
+    date: Date;
+    description: string;
+}
+
+
 export type PalletizerState = {
     status : string;
     cycle: number;
-    current_box: number; // [current, next]
+    current_box: number; 
     total_box: number;
     time: number; // hours? 
-    errors: string[];
+    errors: PalletizerError[];
 };
