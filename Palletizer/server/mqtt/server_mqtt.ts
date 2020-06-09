@@ -20,7 +20,7 @@ function MQTTRelay(handle_error: any, handle_state: any) : mqtt.MqttClient {
 
         client.subscribe(TOPIC + "state", ()=>{
             console.log("Subscribed to " + TOPIC + "state...");
-        })
+        });
 
         client.subscribe(TOPIC + "error", ()=>{
             console.log("Subscribed to " + TOPIC + "error...");

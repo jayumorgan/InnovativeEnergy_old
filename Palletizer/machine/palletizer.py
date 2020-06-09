@@ -7,8 +7,9 @@ from threading import Thread
 import logging
 from time import sleep
 
-
-from machine_mqtt import MQTTRelay
+# MQTT relay.
+# from mqtt_relay import MQTTRelay
+from mqtt_relay import state_controller
 
 
 # Demo data functions.
@@ -31,7 +32,7 @@ with open('./config/pallet.json') as config:
     PALLET_CONFIG = data
 
 # Import Machine Motion.
-print("Uncomment machine motion shortly..")
+print("Import MachineMotion in production...")
 # sys.path.append("./mm-vention-control")
 # from MachineMotion import *
 
@@ -70,15 +71,15 @@ class FakeMachineMotion:
 
     def emitAbsoluteMove(self, axis, position):
         print("Moving axis:{axis} to {position}")
-        sleep(10)
+        sleep(1)
 
     def emitCombinedAxesAbsoluteMove(self, axes, positions):
         print("Moving axes:{axes} to {positions}")
-        sleep(10)
+        sleep(1)
         
     def digitalWrite(self, deviceNetworkId, pin, value):
         print("Writing to (pin,networkID) ",pin, deviceNetworkId, " value ", value)
-        sleep(10)
+        sleep(1)
 
         
 # Palletizer ----------------
@@ -93,8 +94,12 @@ class Palletizer:
         callback = None
         #logging.debug("Controller GCode response: {data}")
 
-        # Init machine motion.
-        # (Fake MM for now...)
+        # This is the state used to populate the General page on UI
+
+        # new state_controller (setup with defauly machine motion state)
+        self.state_controller = state_controller.StateController(True)
+    
+        
         self.mm = FakeMachineMotion("Some IP address")
         # self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, silence)
         # self.rotation_mm = MachineMotion(self.rotation_mm, silence)
@@ -102,9 +107,10 @@ class Palletizer:
         self.rotation_mm = FakeMachineMotion(self.rotationMMIP, silence)
 
         # publish events for the client..
-        self.mqtt_pub = MQTTRelay.MQTTPublisher()
+        # self.mqtt_pub = MQTTRelay.MQTTPublisher()
     
-        sleep(3) # Wait for the Machine Motions to boot up.. 
+        # sleep(3) # Wait for the Machine Motions to boot up..
+        print("Sleep in prod.")
 
         # MACHINE configuration ------------------------------
         
@@ -184,6 +190,8 @@ class Palletizer:
         self.layer_pickups = get_demo_pickups()
             
         print(self.layer_centroids)
+        # Set the total box number to the number of centroids
+        self.state_controller.update("total_box", len(self.layer_centroids))
             
         self.box_height = self.box_dimensions["z"]
 
@@ -271,8 +279,6 @@ class Palletizer:
             self.pressure_module_address,
             self.pressure_input_channel,
             0)
-        # increment the layer index.
-        self.layer_index += 1
         
     def move_up_from_box_stack(self):
         logging.debug("Moving up from box stack...")
@@ -349,6 +355,8 @@ class Palletizer:
         while True:
             if self.check_for_start():
                 print("Start Signal Received...")
+                self.state_controller.update("status", "Running")
+                self.state_controller.update("current_box", self.layer_index + 1)
                 break
         # Check pallet presence -- may need to be moved into a health check loop
         self.check_pallet()
@@ -377,11 +385,22 @@ class Palletizer:
     def motion_loop(self):
         # Start monitoring for Pause/Stop.
         self.monitor_interupt()
-        while not self.interrupt:
+        while not self.interrupt and self.layer_index < len(self.layer_centroids):
             # Execute the next operation.
             self.next_operation()
             # Increment the motion index.
+            
+            
             self.motion_index = (self.motion_index + 1)%len(self.motion_queue)
+            self.state_controller.update("cycle", self.motion_index)
+            if self.motion_index == 0:
+                # increment the box number
+                self.layer_index += 1
+                # Haha.
+                if self.layer_index < len(self.layer_centroids):
+                    self.state_controller.update("current_box", self.layer_index + 1)
+                else:
+                    self.state_controller.update("status", "Complete")
 
     # Calls operations in the motion queue.
     def next_operation(self):

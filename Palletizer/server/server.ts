@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import relay from "./mqtt/server_mqtt";
+import {PalletizerState} from "./client/src/types/Types";
 // For types
 import { AddressInfo } from "net";
 
@@ -12,18 +13,14 @@ const app = express();
 
 app.use(morgan('dev'));
 
-
-app.get("/", (req: express.Request, res: express.Response)=> {
-    res.send("Index worked.");
-})
-
-var palletizer_state = {
+// We should explot the existing state of the application.
+var palletizer_state : PalletizerState = {
     status : "N/A",
     cycle: 0, 
     current_box: 0,
     total_box: 0,
     time: 2,
-    errors: [] as any[]
+    errors: [] as string[]
 };
 
 
@@ -36,10 +33,7 @@ app.get("/events", (req: express.Request, res: express.Response)=>{
     }
 
     let handle_state = (message: any) => {
-        // PArge the message properly
-        console.log("We will need a type here", message);
-        // palletizer_state = message;
-        // let data = {state : palletizer_state};
+        palletizer_state = message;
         write(palletizer_state);
     };
 
@@ -72,6 +66,14 @@ app.get("/events", (req: express.Request, res: express.Response)=>{
     // Write the initial data.
     write(palletizer_state);
 });
+
+
+
+
+app.get("/", (req: express.Request, res: express.Response)=> {
+    res.send("Index worked.");
+});
+
 
 
 let server = app.listen(PORT, "localhost",()=>{

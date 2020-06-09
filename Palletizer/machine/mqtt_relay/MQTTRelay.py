@@ -13,7 +13,6 @@ MQTT_TIMEOUT = 60
 class MQTTSubscriber:
     def __init__(self, *args):
         print(args)
-
         self.status_topic = PALLETIZER_TOPIC
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
@@ -39,12 +38,14 @@ class MQTTPublisher:
         self.status_topic = PALLETIZER_TOPIC + "state"
         self.error_topix = PALLETIZER_TOPIC + "error"
 
-    def publish_state(self,status, cycles, box, time):
-        data = {"status": status, "cycles": cycles, "box": box, "time": time}
+    def publish_state(self, data):
         data = json.dumps(data)
         self.client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
+        
         pub = self.client.publish(self.status_topic, data)
+
         self.client.disconnect()
+
     def publish_error(self, error):
         print("Fill in details...")
         
