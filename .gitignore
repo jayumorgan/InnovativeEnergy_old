@@ -6,3 +6,6 @@ palletizer/server_mqtt/dist/
 *.pyc
 palletizer/node_modules/
 palletizer/__pycache__/
+palletizer/server/node_modules/
+palletizer/server/dist/
+palletizer/server/client/node_modules
