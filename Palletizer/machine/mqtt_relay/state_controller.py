@@ -14,8 +14,6 @@ class StateController:
     def __init__(self, new):
         # intial state of the machine motion.
         self.client = mqtt.Client()
-        
-
         self.state = {
             "status" : "Sleep",
             "cycle" : 0,
@@ -40,4 +38,27 @@ class StateController:
     def update(self, key, value):
         self.state[key] = value
         self.__publish()
+        
+
+
+class ControlListener:
+    def __init__(self):
+        self.client = mqtt.Client()
+        self.status_topic = PALLETIZER_TOPIC + "control"
+        self.client.on_message = self.__on_message
+        self.client.on_connect = self.__on_connect
+
+        self.command = None
+        
+        self.client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
+
+        self.client.loop_forever()
+        
+    def __on_connect(self, client,userdata, flags):    
+        client.subscribe(self.status_topic)
+
+    def __on_message(client, userdata, msg):
+        print(msg.topic+" "+str(msg.payload))
+        self.command = msg.payload
+
         
