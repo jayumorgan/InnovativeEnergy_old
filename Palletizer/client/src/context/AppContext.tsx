@@ -1,54 +1,69 @@
-import React, {createContext, useReducer} from 'react';
+import React, {createContext, useReducer, useEffect} from 'react';
 
-type PalletizerState = {
-    status : string;
-    cycle: number;
-    current_box: number; // [current, next]
-    total_box: number;
-    time: number; // hours? 
-    errors: string[];
-};
+// For server sent events -- see server.js for further details.
+
+import {PalletizerState} from "../types/Types";
 
 type ReducerAction = {
-    type: string;
+    type_of: string;
     payload: any;
 };
 
-
 function PalletizerReducer(state : PalletizerState, action : ReducerAction) {
 
-    switch (action.type) {
+    switch (action.type_of) {
         default : {
-            return state;
+            return {...action.payload};
         }
     }
 }
 
 const PalletizerContext = createContext<Partial<PalletizerState>>({});
 
+export { PalletizerContext };
 
 function AppState(props: any) {
+    // Initial state -- mirrored in server.js
     let initial_state : PalletizerState = {
         status : "N/A",
         cycle: 0, 
         current_box: 0,
         total_box: 0,
-        time: 0,
-        errors: [] as string[]
+        time: 10,
+        errors: [] as string[] // This will change to a structured format.
     };
 
     const [state, dispatch] = useReducer(PalletizerReducer, initial_state);
+
+    useEffect( () => {
+        let event_source = new EventSource("http://localhost:3011/events");
+
+
+        event_source.onopen = function(e: Event) {
+            console.log("Opened event_source.", e);
+        }
+
+        event_source.onerror = function(e:Event) {
+            console.log(e, "Error in AppContext.tsx - event_source");
+        }
+
+        event_source.addEventListener("message", (e: MessageEvent)=> {
+            let data = JSON.parse(e.data);
+            // Call dispatch and set new app data.
+            dispatch({
+                type_of: "state",
+                payload: data
+            });
+
+        });
+
+    }, []);
 
     return (
         <PalletizerContext.Provider value={state}>
             {props.children}
         </PalletizerContext.Provider>
     )
-
-    
 }
-
-
-
 
 export default AppState;

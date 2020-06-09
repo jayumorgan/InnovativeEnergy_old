@@ -1,5 +1,8 @@
-import React from 'react';
+import React, {useContext} from 'react';
 
+
+// Context
+import { PalletizerContext } from "../context/AppContext";
 
 // Styles
 import "./css/General.scss";
@@ -25,7 +28,7 @@ function make_date_string(day: number, month: number, year: number){
 // Status Item Interfaces...
 interface StatusItem {
     title: string;
-    get_function(): any;
+    value: any;
 }
 
 
@@ -39,17 +42,16 @@ interface StatusContainerProps {
 }
 
 
-function DisplayItem(props: DisplayItemProps) {
-    let {item} = props;
-    item.title = item.title.toUpperCase();
+function DisplayItem({title, value}: StatusItem) {
+    title = title.toUpperCase();
     return (
         <div className="StatusItem">
             <span>
-                {item.title}
+                {title}
             </span>
             <div className="StatusValue">
                 <span>
-                    {item.get_function()}
+                    {value}
                 </span>
             </div>
         </div>
@@ -67,30 +69,11 @@ function StatusContainer(props: StatusContainerProps) {
                 </div>
                 <div className="StatusBlock" >
                     {status_items.map((item, index)=>{
-                        return(<DisplayItem item={item} key={index} />)
+                        return(<DisplayItem {...item} key={index} />)
                     })}
                 </div>
         </div>
     );
-}
-
-
-// Garbage functions -- temporary.
-
-function get_status() {
-    return "Running";
-}
-
-function cycle_count(){
-    return "23";
-}
-
-function current_box(){
-    return "1 of 32";
-}
-
-function time_to_completion(){
-    return "100 Hours";
 }
 
 
@@ -218,13 +201,32 @@ function Execute() {
 
 
 
+
+
+
 function General() {
     // Make some temporary data to display..
+    let appContext = useContext(PalletizerContext);
+
+    let {status, cycle, total_box, current_box, time } = appContext;
+    
     let items = [] as StatusItem[];
-    items.push({title: "Status", get_function: get_status});
-    items.push({title: "Cycle Count", get_function: cycle_count});
-    items.push({title: "Current Box", get_function: current_box});
-    items.push({title: "Time To Completion", get_function: time_to_completion});
+    items.push({
+        title: "Status",
+        value: status
+    });
+    items.push({
+        title: "Cycle Count",
+        value: String(cycle)
+    });
+    items.push({
+        title: "Current Box",
+        value: `${current_box} of ${total_box}`
+    });
+    items.push({
+        title: "Time To Completion",
+        value: `${time} Hours`
+    });
     return (
         <div className="GridContainer" >
             <div className="TopLeft" >

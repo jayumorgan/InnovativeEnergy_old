@@ -8,7 +8,7 @@ const TOPIC = "palletizer/";
 
 // MQTT example: https://www.cloudamqp.com/docs/nodejs_mqtt.html
 
-function MQTTRelay(handle_error: any, handle_state: any){
+function MQTTRelay(handle_error: any, handle_state: any) : mqtt.MqttClient {
 
     let options = {
         clientId: "server-MQTTRelay"
@@ -53,6 +53,7 @@ function MQTTRelay(handle_error: any, handle_state: any){
         }
 
     });
+    return client;
 }
 
 // MQTTRelay(console.log, console.log);
