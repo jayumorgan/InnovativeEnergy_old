@@ -305,7 +305,6 @@ class Palletizer:
 
     def system_loop(self):
         first = True
-        last_command = None
         while True:
             command = self.control_listenter.command
             if command == "START":
@@ -338,7 +337,6 @@ class Palletizer:
             else:
                 self.state_controller.update("status", "Idle")
                 sleep(0.5)
-            last_command = command
                 
 
     def next_operation(self):

@@ -38,8 +38,9 @@ class StateController:
         self.client.disconnect()
 
     def update(self, key, value):
-        self.state[key] = value
-        self.__publish()
+        if self.state[key] != value: #ie. the value needs to be changed.
+            self.state[key] = value
+            self.__publish()
         
 
 
