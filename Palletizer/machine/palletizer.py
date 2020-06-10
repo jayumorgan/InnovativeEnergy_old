@@ -294,9 +294,7 @@ class Palletizer:
         sleep(1)
         return False
 
-    # Signal monitoring functions:
     def check_pressure_pick(self):
-        
         pass
 
     def home(self):

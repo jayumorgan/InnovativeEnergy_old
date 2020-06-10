@@ -162,7 +162,7 @@ function Execute() {
     let appContext = useContext(PalletizerContext);
 
     let {current_box} = appContext;
-
+    
     let [start_box, set_start_box] = useState(current_box);
 
     let select_options = {
