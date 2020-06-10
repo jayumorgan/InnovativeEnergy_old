@@ -2,7 +2,7 @@ import React, { useContext, ChangeEvent, useState} from 'react';
 
 import {MQTTControl} from "../mqtt/MQTT";
 // Context
-import { MachineContext } from "../context/AppContext";
+import { PalletizerContext } from "../context/AppContext";
 
 // Styles
 import "./css/General.scss";
@@ -160,17 +160,17 @@ function SelectCell(props: SelectCellProps) {
 }
 
 
+interface ExecuteProps {
+    current_box: number;
+};
 
-function Execute() {
 
-    let machine_context = useContext(MachineContext);
+function Execute({current_box} : ExecuteProps) {
 
-    let {current_box} = machine_context.palletizer_state as PalletizerState;
-    
     let [start_box, set_start_box] = useState(current_box);
 
     let select_options = {
-        "Machine Configuration": ["configuration 1", "configuration 2", "configuration 3"],
+        "Palletizer Configuration": ["configuration 1", "configuration 2", "configuration 3"],
         "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
     } as any;
 
@@ -212,7 +212,7 @@ function Execute() {
                 <span> {input_title} </span>
             <input type="text" name={input_title} onChange={handle_input} value={start_box} />
             </div>
-            <div className="MachineControls" >
+            <div className="PalletizerControls" >
                 <div className={"ControlButton start"} onClick={start_button} >
                         <span className={icons[0]}> </span>
                         <span id="button-text">{"Start"}</span>    
@@ -233,10 +233,10 @@ function Execute() {
 
 function General() {
     // Make some temporary data to display..
-    let machine_context = useContext(MachineContext);
+    let palletizer_context = useContext(PalletizerContext);
 
 
-    let {status, cycle, total_box, current_box, time } = machine_context.palletizer_state as PalletizerState;
+    let {status, cycle, total_box, current_box, time } = palletizer_context;
     
     let items = [] as StatusItem[];
     items.push({
@@ -267,7 +267,7 @@ function General() {
                 <StatusContainer status_items={items} />
             </div>
             <div className="BottomLeft">
-                <Execute />
+                <Execute current_box={current_box as number}/>
             </div>
             <div className="BottomRight">
                 <Information />

@@ -11,7 +11,7 @@ import General from "./parts/General";
 import Configuration from "./parts/Configuration";
 
 // Context
-import AppState from "./context/AppContext";
+import PalletizerHub from "./context/AppContext";
 
 // Styles
 import './App.scss';
@@ -22,7 +22,7 @@ function App() {
     let tab_options = ['General', 'Configuration'];
     let [general_index, config_index] = [0,1]; 
     return (
-        <AppState>
+        <PalletizerHub>
           <Router>
             <div className="App">
                 <Header />
@@ -39,7 +39,7 @@ function App() {
               <Footer />
             </div>
           </Router>
-        </AppState>
+        </PalletizerHub>
     );
 }
 
