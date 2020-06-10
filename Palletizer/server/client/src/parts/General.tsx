@@ -1,8 +1,13 @@
-import React, { useContext, ChangeEvent, useState} from 'react';
+import React, {useContext, ChangeEvent, useState} from 'react';
 
 import {MQTTControl} from "../mqtt/MQTT";
 // Context
-import { PalletizerContext } from "../context/PalletizerContext";
+import {PalletizerContext} from "../context/PalletizerContext";
+import {ConfigContext} from "../context/ConfigContext";
+
+//Types
+import {ConfigState, PalletizerState} from "../types/Types";
+
 
 // Styles
 import "./css/General.scss";
@@ -161,16 +166,18 @@ function SelectCell(props: SelectCellProps) {
 
 interface ExecuteProps {
     current_box: number;
+    pallet_configs: string[];
+    machine_configs: string[];
 };
 
 
-function Execute({current_box} : ExecuteProps) {
+function Execute({current_box, machine_configs, pallet_configs} : ExecuteProps) {
 
     let [start_box, set_start_box] = useState(current_box);
 
     let select_options = {
-        "Palletizer Configuration": ["configuration 1", "configuration 2", "configuration 3"],
-        "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
+        "Palletizer Configuration": machine_configs,
+        "Pallet Configuration": pallet_configs,
     } as any;
 
     let handle_input = (e: ChangeEvent) => {
@@ -233,9 +240,11 @@ function Execute({current_box} : ExecuteProps) {
 function General() {
     // Make some temporary data to display..
     let palletizer_context = useContext(PalletizerContext);
+    let config_context = useContext(ConfigContext);
 
 
-    let {status, cycle, total_box, current_box, time } = palletizer_context;
+    let {status, cycle, total_box, current_box, time } = palletizer_context as PalletizerState;
+    let {machine_configs, pallet_configs} = config_context as ConfigState; 
     
     let items = [] as StatusItem[];
     items.push({
@@ -266,7 +275,7 @@ function General() {
                 <StatusContainer status_items={items} />
             </div>
             <div className="BottomLeft">
-                <Execute current_box={current_box as number}/>
+            <Execute current_box={current_box} machine_configs={machine_configs} pallet_configs={pallet_configs}/>
             </div>
             <div className="BottomRight">
                 <Information />

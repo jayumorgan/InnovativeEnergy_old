@@ -1,13 +1,9 @@
-import React, { createContext, useReducer, useEffect, useState} from 'react';
+import React, { createContext, useEffect, useState} from 'react';
 
 import {get_configs} from "../requests/requests";
+import {ConfigState} from "../types/Types";
 
-import {ConfigState, ReducerAction} from "../types/Types";
 
-function ConfigReducer(state: ConfigState, action: ReducerAction) {
-    console.log(action.payload);
-    return {...action.payload};
-}
 
 const ConfigContext = createContext<Partial<ConfigState>>({});
 
@@ -24,7 +20,6 @@ function ConfigHub(props: any) {
     var [state, set_state] = useState(initial_state);
 
     useEffect(()=>{
-
         get_configs((data:ConfigState)=>{
             set_state(data); 
         });
