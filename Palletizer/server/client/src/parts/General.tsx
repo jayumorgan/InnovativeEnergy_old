@@ -2,12 +2,13 @@ import React, { useContext, ChangeEvent, useState} from 'react';
 
 import {MQTTControl} from "../mqtt/MQTT";
 // Context
-import { PalletizerContext } from "../context/AppContext";
+import { MachineContext } from "../context/AppContext";
 
 // Styles
 import "./css/General.scss";
 
 import logo from "../images/vention_logo.png";
+import { PalletizerState } from '../types/Types';
 
 // MQTT Control
 var control = MQTTControl();
@@ -162,9 +163,9 @@ function SelectCell(props: SelectCellProps) {
 
 function Execute() {
 
-    let appContext = useContext(PalletizerContext);
+    let machine_context = useContext(MachineContext);
 
-    let {current_box} = appContext;
+    let {current_box} = machine_context.palletizer_state as PalletizerState;
     
     let [start_box, set_start_box] = useState(current_box);
 
@@ -230,15 +231,12 @@ function Execute() {
 }
 
 
-
-
-
-
 function General() {
     // Make some temporary data to display..
-    let appContext = useContext(PalletizerContext);
+    let machine_context = useContext(MachineContext);
 
-    let {status, cycle, total_box, current_box, time } = appContext;
+
+    let {status, cycle, total_box, current_box, time } = machine_context.palletizer_state as PalletizerState;
     
     let items = [] as StatusItem[];
     items.push({

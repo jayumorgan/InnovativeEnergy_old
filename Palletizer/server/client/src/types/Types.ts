@@ -22,3 +22,9 @@ export type PartialState = {
     time: number; // hours? 
 };
 
+
+export type MachineState = {
+    pallet_configs: string[];
+    machine_configs: string[];
+    palletizer_state: PalletizerState;
+};

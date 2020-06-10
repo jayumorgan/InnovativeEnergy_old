@@ -13,7 +13,7 @@ from mqtt_relay import state_controller
 
 
 # Demo data functions.
-from demo_data import  get_demo_pickups, get_demo_centroids 
+from demo_data import get_demo_pickups, get_demo_centroids 
 
 
 # Setup proper logging.
@@ -23,11 +23,11 @@ MACHINE_CONFIG = None
 PALLET_CONFIG = None
 
 # Load configurations. -- path.
-with open('./config/machine.json') as config:
+with open('./config/machine/machine.json') as config:
     data = json.load(config)
     MACHINE_CONFIG = data
 
-with open('./config/pallet.json') as config:
+with open('./config/pallet/pallet.json') as config:
     data = json.load(config)
     PALLET_CONFIG = data
 

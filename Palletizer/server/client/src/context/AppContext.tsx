@@ -2,45 +2,52 @@ import React, {createContext, useReducer, useEffect} from 'react';
 import {MQTTSubscriber} from "../mqtt/MQTT";
 // For server sent events -- see server.js for further details.
 
-import {PalletizerState, PalletizerError, PartialState} from "../types/Types";
+import {PalletizerState, PalletizerError, PartialState, MachineState} from "../types/Types";
 
 type ReducerAction = {
     type_of: string;
     payload: any;
 };
 
-function PalletizerReducer(state : PalletizerState, action : ReducerAction) {
+function MachineReducer(state : MachineState, action : ReducerAction) {
 
     switch (action.type_of) {
         case "ERROR" : {
-            state.errors.push(action.payload as PalletizerError);
+            state.palletizer_state.errors.push(action.payload as PalletizerError);
             return state;
         }
         case "STATE" : {
-            return {errors: state.errors, ...(action.payload as PartialState)} as PalletizerState;
+            return {
+                ...state,
+                palletizer_state: {errors: state.palletizer_state.errors, ...(action.payload as PartialState)} as PalletizerState
+            };
         }
         default : {
-            return {...action.payload};
+            return state
         }
     }
 }
 
-const PalletizerContext = createContext<Partial<PalletizerState>>({});
+const MachineContext = createContext<Partial<MachineState>>({});
 
-export { PalletizerContext };
+export { MachineContext };
 
 function AppState(props: any) {
 
-    let initial_state : PalletizerState = {
-        status : "N/A",
-        cycle: 0, 
-        current_box: 0,
-        total_box: 0,
-        time: 10,
-        errors: [] as PalletizerError[] 
+    let initial_state : MachineState = {
+        pallet_configs : [] as string[],
+        machine_configs : [] as string[],
+        palletizer_state: {
+            status : "N/A",
+            cycle: 0, 
+            current_box: 0,
+            total_box: 0,
+            time: 10,
+            errors: [] as PalletizerError[]
+        } as PalletizerState
     };
 
-    const [state, dispatch] = useReducer(PalletizerReducer, initial_state);
+    const [state, dispatch] = useReducer(MachineReducer, initial_state);
 
     useEffect(() => {
         // Change the error structure.
@@ -63,9 +70,9 @@ function AppState(props: any) {
     }, []);
 
     return (
-        <PalletizerContext.Provider value={state}>
+        <MachineContext.Provider value={state}>
             {props.children}
-        </PalletizerContext.Provider>
+        </MachineContext.Provider>
     )
 }
 
