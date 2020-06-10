@@ -98,7 +98,8 @@ class Palletizer:
 
         # new state_controller (setup with defauly machine motion state)
         self.state_controller = state_controller.StateController(True)
-    
+        # Runs on another thread.
+        self.control_listenter = state_controller.ControlListener() # See monitor loop.
         
         self.mm = FakeMachineMotion("Some IP address")
         # self.mm = MachineMotion(DEFAULT_IP_ADDRESS.usb_windows, silence)
@@ -366,6 +367,7 @@ class Palletizer:
         self.motion_loop()
 
 
+    # Monitor state in here.
     def monitor_loop(self):
         while not self.check_for_interrupt():
             sleep(1)

@@ -23,6 +23,13 @@ var palletizer_state : PalletizerState = {
 };
 
 
+// Handle Estop.
+app.get("/estop", (req: express.Request, res: express.Response)=>{
+    console.log("Estop requested.");
+    res.sendStatus(200);
+});
+
+
 let control = MQTTControl();
 
 // GET route to accept client control operations (Start, Pause, Stop)

@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 
-
+import {control_request} from "./requests/requests";
 // Context
 import { PalletizerContext } from "../context/AppContext";
 
@@ -30,12 +30,6 @@ interface StatusItem {
     title: string;
     value: any;
 }
-
-
-interface DisplayItemProps {
-    item: StatusItem;
-}
-
 
 interface StatusContainerProps {
     status_items: StatusItem[];
@@ -169,9 +163,18 @@ function Execute() {
         "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
     } as any;
     let input_title = "Start from box";
-    let buttons = ["Start", "Pause", "Stop"];
     let icons = ["icon-play", "icon-pause", "icon-stop"];
-    let colors = [" start", "", ""];
+
+    let stop_button = ()=>{
+        control_request("stop");
+    };
+    let pause_button = ()=>{
+        control_request("pause");
+    };
+    let start_button = ()=>{
+        control_request("start");
+    };
+    
     return (
         <div className="StackContainer">
             <div className="StackTitle">
@@ -186,14 +189,18 @@ function Execute() {
                 <input type="text" name={input_title} />
             </div>
             <div className="MachineControls" >
-                {buttons.map((name, index)=>{
-                    return (
-                        <div className={"ControlButton" + colors[index]} key={index} >
-                            <span className={icons[index]}> </span>
-                            <span id="button-text">{name}</span>    
-                        </div>
-                    )
-                })}
+                <div className={"ControlButton start"} onClick={start_button} >
+                        <span className={icons[0]}> </span>
+                        <span id="button-text">{"Start"}</span>    
+                    </div>
+                <div className={"ControlButton"}  onClick={pause_button}>
+                        <span className={icons[1]}> </span>
+                        <span id="button-text">{"Pause"}</span>    
+                    </div>
+                <div className={"ControlButton"} onClick={stop_button} >
+                        <span className={icons[2]}> </span>
+                        <span id="button-text">{"Stop"}</span>    
+                    </div>
             </div>
         </div>
     );

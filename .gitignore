@@ -9,3 +9,4 @@ palletizer/__pycache__/
 palletizer/server/node_modules/
 palletizer/server/dist/
 palletizer/server/client/node_modules
+palletizer/machine/__pycache__/
