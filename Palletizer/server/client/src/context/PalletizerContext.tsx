@@ -2,15 +2,10 @@ import React, {createContext, useReducer, useEffect} from 'react';
 import {MQTTSubscriber} from "../mqtt/MQTT";
 // For server sent events -- see server.js for further details.
 
-import {PalletizerState, PalletizerError, PartialState} from "../types/Types";
+import {PalletizerState, PalletizerError, PartialState, ReducerAction} from "../types/Types";
 
-type ReducerAction = {
-    type_of: string;
-    payload: any;
-};
 
 function PalletizerReducer(state : PalletizerState, action : ReducerAction) {
-
     switch (action.type_of) {
         case "ERROR" : {
             state.errors.push(action.payload as PalletizerError)

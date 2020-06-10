@@ -2,13 +2,12 @@ import React, { useContext, ChangeEvent, useState} from 'react';
 
 import {MQTTControl} from "../mqtt/MQTT";
 // Context
-import { PalletizerContext } from "../context/AppContext";
+import { PalletizerContext } from "../context/PalletizerContext";
 
 // Styles
 import "./css/General.scss";
 
 import logo from "../images/vention_logo.png";
-import { PalletizerState } from '../types/Types';
 
 // MQTT Control
 var control = MQTTControl();

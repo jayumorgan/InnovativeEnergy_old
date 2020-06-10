@@ -1,3 +1,8 @@
+export type ReducerAction = {
+    type_of: string;
+    payload: any;
+};
+
 
 export type PalletizerError = {
     date: Date;
@@ -23,8 +28,8 @@ export type PartialState = {
 };
 
 
-export type MachineState = {
+export type ConfigState = {
     pallet_configs: string[];
     machine_configs: string[];
-    palletizer_state: PalletizerState;
 };
+

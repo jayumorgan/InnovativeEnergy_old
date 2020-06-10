@@ -11,17 +11,17 @@ import General from "./parts/General";
 import Configuration from "./parts/Configuration";
 
 // Context
-import PalletizerHub from "./context/AppContext";
-
+import PalletizerHub from "./context/PalletizerContext";
+import ConfigHub from "./context/ConfigContext";
 // Styles
 import './App.scss';
 
 
-// Require the context hook to seep things updated..;
 function App() {
     let tab_options = ['General', 'Configuration'];
     let [general_index, config_index] = [0,1]; 
     return (
+      <ConfigHub>
         <PalletizerHub>
           <Router>
             <div className="App">
@@ -40,6 +40,7 @@ function App() {
             </div>
           </Router>
         </PalletizerHub>
+      </ConfigHub>
     );
 }
 
