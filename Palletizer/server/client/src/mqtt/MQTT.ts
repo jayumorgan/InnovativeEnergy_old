@@ -1,5 +1,5 @@
 import mqtt from "mqtt";
-import {PalletizerState, PalletizerError} from "../types/Types";
+// import {PalletizerState, PalletizerError} from "../types/Types";
 
 // Config + Globals.
 const PORT = 9001;
@@ -13,7 +13,6 @@ function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient 
 
     let options = {
         clientId: "server-MQTTSubscriber",
-        // useSSL: true
     };
 
     let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
@@ -59,20 +58,18 @@ function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient 
     return client;
 }
 
-// MQTTRelay(console.log, console.log);
-
-
 function MQTTControl() {
-// Return an object with function in it.
+
     let options = {
         clientId: "server-MQTTControl"
     };
+
     let topic = TOPIC + "control";
 
     let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
 
     client.on("connect",()=> {
-       console.log("Connected to control MQTT server."); 
+       // console.log("Connected to MQTT control server."); 
     });
 
     let stop_command = "STOP";
@@ -93,9 +90,5 @@ function MQTTControl() {
     
     return {start, stop, pause};
 }
-
-
-
-
 
 export {MQTTSubscriber, MQTTControl};

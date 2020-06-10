@@ -1,7 +1,5 @@
 import React from 'react';
 
-
-import {estop_request} from "./requests/requests";
 // Logo image import..
 import logo from "../images/white-logo.png";
 
@@ -11,11 +9,13 @@ import "./css/Header.scss";
 
 function Header() {
     let handle_back = function() {
-        console.log("Trigger back button...");
+        console.log("Handle Back Button");
     };
+
     let handle_stop = function() {
-        estop_request();
+        console.log("Handle ESTOP.");
     };
+
     return (
         <div className="HeaderGrid">
             <div className="HeaderLeft">

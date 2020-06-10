@@ -1,6 +1,5 @@
 import React, { useContext, ChangeEvent, useState} from 'react';
 
-import {control_request} from "./requests/requests";
 import {MQTTControl} from "../mqtt/MQTT";
 // Context
 import { PalletizerContext } from "../context/AppContext";
@@ -9,6 +8,9 @@ import { PalletizerContext } from "../context/AppContext";
 import "./css/General.scss";
 
 import logo from "../images/vention_logo.png";
+
+// MQTT Control
+var control = MQTTControl();
 
 // Support Functions:
 function make_time_string(hours:number, minute:number) : string {
@@ -178,15 +180,19 @@ function Execute() {
     
     let icons = ["icon-play", "icon-pause", "icon-stop"];
 
-    // We will submit the requests.
     let stop_button = ()=>{
-        control_request("stop");
+        let {stop} = control;
+        stop();
     };
+    
     let pause_button = ()=>{
-        control_request("pause");
+        let {pause} = control;
+        pause();
     };
+    
     let start_button = ()=>{
-        control_request("start");
+        let {start} = control;
+        start();
     };
     
     
