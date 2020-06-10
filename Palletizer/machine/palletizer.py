@@ -92,13 +92,8 @@ class Palletizer:
         print(pallet_json)
         # Gcode callback.
         callback = None
-        #logging.debug("Controller GCode response: {data}")
 
-        # This is the state used to populate the General page on UI
-
-        # new state_controller (setup with defauly machine motion state)
         self.state_controller = state_controller.StateController(True)
-        # Runs on another thread.
         self.control_listenter = state_controller.ControlListener() # See monitor loop.
         
         self.mm = FakeMachineMotion("Some IP address")
@@ -107,26 +102,21 @@ class Palletizer:
         self.rotationMMIP = "192.168.1.6"
         self.rotation_mm = FakeMachineMotion(self.rotationMMIP, silence)
 
-        # publish events for the client..
-        # self.mqtt_pub = MQTTRelay.MQTTPublisher()
     
         # sleep(3) # Wait for the Machine Motions to boot up..
-        print("Sleep in prod.")
+        print("Sleep in production...")
 
-        # MACHINE configuration ------------------------------
-        
         axes_config = machine_json['AXES_CONFIG']
         pick_config = machine_json['PICK_CONFIG']
         detector_config = machine_json['DETECTOR_CONFIG']
         network_config = machine_json['NETWORK_CONFIG']
 
-        # Provides a map between coordinates and axes.
         self.axes = axes_config['AXES_DIRECTIONS']
 
         self.x = self.axes['x']
         self.y = self.axes['y']
         self.z = self.axes['z']
-        # assume the top of z is zero.
+
         self.home_x = 0
         self.home_y = 0
         self.home_z = 0
@@ -134,12 +124,10 @@ class Palletizer:
         self.axes_travel = axes_config["AXES_TRAVEL"]
         axes_gains = axes_config['AXES_GAINS']
 
-        # uStep
         # uStep = MICRO_STEPS.ustep_8
         print("Set micro steps on machine..")
         uStep = 8
 
-        # Configure the axes within Machine Motion
         for axis, gain in axes_gains.items():
             axis_number = self.axes[axis]
             self.mm.configAxis(axis_number,uStep,gain)
@@ -165,16 +153,12 @@ class Palletizer:
                                         self.controller_netmask)
         
         self.pick_origin = pick_config["PICK_ORIGIN"]
-        # Read axes from here, or assume "z"?
         self.lift_clearance = pick_config["LIFT_CLEARANCE"]
         self.pallet_origin = pick_config["PALLET_ORIGIN"]
-        
-        # PALLET configuration ---------------------------
 
         pallet_config = pallet_json['PALLET_CONFIG']
         operating_params = pallet_json['OPERATING_PARAMETERS']
         
-        # Speed + Acceleration Setup
         travel_config = operating_params['TRAVEL']
         approach_config = operating_params["APPROACH"]
         
@@ -190,30 +174,23 @@ class Palletizer:
         self.layer_centroids = get_demo_centroids()
         self.layer_pickups = get_demo_pickups()
             
-        print(self.layer_centroids)
-        # Set the total box number to the number of centroids
         self.state_controller.update("total_box", len(self.layer_centroids))
             
         self.box_height = self.box_dimensions["z"]
 
-        # The current layer index. 
         self.layer_index = 0
-        # Prepare.
+
         self.mm.releaseEstop()
         self.mm.resetSystem()
 
-        # Status Checks.
         self.health_check()
         self.hardware_check()
 
-        # Init thread variables.
         self.monitor_thread = None
 
-        # State Variables
         self.interrupt = False
         self.motion_index = 0 # Location in motion_queue
         self.box_index = 0 # box number for centroids + height computation.
-        # self.motion_completed = False # Motion is complete
 
         self.motion_queue = [
             self.move_to_pick_point, #move above pick point (z_pp_clear)
@@ -229,17 +206,13 @@ class Palletizer:
             self.move_up_from_box_stack, # clear the box stack.
         ]
 
-
-        # Await start signal.
-        self.await_start()
+        self.system_loop()
 
     # Motion sequences:
     def move_to_pick_point(self):
         logging.debug("Moving to pick point...")
-        # self.pick_origin = pick_config["PICK_ORIGIN"]
         pick_point = self.layer_pickups[self.layer_index]
         xy_coords = [pick_point["x"], pick_point["y"]]
-        # xy_coords = [self.pick_origin["x"], self.pick_origin["y"]]
         xy_axes = [self.x, self.y]
         self.mm.emitCombinedAxesAbsoluteMove(xy_axes, xy_coords)
 
@@ -249,9 +222,7 @@ class Palletizer:
         self.mm.emitAbsoluteMove(self.z, z_coord)
 
     def pick(self):
-        # Turn on suction.
         logging.debug("Picking...")
-        # Turn on the digital input
         self.mm.digitalWrite(
             self.pressure_module_address,
             self.pressure_input_channel,
@@ -262,7 +233,6 @@ class Palletizer:
         self.mm.emitAbsoluteMove(self.z, self.home_z)
 
     def move_to_drop(self):
-        # pallet origin is x_y coordinates:
         logging.debug("Moving to drop location...")
         axes = [self.x, self.y]
         centroid = self.layer_centroids[self.layer_index]
@@ -286,34 +256,24 @@ class Palletizer:
         self.mm.emitAbsoluteMove(self.z, self.home_z)
 
     def move_to_idle_point(self):
-        # move the z axis up.
         z_axis = self.axes["z"]
         self.mm.emitAbsoluteMove(self.z, self.home_z) # move to the top
         self.wait_for_motion()
-
-        # move the axes back to position.
         (x_axis, y_axis) = (self.axes["x"], self.axes["y"])
         self.mm.emitCombinedAxesAbsoluteMove([x_axis, y_axis], [self.home_x,self.home_y])
-        # Move z, then (x,y)
         logging.debug("Move to the idle point...")
         
-    # Motion checks
-    def check_for_box(self): # or wait for it.
-        # Digital read
+    def check_for_box(self): # or wait for box?.
         logging.debug("Checking for box...")
         pass
 
     def check_pick_pressure(self):
-        # digital read
         logging.debug("Checking pick pressure...")
         pass
 
-    def check_encoder_position(self): #make sure we are in the right place
-        #digital
+    def check_encoder_position(self): 
         logging.debug("Checking encoder position...")
         pass
-    
-    # Hardware + System Checks
     
     def hardware_check(self):
         pass
@@ -322,17 +282,12 @@ class Palletizer:
         pass
 
     def check_pallet(self):
-        # Check for pallet presence...
         pass
 
-    # User signal monitoring functions.
     def check_for_start(self):
-        ## If a start signal.
-        ## Prompt for start as a demo.
         ## If python2, use raw_input
         pr = input("Start machine motion? (y/n): ")
         return pr == "y"
-        # return random.random() > 0.99999
 
     def check_for_interrupt(self):
         # True for interrupt -- handle (pause / stop)
@@ -345,78 +300,63 @@ class Palletizer:
         pass
 
     def home(self):
-        # move the axis up all the way, and and then home the other axes.
         logging.debug("Homing the machine.")
         self.move_to_idle_point()
-        
-    # System Progress + Signal Processing Loops
+
     
     def await_start(self):
-        # Blocks the main thread until start signal is received.
         while True:
             if self.check_for_start():
                 print("Start Signal Received...")
                 self.state_controller.update("status", "Running")
                 self.state_controller.update("current_box", self.layer_index + 1)
                 break
-        # Check pallet presence -- may need to be moved into a health check loop
         self.check_pallet()
-        # Home all controls.
         self.home()
-        # Begin motion loop.
         self.motion_loop()
 
-
-    # Monitor state in here.
-    def monitor_loop(self):
-        while not self.check_for_interrupt():
-            sleep(1)
-            
-        #Set interrupt state.
-        self.interrupt = True
-        #stop the machine.
-        self.mm.emitStop()
-        # Join threads.
-        self.monitor_thread.join()
-        
-    def monitor_interupt(self):
-        monitor_thread = Thread(target=self.monitor_loop)
-        monitor_thread.start()
-        
-
-    def motion_loop(self):
-        # Start monitoring for Pause/Stop.
-        self.monitor_interupt()
-        while not self.interrupt and self.layer_index < len(self.layer_centroids):
-            # Execute the next operation.
-            self.next_operation()
-            # Increment the motion index.
-            
-            
-            self.motion_index = (self.motion_index + 1)%len(self.motion_queue)
-            self.state_controller.update("cycle", self.motion_index)
-            if self.motion_index == 0:
-                # increment the box number
-                self.layer_index += 1
-                # Haha.
+    def system_loop(self):
+        first = True
+        while True:
+            command = self.control_listenter.command
+            if command == "START":
+                self.state_controller.update("status", "Running")
+                if first:
+                    self.state_controller.update("current_box", self.layer_index+1)
+                    self.check_pallet()
+                    self.home()
+                    first = False
                 if self.layer_index < len(self.layer_centroids):
-                    self.state_controller.update("current_box", self.layer_index + 1)
-                else:
-                    self.state_controller.update("status", "Complete")
+                    self.next_operation()
+                    self.motion_index = (self.motion_index + 1)%len(self.motion_queue)
+                    self.state_controller.update("cycle", self.motion_index)
+                    if self.motion_index == 0:
+                        self.layer_index += 1
+                        # Haha.
+                        if self.layer_index < len(self.layer_centroids):
+                            self.state_controller.update("current_box", self.layer_index + 1)
+                        else:
+                            self.state_controller.update("status", "Complete")
+                            self.control_listenter.command = "DONE" # or something
+                            first = True
+            elif command == "PAUSE":
+                sleep(0.5)
+                self.state_controller.update("status", "Paused")
+            elif command == "STOP":
+                first = True
+                self.state_controller.update("status", "Stopped")
+                sleep(0.5)
+            else:
+                self.state_controller.update("status", "Idle")
+                sleep(0.5)
+                
 
-    # Calls operations in the motion queue.
     def next_operation(self):
-        # get the next operation.
         operation = self.motion_queue[self.motion_index]
         self.motion_completed = False
-        # Call the operation.
         operation()
-        #Wait here -- (will do nothin for IO)
-        # self.mm.waitForMotionCompletion()
         self.wait_for_motion()
-            # Execute next instruction.
 
-    # Wait for motion sequence to complete.
     def wait_for_motion(self):
         self.mm.waitForMotionCompletion()
 

@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, { useContext, ChangeEvent, useState} from 'react';
 
 import {control_request} from "./requests/requests";
 // Context
@@ -158,11 +158,23 @@ function SelectCell(props: SelectCellProps) {
 
 
 function Execute() {
+
+    let appContext = useContext(PalletizerContext);
+
+    let {current_box} = appContext;
+
+    let [start_box, set_start_box] = useState(current_box);
+
     let select_options = {
         "Machine Configuration": ["configuration 1", "configuration 2", "configuration 3"],
         "Pallet Configuration": ["pallet 1", "pallet 2", "pallet 3"],
     } as any;
-    let input_title = "Start from box";
+
+    let handle_input = (e: ChangeEvent) => {
+        let value = Number((e.target as HTMLInputElement).value);
+        set_start_box(value);
+    };
+    
     let icons = ["icon-play", "icon-pause", "icon-stop"];
 
     let stop_button = ()=>{
@@ -175,6 +187,9 @@ function Execute() {
         control_request("start");
     };
     
+    
+    let input_title = "Start from box";
+    
     return (
         <div className="StackContainer">
             <div className="StackTitle">
@@ -186,7 +201,7 @@ function Execute() {
             })}
             <div className="SelectCell" >
                 <span> {input_title} </span>
-                <input type="text" name={input_title} />
+            <input type="text" name={input_title} onChange={handle_input} value={start_box} />
             </div>
             <div className="MachineControls" >
                 <div className={"ControlButton start"} onClick={start_button} >
@@ -234,6 +249,7 @@ function General() {
         title: "Time To Completion",
         value: `${time} Hours`
     });
+
     return (
         <div className="GridContainer" >
             <div className="TopLeft" >
