@@ -51,8 +51,8 @@ app.get("/configs", (req:express.Request, res: express.Response)=>{
     
 
     res.json({
-        machine: machine_configs,
-        pallet: pallet_configs
+        machine_configs: machine_configs,
+        pallet_configs: pallet_configs
     });
 
 });

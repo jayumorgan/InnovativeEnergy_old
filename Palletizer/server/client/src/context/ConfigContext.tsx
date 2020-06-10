@@ -1,10 +1,12 @@
-import React, {createContext, useReducer, useEffect} from 'react';
+import React, { createContext, useReducer, useEffect, useState} from 'react';
+
+import {get_configs} from "../requests/requests";
 
 import {ConfigState, ReducerAction} from "../types/Types";
 
-
 function ConfigReducer(state: ConfigState, action: ReducerAction) {
-    return state;
+    console.log(action.payload);
+    return {...action.payload};
 }
 
 const ConfigContext = createContext<Partial<ConfigState>>({});
@@ -19,12 +21,15 @@ function ConfigHub(props: any) {
         pallet_configs: [] as string[]
     };
 
-    
-    const [state, dispatch] = useReducer(ConfigReducer, initial_state);
+    var [state, set_state] = useState(initial_state);
 
     useEffect(()=>{
-        
-    });
+
+        get_configs((data:ConfigState)=>{
+            set_state(data); 
+        });
+    }, []);
+
 
     return (
         <ConfigContext.Provider value={state}>
