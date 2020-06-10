@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
+
+import {ConfigContext} from "../context/ConfigContext";
+
+import {ConfigState} from "../types/Types";
 
 // Styles
 import "./css/Configuration.scss";
@@ -71,12 +75,10 @@ function ConfigContainer(props: ConfigContainerProps) {
 
 
 function Configuration() {
-    let pallet_configs = [] as string[];
-    let machine_configs = [] as string[];
-    for (let i = 0; i< 20; i++){
-        pallet_configs.push("Pallet configuration "+String(i+1));
-        machine_configs.push("Machine configuration " + String(i+1));
-    }
+    let config_context = useContext(ConfigContext);
+
+    let {machine_configs, pallet_configs} = config_context as ConfigState; 
+    
     return (
         <div className="ConfigGrid">
             <div className="PalletConfig">
