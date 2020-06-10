@@ -1,8 +1,8 @@
 import React, {createContext, useReducer, useEffect} from 'react';
-
+import {MQTTSubscriber} from "../mqtt/MQTT";
 // For server sent events -- see server.js for further details.
 
-import {PalletizerState, PalletizerError} from "../types/Types";
+import {PalletizerState, PalletizerError, PartialState} from "../types/Types";
 
 type ReducerAction = {
     type_of: string;
@@ -12,6 +12,13 @@ type ReducerAction = {
 function PalletizerReducer(state : PalletizerState, action : ReducerAction) {
 
     switch (action.type_of) {
+        case "ERROR" : {
+            state.errors.push(action.payload as PalletizerError);
+            return state;
+        }
+        case "STATE" : {
+            return {errors: state.errors, ...(action.payload as PartialState)} as PalletizerState;
+        }
         default : {
             return {...action.payload};
         }
@@ -23,39 +30,35 @@ const PalletizerContext = createContext<Partial<PalletizerState>>({});
 export { PalletizerContext };
 
 function AppState(props: any) {
-    // Initial state -- mirrored in server.js
+
     let initial_state : PalletizerState = {
         status : "N/A",
         cycle: 0, 
         current_box: 0,
         total_box: 0,
         time: 10,
-        errors: [] as PalletizerError[] // This will change to a structured format.
+        errors: [] as PalletizerError[] 
     };
 
     const [state, dispatch] = useReducer(PalletizerReducer, initial_state);
 
-    useEffect( () => {
-        let event_source = new EventSource("http://localhost:3011/events");
-
-
-        event_source.onopen = function(e: Event) {
-            console.log("Opened event_source.", e);
-        }
-
-        event_source.onerror = function(e:Event) {
-            console.log(e, "Error in AppContext.tsx - event_source");
-        }
-
-        event_source.addEventListener("message", (e: MessageEvent)=> {
-            let data = JSON.parse(e.data);
-            // Call dispatch and set new app data.
+    useEffect(() => {
+        // Change the error structure.
+        let handle_error = (message: any) => {
             dispatch({
-                type_of: "state",
-                payload: data
+               type_of: "ERROR",
+               payload: message 
             });
+        };
 
-        });
+        let handle_state = (message: any) => {
+            dispatch({
+               type_of: "STATE",
+                payload: message
+            });
+        };
+
+        MQTTSubscriber(handle_error, handle_state);
 
     }, []);
 

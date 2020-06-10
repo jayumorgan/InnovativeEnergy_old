@@ -1,6 +1,7 @@
 import React, { useContext, ChangeEvent, useState} from 'react';
 
 import {control_request} from "./requests/requests";
+import {MQTTControl} from "../mqtt/MQTT";
 // Context
 import { PalletizerContext } from "../context/AppContext";
 
@@ -177,6 +178,7 @@ function Execute() {
     
     let icons = ["icon-play", "icon-pause", "icon-stop"];
 
+    // We will submit the requests.
     let stop_button = ()=>{
         control_request("stop");
     };

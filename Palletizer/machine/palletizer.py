@@ -302,19 +302,10 @@ class Palletizer:
         self.move_to_idle_point()
 
     
-    def await_start(self):
-        while True:
-            if self.check_for_start():
-                print("Start Signal Received...")
-                self.state_controller.update("status", "Running")
-                self.state_controller.update("current_box", self.layer_index + 1)
-                break
-        self.check_pallet()
-        self.home()
-        self.motion_loop()
 
     def system_loop(self):
         first = True
+        last_command = None
         while True:
             command = self.control_listenter.command
             if command == "START":
@@ -347,6 +338,7 @@ class Palletizer:
             else:
                 self.state_controller.update("status", "Idle")
                 sleep(0.5)
+            last_command = command
                 
 
     def next_operation(self):

@@ -23,7 +23,6 @@ class StateController:
             "current_box" : 0,
             "total_box": 0,
             "time": 0,
-            "errors" : []
         }
 
         if new:
