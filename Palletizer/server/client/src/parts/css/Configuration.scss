@@ -21,12 +21,6 @@ $half-width: 50%;
     @include grid-coordinate(1,2);
 }
 
-@mixin flex-center() {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 // Grid of a certain height
 $title-height: 11%;
 $add-height: 15%;

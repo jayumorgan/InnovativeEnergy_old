@@ -3,8 +3,13 @@
 
 $bottom-height-max: 55vh;
 
-// Colors... 
+$header-height: 128px;
+$navbar-height: 48px;
+$top-height: $header-height+$navbar-height;
 
+
+
+// Colors... 
 $medium-blue: rgb(43,62,85);
 $container-blue: rgb(50,72,102);
 $dark-blue: rgb(22,35,56);
@@ -51,6 +56,15 @@ $huge-font: 2em;
 $medium-font: 1.3em;
 
 $normal-font-size: 1em;
+
+
+
+@mixin flex-center() {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 
 @mixin shadow(){
    -moz-box-shadow:    0 0 10px $dark-grey;

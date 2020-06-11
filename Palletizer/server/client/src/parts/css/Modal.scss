@@ -1,0 +1,88 @@
+@import "../../master.scss";
+
+$modal-background : rgba(22,35,56,0.8);
+
+@mixin editor-button(){
+    @include flex-center();
+    width: 50%;
+    background-color: $container-blue;
+    cursor: pointer;
+}
+
+
+.Modal {
+    position: fixed;
+    background: $modal-background;
+    left: 0;
+    top: $top-height; // This approximately works for the height -- will need to change header + nav for this to work perfectly.
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    color: white;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+
+    .ModalContent {
+        display: flex;
+        align-content: center;
+        justify-content: flex-start;
+        flex-direction: column;
+        margin-top: $double-margin;
+        // margin: auto;
+        // padding: $double-margin;
+        #EditorTitle {
+            color: white;
+            letter-spacing: 1pt;
+            font-size: $medium-font;
+            padding: $margin;
+            background-color: $container-blue;
+            border-radius: $border-radius $border-radius 0 0;
+            
+        }
+
+        #AceEditor {
+            font-family : monospace !important;
+            font-size: 16px !important;
+            direction:ltr !important;
+            text-align:left !important;
+        }
+
+        .EditorFooter {
+            display: flex;
+            align-content: center;
+            justify-content: space-around;
+            .SaveEditor {
+                @include editor-button();
+                border-radius: 0 0 $border-radius 0;
+                span {
+                    padding: $margin;
+                    color:white;
+                }
+                
+            }
+            .CloseEditor {
+                @include editor-button();
+                border-radius: 0 0 0 $border-radius;
+                span {
+                    padding: $margin;
+                    color:white;
+                }
+            }
+            .SaveEditor:hover {
+                background-color: $off-white;
+                span {
+                    color: $green;
+                }
+            }
+            .CloseEditor:hover {
+                background-color: $off-white;
+                span {
+                    color: red;
+                }
+            }
+        }
+
+    }
+}
+

@@ -13,6 +13,7 @@ $small-med-font-size: 1.2em;
 
 
 .NavBarContainer {
+    height: $navbar-height - 1px; // For the border
     border-bottom: $grey-border;
     margin-right: $double-margin;
     margin-left: $double-margin;
