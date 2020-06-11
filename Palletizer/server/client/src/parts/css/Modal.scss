@@ -1,6 +1,7 @@
 @import "../../master.scss";
 
 $modal-background : rgba(22,35,56,0.8);
+// $modal-background: rgba(255,255,255,0.8);
 
 @mixin editor-button(){
     @include flex-center();
@@ -28,9 +29,10 @@ $modal-background : rgba(22,35,56,0.8);
         align-content: center;
         justify-content: flex-start;
         flex-direction: column;
-        margin-top: $double-margin;
-        // margin: auto;
-        // padding: $double-margin;
+        margin-top: $quad-margin;
+        // border-radius: $border-radius;
+        // border: $container-border;
+
         #EditorTitle {
             color: white;
             letter-spacing: 1pt;
@@ -38,7 +40,14 @@ $modal-background : rgba(22,35,56,0.8);
             padding: $margin;
             background-color: $container-blue;
             border-radius: $border-radius $border-radius 0 0;
+            border-top: $container-border;
+            border-right: $container-border;
+            border-left: $container-border;
             
+        }
+
+        .ace_editor, .ace_editor div{
+            font-family:monospace
         }
 
         #AceEditor {
@@ -46,12 +55,25 @@ $modal-background : rgba(22,35,56,0.8);
             font-size: 16px !important;
             direction:ltr !important;
             text-align:left !important;
+            border-left: $container-border;
+            border-right: $container-border;
+            span {
+                
+                font-family : monospace !important;
+                font-size: 16px !important;
+                direction:ltr !important;
+                text-align:left !important;
+            }
         }
 
         .EditorFooter {
             display: flex;
             align-content: center;
             justify-content: space-around;
+            border-bottom: $container-border;
+            border-right: $container-border;
+            border-left: $container-border;
+            border-radius: 0 0 $border-radius $border-radius;
             .SaveEditor {
                 @include editor-button();
                 border-radius: 0 0 $border-radius 0;
