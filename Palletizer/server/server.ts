@@ -22,6 +22,9 @@ const app = express();
 app.use(morgan('dev'));
 
 
+app.use("/config/machine", express.static(MACHINE_PATH));
+app.use("/config/pallet", express.static(PALLET_PATH));
+
 // List current configurations.
 app.get("/configs", (req:express.Request, res: express.Response)=>{
     

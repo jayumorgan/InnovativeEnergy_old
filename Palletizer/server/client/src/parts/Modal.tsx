@@ -1,18 +1,36 @@
-import React from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
  
 // Ace Editor
 import AceEditor, { IAceEditorProps } from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-xcode";
 
+import {get_pallet_config, get_machine_config} from "../requests/requests";
+
 // Styles
 import "./css/Modal.scss";
 
-function Modal(props: any) {
+interface ModalProps {
+    children: ReactNode;
+    close():any;
+}
+
+
+function Modal({children, close}: ModalProps) {
+
+    let modal_class : string = "Modal";
+    
+    let close_modal = (e: React.MouseEvent<HTMLElement>) => {
+        let target = e.target as HTMLElement;
+        if (target.className === modal_class) {        
+            close();
+        }
+    };
+    
     return (
-        <div className="Modal">
+        <div className={modal_class} onClick={close_modal}>
             <div className="ModalContent">
-                {props.children}
+                {children}
             </div>
         </div>
     );
@@ -21,33 +39,49 @@ function Modal(props: any) {
 interface EditorProps {
     file_name : string;
     title : string;
-    close_editor(): any
+    machine: boolean;
+    close(): any;
 }
 
-
-function Editor({file_name, title, close_editor} : EditorProps) {
+function Editor({file_name, title, close, machine} : EditorProps) {
     
     let handle_edit = (value:string) => {
-        // console.log(value);
     }
 
     let modal_title = "Edit " + title.toLowerCase() + ": " + file_name;
     
+    var [data, set_data] = useState("");
+
     let editor_settings = {
         mode: "json",
         theme: "xcode",
         onChange: handle_edit,
-        name: "AceEditor"
+        name: "AceEditor",
+        vale: data
     } as IAceEditorProps;
     
+    useEffect(()=>{
+        let fetch_data = async ()=>{
+            if (machine) {
+                let res_data = await get_machine_config(file_name) as any;
+                set_data(JSON.stringify(res_data, null, "\t"));
+            }else{
+                let res_data = await get_pallet_config(file_name) as any;
+                set_data(JSON.stringify(res_data,null, "\t"));
+            }
+            
+        }
+        fetch_data();
+    },[]);
+    
     return (
-        <Modal>
+        <Modal close={close}>
             <span id="EditorTitle">
                 {modal_title}
             </span>
-            <AceEditor {...editor_settings} /> 
+            <AceEditor {...editor_settings} value={data as string} /> 
             <div className="EditorFooter">
-                <div className="CloseEditor">
+                <div className="CloseEditor" onClick={close}>
                     <span>
                         {"Close"}
                     </span>

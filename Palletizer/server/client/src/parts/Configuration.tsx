@@ -86,7 +86,11 @@ function ConfigContainer(props: ConfigContainerProps) {
 
 
 
-
+interface EditorConfig {
+    title: string;
+    filename: string;
+    edit: boolean;
+}
 
 function Configuration() {
 
@@ -94,36 +98,47 @@ function Configuration() {
 
     let {machine_configs, pallet_configs} = config_context as ConfigState; 
 
+    var [editor, set_editor] = useState<EditorConfig>({
+        title: "",
+        filename: "",
+        edit: false
+    });
+
     let [pallet_title, machine_title] = ["Pallet Configuration", "Machine Configuration"];
-
-    let file_name = "";
-
+    
     let start_pallet_editor = (fn : string) => {
-        file_name = fn;
-        // set_editor("PALLET");
+        let edit = {
+            filename: fn,
+            title: pallet_title,
+            edit: true
+        } as EditorConfig;
+        set_editor(edit);
     };
 
     let start_machine_editor = (fn: string) => {
-        file_name = fn;
-        // set_editor("MACHINE");
+        let edit = {
+            filename: fn,
+            title: machine_title,
+            edit: true
+        } as EditorConfig;
+        set_editor(edit);
     }
 
     let close_editor = ()=>{
-        // Save the file in the editor.
-        // set_editor("CONFIG");
+        set_editor({...editor, edit: false});
     };
     
     return (
         <Fragment>
-        <div className="ConfigGrid">
-            <div className="PalletConfig">
-            <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_pallet_editor} />
+            <div className="ConfigGrid">
+                <div className="PalletConfig">
+                <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_pallet_editor} />
+                </div>
+                <div className="MachineConfig">
+                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_machine_editor} />
+                </div>
             </div>
-            <div className="MachineConfig">
-            <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_machine_editor} />
-            </div>
-        </div>
-            <Editor file_name={"file"} title={"Pallet Configuration"} close_editor={close_editor}  />
+            {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.title == machine_title} />}
         </Fragment>
     );
 }
