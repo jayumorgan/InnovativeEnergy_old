@@ -13,17 +13,32 @@ function get_configs(callback: any){
 
 async function get_machine_config(filename : string) {
     let res = await axios.get("/config/machine/" + filename);
-    console.log(res);
     return res.data;
-    // return await res.json();
 }
 
 async function get_pallet_config(filename : string) {
     let res = await axios.get("/config/pallet/" + filename);
-    console.log(res);
     return res.data;
+}
+
+
+function post_config(filename: string, content: any, machine: boolean, callback: any) {
+    let url = "/config/new";
+
+    let data = {
+        filename: filename,
+        data: content,
+        machine: machine
+    };
+    
+    axios.post(url, data).then((res : AxiosResponse)=>{
+        console.log(res);
+        callback();
+    });
 }
 
 
 
 export {get_configs, get_machine_config, get_pallet_config};
+
+export {post_config};

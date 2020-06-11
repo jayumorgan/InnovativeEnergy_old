@@ -18,10 +18,32 @@ const PORT = 3011;
 
 const app = express();
 
+app.use(express.json());
 
 app.use(morgan('dev'));
 
 
+interface ConfigUpload {
+    filename : string;
+    machine: boolean;
+    data: any;
+};
+
+
+app.post("/config/new", (req:express.Request, res: express.Response) => {
+    res.sendStatus(200);
+    let {filename, machine, data} = req.body as ConfigUpload;
+    let file_path = (machine ? MACHINE_PATH : PALLET_PATH) + "/" + filename;
+    console.log(file_path, data, filename);
+    fs.writeFile(file_path, JSON.stringify(data, null, "\t"), ()=>{
+        console.log("Wrote file: " + file_path);
+    });
+});
+
+
+
+
+// Serve the static configuration files.
 app.use("/config/machine", express.static(MACHINE_PATH));
 app.use("/config/pallet", express.static(PALLET_PATH));
 

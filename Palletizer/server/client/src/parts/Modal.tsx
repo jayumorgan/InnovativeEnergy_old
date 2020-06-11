@@ -1,11 +1,11 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState, useRef } from 'react';
  
 // Ace Editor
 import AceEditor, { IAceEditorProps } from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-xcode";
 
-import {get_pallet_config, get_machine_config} from "../requests/requests";
+import {get_pallet_config, get_machine_config, post_config} from "../requests/requests";
 
 // Styles
 import "./css/Modal.scss";
@@ -73,20 +73,32 @@ function Editor({file_name, title, close, machine} : EditorProps) {
         }
         fetch_data();
     },[]);
+
+    const config_ref = useRef<AceEditor | null>(null);
+
+    let save_config = ()=>{
+        let element = config_ref.current as AceEditor;
+        if (element) {
+            let json = JSON.parse(element.editor.getValue() as string);
+            console.log("Add a check for valid configuration content");
+            post_config(file_name, json, machine, close);
+        }
+    };
+
     
     return (
         <Modal close={close}>
             <span id="EditorTitle">
                 {modal_title}
             </span>
-            <AceEditor {...editor_settings} value={data as string} /> 
+            <AceEditor ref={config_ref} {...editor_settings} value={data as string} /> 
             <div className="EditorFooter">
                 <div className="CloseEditor" onClick={close}>
                     <span>
                         {"Close"}
                     </span>
                 </div>
-                <div className="SaveEditor">
+            <div className="SaveEditor" onClick={save_config}>
                     <span>
                         {"Save"}
                     </span>
