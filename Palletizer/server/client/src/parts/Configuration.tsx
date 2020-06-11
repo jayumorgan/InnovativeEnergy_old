@@ -56,19 +56,24 @@ interface ConfigContainerProps {
     configs: string[];
 }
 
+
 function ConfigContainer(props: ConfigContainerProps) {
     let {title, configs} = props;
     return(
-        <div className="StackContainer">
-            <div className="StackTitle">
+        <div className="ConfigContainer">
+            <div className="ConfigTitle">
                 <span> {title} </span>
             </div>
-            <div className="StackScroll" >
+            <div className="ConfigScroll" >
                 {configs.map((title, index)=>{
                     return (<ConfigCell title={title} key={index} />)
                 })}
             </div>
-            <AddConfigButton title={title}/>
+            <div className="ConfigAdd" >
+                <div className="AddConfigButton" >
+                    <span> {title} </span>
+                </div>
+            </div>
         </div>
     );
 }
@@ -87,7 +92,7 @@ function Configuration() {
             <div className="MachineConfig">
                 <ConfigContainer title={"Machine Configuration"} configs={machine_configs} />
             </div>
-            </div>
+        </div>
     );
 }
 

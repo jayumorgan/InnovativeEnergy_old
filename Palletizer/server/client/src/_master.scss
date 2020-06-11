@@ -6,6 +6,7 @@ $bottom-height-max: 55vh;
 // Colors... 
 
 $medium-blue: rgb(43,62,85);
+$container-blue: rgb(50,72,102);
 $dark-blue: rgb(22,35,56);
 
 $light-grey: rgb(212,217,226);
@@ -67,7 +68,6 @@ $normal-font-size: 1em;
     display: flex;
     align-items: center;
 }
-
 @mixin container-style() {
     width: 100%;
     height: 100%;
