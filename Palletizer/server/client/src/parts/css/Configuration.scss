@@ -63,11 +63,11 @@ $scroll-height: 100% - $title-height - $add-height;
         overflow-y: auto;
 
         .ConfigCell {
-            width: 100%;
+            width: 95%;
             border: $container-border;
             border-radius: $border-radius;
-            padding-left: $margin;
-            padding-right: $margin;
+            padding-left: $double-margin;
+            padding-right: $double-margin;
             padding-top: $double-margin;
             padding-bottom: $double-margin;
             background-color: $off-white;

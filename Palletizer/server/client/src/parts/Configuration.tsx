@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import {ConfigContext} from "../context/ConfigContext";
 
@@ -9,37 +9,27 @@ import "./css/Configuration.scss";
 import "./css/Login.scss";
 
 
-interface AddConfigButtonProps {
-    title: string;
-}
-
-function AddConfigButton(props: AddConfigButtonProps) {
-    let {title} = props;
-    title.toLowerCase();
-    title = "Add " + title;
-    return(
-        <div className="AddContainer" >
-            <div className="AddConfigButton" >
-                <span> {title} </span>
-            </div>
-        </div>
-    );
-} 
-
- // This will include file references or similar.
 interface ConfigCellProps {
     title: string;
 }
 
-function ConfigCell(props : ConfigCellProps) {
-    let {title} = props;
+function ConfigCell({title} : ConfigCellProps) {
+
+    let handle_edit = () => {
+        console.log("Edit config " + title);
+    };
+
+    let handle_delete = () => {
+        console.log("Delete config " + title);
+    };
+    
     return (
         <div className="ConfigCell">
             <span> {title} </span>
-            <div className="EditConfigButton" >
+            <div className="EditConfigButton" onClick={handle_edit}>
                 <span> Edit </span>
             </div>
-            <div className="DeleteConfigButton">
+            <div className="DeleteConfigButton" onClick={handle_delete}>
             <span className="icon-delete">
             </span>
                 <span id="button-text">
@@ -58,7 +48,13 @@ interface ConfigContainerProps {
 
 
 function ConfigContainer(props: ConfigContainerProps) {
+
     let {title, configs} = props;
+
+    let handle_add = ()=>{
+        console.log("Handle: Add " + title);
+    };
+    
     return(
         <div className="ConfigContainer">
             <div className="ConfigTitle">
@@ -70,8 +66,8 @@ function ConfigContainer(props: ConfigContainerProps) {
                 })}
             </div>
             <div className="ConfigAdd" >
-                <div className="AddConfigButton" >
-                    <span> {title} </span>
+                <div className="AddConfigButton" onClick={handle_add} >
+                    <span> {"Add " + title.toLowerCase()} </span>
                 </div>
             </div>
         </div>
@@ -79,21 +75,60 @@ function ConfigContainer(props: ConfigContainerProps) {
 }
 
 
-function Configuration() {
-    let config_context = useContext(ConfigContext);
+interface EditorProps {
+    file_name : string;
+    title : string;
+}
 
-    let {machine_configs, pallet_configs} = config_context as ConfigState; 
-    
+
+function Editor({file_name, title} : EditorProps) {
     return (
-        <div className="ConfigGrid">
-            <div className="PalletConfig">
-                <ConfigContainer title={"Pallet Configuration"} configs={pallet_configs} />
-            </div>
-            <div className="MachineConfig">
-                <ConfigContainer title={"Machine Configuration"} configs={machine_configs} />
+        <div className="Editor">
+            <div className="EditorTitle">
+                <span>
+                    {"Edit " + title + ": " + file_name}
+                </span>
             </div>
         </div>
     );
+}
+
+
+
+function Configuration() {
+
+    let config_context = useContext(ConfigContext);
+
+    let {machine_configs, pallet_configs} = config_context as ConfigState; 
+
+    var [editor, set_editor] = useState("CONFIG"); // CONFIG, MACHINE, PALLET
+
+    let [pallet_title, machine_title] = ["Pallet Configuration", "Machine Configuration"];
+
+    switch (editor) {
+        case "MACHINE" : {
+            return (
+                <Editor title={pallet_title} file_name={"temp"}/>
+            );
+        };
+        case "PALLET": {
+            return (
+                <Editor title={machine_title} file_name={"temp"}/>
+            );
+        };
+        default : {
+            return (
+                <div className="ConfigGrid">
+                    <div className="PalletConfig">
+                        <ConfigContainer title={pallet_title} configs={pallet_configs} />
+                    </div>
+                    <div className="MachineConfig">
+                        <ConfigContainer title={machine_title} configs={machine_configs} />
+                    </div>
+                </div>
+            );
+        };
+    }
 }
 
 export default Configuration;
