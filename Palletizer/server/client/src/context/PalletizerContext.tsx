@@ -31,7 +31,7 @@ function PalletizerHub(props: any) {
         cycle: 0, 
         current_box: 0,
         total_box: 0,
-        time: 10,
+        time: 0,
         errors: [] as PalletizerError[]
     };
 

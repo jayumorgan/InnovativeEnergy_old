@@ -62,6 +62,8 @@ function ConfigContainer(props: ConfigContainerProps) {
         console.log("Handle: Add " + title);
     };
 
+    // Need an input name.
+    // Delete configuration.
     
     return(
         <div className="ConfigContainer">

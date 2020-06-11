@@ -25,11 +25,13 @@ $modal-background : rgba(22,35,56,0.8);
     justify-content: center;
 
     .ModalContent {
+        @include shadow();
         display: flex;
         align-content: center;
         justify-content: flex-start;
         flex-direction: column;
         margin-top: $quad-margin;
+        margin-bottom: auto;
         // border-radius: $border-radius;
         // border: $container-border;
 
@@ -40,9 +42,7 @@ $modal-background : rgba(22,35,56,0.8);
             padding: $margin;
             background-color: $container-blue;
             border-radius: $border-radius $border-radius 0 0;
-            border-top: $container-border;
-            border-right: $container-border;
-            border-left: $container-border;
+            border: $container-border;
             
         }
 
@@ -70,9 +70,7 @@ $modal-background : rgba(22,35,56,0.8);
             display: flex;
             align-content: center;
             justify-content: space-around;
-            border-bottom: $container-border;
-            border-right: $container-border;
-            border-left: $container-border;
+            border: $container-border;
             border-radius: 0 0 $border-radius $border-radius;
             .SaveEditor {
                 @include editor-button();
