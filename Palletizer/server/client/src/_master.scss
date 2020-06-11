@@ -68,6 +68,7 @@ $normal-font-size: 1em;
     display: flex;
     align-items: center;
 }
+
 @mixin container-style() {
     width: 100%;
     height: 100%;
@@ -78,19 +79,14 @@ $normal-font-size: 1em;
 .StackContainer {
     @include container-style();
     .StackTitle {
-        // border-radius: $border-radius;
         border-radius: $border-radius $border-radius 0 0;
         border-bottom: $container-border;
-        background-color: $medium-blue;
-        background-color: rgb(50,73,102);
-        // background: $left-gradient;
+        background-color: $container-blue;
         color:white;
         display: flex;
         align-items: center;
         justify-content: flex-start;
-            letter-spacing: 1pt;
-        // font-weight: $bold-font;
-        // background: linear-gradient(90deg, rgba(217,231,255,1) 0%, rgba(108,145,191,1) 100%);
+        letter-spacing: 1pt;
         padding: $double-margin;
         font-size: $medium-font;
     }
@@ -98,8 +94,6 @@ $normal-font-size: 1em;
 }
 
 // Fonts:
-
-
 
 @font-face {
     font-family: 'Lato';
