@@ -90,9 +90,20 @@ $normal-font-size: 1em;
     border: $container-border;
 }
 
+
+$stack-top-row: 15%;
+$stack-bottom-row: 100% - $stack-top-row;
+
 .StackContainer {
-    @include container-style();
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows:  $stack-top-row $stack-bottom-row;
+    grid-template-columns: 100%;
+    border-radius: $border-radius;
+    border: $container-border;
     .StackTitle {
+        @include grid-coordinate(1,1);
         border-radius: $border-radius $border-radius 0 0;
         border-bottom: $container-border;
         background-color: $container-blue;
@@ -103,9 +114,27 @@ $normal-font-size: 1em;
         letter-spacing: 1pt;
         padding: $double-margin;
         font-size: $medium-font;
-    }
-
+      }
 }
+
+
+
+// .StackContainer {
+//     @include container-style();
+//     .StackTitle {
+//         border-radius: $border-radius $border-radius 0 0;
+//         border-bottom: $container-border;
+//         background-color: $container-blue;
+//         color:white;
+//         display: flex;
+//         align-items: center;
+//         justify-content: flex-start;
+//         letter-spacing: 1pt;
+//         padding: $double-margin;
+//         font-size: $medium-font;
+//     }
+
+// }
 
 // Fonts:
 

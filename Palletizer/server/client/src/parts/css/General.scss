@@ -93,10 +93,11 @@ $bottom-height: 100% - $top-height;
 
 .StatusBlock {
     // height: 100%;
+    @include grid-coordinate(2,1);
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    height: 46vh;
+    height: 100%;
     .StatusGrid {
         width: 100%;
         // background-color: red;
@@ -159,18 +160,22 @@ $bottom-height: 100% - $top-height;
     }
 }
 
-.SelectCell {
-    // width: 100%;
+
+
+@mixin exec-col() {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-left: $double-margin;
-    padding-top: $double-margin;
-    padding-bottom: $double-margin;
-    padding-right: $double-margin;
-    span {
+    flex-direction: column;
+    height: 100%;
+    #SelectCellTitle {
         // font-weight: $bold-font;
-        font-size: 1.1em;
+        font-size: $medium-font;
+        letter-spacing: 1.5pt;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+        padding-bottom: $margin * 2;
     }
     input {
         border-radius: $border-radius;
@@ -188,16 +193,89 @@ $bottom-height: 100% - $top-height;
         border: $container-border;
         color: $dark-blue;
         font-size: 1em;
-        width: 40%;
+        width: 80%;
         padding: $margin;
+        // margin: $margin;
     }
 }
 
+.ExecuteGrid {
+
+    @include grid-coordinate(2,1);
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 33% 33% 33%;
+
+    .ControlButton {
+        border-radius: $border-radius;
+        display:flex;
+        flex-direction: column;
+        padding-top: $double-margin;
+        padding-bottom: $double-margin;
+        // padding-left: $margin;
+        // padding-right: $margin;
+        align-items: center;
+        justify-content: center;
+        background-color: $medium-blue;
+        color: white;
+        width: 70%;
+        cursor: pointer;
+        span {
+            font-size: $huge-font;
+        }
+        #button-text {
+            padding-top: $margin;
+            font-size: $normal-font-size;
+        }
+    }
+    .ControlButton:hover {
+        @include shadow();
+    }
+    .ControlButton.start{
+        background-color: $green;
+    }
+    .ELeft {
+        @include grid-coordinate(1,1);
+        @include exec-col();
+    }
+    .EMid {
+        @include grid-coordinate(1,2);
+        @include exec-col();
+        
+    }
+    .ERight {
+        @include grid-coordinate(1,3);
+        @include exec-col();
+        
+    }
+
+    .SelectCell {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding-top: $margin * 2;
+        padding-bottom: $margin * 2;
+    }
+}
+
+
+
+
+
+.SelectRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
 
 .PalletizerControls {
     margin-left: $double-margin;
     margin-right: $double-margin;
     margin-top: $double-margin;
+    margin-bottom: $double-margin;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -206,7 +284,10 @@ $bottom-height: 100% - $top-height;
         border-radius: $border-radius;
         display:flex;
         flex-direction: column;
-        padding: $double-margin;
+        padding-top: $double-margin;
+        padding-bottom: $double-margin;
+        padding-left: $margin;
+        padding-right: $margin;
         align-items: center;
         justify-content: center;
         background-color: $medium-blue;
