@@ -15,7 +15,7 @@ import Visualizer from "./Visualizer";
 // Styles
 import "./css/General.scss";
 
-import logo from "../images/vention_logo.png";
+// import logo from "../images/vention_logo.png";
 
 // MQTT Control
 var control = MQTTControl();
@@ -174,12 +174,6 @@ function Execute({current_box, machine_configs, pallet_configs} : ExecuteProps) 
 
     let [start_box, set_start_box] = useState(current_box);
 
-    let select_options = {
-        "Machine Configuration": machine_configs,
-        "Pallet Configuration": pallet_configs,
-    } as any;
-
-
     let handle_input = (e: ChangeEvent) => {
         let value = Number((e.target as HTMLInputElement).value);
         set_start_box(value);
@@ -238,33 +232,8 @@ function Execute({current_box, machine_configs, pallet_configs} : ExecuteProps) 
     );
 }
 
-            // <div className="SelectRow">
-            //     {Object.keys(select_options).map((title, index)=>{
-            //         let options = select_options[title];
-            //         return (<SelectCell title={title} options={options} key={index}/> )
-            //     })}
-            //     <div className="SelectCell" >
-            //         <span> {input_title} </span>
-            //         <input type="text" name={input_title} onChange={handle_input} value={start_box} />
-            //     </div>
-            // </div>
-            // <div className="PalletizerControls" >
-            //     <div className={"ControlButton start"} onClick={start_button} >
-            //             <span className={icons[0]}> </span>
-            //             <span id="button-text">{"Start"}</span>    
-            //         </div>
-            //     <div className={"ControlButton"}  onClick={pause_button}>
-            //             <span className={icons[1]}> </span>
-            //             <span id="button-text">{"Pause"}</span>    
-            //         </div>
-            //     <div className={"ControlButton"} onClick={stop_button} >
-            //             <span className={icons[2]}> </span>
-            //             <span id="button-text">{"Stop"}</span>    
-            //         </div>
-            // </div>
 
 function General() {
-    // Make some temporary data to display..
     let palletizer_context = useContext(PalletizerContext);
     let config_context = useContext(ConfigContext);
 
