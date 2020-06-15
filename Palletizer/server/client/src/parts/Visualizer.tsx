@@ -6,6 +6,7 @@ import * as Three from "three";
 // Styles.
 import "./css/Visualizer.scss";
 import wood from "./images/wood.jpg";
+import carboard from "./images/cardboard.jpg";
 
 
 
@@ -25,21 +26,31 @@ function Visualizer(){
         const camera = new Three.PerspectiveCamera(75, width / height, 0.1, 1000);
         const renderer = new Three.WebGLRenderer({ antialias: true });
 
+        renderScene = ()=>{
+            renderer.render(scene, camera);
+        }
+
 
         let loader = new Three.TextureLoader();
 
         camera.position.z = 1;
 
-        let [h, w, l] = [0.8, 8, 8];
-        
-        loader.load(wood, (t: Three.Texture)=>{
+        let [h, w, l] = [0.8, 12, 12];
+        let norm = Math.sqrt(w ** 2 + h ** 2 + l ** 2)
 
-            let norm = Math.sqrt(w ** 2 + h ** 2 + l ** 2)
+        let set_rotation = (obj: Three.Mesh)=>{
+            obj.rotateX(0.3);
+            // obj.rotateY(0.8);
+        };
+
+
+        // Setup the palletizer.
+        loader.load(wood, (t: Three.Texture)=>{
+            
             let geometry = new Three.BoxGeometry(w/norm, h/norm, l/norm);
             let material = new Three.MeshBasicMaterial({ map : t });
             let cube = new Three.Mesh(geometry, material);
-            cube.rotateX(0.3);
-            // cube.rotateY(-0.3);
+            set_rotation(cube);
 
             scene.add(cube);
             renderer.setClearColor('white');
@@ -48,7 +59,29 @@ function Visualizer(){
             
         });
 
+        let [ch, cw, cl] = [3,3,3];
 
+        let box_height = 0 + h/norm + 0.1; // The last 0.1 corresponds to sine(x_ange) * length of box.
+        let cardboard_box = (()=>{
+            let texture = loader.load(carboard);
+            // let v_texture = loader.load()
+            let geometry = new Three.BoxGeometry(cw/norm, ch/norm, cl/norm);
+            let material = new Three.MeshBasicMaterial({map: texture});
+            let box = new Three.Mesh(geometry, material);
+            set_rotation(box);
+            
+            return box;
+        })();
+        
+        let add_box = () => {
+            let new_box = cardboard_box.clone();
+            new_box.position.y = box_height;
+            box_height += ch/norm;
+            console.log("Box height")
+            scene.add(new_box);
+            renderScene();
+        };
+        
         let handleResize = () => {
             width = (mount.current as HTMLDivElement).clientWidth;
             height = (mount.current as HTMLDivElement).clientHeight;
@@ -81,7 +114,8 @@ function Visualizer(){
         window.addEventListener('resize', handleResize)
         // start()
 
-        controls.current = { start, stop };
+        // controls.current = { start, stop };
+        controls.current = {add_box};
         // renderScene();
 
         // return () => {
@@ -95,17 +129,23 @@ function Visualizer(){
         // }
     }, []);
 
-  useEffect(() => {
-      // renderScene();
+    let handle_click = ()=>{
+        controls.current.add_box();
+        
+    };
+  // useEffect(() => {
+  //     // renderScene();
+  //     console.log("Adding a box");
+  //     controls.current.add_box();
     
-    if (isAnimating) {
-      controls.current.start()
-    } else {
-      controls.current.stop()
-    }
-  }, [isAnimating])
+  //   // if (isAnimating) {
+  //   //   controls.current.start()
+  //   // } else {
+  //   //   controls.current.stop()
+  //   // }
+  // }, [isAnimating])
   
-  return <div className="Visualizer" ref={mount} onClick={() => setAnimating(!isAnimating)} />
+  return <div className="Visualizer" ref={mount} onClick={handle_click} />
 }
 export default Visualizer;
 
