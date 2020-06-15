@@ -6,8 +6,11 @@ import {PalletizerContext} from "../context/PalletizerContext";
 
 // Styles.
 import "./css/Visualizer.scss";
+
+// Images.
 import wood from "./images/wood.jpg";
 import carboard from "./images/cardboard.jpg";
+import vcardboard from "./images/vcardboard.jpg";
 
 
 function Visualizer(){
@@ -38,24 +41,16 @@ function Visualizer(){
 
         let loader = new Three.TextureLoader();
 
-        // camera.rotateX(-0.1);
-        
-        // camera.rotateY(Math.PI / 4);
-        // camera.rotateY(Math.PI/4);
-        // camera.rotateZ(Math.PI/4);
-        // camera.rotateX(-Math.PI/8);
         camera.rotateY(Math.PI/4);
-        
-        // camera.position.x = 1;
 
         let [h, w, l] = [0.1, 4, 3];
         let norm = Math.sqrt(w ** 2 + h ** 2 + l ** 2)
-        // camera.position.z = 1.1 * l/norm;
-        // camera.position.x = 1.1 * l/norm;
-        camera.position.z = 0.6;
-        camera.position.y = 0.2;
-        camera.position.x = 0.6;
-        // camera.rotateY(Math.PI/4);
+
+        let dist = 1.1 / Math.sqrt(2)
+
+        camera.position.z = dist;
+        camera.position.y = 0.4;
+        camera.position.x = dist;
 
         // Setup the palletizer.
         loader.load(wood, (t: Three.Texture)=>{
@@ -110,11 +105,29 @@ function Visualizer(){
             return next;
         };
 
+
+        
+
         let cardboard_box = (()=>{
             let texture = loader.load(carboard);
-            let geometry = new Three.BoxGeometry(cw/norm, ch/norm, cl/norm);
+            let vtexture = loader.load(vcardboard);
             let material = new Three.MeshBasicMaterial({map: texture});
-            let box = new Three.Mesh(geometry, material);
+            let vmaterial = new Three.MeshBasicMaterial({map: vtexture});
+            let textures = [] as Three.MeshBasicMaterial[];
+
+            for (let i=0; i<6; i++){
+                if (i === 4){
+                    textures.push(vmaterial);
+                }else{
+                    textures.push(material);
+                }
+            }
+
+
+
+            
+            let geometry = new Three.BoxGeometry(cw/norm, ch/norm, cl/norm);
+            let box = new Three.Mesh(geometry, textures);
             
             return box;
         })();
