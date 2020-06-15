@@ -7,22 +7,6 @@ import * as Three from "three";
 import "./css/Visualizer.scss";
 import wood from "./images/wood.jpg";
 
-interface PalletDimensions {
-    height: number;
-    width: number;
-    length: number;
-};
-
-function Pallet({height, width, length}: PalletDimensions) : Three.Mesh {
-    // Normalize the heights;
-    let norm = Math.sqrt(width ** 2 + height ** 2 + length ** 2)
-    let texture = new Three.TextureLoader().load(wood);
-    let geometry = new Three.BoxGeometry(width/norm, height/norm, length/norm);
-    let material = new Three.MeshBasicMaterial({ map : texture });
-    let cube = new Three.Mesh(geometry, material);
-    return cube;
-}
-
 
 
 function Visualizer(){
@@ -41,19 +25,31 @@ function Visualizer(){
         const camera = new Three.PerspectiveCamera(75, width / height, 0.1, 1000);
         const renderer = new Three.WebGLRenderer({ antialias: true });
 
-        // This will be the rectange.
 
-        let cube = Pallet({height: 0.8, width: 8, length: 8});
+        let loader = new Three.TextureLoader();
+
         camera.position.z = 1;
-        scene.add(cube);
-        renderer.setClearColor('white');
-        renderer.setSize(width, height);
 
-        renderScene = () => {
+        let [h, w, l] = [0.8, 8, 8];
+        
+        loader.load(wood, (t: Three.Texture)=>{
+
+            let norm = Math.sqrt(w ** 2 + h ** 2 + l ** 2)
+            let geometry = new Three.BoxGeometry(w/norm, h/norm, l/norm);
+            let material = new Three.MeshBasicMaterial({ map : t });
+            let cube = new Three.Mesh(geometry, material);
+            cube.rotateX(0.3);
+            // cube.rotateY(-0.3);
+
+            scene.add(cube);
+            renderer.setClearColor('white');
+            renderer.setSize(width, height);
             renderer.render(scene, camera);
-        };
+            
+        });
 
-        const handleResize = () => {
+
+        let handleResize = () => {
             width = (mount.current as HTMLDivElement).clientWidth;
             height = (mount.current as HTMLDivElement).clientHeight;
             renderer.setSize(width, height);
@@ -63,11 +59,11 @@ function Visualizer(){
         }
 
         const animate = () => {
-            cube.rotation.x += 0.01
-            cube.rotation.y += 0.01
+            // cube.rotation.x += 0.01
+            // cube.rotation.y += 0.01
 
-            renderScene()
-            frameId = window.requestAnimationFrame(animate)
+            // renderScene()
+            // frameId = window.requestAnimationFrame(animate)
         }
 
         const start = () => {

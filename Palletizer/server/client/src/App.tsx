@@ -29,12 +29,15 @@ function App() {
                 <Header />
                 <Switch>
                   <Route path="/Configuration">
-                    <NavBar tabs={tab_options} selected_index={config_index}/>
-                    <Visualizer />
+                      <NavBar tabs={tab_options} selected_index={config_index}/>
+                      <Configuration />
+                  </Route>
+                  <Route path="/Visualizer">
+                      <Visualizer />
                   </Route>
                   <Route path="/">
-                    <NavBar tabs={tab_options} selected_index={general_index}/>
-                    <General />
+                      <NavBar tabs={tab_options} selected_index={general_index}/>
+                      <General />
                   </Route>
               </Switch>
               <Footer />
