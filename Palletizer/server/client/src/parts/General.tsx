@@ -56,7 +56,6 @@ function StatusContainer(props: StatusContainerProps) {
                     {"System Status"}
                     </span>
                 </div>
-            <div className="StatusBlock">
                 <div className="StatusGrid" >
                     {status_items.map((item, index)=>{
                         return(
@@ -72,7 +71,6 @@ function StatusContainer(props: StatusContainerProps) {
                             </div>
                         )})}
                 </div>
-            </div>
         </div>
     );
 }
