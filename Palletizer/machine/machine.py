@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-
-
 from config import configuration as cf
 from fake_mm import fake_mm as fmm
 
@@ -160,8 +158,6 @@ class Palletizer:
         print(f"Starting...")
         
         self.move_to_pick(count)
-
-        
 
     def move_to_pick(self,count):
         if (count < self.machine.box_count):
