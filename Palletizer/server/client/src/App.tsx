@@ -9,6 +9,7 @@ import Footer from "./parts/Footer";
 // Main Components
 import General from "./parts/General";
 import Configuration from "./parts/Configuration";
+import Visualizer from "./parts/Visualizer";
 
 // Context
 import PalletizerHub from "./context/PalletizerContext";
@@ -29,7 +30,7 @@ function App() {
                 <Switch>
                   <Route path="/Configuration">
                     <NavBar tabs={tab_options} selected_index={config_index}/>
-                    <Configuration />
+                    <Visualizer />
                   </Route>
                   <Route path="/">
                     <NavBar tabs={tab_options} selected_index={general_index}/>
