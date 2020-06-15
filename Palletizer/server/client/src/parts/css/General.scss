@@ -6,10 +6,10 @@
 // This allows for control of symmetry and positioning.
 
 
-$left-width: 30%;
-$right-width: 70%;
-$top-height: 30%;
-$bottom-height: 70%;
+$left-width: 50%;
+$right-width: 100% - $left-width;
+$top-height: 50%;
+$bottom-height: 100% - $top-height;
 
 
 // Create a grid to hold everthing
@@ -65,10 +65,77 @@ $bottom-height: 70%;
 }
 
 
+// 4 grid coordinates for state bar.
+
+@mixin span-style() {
+    span {
+        font-size: $medium-font;
+        letter-spacing: 1.5pt;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+}
+
+@mixin status-stye() {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $double-margin;
+    .StatusValue {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: $bold-font;
+        font-size: $large-font;
+        padding-top: $double-margin;
+    }
+}
+
 .StatusBlock {
+    // height: 100%;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    height: 46vh;
+    .StatusGrid {
+        width: 100%;
+        // background-color: red;
+        height: 100%;
+        display: grid;
+        grid-template-rows: 50% 50%;
+        grid-template-columns: 50% 50%;
+
+        .TopL {
+            @include grid-coordinate(1,1);
+            @include span-style();
+            @include status-stye();
+            
+        }
+        .TopR {
+            @include grid-coordinate(1,2);
+            @include span-style();
+            @include status-stye();
+
+        }
+
+        .BotL {
+            @include grid-coordinate(2,1);
+            @include span-style();
+            @include status-stye();
+            
+        }
+
+        .BotR {
+            @include grid-coordinate(2,2);
+            @include span-style();
+            @include status-stye();
+            
+        }
+        
+    }
+
+
+    
     .StatusItem {
         width: 25%;
         display: flex;

@@ -9,6 +9,8 @@ import {ConfigContext} from "../context/ConfigContext";
 import {ConfigState, PalletizerState} from "../types/Types";
 
 
+import Visualizer from "./Visualizer";
+
 // Styles
 import "./css/General.scss";
 
@@ -62,6 +64,7 @@ function DisplayItem({title, value}: StatusItem) {
 
 function StatusContainer(props: StatusContainerProps) {
     let {status_items} = props;
+    let container_classes = ["TopL", "TopR", "BotL", "BotR"];
     return (
             <div className="StackContainer">
                 <div className="StackTitle" >
@@ -69,11 +72,23 @@ function StatusContainer(props: StatusContainerProps) {
                     {"System Status"}
                     </span>
                 </div>
-                <div className="StatusBlock" >
+            <div className="StatusBlock">
+                <div className="StatusGrid" >
                     {status_items.map((item, index)=>{
-                        return(<DisplayItem {...item} key={index} />)
-                    })}
+                        return(
+                            <div className={container_classes[index]} key={index}>
+                                    <span>
+                                        {item.title}
+                                    </span>
+                                    <div className="StatusValue">
+                                        <span>
+                                            {item.value}
+                                        </span>
+                                    </div>
+                            </div>
+                        )})}
                 </div>
+            </div>
         </div>
     );
 }
@@ -267,9 +282,7 @@ function General() {
     return (
         <div className="GridContainer" >
             <div className="TopLeft" >
-                <div className="ImageContainer" >
-                    <img src={logo} alt="Vention Logo" />
-                </div>
+            <Visualizer />
             </div>
             <div className="TopRight">
                 <StatusContainer status_items={items} />
@@ -284,5 +297,9 @@ function General() {
     );
 }
 
+// In the top left: 
+                // <div className="ImageContainer" >
+                //     <img src={logo} alt="Vention Logo" />
+                // </div>
 
 export default General;
