@@ -25,7 +25,6 @@ function Visualizer(){
 
         let width = (mount.current as HTMLDivElement).clientWidth;
         let height =  (mount.current as HTMLDivElement).clientHeight;
-        let frameId : any;
 
         const scene = new Three.Scene();
         // let camera = new Three.PerspectiveCamera()
@@ -65,6 +64,12 @@ function Visualizer(){
             renderer.render(scene, camera);
             
         });
+
+        let light = new Three.PointLight(0xffffff,100, 100);
+        light.position.set( 0.5, 0.5, 0 );
+        scene.add( light );
+
+        // Setup for the cardboard boxes.
 
         let [ch, cw, cl] = [1,1,1];
         let start_z =  (h + ch) / (2 * norm);  
@@ -107,13 +112,15 @@ function Visualizer(){
 
 
         
-
+        // Color the last box Green, Yellow or Red depending on system state.
+        // Consider adding a floor to the display. (concrete?)
         let cardboard_box = (()=>{
             let texture = loader.load(carboard);
             let vtexture = loader.load(vcardboard);
             let material = new Three.MeshBasicMaterial({map: texture});
             let vmaterial = new Three.MeshBasicMaterial({map: vtexture});
             let textures = [] as Three.MeshBasicMaterial[];
+            // vmaterial.color = new Three.Color("red");
 
             for (let i=0; i<6; i++){
                 if (i === 4){
@@ -133,15 +140,19 @@ function Visualizer(){
         })();
         
         let add_box = () => {
-            let new_box = cardboard_box.clone();
-            let [x,y,z] = next_position(); 
-            console.log(x,z,y);
-            new_box.position.set(x,z,y); // because strange coordinates.
-            scene.add(new_box);
             current_box_count++;
+            
+            let new_box = cardboard_box.clone();
+
+            new_box.name = "Box-"+String(current_box_count);
+            console.log(new_box.name);
+            
+            let [x,y,z] = next_position(); 
+
+            new_box.position.set(x,z,y); // swap around coordinates.
+            scene.add(new_box);
             renderScene();
         };
-
 
         let add_boxes = (box_number : number) => {
             if (current_box_count <= box_number) {
@@ -160,42 +171,10 @@ function Visualizer(){
             renderScene();
         }
 
-        const animate = () => {
-            // cube.rotation.x += 0.01
-            // cube.rotation.y += 0.01
-
-            // renderScene()
-            // frameId = window.requestAnimationFrame(animate)
-        }
-
-        const start = () => {
-            if (!frameId) {
-                frameId = requestAnimationFrame(animate)
-            }
-        }
-
-        const stop = () => {
-            cancelAnimationFrame(frameId)
-            frameId = null
-        }
 
         (mount.current as HTMLDivElement).appendChild(renderer.domElement)
         window.addEventListener('resize', handleResize)
-        // start()
-
-        // controls.current = { start, stop };
         controls.current = {add_box, add_boxes} ;
-        // renderScene();
-
-        // return () => {
-        //     stop();
-        //     (window as any).removeEventListener('resize', handleResize)
-        //     (mount.current as HTMLDivElement).removeChild(renderer.domElement)
-
-        //     scene.remove(cube)
-        //     // geometry.dispose()
-        //     // material.dispose()
-        // }
     }, []);
 
     let handle_click = ()=>{
@@ -207,19 +186,8 @@ function Visualizer(){
         // controls.current.add_box();
         controls.current.add_boxes(current_box);
     }, [current_box]);
-  // useEffect(() => {
-  //     // renderScene();
-  //     console.log("Adding a box");
-  //     controls.current.add_box();
-    
-  //   // if (isAnimating) {
-  //   //   controls.current.start()
-  //   // } else {
-  //   //   controls.current.stop()
-  //   // }
-  // }, [isAnimating])
   
-  return <div className="Visualizer" ref={mount} onClick={handle_click} />
+    return (<div className="Visualizer" ref={mount} onClick={handle_click} />);
 }
 export default Visualizer;
 

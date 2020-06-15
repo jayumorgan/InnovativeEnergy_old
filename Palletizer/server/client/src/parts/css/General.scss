@@ -8,7 +8,7 @@
 
 $left-width: 50%;
 $right-width: 100% - $left-width;
-$top-height: 50%;
+$top-height: 40%;
 $bottom-height: 100% - $top-height;
 
 
@@ -169,7 +169,7 @@ $bottom-height: 100% - $top-height;
         font-size: $medium-font;
         letter-spacing: 1.5pt;
         overflow: hidden;
-        white-space: nowrap;
+        // white-space: nowrap;
         text-align: center;
         // padding-bottom: $margin * 2;
     }
@@ -258,7 +258,7 @@ $bottom-height: 100% - $top-height;
 
 
 .ErrorLogContainer {
-    width: 100%;
+    // width: 100%;
     overflow-y: auto;
     // max-height: inherit;
     max-height: 46vh;
