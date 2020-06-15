@@ -49,18 +49,26 @@ def compute_coordinates(box_size, pallet_origin, pallet_rows, pallet_cols, palle
 class Machine:
 
     def __init__(self):
-
         self.config = cf.load_config("config.json")
         cf.output(self.config)
 
         axes = self.config["AXES"]
+        self.x = axes["x"]
+        self.x_0 = 0
+        
+        self.y = axes["y"]
+        self.y_0 = 0
+        
+        self.z = axes["z"]
+        self.z_0 = 0
+        
         gain = self.config["GAIN"]
         speed = self.config["SPEED"]
         acceleration = self.config["ACCELERATION"]
+        box_size = self.config["BOX_SIZE"]
 
         network = self.config["NETWORK"]
         
-        box_size = self.config["BOX_SIZE"]
         
         pallet_columns = self.config["PALLET_COLUMNS"]
         pallet_rows = self.config["PALLET_ROWS"]
@@ -70,25 +78,115 @@ class Machine:
         pallet_origin = self.config["PALLET_ORIGIN"]
 
         # Pickup boxes:
-        pick_origin = self.config["PICK_ORIGIN"]
+        self.pick_origin = self.config["PICK_ORIGIN"]
 
-        
         self.mm = fmm.FakeMachineMotion()
 
         self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
         
         self.mm.emitSpeed(speed)
         self.mm.emitAcceleration(acceleration)
+
+
+        for axis, gain in gain.items():
+            axis_number = axes[axis]
+            self.mm.configAxis(axis_number,MICROSTEPS.ustep_8,gain)
+
+
+
+        self.mm.releaseEstop()
+        self.mm.resetSystem()
+
+
+        self.box_count = len(self.coordinates)
         
         for c in self.coordinates:
             print(c)
 
-        self.__move("point")
 
 
-    def __move(self, point): # Point is 2D [x,y] coordinate.
+    def home(self):
+        self.move_vertical({"z":self.z_0})
+        self.move_planar({"x": self.x_0, "y":self.y_0})
+            
+    def move_planar(self, point): # Point is 2D [x,y] coordinate.
+        self.mm.emitAbsoluteMove(self.z, self.z_0)
+        self.mm.waitForMotionCompletion()
+        [x,y] = [point["x"], point["y"]] 
+        self.mm.emitCombinedAxesAbsoluteMove([self.x, self.y], [x,y])
+        self.mm.waitForMotionCompletion()
 
-        print("Moving safely")
+
+    def move_vertical(self, point): # point is z_coordinate
+        self.mm.emitAbsoluteMove(self.z, point["z"])
+        self.mm.waitForMotionCompletion()
+
+    def move_all(self, point):
+        self.move_planar(point)
+        self.move_vertical(point)
+
+        
+    def move_to_pick(self):
+        self.move_all(self.pick_origin)
+
+    def move_to_drop(self, index):
+        coordinate = self.coordinates[index]
+        self.move_planar(coordinate)
+        self.move_vertical(coordinate)
+
+# Also implement the checks in here.
+
+        
 
 
-Machine()
+class Palletizer:
+    # Do run link protocols.
+
+
+
+    def __init__(self):
+        self.machine = Machine()
+
+        self.machine.home()
+
+        self.start(0)
+
+    
+
+
+    def start(self,count):
+        # Do: nothing
+        print(f"Waiting for start signal: count={count}...")
+        print(f"Starting...")
+        
+        self.move_to_pick(count)
+
+        
+
+    def move_to_pick(self,count):
+        if (count < self.machine.box_count):
+            print(f"Moving to pick count={count}...")
+            self.machine.move_to_pick()
+
+            print(f"Waiting for box....")
+            print(f"Picking")
+
+
+            self.move_to_drop(count)
+        else:
+            print(f"Motion completed, wait on restart..")
+
+
+    def move_to_drop(self, count):
+        print(f"Moving to drop: {count}")
+        self.machine.move_to_drop(count)
+
+        print(f"Releasing pressure")
+
+        self.move_to_pick(count + 1)
+
+    
+
+if __name__ == "__main__":
+
+    Palletizer()

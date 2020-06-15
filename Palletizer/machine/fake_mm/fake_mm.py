@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from time import sleep
+import logging
+logging.basicConfig(level=logging.DEBUG,format='(%(threadName)-9s) %(message)s',)
 
 class FakeMachineMotion:
     def __init__(self, *args):
@@ -22,8 +24,7 @@ class FakeMachineMotion:
         pass
 
     def waitForMotionCompletion(self):
-        sleep(0.5)
-        logging.debug("Wait for motion completion...")
+        sleep(0.1)
         
     def emitStop(self):
         print("Please Stop...")
@@ -32,10 +33,10 @@ class FakeMachineMotion:
         print(mode, ip, gateway, mask)
 
     def emitAbsoluteMove(self, axis, position):
-        print("Moving axis:{axis} to {position}")
+        print(f"Move: {axis} to {position}")
 
     def emitCombinedAxesAbsoluteMove(self, axes, positions):
-        print("Moving axes:{axes} to {positions}")
+        print(f"Move: {axes} to {positions}")
         
     def digitalWrite(self, deviceNetworkId, pin, value):
         print("Writing to (pin,networkID) ",pin, deviceNetworkId, " value ", value)
