@@ -1,7 +1,7 @@
 @import '../../master.scss';
 
 
-$top-height: 80%;
+$top-height: 90%;
 $bottom-height: 100% - $top-height;
 
 
@@ -14,22 +14,27 @@ $bottom-height: 100% - $top-height;
     grid-template-rows: $top-height $bottom-height;
     grid-template-columns: 100%;
 
-    $sys-h: 20%;
+    $sys-h: 18%;
     $sys-b: 100% - $sys-h;
 
     .SystemContainer {
         @include grid-coordinate(1,1); 
         .SystemGrid {
             display: grid;
-            grid-template-columns: 50% 50%;
+            grid-template-columns: 60% 40%;
             grid-template-rows: $sys-h $sys-b;
-            
             .StatusBar {
                 @include stretch-grid(1,1,1,2);
-                @include flex-center();
-                justify-content: space-between;
+                // @include flex-center();
+                // justify-content: space-between;
                 border-bottom: $container-border;
-                // padding-top: $margin;
+
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 25% 25% 25% 25%;
+
+
+                
                 .StatusItem {
                     padding-right: $double-margin;
                     padding-left: $double-margin;
@@ -89,23 +94,48 @@ $bottom-height: 100% - $top-height;
                     @include flex-center();
                     justify-content: space-around;
                 }
-                
+                @mixin title-style(){
+                    @include flex-center();
+                    span {
+                        font-size: $medium-font;
+                        // letter-spacing: 1.5pt;
+                        overflow: hidden;
+                        // white-space: nowrap;
+                        text-align: center;
+                        font-weight: $bold-font;
+                        font-size: $large-font;
+                    }
+                }
+
+                .ConfigTitle {
+                    @include grid-coordinate(1,1);
+                    @include title-style();
+                }
+
+                .BoxStartTitle {
+                    @include grid-coordinate(2,1);
+                    @include title-style();
+                }
+
                 .ConfigItem {
-                    @include input-stizz();
-                    @include stretch-grid(1,1,1,2);
-
+                    @include grid-coordinate(1,2);
+                    @include flex-center;
                 }
 
-                .BoxItem {
-                    @include input-stizz();
-                    @include stretch-grid(2,2,1,2);
+                .BoxStartItem {
+                    @include grid-coordinate(2,2);
+                    @include flex-center;
                 }
+
+                
+                
                 input {
                     border-radius: $border-radius;
                     color: $dark-blue;
                     border: $container-border;
                     font-size: 1em;
-                    width: calc(40% - 2 * $margin);
+                    // width: calc(40% - 2 * $margin);
+                    width: 100%;
                     padding: $margin;
                 }
                 select {
@@ -116,7 +146,8 @@ $bottom-height: 100% - $top-height;
                     border: $container-border;
                     color: $dark-blue;
                     font-size: 1em;
-                    width: 40%;
+                    // width: 40%;
+                    width: 100%;
                     padding: $margin;
                 }
 
@@ -127,10 +158,12 @@ $bottom-height: 100% - $top-height;
                     .ButtonContainer {
                         @include flex-center();
                         flex-direction: column;
-                        padding: $double-margin;
+                        padding: $margin * 4;
+                        // padding-top: $double-margin;
+                        // padding-bottom: $double-margin;
                         border-radius: $border-radius;
                         // margin-left: $double-margin;
-                        width: 50%;
+                        // width: 30%;
                         cursor: pointer;
                         color: white;
                         span {

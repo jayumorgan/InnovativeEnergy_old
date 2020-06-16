@@ -23,14 +23,14 @@ var control = MQTTControl();
 
 interface ExecuteProps {
     current_box : number;
+    status: string;
 }
 
 
-function ExecutePane({current_box} : ExecuteProps) {
+function ExecutePane({current_box, status} : ExecuteProps) {
     let config_context = useContext(ConfigContext);
     
     let {machine_configs} = config_context as ConfigState; 
-
 
     let [start_box, set_start_box] = useState(current_box);
 
@@ -39,7 +39,8 @@ function ExecutePane({current_box} : ExecuteProps) {
         set_start_box(value);
     };
 
-    let input_title = "Start from box:";
+    let box_title = "Start from box";
+    let config_title = "Configuration";
 
     let icons = ["icon-play", "icon-pause", "icon-stop"];
 
@@ -57,29 +58,41 @@ function ExecutePane({current_box} : ExecuteProps) {
         let {start} = control;
         start();
     };
+
+    let is_running : boolean = (status === "Running");
+
+    let start_icon = is_running ? icons[1] : icons[0];
+
+    let start_fn = is_running ? pause_button : start_button;
+
+    let start_text = is_running ? "Pause" : "Start";
     
     return (
         <div className="ExecuteGrid">
+            <div className="ConfigTitle">
+                <span>{config_title}</span>
+            </div>
             <div className="ConfigItem">
-                <span id="SelectTitle">{"Configuration:"}</span>
                 <select>
                     {machine_configs.map((item: string, index:number)=>{
                         return (<option value={item} key={index} > {item} </option>)
                     })}
                 </select>
             </div>
-            <div className="BoxItem">
-                <span id="SelectTitle">{input_title}</span>
-                <input type="text" name={input_title} onChange={handle_input} value={start_box} />
+            <div className="BoxStartTitle">
+                <span>{box_title}</span>
+            </div>
+            <div className="BoxStartItem">
+                <input type="text" name={box_title} onChange={handle_input} value={start_box} />
             </div>
             <div className="StartButton">
-                <div className="ButtonContainer">
-                    <span className={icons[0]}> </span>
-                    <span id="button-text">{"Start"}</span>    
+            <div className="ButtonContainer" onClick={start_fn}>
+                    <span className={start_icon}> </span>
+                    <span id="button-text">{start_text}</span>    
                 </div>
             </div>
             <div className="StopButton">
-                <div className="ButtonContainer">
+            <div className="ButtonContainer" onClick={stop_button}>
                     <span className={icons[2]}> </span>
                     <span id="button-text">{"Stop"}</span>    
                 </div>
@@ -157,7 +170,7 @@ function General () {
                 <div className="SystemGrid">
                 <StatusBar items={items} />
                 <Visualizer />
-                <ExecutePane current_box={current_box}/>
+                <ExecutePane status={status} current_box={current_box}/>
 
                 </div>
                 </div>
