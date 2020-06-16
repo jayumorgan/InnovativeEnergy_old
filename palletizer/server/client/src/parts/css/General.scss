@@ -54,9 +54,10 @@ $bottom-height: 100% - $top-height;
 
             .Visualizer {
                 @include grid-coordinate(2,2);
+                padding: 0;
                 canvas {
-                    margin-bottom: $margin;
-                    margin-top: $margin;
+                    // margin-bottom: $margin;
+                    // margin-top: $margin;
                     // // padding: $margin;
                 }
             }
@@ -70,7 +71,7 @@ $bottom-height: 100% - $top-height;
                 display: grid;
                 grid-template-columns: 50% 50%;
                 grid-template-rows: $ex-t $ex-t $ex-b;
-                border-right: $container-border;
+                // border-right: $container-border;
 
                 @mixin input-stizz() {
                     
@@ -88,8 +89,8 @@ $bottom-height: 100% - $top-height;
                         overflow: hidden;
                         // white-space: nowrap;
                         text-align: center;
-                        font-weight: $bold-font;
-                        font-size: $large-font;
+                        // font-weight: $bold-font;
+                        // font-size: $large-font;
                     }
                 }
 
@@ -97,14 +98,15 @@ $bottom-height: 100% - $top-height;
                     @include grid-coordinate(1,1);
                     padding: 0;
                     @include title-style();
-                    border-bottom: $container-border;
+                    // border-bottom: $container-border;
                     height: 100%;
                 }
 
                 .BoxStartTitle {
                     @include grid-coordinate(2,1);
                     @include title-style();
-                    border-bottom: $container-border;
+                    // border-bottom: $container-border;
+                    // border-bottom: $container-border;
                     height: 100%;
                     padding: 0;
                 }
@@ -112,7 +114,6 @@ $bottom-height: 100% - $top-height;
                 .ConfigItem {
                     @include grid-coordinate(1,2);
                     @include flex-center;
-                    border-bottom: $container-border;
                     height: 100%;
                     padding: 0;
                     padding-right: $double-margin;
@@ -122,7 +123,7 @@ $bottom-height: 100% - $top-height;
                     @include grid-coordinate(2,2);
                     @include flex-center;
                     height: 100%;
-                    border-bottom: $container-border;
+                    // border-bottom: $container-border;
                     padding: 0;
                     padding-right: $double-margin;
                 }
@@ -163,8 +164,8 @@ $bottom-height: 100% - $top-height;
                         // padding-bottom: $double-margin;
                         border-radius: $border-radius;
                         // margin-left: $double-margin;
-                        width: 45%;
-                        height: 60%;
+                        width: 70%;
+                        height: 80%;
                         cursor: pointer;
                         color: white;
                         span {
@@ -172,7 +173,7 @@ $bottom-height: 100% - $top-height;
                         }
                         #button-text {
                             padding-top: $margin;
-                            font-size: $normal-font-size;
+                            // font-size: $normal-font-size;
                             font-size: $large-font;
                         }
                     }
