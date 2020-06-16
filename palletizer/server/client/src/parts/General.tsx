@@ -259,10 +259,7 @@ function General() {
 
     return (
         <div className="GridContainer" >
-            <div className="TopLeft" >
-            <Visualizer />
-            </div>
-            <div className="TopRight">
+            <div className="Top">
                 <StatusContainer status_items={items} />
             </div>
             <div className="BottomLeft">
@@ -275,6 +272,9 @@ function General() {
     );
 }
 
+            // <div className="TopLeft" >
+            // <Visualizer />
+            // </div>
 // In the top left: 
                 // <div className="ImageContainer" >
                 //     <img src={logo} alt="Vention Logo" />

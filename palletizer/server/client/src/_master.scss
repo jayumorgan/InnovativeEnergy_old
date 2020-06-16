@@ -72,6 +72,17 @@ $normal-font-size: 1em;
    box-shadow:         0 0 10px $dark-grey;
 }
 
+@mixin stretch-grid($row-start, $row-end, $col-start, $col-end) {
+  grid-column-start: $col-start;
+  grid-column-end: span $col-end;
+  grid-row-start: $row-start;
+  grid-row-end: $row-end;
+  // padding: $double-margin;
+  display: flex;
+  align-items: center;
+  
+}
+
 
 @mixin grid-coordinate($row, $col) {
     grid-column-start: $col;

@@ -23,12 +23,13 @@ $bottom-height: 100% - $top-height;
 }
 
 
-.TopLeft {
-    @include grid-coordinate(1,1);
+.Top {
+    @include stretch-grid(1,1,1,2);
+    // width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: $margin;
+    // margin: $margin;
     canvas {
         padding: $margin;
     }
@@ -48,24 +49,12 @@ $bottom-height: 100% - $top-height;
     @include grid-coordinate(1,2);
 }
 
-
-.Status {
-    width: 100%;
-    height: 100%;
-    // margin-top: $margin;
-    // padding: $margin;
-    border-radius: $border-radius;
-    border: $container-border; 
-    // width: 70%; 
-}
-
 .BottomLeft {
     @include grid-coordinate(2,1);
 }
 
 .BottomRight {
     @include grid-coordinate(2,2);
-    
 }
 
 
@@ -94,6 +83,11 @@ $bottom-height: 100% - $top-height;
         padding-top: $double-margin;
     }
 }
+
+
+
+
+
 
 .StatusGrid {
     @include grid-coordinate(2,1);

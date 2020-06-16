@@ -7,10 +7,10 @@ import NavBar from "./parts/NavBar";
 import Footer from "./parts/Footer";
 
 // Main Components
-import General from "./parts/General";
+// import General from "./parts/General";
+import General from "./parts/Main";
 import Configuration from "./parts/Configuration";
-import Visualizer from "./parts/Visualizer";
-
+ 
 // Context
 import PalletizerHub from "./context/PalletizerContext";
 import ConfigHub from "./context/ConfigContext";
@@ -31,9 +31,6 @@ function App() {
                   <Route path="/Configuration">
                       <NavBar tabs={tab_options} selected_index={config_index}/>
                       <Configuration />
-                  </Route>
-                  <Route path="/Visualizer">
-                      <Visualizer />
                   </Route>
                   <Route path="/">
                       <NavBar tabs={tab_options} selected_index={general_index}/>
