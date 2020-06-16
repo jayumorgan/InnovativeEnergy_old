@@ -74,23 +74,15 @@ $bottom-height: 100% - $top-height;
             .ExecuteGrid {
                 @include grid-coordinate(2,2);
                 padding: 0;
-                
                 display: grid;
                 grid-template-columns: 50% 50%;
                 grid-template-rows: $ex-t $ex-t $ex-b;
-                #SelectTitle {
-                    font-size: $medium-font;
-                    letter-spacing: 1.5pt;
-                    overflow: hidden;
-                    // white-space: nowrap;
-                    text-align: center;
-                }
 
                 @mixin input-stizz() {
                     
                     padding-left: $margin;
                     padding-right: $margin;
-                    padding-top: $double-margin;
+                    // padding-top: $double-margin;
                     @include flex-center();
                     justify-content: space-around;
                 }
@@ -109,22 +101,36 @@ $bottom-height: 100% - $top-height;
 
                 .ConfigTitle {
                     @include grid-coordinate(1,1);
+                    padding: 0;
                     @include title-style();
+                    border-bottom: $container-border;
+                    height: 100%;
                 }
 
                 .BoxStartTitle {
                     @include grid-coordinate(2,1);
                     @include title-style();
+                    border-bottom: $container-border;
+                    height: 100%;
+                    padding: 0;
                 }
 
                 .ConfigItem {
                     @include grid-coordinate(1,2);
                     @include flex-center;
+                    border-bottom: $container-border;
+                    height: 100%;
+                    padding: 0;
+                    padding-right: $double-margin;
                 }
 
                 .BoxStartItem {
                     @include grid-coordinate(2,2);
                     @include flex-center;
+                    height: 100%;
+                    border-bottom: $container-border;
+                    padding: 0;
+                    padding-right: $double-margin;
                 }
 
                 
@@ -158,12 +164,13 @@ $bottom-height: 100% - $top-height;
                     .ButtonContainer {
                         @include flex-center();
                         flex-direction: column;
-                        padding: $margin * 4;
+                        // padding: $margin * 4;
                         // padding-top: $double-margin;
                         // padding-bottom: $double-margin;
                         border-radius: $border-radius;
                         // margin-left: $double-margin;
-                        // width: 30%;
+                        width: 50%;
+                        height: 50%;
                         cursor: pointer;
                         color: white;
                         span {
@@ -192,6 +199,7 @@ $bottom-height: 100% - $top-height;
                 .StopButton {
                     @include grid-coordinate(3,2);
                     @include button-stizz();
+                    height: 100%;
                     .ButtonContainer {
                         background-color: $medium-blue;
                     }
