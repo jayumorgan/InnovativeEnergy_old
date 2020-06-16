@@ -146,6 +146,7 @@ class Machine:
         
 
 
+# this should be a function.
 class Palletizer(pc.PalletizerControl):
     # Do run link protocols.
 
@@ -159,18 +160,51 @@ class Palletizer(pc.PalletizerControl):
 
         self.start(0)
 
-    def start(self,count):
-        # Do: nothing
-        print(f"Waiting for start signal.")
-        while self.get_command() != "START":
-            sleep(0.3)
 
+    def command_status_update(self, command):
+        if command != None:
+            status = {"status": None}
+            if command == "START":
+                status["status"] = "Running"
+            elif command == "PAUSE":
+                status["status"] = "Paused"
+                self.update({"status": "Paused"})
+            elif command == "STOP":
+                status["status"] = "Stopped"
+            else:
+                status["status"] = "Unhandled Status"
+                print("Unhandled status for command", command)
+            self.update(status)
+        
+    # ie. handle play, pause, stop.
+    def control_checks(self, interrupted = False):
+        # Use walrus operator if python 3.8
+        while True:
+            command = self.get_command()
+            self.command_status_update(command)
+
+            if interrupted:
+                if command == "START":
+                    break
+            else:
+                if command == "PAUSE" or command == "STOP":
+                    interrupted = True
+                    sleep(0.3)
+                else:
+                    break
+                
+            
+
+    def start(self,count):
+        self.control_checks(interrupted=True)
         total_box_count = self.machine.box_count
         self.update({"status": "Running"})
         self.machine.home()
+        self.control_checks()
         self.move_to_pick(count)
 
     def move_to_pick(self,count):
+        self.control_checks()
         self.update({"current_box": count})
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
@@ -180,8 +214,8 @@ class Palletizer(pc.PalletizerControl):
             self.update({"status": "Complete"})
             self.start(0)
 
-
     def move_to_drop(self, count):
+        self.control_checks()
         print(f"Moving to drop: {count}")
         self.machine.move_to_drop(count)
 

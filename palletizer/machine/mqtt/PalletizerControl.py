@@ -14,6 +14,8 @@ MQTT_TIMEOUT = 60
 
 
 
+# Decorator for locking>
+
 class PalletizerControl:
 
     def __init__(self):
@@ -64,7 +66,6 @@ class PalletizerControl:
         command = None if len(self.commands) == 0 else self.commands.pop(0)
         self.__lock.release()
         return command
-
         
     def disconnect(self):
         self.control_client.disconnect()
