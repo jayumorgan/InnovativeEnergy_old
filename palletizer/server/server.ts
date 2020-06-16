@@ -8,18 +8,14 @@ import path from "path";
 import { AddressInfo } from "net";
 
 // Config Paths.
-let CONFIG_PATH : fs.PathLike = path.join(__dirname, '..', '..' , 'machine', 'config');
-let MACHINE_PATH : fs.PathLike = path.join(CONFIG_PATH, "machine");
-let PALLET_PATH : fs.PathLike = path.join(CONFIG_PATH, "pallet");
+let CONFIG_PATH : fs.PathLike = path.join(__dirname, '..', '..' , 'machine', 'config', 'config');
 
 
-console.log(CONFIG_PATH, MACHINE_PATH, PALLET_PATH);
+console.log(CONFIG_PATH);
 const PORT = 3011;
 
 const app = express();
-
 app.use(express.json());
-
 app.use(morgan('dev'));
 
 
@@ -30,10 +26,10 @@ interface ConfigUpload {
 };
 
 
-app.post("/config/new", (req:express.Request, res: express.Response) => {
+app.post("/configs/new", (req:express.Request, res: express.Response) => {
     res.sendStatus(200);
-    let {filename, machine, data} = req.body as ConfigUpload;
-    let file_path = (machine ? MACHINE_PATH : PALLET_PATH) + "/" + filename;
+    let {filename, data} = req.body as ConfigUpload;
+    let file_path = path.join(CONFIG_PATH.toString(), filename);
     console.log(file_path, data, filename);
     fs.writeFile(file_path, JSON.stringify(data, null, "\t"), ()=>{
         console.log("Wrote file: " + file_path);
@@ -44,8 +40,7 @@ app.post("/config/new", (req:express.Request, res: express.Response) => {
 
 
 // Serve the static configuration files.
-app.use("/config/machine", express.static(MACHINE_PATH));
-app.use("/config/pallet", express.static(PALLET_PATH));
+app.use("/config", express.static(CONFIG_PATH));
 
 // List current configurations.
 app.get("/configs", (req:express.Request, res: express.Response)=>{
@@ -54,31 +49,18 @@ app.get("/configs", (req:express.Request, res: express.Response)=>{
         withFileTypes: true
     } as BaseEncodingOptions;
     
-    let machine = fs.readdirSync(MACHINE_PATH, options);
-    let pallet = fs.readdirSync(PALLET_PATH, options);
+    let config = fs.readdirSync(CONFIG_PATH, options);
 
-    let machine_configs = [] as string[];
-    let pallet_configs = [] as string[];
+    let configs = [] as string[];
 
-    machine.forEach((item: any)=> {
+    config.forEach((item: any)=> {
         item = item as Dirent;
         if (item.isFile() && path.extname(item.name) === ".json") {
-                machine_configs.push(item.name);
+                configs.push(item.name);
         } 
     });
 
-    pallet.forEach((item: any)=>{
-        item = item as Dirent;
-        if (item.isFile() && path.extname(item.name) === ".json" ) {
-            pallet_configs.push(item.name);
-        } 
-    });
-    
-
-    res.json({
-        machine_configs: machine_configs,
-        pallet_configs: pallet_configs
-    });
+    res.json({ configurations : configs});
 
 });
 

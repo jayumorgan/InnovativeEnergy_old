@@ -5,7 +5,7 @@ import AceEditor, { IAceEditorProps } from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-xcode";
 
-import {get_pallet_config, get_machine_config, post_config} from "../requests/requests";
+import {get_config, post_config} from "../requests/requests";
 
 // Styles
 import "./css/Modal.scss";
@@ -39,11 +39,10 @@ function Modal({children, close}: ModalProps) {
 interface EditorProps {
     file_name : string;
     title : string;
-    machine: boolean;
     close(): any;
 }
 
-function Editor({file_name, title, close, machine} : EditorProps) {
+function Editor({file_name, title, close} : EditorProps) {
     
     let handle_edit = (value:string) => {
     }
@@ -62,13 +61,8 @@ function Editor({file_name, title, close, machine} : EditorProps) {
     
     useEffect(()=>{
         let fetch_data = async ()=>{
-            if (machine) {
-                let res_data = await get_machine_config(file_name) as any;
-                set_data(JSON.stringify(res_data, null, "\t"));
-            }else{
-                let res_data = await get_pallet_config(file_name) as any;
-                set_data(JSON.stringify(res_data,null, "\t"));
-            }
+            let res_data = await get_config(file_name) as any;
+            set_data(JSON.stringify(res_data, null, "\t"));
             
         }
         fetch_data();
@@ -81,7 +75,7 @@ function Editor({file_name, title, close, machine} : EditorProps) {
         if (element) {
             let json = JSON.parse(element.editor.getValue() as string);
             console.log("Add a check for valid configuration content");
-            post_config(file_name, json, machine, close);
+            post_config(file_name, json, close);
         }
     };
 

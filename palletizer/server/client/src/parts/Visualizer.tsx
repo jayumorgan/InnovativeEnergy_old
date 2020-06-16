@@ -13,6 +13,43 @@ import carboard from "./images/cardboard.jpg";
 import vcardboard from "./images/vcardboard.jpg";
 
 
+function get_scene() : Three.Scene {
+    let scene = new Three.Scene();
+    scene = new Three.Scene();
+    scene.background = new Three.Color( 0xa0a0a0 );
+    scene.fog = new Three.Fog( 0xa0a0a0, 1, 4);
+
+    let hemiLight = new Three.HemisphereLight( 0xffffff, 0x444444 );
+    hemiLight.position.set( 0, 20, 0 );
+    scene.add( hemiLight );
+
+    let dirLight = new Three.DirectionalLight( 0xffffff );
+    dirLight.position.set( 0, 1, 1 );
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 10;
+    dirLight.shadow.camera.bottom = - 10;
+    dirLight.shadow.camera.left = - 10;
+    dirLight.shadow.camera.right = 10;
+    dirLight.shadow.camera.near = 0.1;
+    dirLight.shadow.camera.far = 40;
+    scene.add( dirLight );
+
+    // ground
+    var groundMesh = new Three.Mesh(
+        new Three.PlaneBufferGeometry( 40, 40 ),
+        new Three.MeshPhongMaterial( {
+            color: 0x999999,
+            depthWrite: false
+        } )
+    );
+
+    groundMesh.rotation.x = - Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add( groundMesh );
+    return scene;
+}
+
+
 function Visualizer(){
     const mount = useRef<HTMLDivElement>(null);
     let palletizer_context = useContext(PalletizerContext);
@@ -26,9 +63,12 @@ function Visualizer(){
         let width = (mount.current as HTMLDivElement).clientWidth;
         let height =  (mount.current as HTMLDivElement).clientHeight;
 
-        const scene = new Three.Scene();
-        // let camera = new Three.PerspectiveCamera()
-        const camera = new Three.PerspectiveCamera(75, width / height, 0.1, 1000);
+        // const scene = new Three.Scene();
+        let scene = get_scene();
+        let camera = new Three.PerspectiveCamera(45, width/height, 1, 1000);
+        camera.position.set(0, 1.2, 1.2);
+        camera.lookAt(0, 0, 0);
+        // const camera = new Three.PerspectiveCamera(75, width / height, 0.1, 1000);
         const renderer = new Three.WebGLRenderer({ antialias: true });
         let axes_helper = new Three.AxesHelper(1);
         scene.add(axes_helper);
@@ -40,18 +80,11 @@ function Visualizer(){
 
         let loader = new Three.TextureLoader();
 
-        camera.rotateY(Math.PI/4);
-
         let [h, w, l] = [0.1, 4, 3];
         let norm = Math.sqrt(w ** 2 + h ** 2 + l ** 2)
 
-        let dist = 1.1 / Math.sqrt(2)
 
-        camera.position.z = dist;
-        camera.position.y = 0.4;
-        camera.position.x = dist;
-
-        // Setup the palletizer.
+        // Setup the palletizer
         loader.load(wood, (t: Three.Texture)=>{
             
             let geometry = new Three.BoxGeometry(w/norm, h/norm, l/norm);
@@ -65,9 +98,6 @@ function Visualizer(){
             
         });
 
-        let light = new Three.PointLight(0xffffff,100, 100);
-        light.position.set( 0.5, 0.5, 0 );
-        scene.add( light );
 
         // Setup for the cardboard boxes.
 
@@ -96,7 +126,6 @@ function Visualizer(){
             if (shift_index % 4 === 0 && shift_index !== 0) {
                 box_y += y_shift;
                 box_x = start_x;
-                // sign *= -1;
             } else {
                 box_x += x_shift * sign;
             }
@@ -105,22 +134,18 @@ function Visualizer(){
                 box_x = start_x;
                 box_y = start_y;
                 sign = 1;
-                
             } 
             return next;
         };
 
 
         
-        // Color the last box Green, Yellow or Red depending on system state.
-        // Consider adding a floor to the display. (concrete?)
         let cardboard_box = (()=>{
             let texture = loader.load(carboard);
             let vtexture = loader.load(vcardboard);
             let material = new Three.MeshBasicMaterial({map: texture});
             let vmaterial = new Three.MeshBasicMaterial({map: vtexture});
             let textures = [] as Three.MeshBasicMaterial[];
-            // vmaterial.color = new Three.Color("red");
 
             for (let i=0; i<6; i++){
                 if (i === 4){
@@ -129,10 +154,6 @@ function Visualizer(){
                     textures.push(material);
                 }
             }
-
-
-
-            
             let geometry = new Three.BoxGeometry(cw/norm, ch/norm, cl/norm);
             let box = new Three.Mesh(geometry, textures);
             
@@ -170,7 +191,6 @@ function Visualizer(){
             camera.updateProjectionMatrix();
             renderScene();
         }
-
 
         (mount.current as HTMLDivElement).appendChild(renderer.domElement)
         window.addEventListener('resize', handleResize)

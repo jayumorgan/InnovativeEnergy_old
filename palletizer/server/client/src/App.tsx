@@ -7,8 +7,7 @@ import NavBar from "./parts/NavBar";
 import Footer from "./parts/Footer";
 
 // Main Components
-// import General from "./parts/General";
-import General from "./parts/Main";
+import General from "./parts/General";
 import Configuration from "./parts/Configuration";
  
 // Context

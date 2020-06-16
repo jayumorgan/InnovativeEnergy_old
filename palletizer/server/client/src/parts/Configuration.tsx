@@ -97,8 +97,8 @@ interface EditorConfig {
 function Configuration() {
 
     let config_context = useContext(ConfigContext);
-
-    let {machine_configs, pallet_configs} = config_context as ConfigState; 
+    
+    let {configurations} = config_context as ConfigState;
 
     var [editor, set_editor] = useState<EditorConfig>({
         title: "",
@@ -106,21 +106,13 @@ function Configuration() {
         edit: false
     });
 
-    let [pallet_title, machine_title] = ["Pallet Configuration", "Machine Configuration"];
+    let title = "Machine Configuration";
     
-    let start_pallet_editor = (fn : string) => {
-        let edit = {
-            filename: fn,
-            title: pallet_title,
-            edit: true
-        } as EditorConfig;
-        set_editor(edit);
-    };
 
-    let start_machine_editor = (fn: string) => {
+    let start_editor = (fn: string) => {
         let edit = {
             filename: fn,
-            title: machine_title,
+            title: title,
             edit: true
         } as EditorConfig;
         set_editor(edit);
@@ -134,13 +126,13 @@ function Configuration() {
         <Fragment>
             <div className="ConfigGrid">
                 <div className="PalletConfig">
-                <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_pallet_editor} />
+                <ConfigContainer title={title} configs={configurations} start_editor={start_editor} />
                 </div>
                 <div className="MachineConfig">
-                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_machine_editor} />
+                <ConfigContainer title={title} configs={configurations} start_editor={start_editor} />
                 </div>
             </div>
-            {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.title == machine_title} />}
+            {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} />}
         </Fragment>
     );
 }

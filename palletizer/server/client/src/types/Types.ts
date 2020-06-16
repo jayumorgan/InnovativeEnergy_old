@@ -27,9 +27,7 @@ export type PartialState = {
     time: number; // hours? 
 };
 
-
 export type ConfigState = {
-    pallet_configs: string[];
-    machine_configs: string[];
-};
+    configurations : string[];
+}
 

@@ -13,8 +13,7 @@ export { ConfigContext };
 function ConfigHub(props: any) {
 
     let initial_state : ConfigState = {
-        machine_configs: [] as string[],
-        pallet_configs: [] as string[]
+        configurations: [] as string[]
     };
 
     var [state, set_state] = useState(initial_state);
