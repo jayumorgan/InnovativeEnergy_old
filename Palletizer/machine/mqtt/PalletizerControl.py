@@ -3,7 +3,7 @@
 
 import paho.mqtt.client as mqtt
 import json
-from threading import Thread
+from threading import Thread, RLock
 import logging
 logging.basicConfig(level=logging.DEBUG,format='(%(threadName)-9s) %(message)s',)
 
@@ -13,12 +13,14 @@ MQTT_PORT = 1883
 MQTT_TIMEOUT = 60
 
 
+
 class PalletizerControl:
 
-    def __init__(self, new):
+    def __init__(self):
         # Setup the state client.
         self.state_client = mqtt.Client()
         self.state_topic = PALLETIZER_TOPIC + "state"
+
         self.state = {
             "status" : "Sleep",
             "cycle" : 0,
@@ -27,23 +29,24 @@ class PalletizerControl:
             "time": 0,
         }
 
-        self.commands = [] 
+
+        self.commands = []
         self.control_client = None
         self.control_topic = PALLETIZER_TOPIC + "control"
         self.control_thread = Thread(target=self.__connect)
         self.control_thread.start()
 
-        if new:
-            self.__publish()
+        self.__lock = RLock()
 
-    # For the control client.
+
+        
+    # ------ For the control client.
     def __connect(self):
         self.control_client = mqtt.Client()
         self.control_client.on_message = self.__on_message
         self.control_client.on_connect = self.__on_connect
-        self.control_client = client
         self.control_client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
-        self.control_client.subscribe(self.status_topic)
+        self.control_client.subscribe(self.control_topic)
         self.control_client.loop_forever()
 
     def __on_connect(self, client, userdata, flags):    
@@ -51,27 +54,42 @@ class PalletizerControl:
 
     def __on_message(self, client, userdata, msg):
         message = msg.payload.decode("utf-8")
-        self.commands.append(message)
         print("Control client received message: " + message, flush=True)
+        self.__lock.acquire()
+        self.commands.append(message)
+        self.__lock.release()
 
+    def get_command(self):
+        self.__lock.acquire()
+        command = None if len(self.commands) == 0 else self.commands.pop(0)
+        self.__lock.release()
+        return command
+
+        
     def disconnect(self):
-        # Disconnect the control client + join thread.
         self.control_client.disconnect()
         self.thread.join()
-        # disconnect the state client
         self.state_client.disconnect()
             
     # ---- For the state client (publish)
-    def __publish(self):
-        data = json.dumps(self.state)
+    def __publish(self, state):
+        data = json.dumps(state)
 
         self.state_client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
         pub = self.state_client.publish(self.state_topic, data)
 
         self.state_client.disconnect()
 
-    def update(self, key, value):
-        if self.state[key] != value: #ie. the value needs to be changed.
-            self.state[key] = value
-            self.__publish()
+    def update(self, updates):
+        update = False
+        self.__lock.acquire()
+        for key, value in updates.items():
+            if self.state[key] != value:
+                self.state[key] = value
+                update = True
+        state = self.state
+        self.__lock.release()
+
+        if update:
+            self.__publish(state)
     

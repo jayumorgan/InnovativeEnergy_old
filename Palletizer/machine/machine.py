@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 
+from time import sleep
+
+
+# import ./config/configuration.py
 from config import configuration as cf
+
+from mqtt import PalletizerControl as pc
+
+
+# fake machine motion for development.
 from fake_mm import fake_mm as fmm
 
 
@@ -137,40 +146,39 @@ class Machine:
         
 
 
-class Palletizer:
+class Palletizer(pc.PalletizerControl):
     # Do run link protocols.
-
-
 
     def __init__(self):
         self.machine = Machine()
+        # Intialize state+controls (PalletizerControl)
+        super().__init__()
 
-        self.machine.home()
+        self.total_box_count = self.machine.box_count
+        self.update({"status": "Waiting", "total_box": self.total_box_count})
 
         self.start(0)
 
-    
-
-
     def start(self,count):
         # Do: nothing
-        print(f"Waiting for start signal: count={count}...")
-        print(f"Starting...")
-        
+        print(f"Waiting for start signal.")
+        while self.get_command() != "START":
+            sleep(0.3)
+
+        total_box_count = self.machine.box_count
+        self.update({"status": "Running"})
+        self.machine.home()
         self.move_to_pick(count)
 
     def move_to_pick(self,count):
+        self.update({"current_box": count})
         if (count < self.machine.box_count):
-            print(f"Moving to pick count={count}...")
             self.machine.move_to_pick()
-
-            print(f"Waiting for box....")
-            print(f"Picking")
-
-
             self.move_to_drop(count)
         else:
             print(f"Motion completed, wait on restart..")
+            self.update({"status": "Complete"})
+            self.start(0)
 
 
     def move_to_drop(self, count):
