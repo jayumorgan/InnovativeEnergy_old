@@ -184,12 +184,14 @@ function Visualizer(){
         }
         
         let handleResize = () => {
-            width = (mount.current as HTMLDivElement).clientWidth;
-            height = (mount.current as HTMLDivElement).clientHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderScene();
+            if (mount.current) {
+                width = (mount.current as HTMLDivElement).clientWidth;
+                height = (mount.current as HTMLDivElement).clientHeight;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderScene();
+            }
         }
 
         (mount.current as HTMLDivElement).appendChild(renderer.domElement)
