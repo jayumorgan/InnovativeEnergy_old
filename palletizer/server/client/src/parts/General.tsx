@@ -167,12 +167,11 @@ function General () {
                             {"System Status"}
                         </span>
                     </div>
-                <div className="SystemGrid">
-                <StatusBar items={items} />
-                <Visualizer />
-                <ExecutePane status={status} current_box={current_box}/>
-
-                </div>
+                    <div className="SystemGrid">
+                        <StatusBar items={items} />
+                        <Visualizer />
+                        <ExecutePane status={status} current_box={current_box}/>
+                    </div>
                 </div>
             </div>
             <div className="InformationPane">

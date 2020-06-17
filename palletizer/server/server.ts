@@ -1,23 +1,17 @@
+// Express
 import express from "express";
 import morgan from "morgan";
-// For configuration file storage
+
+// File Handling
 import fs, { BaseEncodingOptions, Dirent } from "fs";
 import path from "path";
 
-// For types
+// Types
 import { AddressInfo } from "net";
 
-// Config Paths.
+// Configuration
 let CONFIG_PATH : fs.PathLike = path.join(__dirname, '..', '..' , 'machine', 'config', 'config');
-
-
-console.log(CONFIG_PATH);
 const PORT = 3011;
-
-const app = express();
-app.use(express.json());
-app.use(morgan('dev'));
-
 
 interface ConfigUpload {
     filename : string;
@@ -25,8 +19,16 @@ interface ConfigUpload {
     data: any;
 };
 
+console.log(CONFIG_PATH);
 
-app.post("/configs/new", (req:express.Request, res: express.Response) => {
+const app = express();
+app.use(express.json());
+app.use(morgan('dev'));
+
+let router : express.Router = express.Router();
+
+
+router.post("/configs/new", (req:express.Request, res: express.Response) => {
     res.sendStatus(200);
     let {filename, data} = req.body as ConfigUpload;
     let file_path = path.join(CONFIG_PATH.toString(), filename);
@@ -36,14 +38,11 @@ app.post("/configs/new", (req:express.Request, res: express.Response) => {
     });
 });
 
-
-
-
 // Serve the static configuration files.
-app.use("/config", express.static(CONFIG_PATH));
+router.use("/config", express.static(CONFIG_PATH));
 
 // List current configurations.
-app.get("/configs", (req:express.Request, res: express.Response)=>{
+router.get("/configs", (req:express.Request, res: express.Response)=>{
     
     let options = {
         withFileTypes: true
@@ -60,17 +59,15 @@ app.get("/configs", (req:express.Request, res: express.Response)=>{
         } 
     });
 
-    res.json({ configurations : configs});
+    res.json({ configurations : configs, current_index : 0});
 
 });
 
-
-
-app.get("/", (req: express.Request, res: express.Response)=> {
+router.get("/", (req: express.Request, res: express.Response)=> {
     res.send("Index worked.");
 });
 
-
+app.use(router);
 
 let server = app.listen(PORT, "localhost",()=>{
 

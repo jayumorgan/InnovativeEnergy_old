@@ -29,5 +29,6 @@ export type PartialState = {
 
 export type ConfigState = {
     configurations : string[];
+    current_index: number|null;
 }
 

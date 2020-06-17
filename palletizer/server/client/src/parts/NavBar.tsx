@@ -1,4 +1,4 @@
-import React, {FunctionComponent} from 'react';
+import React from 'react';
 import {Link} from "react-router-dom";
 import "./css/NavBar.scss";
 
@@ -7,8 +7,8 @@ interface NavBarProps {
     selected_index: number;
 }
 
-                    // <div className={class_name}>
-let NavBar : FunctionComponent<NavBarProps> = ({tabs, selected_index} : NavBarProps)=>{
+
+function NavBar({tabs, selected_index} : NavBarProps) {
     return (
         <div className="NavBarContainer" >
             {tabs.map((item, index)=>{
@@ -23,6 +23,7 @@ let NavBar : FunctionComponent<NavBarProps> = ({tabs, selected_index} : NavBarPr
         </div>
     );
 }
+
 
 export default NavBar;
 

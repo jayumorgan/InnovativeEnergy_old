@@ -197,7 +197,6 @@ class Palletizer(pc.PalletizerControl):
 
     def start(self,count):
         self.control_checks(interrupted=True)
-        total_box_count = self.machine.box_count
         self.update({"status": "Running"})
         self.machine.home()
         self.control_checks()
