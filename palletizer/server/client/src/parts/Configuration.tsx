@@ -62,9 +62,6 @@ function ConfigContainer(props: ConfigContainerProps) {
         console.log("Handle: Add " + title);
     };
 
-    // Need an input name.
-    // Delete configuration.
-    
     return(
         <div className="ConfigContainer">
             <div className="ConfigTitle">
@@ -125,9 +122,6 @@ function Configuration() {
     return (
         <Fragment>
             <div className="ConfigGrid">
-                <div className="PalletConfig">
-                <ConfigContainer title={title} configs={configurations} start_editor={start_editor} />
-                </div>
                 <div className="MachineConfig">
                 <ConfigContainer title={title} configs={configurations} start_editor={start_editor} />
                 </div>

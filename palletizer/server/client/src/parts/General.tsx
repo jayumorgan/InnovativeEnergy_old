@@ -1,4 +1,4 @@
-import React, {useContext, ChangeEvent, useState, Fragment} from 'react';
+import React, {useContext, ChangeEvent, useState} from 'react';
 
 // MQTT
 import {MQTTControl} from "../mqtt/MQTT";
@@ -114,7 +114,7 @@ function StatusBar({items} : StatusBarProps) {
             {items.map((item: StatusItem, index: number)=>{
                 return (
                     <div className="StatusItem" key={index}>
-                        <span>{item.title}</span>
+                        <span>{item.title.toUpperCase()}</span>
                         <div className="StatusValue">
                             <span>
                                 {item.value}
@@ -174,7 +174,14 @@ function General () {
                     </div>
                 </div>
             </div>
-            <div className="InformationPane">
+            <div className="InformationContainer">
+                <div className="StackContainer">
+                    <div className="StackTitle">
+                        <span>
+                            {"Information Console"}
+                        </span>
+                    </div>
+                    </div>
             </div>
         </div>
     );
