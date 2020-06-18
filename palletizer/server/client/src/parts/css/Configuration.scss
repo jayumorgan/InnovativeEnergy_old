@@ -1,6 +1,6 @@
 @import '../../master.scss';
 
-$add-height: 10%;
+$add-height: 20%;
 $scroll-height: 100% - $add-height;
 
 .ConfigContainer {
@@ -17,13 +17,14 @@ $scroll-height: 100% - $add-height;
         .ConfigScroll {
             @include grid-coordinate(1,1);
             display: flex;
-            min-height: 75vh;
+            min-height: 50vh;
             align-items: center;
             justify-content: flex-start;
             flex-direction: column;
             padding-left: $double-margin;
             padding-right: $double-margin;
             paddding-top: $double-margin;
+            margin-top: $double-margin;
             padding-bottom: $margin;
             overflow-y: auto;
 
@@ -37,7 +38,6 @@ $scroll-height: 100% - $add-height;
                 display: flex;
                 justify-content: flex-start;
                 align-items: center;
-
                 span {
                     font-weight: $bold-font;
                 }
