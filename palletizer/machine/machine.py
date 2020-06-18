@@ -76,7 +76,6 @@ class Machine:
 
         network = self.config["NETWORK"]
         
-        
         pallet_columns = self.config["PALLET_COLUMNS"]
         pallet_rows = self.config["PALLET_ROWS"]
         pallet_layers = self.config["PALLET_LAYERS"]
@@ -109,8 +108,6 @@ class Machine:
         
         for c in self.coordinates:
             print(c)
-
-
 
     def home(self):
         self.move_vertical({"z":self.z_0})
@@ -201,6 +198,7 @@ class Palletizer(pc.PalletizerControl):
 
     def start(self,count):
         self.control_checks(interrupted=True)
+        self.increment_cycle()
         self.update({"status": "Running"})
         self.machine.home()
         self.control_checks()

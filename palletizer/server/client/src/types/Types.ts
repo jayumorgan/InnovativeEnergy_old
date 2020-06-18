@@ -12,7 +12,7 @@ export type PalletizerError = {
 
 export type PalletizerState = {
     status : string;
-    cycle: number;
+    cycle : number;
     current_box: number; 
     total_box: number;
     time: number; // hours? 
@@ -22,7 +22,7 @@ export type PalletizerState = {
 
 export type PartialState = {
     status : string;
-    cycle: number;
+    cycle : number;
     current_box: number; 
     total_box: number;
     time: number; // hours? 

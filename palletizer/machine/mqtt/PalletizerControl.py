@@ -43,9 +43,11 @@ class PalletizerControl:
 
         self.__lock = RLock()
 
+    def increment_cycle(self):
+        self.__lock.acquire()
+        self.state["cycle"] += 1
+        self.__lock.release()
 
-        
-    # ------ For the control client.
     def __connect(self):
         self.control_client = mqtt.Client()
         self.control_client.on_message = self.__on_message

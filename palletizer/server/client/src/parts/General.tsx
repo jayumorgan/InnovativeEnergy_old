@@ -219,12 +219,15 @@ function General () {
     let {status, cycle, total_box, current_box, time } = palletizer_context as PalletizerState;
     
     let items = [] as StatusItem[];
+
+    console.log("Current box", current_box);
+    
     items.push({
         title: "Status",
         value: status
     });
     items.push({
-        title: "Cycle Count",
+        title: "Cycle",
         value: String(cycle)
     });
     items.push({
