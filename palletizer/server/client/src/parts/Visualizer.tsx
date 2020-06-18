@@ -185,18 +185,20 @@ function translate_box_coordinates(c: Coordinate[], g : PalletGeometry) : Coordi
         y,
         z,
         pallet_width,
-        pallet_length
+        pallet_length,
+        box_height
     } = g;
 
+    
     c.forEach((v : Coordinate)=>{
         (v as any)[x] -= shift_x + pallet_width * norm/2;
         (v as any)[y] -= shift_y + pallet_length * norm/2;
-        (v as any)[z] -= shift_z;
+        (v as any)[z] -= shift_z + box_height *norm/2; // Pallet coordinates are at the top of the box.
         (v as any)[x] /= norm;
         (v as any)[y] /= norm;
         (v as any)[z] /= norm;
     });
-
+    console.log("Coordinates", c);
     return c;
 }
 
@@ -240,8 +242,8 @@ function Visualizer(){
             render_scene();
         }
         
-        let axes_helper = new Three.AxesHelper(1);
-        scene.add(axes_helper);
+        // let axes_helper = new Three.AxesHelper(1);
+        // scene.add(axes_helper);
 
         let current_box_count = 0;
         let cardboard_box : Three.Mesh;
@@ -310,6 +312,7 @@ function Visualizer(){
                 let res_data = await get_config(configurations[current_index as number]) as any;
 
                 let g = parse_config(res_data) as PalletGeometry;
+                
                 geometry.current = g;
 
                 controls.current?.set_cardboard_box(g);
@@ -349,11 +352,8 @@ function Visualizer(){
 
 
     // Temporary function.
-    let handle_click = ()=>{
-        controls.current?.add_box();
-    };
   
-    return (<div className="Visualizer" ref={mount} onClick={handle_click} />);
+    return (<div className="Visualizer" ref={mount} />);
 }
 export default Visualizer;
 

@@ -12,7 +12,7 @@
     "BOX_SIZE" : {
         "x" : 50,
         "y" : 50,
-        "z" : 10
+        "z" : 50
     },
     "PICK_ORIGIN" : {
         "x" : 320.5,
@@ -21,7 +21,7 @@
     },
     "PALLET_ORIGIN" : {
         "x" : 0,
-        "y" : 10,
+        "y" : 0,
         "z" : 0
     },
     "PALLET_ROWS": {
