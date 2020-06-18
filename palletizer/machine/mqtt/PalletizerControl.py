@@ -29,8 +29,11 @@ class PalletizerControl:
             "current_box" : 0,
             "total_box": 0,
             "time": 0,
+            "coordinates": []
         }
 
+        # For requests for state.
+        self.req_topic = PALLETIZER_TOPIC + "request"
 
         self.commands = []
         self.control_client = None
@@ -48,18 +51,23 @@ class PalletizerControl:
         self.control_client.on_message = self.__on_message
         self.control_client.on_connect = self.__on_connect
         self.control_client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
-        self.control_client.subscribe(self.control_topic)
+        self.control_client.subscribe([(self.control_topic, 0), (self.req_topic, 0)])
         self.control_client.loop_forever()
 
     def __on_connect(self, client, userdata, flags):    
         print("Control client connected to: " + self.state_topic)
 
-    def __on_message(self, client, userdata, msg):
+    def __on_message(self,client, userdata, msg):
+        topic = msg.topic
         message = msg.payload.decode("utf-8")
-        print("Control client received message: " + message, flush=True)
-        self.__lock.acquire()
-        self.commands.append(message)
-        self.__lock.release()
+        if topic == self.control_topic:
+            self.__lock.acquire()
+            self.commands.append(message)
+            self.__lock.release()
+        else:
+            # force state update.
+            self.update({}, force=True)
+            
 
     def get_command(self):
         self.__lock.acquire()
@@ -81,7 +89,7 @@ class PalletizerControl:
 
         self.state_client.disconnect()
 
-    def update(self, updates):
+    def update(self, updates, force=False):
         update = False
         self.__lock.acquire()
         for key, value in updates.items():
@@ -91,6 +99,6 @@ class PalletizerControl:
         state = self.state
         self.__lock.release()
 
-        if update:
+        if update or force:
             self.__publish(state)
     

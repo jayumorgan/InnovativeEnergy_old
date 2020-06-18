@@ -1,10 +1,11 @@
 import React, {createContext, useReducer, useEffect} from 'react';
-import {MQTTSubscriber} from "../mqtt/MQTT";
+import {MQTTSubscriber, RequestState} from "../mqtt/MQTT";
 // For server sent events -- see server.js for further details.
 
 import {PalletizerState, PalletizerError, PartialState, ReducerAction} from "../types/Types";
 
 
+// "Partial State" is an egregious violation of principles. Fix when we get to error handling.
 function PalletizerReducer(state : PalletizerState, action : ReducerAction) {
     switch (action.type_of) {
         case "ERROR" : {
@@ -32,13 +33,13 @@ function PalletizerHub(props: any) {
         current_box: 0,
         total_box: 0,
         time: 0,
-        errors: [] as PalletizerError[]
+        errors: [] as PalletizerError[],
+        coordinates: [] as any[]
     };
 
     const [state, dispatch] = useReducer(PalletizerReducer, initial_state);
 
     useEffect(() => {
-        // Change the error structure.
         let handle_error = (message: any) => {
             dispatch({
                type_of: "ERROR",
@@ -54,7 +55,7 @@ function PalletizerHub(props: any) {
         };
 
         MQTTSubscriber(handle_error, handle_state);
-
+        RequestState();
     }, []);
 
     return (

@@ -1,5 +1,4 @@
 import mqtt from "mqtt";
-// import {PalletizerState, PalletizerError} from "../types/Types";
 
 // Config + Globals.
 const PORT = 9001;
@@ -38,23 +37,20 @@ function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient 
         let message : any = JSON.parse(message_string);
 
         switch(topic) {
-                
             case TOPIC + "state" : {
                 handle_state(message);
                 break;
             }
-                
             case TOPIC + "error" : {
                 handle_error(message);
                 break;
             }
-                
             default : {
                 console.log("Unhandled message on topic: ", topic, message);
             }
         }
-
     });
+
     return client;
 }
 
@@ -91,4 +87,20 @@ function MQTTControl() {
     return {start, stop, pause};
 }
 
-export {MQTTSubscriber, MQTTControl};
+
+function RequestState() {
+
+    let options = {
+        clientId: "server-MQTTRequester",
+    };
+
+    let topic = TOPIC + "request";
+
+    let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
+
+    client.publish(topic, "g");
+}
+
+
+
+export {MQTTSubscriber, MQTTControl, RequestState};

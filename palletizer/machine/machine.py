@@ -156,7 +156,11 @@ class Palletizer(pc.PalletizerControl):
         super().__init__()
 
         self.total_box_count = self.machine.box_count
-        self.update({"status": "Waiting", "total_box": self.total_box_count})
+        self.update({
+            "status": "Waiting",
+            "total_box": self.total_box_count,
+            "coordinates" : self.machine.coordinates
+        })
 
         self.start(0)
 

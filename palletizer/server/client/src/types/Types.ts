@@ -17,6 +17,7 @@ export type PalletizerState = {
     total_box: number;
     time: number; // hours? 
     errors: PalletizerError[];
+    coordinates: any[];
 };
 
 export type PartialState = {
@@ -25,6 +26,7 @@ export type PartialState = {
     current_box: number; 
     total_box: number;
     time: number; // hours? 
+    coordinates: any[];
 };
 
 export type ConfigState = {

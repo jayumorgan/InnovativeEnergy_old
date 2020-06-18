@@ -22,7 +22,7 @@ import wood from "./images/wood.jpg";
 import carboard from "./images/cardboard.jpg";
 import vcardboard from "./images/vcardboard.jpg";
 
-
+// Cleanup this file once it is functional!
 
 interface PalletGeometry {
     pallet_height : number;
@@ -34,6 +34,13 @@ interface PalletGeometry {
     width_count : number;
     length_count : number;
     height_count : number;
+    norm: number;
+    shift_x : number;
+    shift_y : number;
+    shift_z : number;
+    x : string;
+    y : string;
+    z : string;
 }
 
 
@@ -43,22 +50,28 @@ function parse_config(config : any) : PalletGeometry {
     let pallet_cols = config["PALLET_COLUMNS"] as any;
     let pallet_lays = config["PALLET_LAYERS"] as any;
 
+    let x = pallet_rows["DIRECTION"] as string;
+    let y = pallet_cols["DIRECTION"] as string;
+    let z = pallet_lays["DIRECTION"] as string;
+    
     let width_count = pallet_rows["COUNT"] as number;
     let length_count = pallet_cols["COUNT"] as number;
     let height_count = pallet_lays["COUNT"] as number;
 
-    let row_direction = pallet_rows["DIRECTION"] as string;
-    let col_direction = pallet_cols["DIRECTION"] as string;
-    let lay_direction = pallet_lays["DIRECTION"] as string;
 
-    let box_width = box_size[row_direction] as number;
-    let box_length = box_size[col_direction] as number;
-    let box_height = box_size[lay_direction] as number;
+    let box_width = box_size[x] as number;
+    let box_length = box_size[y] as number;
+    let box_height = box_size[z] as number;
 
     let width = width_count * box_width;
     let length = length_count * box_length;
     let height = width/25; // not too small, approximately fixed.
     let norm = Math.sqrt(width ** 2 + length ** 2 + height ** 2);
+
+    let pallet_origin = config["PALLET_ORIGIN"];
+    let shift_x = pallet_origin[x] as number;
+    let shift_y = pallet_origin[y] as number;
+    let shift_z = pallet_origin[z] as number;
 
     let geometry = {
         pallet_height : height/norm,
@@ -69,7 +82,14 @@ function parse_config(config : any) : PalletGeometry {
         box_width : box_width/norm,
         width_count : width_count,
         height_count : height_count,
-        length_count : length_count
+        length_count : length_count,
+        norm,
+        shift_x,
+        shift_y,
+        shift_z,
+        x,
+        y,
+        z
     } as PalletGeometry;
 
     return geometry;
@@ -141,13 +161,43 @@ function get_cardboard_box(width: number, height: number, length: number) : Thre
     return box;
 } 
 
-
+interface Coordinate { // To allow for angle.
+    x : number;
+    y : number;
+    z : number;
+}
 
 interface VisualizerControls {
     add_box() : ()=>void;
     add_boxes(current_box : number) : void;
     add_mesh(mesh : Three.Mesh) : void;
     set_cardboard_box(g : PalletGeometry) : void;
+}
+
+
+function translate_box_coordinates(c: Coordinate[], g : PalletGeometry) : Coordinate[] {
+    let {
+        norm,
+        shift_x,
+        shift_y,
+        shift_z,
+        x,
+        y,
+        z,
+        pallet_width,
+        pallet_length
+    } = g;
+
+    c.forEach((v : Coordinate)=>{
+        (v as any)[x] -= shift_x + pallet_width * norm/2;
+        (v as any)[y] -= shift_y + pallet_length * norm/2;
+        (v as any)[z] -= shift_z;
+        (v as any)[x] /= norm;
+        (v as any)[y] /= norm;
+        (v as any)[z] /= norm;
+    });
+
+    return c;
 }
 
 
@@ -159,10 +209,13 @@ function Visualizer(){
     let palletizer_context = useContext(PalletizerContext);
     let config_context = useContext(ConfigContext);
     
-    let {current_box} = palletizer_context;
+    let {current_box, coordinates} = palletizer_context;
     let {configurations, current_index} = config_context as ConfigState; 
 
     let controls = useRef<VisualizerControls | null>(null);
+
+    let geometry = useRef<PalletGeometry|null>(null);
+    let box_positions = useRef<Coordinate[]|null>(null);
 
   
     useEffect(() => {
@@ -190,69 +243,20 @@ function Visualizer(){
         let axes_helper = new Three.AxesHelper(1);
         scene.add(axes_helper);
 
-        let geometry : PalletGeometry;
-
-        // render_scene();
-
-        let [h, w, l] = [0.1, 4, 3];
-        let norm = Math.sqrt(w ** 2 + h ** 2 + l ** 2);
-
-        let [ch, cw, cl] = [1,1,1];
-        let start_z =  (h + ch) / (2 * norm);  
-        let start_x = -1 * w/(2 * norm) + cw/(2*norm); // negative width of box / 2 + 
-        let start_y = -1 * l/(2 * norm) + cl/(2*norm);
-
-        
-        let box_z =  start_z; 
-        let box_x =  start_x;
-        let box_y =  start_y;
-
-        let x_shift = cw/(norm);
-        let y_shift = cl/(norm);
-        let z_shift = ch/(norm);
-        let shift_index = 0;
-
-        let sign = 1;
         let current_box_count = 0;
-
-        let next_position = () : [number,number,number] => {
-            let next = [box_x, box_y, box_z] as [number, number, number];
-            shift_index++;
-            if (shift_index % 4 === 0 && shift_index !== 0) {
-                box_y += y_shift;
-                box_x = start_x;
-            } else {
-                box_x += x_shift * sign;
-            }
-            if (shift_index % 12 === 0){
-                box_z += z_shift;
-                box_x = start_x;
-                box_y = start_y;
-                sign = 1;
-            } 
-            return next;
-        };
-
         let cardboard_box : Three.Mesh;
 
         let set_cardboard_box = (g : PalletGeometry) => {
-            console.log("Setting cardboard box..,", g);
             let {box_width, box_length, box_height} = g;
             cardboard_box = get_cardboard_box(box_width, box_height, box_length);
-        }
+        };
 
-
-        let add_box = () => {
-            current_box_count++;
-            
+        let add_box = ({x,y,z} : Coordinate) => {
             let new_box = cardboard_box.clone();
             new_box.name = "Box-"+String(current_box_count);
-            console.log(new_box.name);
-            
-            let [x,y,z] = next_position(); 
-
             new_box.position.set(x,z,y); // swap around coordinates.
             add_mesh(new_box);
+            current_box_count++;
         };
 
         let remove_box = (box_number: number) => {
@@ -262,19 +266,19 @@ function Visualizer(){
                 current_box_count--;
                 render_scene();
             }
-        }
+        };
 
         let add_boxes = (box_number : number) => {
-            if (current_box_count <= box_number) {
-                while (current_box_count < box_number){
-                    add_box();
+            if (box_positions.current) {
+                let positions = box_positions.current as Coordinate[];
+                while (current_box_count > box_number) {
+                    remove_box(current_box_count - 1);
                 }
-            } else {
-                while (current_box_count > box_number){
-                    remove_box(current_box_count)
+                while (current_box_count < box_number) {
+                    add_box(positions[current_box_count]);
                 }
             }
-        }
+        };
         
         let handleResize = () => {
             if (mount.current) {
@@ -285,25 +289,32 @@ function Visualizer(){
                 camera.updateProjectionMatrix();
                 render_scene();
             }
-        }
+        };
 
         (mount.current as HTMLDivElement).appendChild(renderer.domElement);
         window.addEventListener('resize', handleResize);
 
-        controls.current = {add_box, add_boxes, add_mesh, set_cardboard_box} as VisualizerControls;
+        controls.current = {
+            add_box,
+            add_boxes,
+            add_mesh,
+            set_cardboard_box,
+        } as VisualizerControls;
     }, []);
 
+    // current index is configuration file index.
     useEffect(()=>{
+        
         if (current_index != null && configurations.length > current_index){
             let consume_config = async () => {
-
                 let res_data = await get_config(configurations[current_index as number]) as any;
 
-                let geometry = parse_config(res_data) as PalletGeometry;
+                let g = parse_config(res_data) as PalletGeometry;
+                geometry.current = g;
 
-                controls.current?.set_cardboard_box(geometry);
-
-                let {pallet_length, pallet_width, pallet_height} = geometry;
+                controls.current?.set_cardboard_box(g);
+                
+                let {pallet_length, pallet_width, pallet_height} = g;
 
                 let loader = new Three.TextureLoader();
 
@@ -318,13 +329,23 @@ function Visualizer(){
             
             consume_config();
         }
-        
+
     },[current_index]);
 
+    useEffect(()=>{
+        if (coordinates && geometry.current && coordinates.length > 0){
+            box_positions.current = translate_box_coordinates(coordinates as Coordinate[], geometry.current);
+        }       
+    }, [coordinates]);
+     
     // Populate boxes when the box number increases.
     useEffect(()=>{
-        controls.current?.add_boxes(current_box as number);
+        if (coordinates != null && current_box != null) {
+            controls.current?.add_boxes(current_box as number);
+        }
+            
     }, [current_box]);
+
 
 
     // Temporary function.
