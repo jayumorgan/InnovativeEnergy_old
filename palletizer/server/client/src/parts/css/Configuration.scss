@@ -1,111 +1,85 @@
 @import '../../master.scss';
 
-
-.ConfigGrid {
-    width: 100%;
-    height: 100%;
-    min-height: 70vh;
-    display: grid;
-    grid-template-rows: 100%;
-    grid-template-columns: 100%;
-}
-
-.MachineConfig {
-    @include grid-coordinate(1,1);
-}
-
-// Grid of a certain height
-$title-height: 11%;
-$add-height: 15%;
-$scroll-height: 100% - $title-height - $add-height;
+$add-height: 10%;
+$scroll-height: 100% - $add-height;
 
 .ConfigContainer {
-    @include container-style();
-    display: grid;
-    grid-template-rows: auto $scroll-height $add-height;
-    grid-template-columns: 100%;
+    height: 100%;
+    padding: $double-margin;
 
-    .ConfigTitle {
-        @include grid-coordinate(1,1);
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        background-color: $container-blue;
-        border-radius: $border-radius $border-radius 0 0 ;
-        color: white;
-        letter-spacing: 1pt;
-        font-size: $medium-font;
-    }
+    .ConfigGrid {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows:  $scroll-height $add-height;
+        grid-template-columns: 100%;
 
-    .ConfigScroll {
-        @include grid-coordinate(2,1);
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        flex-direction: column;
-        padding-left: $double-margin;
-        padding-right: $double-margin;
-        paddding-top: $margin;
-        padding-bottom: $margin;
-        overflow-y: auto;
-
-        .ConfigCell {
-            width: 95%;
-            border: $container-border;
-            border-radius: $border-radius;
+        .ConfigScroll {
+            @include grid-coordinate(1,1);
+            display: flex;
+            min-height: 75vh;
+            align-items: center;
+            justify-content: flex-start;
+            flex-direction: column;
             padding-left: $double-margin;
             padding-right: $double-margin;
-            padding-top: $double-margin;
-            padding-bottom: $double-margin;
-            margin-bottom: $margin;
-            background-color: $off-white;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
+            paddding-top: $double-margin;
+            padding-bottom: $margin;
+            overflow-y: auto;
 
+            .ConfigCell {
+                width: 95%;
+                border: $container-border;
+                border-radius: $border-radius;
+                padding: $double-margin;
+                margin-bottom: $margin;
+                background-color: $off-white;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
 
-            span {
-                font-weight: $bold-font;
-            }
-            .EditConfigButton {
-                @include flex-center();
-                padding-left: $margin;
-                text-decoration: underline;
-                cursor: pointer;
                 span {
-                    font-weight: $normal-font;
+                    font-weight: $bold-font;
                 }
-            }
-
-            .DeleteConfigButton {
-                @include flex-center();
-                color:red;
-                align-self: flex-end;
-                margin-left: auto;
-                cursor: pointer;
-                span {
-                    font-weight: $normal-font;
-                }
-                #button-text {
-                    text-decoration: underline;
+                .EditConfigButton {
+                    @include flex-center();
                     padding-left: $margin;
+                    text-decoration: underline;
+                    cursor: pointer;
+                    span {
+                        font-weight: $normal-font;
+                    }
+                }
+                .DeleteConfigButton {
+                    @include flex-center();
+                    color:red;
+                    align-self: flex-end;
+                    margin-left: auto;
+                    cursor: pointer;
+                    span {
+                        font-weight: $normal-font;
+                    }
+                    #button-text {
+                        text-decoration: underline;
+                        padding-left: $margin;
+                    }
                 }
             }
         }
-    }
 
-    .ConfigAdd {
-        @include grid-coordinate(3,1);
-        @include flex-center();
-        .AddConfigButton {
-            background-color: $medium-blue;
-            color:white;
-            border-radius: $border-radius;
-            padding: $double-margin;
-            cursor: pointer;
-        }
-        .AddConfigButton:hover {
-            @include shadow();
+        .ConfigAdd {
+            @include grid-coordinate(2,1);
+            @include flex-center();
+            .AddConfigButton {
+                background-color: $medium-blue;
+                color:white;
+                border-radius: $border-radius;
+                padding: $double-margin;
+                cursor: pointer;
+            }
+            .AddConfigButton:hover {
+                @include shadow();
+            }
         }
     }
 }

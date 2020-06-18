@@ -87,32 +87,38 @@ function ExecutePane({current_box, status} : ExecuteProps) {
     
     return (
         <div className="ExecuteGrid">
-            <div className="ConfigTitle">
-                <span>{config_title}</span>
-            </div>
-            <div className="ConfigItem">
-                <select>
-                    {configurations.map((item: string, index:number)=>{
-                        return (<option value={item} key={index} > {item} </option>)
-                    })}
-                </select>
-            </div>
-            <div className="BoxStartTitle">
-                <span>{box_title}</span>
-            </div>
-            <div className="BoxStartItem">
-                <input type="text" name={box_title} onChange={handle_input} value={start_box} />
-            </div>
-            <div className="StartButton">
-            <div className="ButtonContainer" onClick={start_fn}>
-                    <span className={start_icon}> </span>
-                    <span id="button-text">{start_text}</span>    
+            <div className="ConfigCell">
+                <div className="ConfigTitle">
+                    <span>{config_title}</span>
+                </div>
+                <div className="ConfigItem">
+                    <select>
+                        {configurations.map((item: string, index:number)=>{
+                            return (<option value={item} key={index} > {item} </option>)
+                        })}
+                    </select>
                 </div>
             </div>
-            <div className="StopButton">
-            <div className="ButtonContainer" onClick={stop_button}>
-                    <span className={icons[2]}> </span>
-                    <span id="button-text">{"Stop"}</span>    
+            <div className="ConfigCell">
+                <div className="BoxStartTitle">
+                    <span>{box_title}</span>
+                </div>
+                <div className="BoxStartItem">
+                    <input type="text" name={box_title} onChange={handle_input} value={start_box} />
+                </div>
+            </div>
+            <div className="ButtonGrid">
+                <div className="StartButton">
+                <div className="ButtonContainer" onClick={start_fn}>
+                        <span className={start_icon}> </span>
+                <span id="button-text">{start_text}</span>    
+                    </div>
+                </div>
+                <div className="StopButton">
+                <div className="ButtonContainer" onClick={stop_button}>
+                        <span className={icons[2]}> </span>
+                <span id="button-text">{"Stop"}</span>    
+                    </div>
                 </div>
             </div>
         </div>
@@ -194,7 +200,7 @@ function ErrorLogContainer() {
     return (
         <div className="ErrorLogContainer">
             {errors.map((err : ErrorLogProps, index : number) => {
-                return (<ErrorLog {...err} />)
+                return (<ErrorLog {...err} key={index} />)
             })}
         </div>
     );
@@ -226,7 +232,7 @@ function General () {
         value: `${current_box} of ${total_box}`
     });
     items.push({
-        title: "Time To Completion",
+        title: "Time Remaining",
         value: `${time} Hours`
     });
 

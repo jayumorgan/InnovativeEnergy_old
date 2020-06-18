@@ -18,13 +18,13 @@ function Header() {
 
     return (
         <div className="HeaderGrid">
-            <div className="HeaderLeft">
+            <div className="HeaderItem">
                 <div className="BackButton" onClick={handle_back}>
                     <span className="icon-arrow-left"></span>
                     <span id="button-text"> {"Back to App Launcher"} </span>
                 </div>
             </div>
-            <div className="HeaderCenter">
+            <div className="HeaderItem">
                 <div className="HeaderLogo">
                     <img src={logo} alt="Vention Logo" />
                     <span id="title">
@@ -32,7 +32,7 @@ function Header() {
                     </span>
                 </div>
             </div>
-            <div className="HeaderRight">
+            <div className="HeaderItem">
                 <div className="StopButton" onClick={handle_stop}>
                     <span> {"Stop"} </span>
                 </div>

@@ -59,18 +59,20 @@ function ConfigContainer(props: ConfigContainerProps) {
     };
 
     return(
-        <div className="ConfigContainer">
-            <div className="ConfigTitle">
+        <div className="StackContainer">
+            <div className="StackTitle">
                 <span> {title} </span>
             </div>
-            <div className="ConfigScroll" >
-                {configs.map((file_name, index)=>{
-                    return (<ConfigCell file_name={file_name} key={index} start_editor={start_editor} />)
-                })}
-            </div>
-            <div className="ConfigAdd" >
-                <div className="AddConfigButton" onClick={handle_add} >
-                    <span> {"Add " + title.toLowerCase()} </span>
+            <div className="ConfigGrid">
+                <div className="ConfigScroll" >
+                    {configs.map((file_name, index)=>{
+                        return (<ConfigCell file_name={file_name} key={index} start_editor={start_editor} />)
+                    })}
+                </div>
+                <div className="ConfigAdd">
+                    <div className="AddConfigButton" onClick={handle_add} >
+                        <span> {"Add " + title.toLowerCase()} </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -113,10 +115,8 @@ function Configuration() {
     
     return (
         <Fragment>
-            <div className="ConfigGrid">
-                <div className="MachineConfig">
+            <div className="ConfigContainer">
                 <ConfigContainer title={title} configs={configurations} start_editor={start_editor} />
-                </div>
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} />}
         </Fragment>
