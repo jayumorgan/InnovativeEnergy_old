@@ -1,8 +1,7 @@
 @import '../../master.scss';
 
 .Footer {
-    padding-left: $double-margin;
-    padding-right: $double-margin;
+    padding: $double-margin;
     color: $dark-blue;
     display:flex;
     flex-direction: row;
