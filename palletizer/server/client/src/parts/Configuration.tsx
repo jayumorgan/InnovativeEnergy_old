@@ -11,7 +11,11 @@ import "./css/Configuration.scss";
 import "./css/Login.scss";
 
 
-
+interface ConfigContainerProps {
+    title: string;
+    configs: string[];
+    start_editor(fn: string) : any;
+}
 
 interface ConfigCellProps {
     file_name: string;
@@ -46,14 +50,6 @@ function ConfigCell({file_name, start_editor} : ConfigCellProps) {
     );
 }
 
-
-interface ConfigContainerProps {
-    title: string;
-    configs: string[];
-    start_editor(fn: string) : any;
-}
-
-
 function ConfigContainer(props: ConfigContainerProps) {
 
     let {title, configs, start_editor} = props;
@@ -82,9 +78,6 @@ function ConfigContainer(props: ConfigContainerProps) {
 }
 
 
-
-
-
 interface EditorConfig {
     title: string;
     filename: string;
@@ -105,7 +98,6 @@ function Configuration() {
 
     let title = "Machine Configuration";
     
-
     let start_editor = (fn: string) => {
         let edit = {
             filename: fn,

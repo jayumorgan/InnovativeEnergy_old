@@ -20,6 +20,24 @@ import "./css/General.scss";
 var control = MQTTControl();
 
 
+// Support Functions:
+function make_time_string(hours:number, minute:number) : string {
+    let hour_string = String(hours);
+    let minute_string = minute < 10 ? `0${minute}` : String(minute);
+    return hour_string + ":" + minute_string;
+}
+
+function make_date_string(day: number, month: number, year: number){
+    month += 1;
+    let day_string = day < 10 ? `0${day}` : String(day);
+    let month_string = month < 10 ? `0${month}` : String(month);
+    let year_string = String(year);
+    return year_string + "/" + month_string + "/" + day_string;
+}
+
+
+
+
 
 interface ExecuteProps {
     current_box : number;
@@ -128,6 +146,61 @@ function StatusBar({items} : StatusBarProps) {
 }
 
 
+interface ErrorLogProps {
+    date: Date;
+    description: string;
+}
+
+
+function ErrorLog({date, description}: ErrorLogProps) {
+
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let day = date.getDate();
+    let month = date.getMonth();
+    let year = date.getFullYear();
+    let date_string =  make_date_string(day, month, year);
+    let time_string = make_time_string(hours, minutes);
+
+    return (
+        <div className="ErrorLog">
+            <div className="ErrorLogDate">
+                <span>{time_string}</span>
+            <span id="DateString"> {date_string} </span>
+            </div>
+            <span>
+            {description}
+            </span>
+            <div className="ErrorDismiss">
+                <span>
+                    {"Dismiss"}
+                </span>
+            </div>
+        </div>
+    );
+}
+
+function ErrorLogContainer() {
+    
+    let errors = [] as ErrorLogProps[];
+    
+    for (let i = 0; i < 15; i++){
+        let date = new Date();
+        let description = "./"+String(i)+" Segmentation fault (core dumped)";
+        let item = {"date": date, description: description} as ErrorLogProps;
+        errors.push(item);
+    }
+
+    return (
+        <div className="ErrorLogContainer">
+            {errors.map((err : ErrorLogProps, index : number) => {
+                return (<ErrorLog {...err} />)
+            })}
+        </div>
+    );
+}
+
+
 interface StatusItem {
     title: string;
     value: any;
@@ -136,7 +209,6 @@ interface StatusItem {
 function General () {
     
     let palletizer_context = useContext(PalletizerContext);
-
 
     let {status, cycle, total_box, current_box, time } = palletizer_context as PalletizerState;
     
@@ -181,7 +253,8 @@ function General () {
                             {"Information Console"}
                         </span>
                     </div>
-                    </div>
+                    <ErrorLogContainer />
+                </div>
             </div>
         </div>
     );

@@ -3,7 +3,7 @@
 
 $top-height: 80%;
 // $bottom-height: 100% - $top-height;
-$bottom-height: 80%;
+$bottom-height: auto;
 
 
 // Create a grid to hold everthing
@@ -172,9 +172,7 @@ $bottom-height: 80%;
                     .ButtonContainer {
                         background-color: $green;
                     }
-
                 }
-
                 .StopButton {
                     @include grid-coordinate(3,2);
                     @include button-stizz();
@@ -189,8 +187,37 @@ $bottom-height: 80%;
 
     .InformationContainer {
         @include grid-coordinate(2,1);
+        .ErrorLogContainer {
+            width: 100%;
+            overflow-y: auto;
+            max-height: 30vh;
+            .ErrorLog {
+                display: flex; 
+                justify-content: space-between;
+                border-bottom: $container-border;
+                padding: $double-margin;
+                align-items: center;
+                .ErrorLogDate {
+                    display: flex;
+                    flex-direction: column;
+                    align-content: center;
+                    justify-content: center;
+                    span {
+                        text-align: left;
+                        padding-bottom: $margin;
+                    }
+                    #DateString {
+                        font-weight: $bold-font;
+                        padding-bottom: 0;
+                    }
+                }
 
-        
+                .ErrorDismiss {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+            }
+        }
     }
 }
 
