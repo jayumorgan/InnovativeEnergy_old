@@ -380,7 +380,6 @@ function Visualizer(){
         }       
     }, [coordinates]);
      
-    // Populate boxes when the box number increases.
     useEffect(()=>{
         if (coordinates != null && current_box != null) {
             controls.current?.add_boxes(current_box as number);

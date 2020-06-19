@@ -148,10 +148,14 @@ class Palletizer(pc.PalletizerControl):
     # Do run link protocols.
 
     def __init__(self):
-        self.machine = Machine()
         # Intialize state+controls (PalletizerControl)
         super().__init__()
 
+        self.start(0)
+
+    def start(self,count):
+        # Setup the machine. (load configuration)
+        self.machine = Machine()
         self.total_box_count = self.machine.box_count
         self.update({
             "status": "Waiting",
@@ -159,8 +163,32 @@ class Palletizer(pc.PalletizerControl):
             "coordinates" : self.machine.coordinates
         })
 
-        self.start(0)
+        self.control_checks(interrupted=True)
+        self.increment_cycle()
+        self.update({"status": "Running"})
+        self.machine.home()
+        self.control_checks()
+        self.move_to_pick(count)
 
+    def move_to_pick(self,count):
+        self.control_checks()
+        self.update({"current_box": count})
+        if (count < self.machine.box_count):
+            self.machine.move_to_pick()
+            self.move_to_drop(count)
+        else:
+            print(f"Motion completed, wait on restart..")
+            self.update({"status": "Complete"})
+            self.start(0)
+
+    def move_to_drop(self, count):
+        self.control_checks()
+        print(f"Moving to drop: {count}")
+        self.machine.move_to_drop(count)
+
+        print(f"Releasing pressure")
+
+        self.move_to_pick(count + 1)
 
     def command_status_update(self, command):
         if command != None:
@@ -193,37 +221,6 @@ class Palletizer(pc.PalletizerControl):
                     sleep(0.3)
                 else:
                     break
-                
-            
-
-    def start(self,count):
-        self.control_checks(interrupted=True)
-        self.increment_cycle()
-        self.update({"status": "Running"})
-        self.machine.home()
-        self.control_checks()
-        self.move_to_pick(count)
-
-    def move_to_pick(self,count):
-        self.control_checks()
-        self.update({"current_box": count})
-        if (count < self.machine.box_count):
-            self.machine.move_to_pick()
-            self.move_to_drop(count)
-        else:
-            print(f"Motion completed, wait on restart..")
-            self.update({"status": "Complete"})
-            self.start(0)
-
-    def move_to_drop(self, count):
-        self.control_checks()
-        print(f"Moving to drop: {count}")
-        self.machine.move_to_drop(count)
-
-        print(f"Releasing pressure")
-
-        self.move_to_pick(count + 1)
-
     
 
 if __name__ == "__main__":
