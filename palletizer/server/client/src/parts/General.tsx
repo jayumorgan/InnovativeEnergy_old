@@ -220,8 +220,6 @@ function General () {
     
     let items = [] as StatusItem[];
 
-    console.log("Current box", current_box);
-    
     items.push({
         title: "Status",
         value: status

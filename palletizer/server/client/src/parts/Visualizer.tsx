@@ -139,6 +139,17 @@ function get_scene() : Three.Scene {
     return scene;
 }
 
+
+function get_green_cardboard_box(width: number, height: number, length: number) : Three.Mesh {
+    let box = get_cardboard_box(width, height, length);
+    (box.material as Three.Material[]).forEach((mat : Three.Material)=>{
+        let m = mat as Three.MeshBasicMaterial;
+        m.color.setRGB(0, 1, 0);
+    });
+    return box;
+}
+
+
 function get_cardboard_box(width: number, height: number, length: number) : Three.Mesh {
     
     let loader = new Three.TextureLoader();
@@ -202,7 +213,9 @@ function translate_box_coordinates(c: Coordinate[], g : PalletGeometry) : Coordi
     return c;
 }
 
-
+function get_box_name(box_number : number) : string {
+    return "Box-" + String(box_number);
+}
 
 // Set the scene.
 function Visualizer(){
@@ -211,7 +224,7 @@ function Visualizer(){
     let palletizer_context = useContext(PalletizerContext);
     let config_context = useContext(ConfigContext);
     
-    let {current_box, coordinates} = palletizer_context;
+    let {current_box, coordinates, status} = palletizer_context;
     let {configurations, current_index} = config_context as ConfigState; 
 
     let controls = useRef<VisualizerControls | null>(null);
@@ -235,53 +248,79 @@ function Visualizer(){
 
         let render_scene = () => {
             renderer.render(scene, camera);
-        }
+        };
 
         let add_mesh = (mesh : Three.Mesh) => {
             scene.add(mesh);
             render_scene();
-        }
+        };
         
         let axes_helper = new Three.AxesHelper(1);
         scene.add(axes_helper);
 
         let current_box_count = 0;
         let cardboard_box : Three.Mesh;
+        let green_box : Three.Mesh;
 
         let set_cardboard_box = (g : PalletGeometry) => {
             let {box_width, box_length, box_height} = g;
             cardboard_box = get_cardboard_box(box_width, box_height, box_length);
+            green_box = get_green_cardboard_box(box_width, box_height, box_length);
         };
 
-        let add_box = ({x,y,z} : Coordinate) => {
-            let new_box = cardboard_box.clone();
-            new_box.name = "Box-"+String(current_box_count);
+        let add_box = ({x,y,z} : Coordinate, box_number: number) => {
+            let new_box : Three.Mesh;
+            if (box_number === current_box_count+1){
+                new_box = green_box.clone();
+            }else{
+                new_box = cardboard_box.clone();
+            }
+            let box_name = get_box_name(current_box_count);
+            new_box.name = box_name;
             new_box.position.set(x,z,y); // swap around coordinates.
             add_mesh(new_box);
             current_box_count++;
         };
 
         let remove_box = (box_number: number) => {
-            let box = scene.getObjectByName("Box-"+String(box_number));
+            let box_name = get_box_name(box_number);
+            let box = scene.getObjectByName(box_name);
             if (box) {
                 scene.remove(box);
                 current_box_count--;
-                render_scene();
             }
         };
+
+        let decolor_box = (box_number : number) => {
+            let box_name = get_box_name(box_number - 1);
+            let box = scene.getObjectByName(box_name);
+            if (box) {
+                let position = box.position;
+                let new_box = cardboard_box.clone();
+                new_box.name = box_name;
+                new_box.position.set(position.x, position.y, position.z);
+                scene.remove(box);
+                scene.add(new_box);
+            }
+        }
 
         let add_boxes = (box_number : number) => {
             if (box_positions.current) {
                 let positions = box_positions.current as Coordinate[];
                 while (current_box_count > box_number) {
                     remove_box(current_box_count - 1);
+                    render_scene();
                 }
-                while (current_box_count < box_number) {
-                    add_box(positions[current_box_count]);
+                if (current_box_count < box_number) {
+                    while (current_box_count < box_number) {
+                        add_box(positions[current_box_count], box_number);
+                    }
+                    decolor_box(current_box_count - 1);
+                    render_scene();
                 }
             }
         };
-        
+
         let handleResize = () => {
             if (mount.current) {
                 width = (mount.current as HTMLDivElement).clientWidth;
@@ -348,6 +387,14 @@ function Visualizer(){
         }
             
     }, [current_box]);
+
+    useEffect(()=>{
+        console.log("statis", status);
+        if (status === "Complete"){
+            console.log("Should decolor the last box");
+            // controls.current?.decolor_last();
+        }
+    }, [status]);
 
 
 
