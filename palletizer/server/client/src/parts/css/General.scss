@@ -23,6 +23,7 @@ $bottom-height: 100% - $top-height;
         // @include flex-center();
         @include stop-grid-explosion();
         @include grid-coordinate(1,1); 
+        // width: 50%;
         .SystemGrid {
             @include grid-coordinate(2,1); 
             @include stop-grid-explosion();

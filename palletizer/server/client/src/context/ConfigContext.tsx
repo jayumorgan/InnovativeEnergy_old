@@ -10,9 +10,14 @@ export { ConfigContext };
 
 function ConfigHub(props: any) {
 
+    let update_configs = () => {
+        console.log("update_configs");
+    };
+    
     let initial_state : ConfigState = {
         configurations: [] as string[],
-        current_index: null
+        current_index: null,
+        update_configs
     };
 
     var [state, set_state] = useState(initial_state);
