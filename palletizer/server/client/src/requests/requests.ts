@@ -16,7 +16,7 @@ async function get_config(filename : string) {
 
 
 function post_config(filename: string, content: any, callback: any) {
-    let url = "/config/new";
+    let url = "/configs/new";
 
     let data = {
         filename: filename,

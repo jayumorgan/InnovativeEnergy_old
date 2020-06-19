@@ -388,18 +388,6 @@ function Visualizer(){
             
     }, [current_box]);
 
-    useEffect(()=>{
-        console.log("statis", status);
-        if (status === "Complete"){
-            console.log("Should decolor the last box");
-            // controls.current?.decolor_last();
-        }
-    }, [status]);
-
-
-
-    // Temporary function.
-  
     return (<div className="Visualizer" ref={mount} />);
 }
 export default Visualizer;

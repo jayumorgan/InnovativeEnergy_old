@@ -56,7 +56,7 @@ def compute_coordinates(box_size, pallet_origin, pallet_rows, pallet_cols, palle
 class Machine:
 
     def __init__(self):
-        self.config = cf.load_config("config.json")
+        self.config = cf.load_selected_config()
         cf.output(self.config)
 
         axes = self.config["AXES"]

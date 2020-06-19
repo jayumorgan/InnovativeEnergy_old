@@ -87,7 +87,6 @@ function ExecutePane({current_box, status} : ExecuteProps) {
 
     let handle_config_select = (e : React.ChangeEvent) => {
         let file_name = (e.target as HTMLSelectElement).value;
-        // set_current_config(file_name);
         set_config(file_name); // server request.
         set_current_config(file_name);
     };
@@ -131,9 +130,6 @@ function ExecutePane({current_box, status} : ExecuteProps) {
         </div>
     );
 }
-
-
-
 
 interface StatusBarProps {
     items: StatusItem[];
