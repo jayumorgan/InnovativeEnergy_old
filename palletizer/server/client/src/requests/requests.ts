@@ -29,8 +29,21 @@ function post_config(filename: string, content: any, callback: any) {
     });
 }
 
+function set_config(file_name: string) {
+    let url = "/configs/set";
+
+    let data = {
+        file_name
+    } as any;
+
+    axios.post(url, data);
+}
 
 
-export {get_configs, get_config};
 
-export {post_config};
+export {
+    get_configs,
+    get_config,
+    post_config,
+    set_config
+};

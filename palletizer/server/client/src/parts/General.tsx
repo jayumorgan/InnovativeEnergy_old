@@ -7,6 +7,9 @@ import {MQTTControl} from "../mqtt/MQTT";
 import {PalletizerContext} from "../context/PalletizerContext";
 import {ConfigContext} from "../context/ConfigContext";
 
+// Requests
+import {set_config} from "../requests/requests";
+
 // Types
 import {ConfigState, PalletizerState} from "../types/Types";
 
@@ -35,10 +38,6 @@ function make_date_string(day: number, month: number, year: number){
     return year_string + "/" + month_string + "/" + day_string;
 }
 
-
-
-
-
 interface ExecuteProps {
     current_box : number;
     status: string;
@@ -48,9 +47,10 @@ interface ExecuteProps {
 function ExecutePane({current_box, status} : ExecuteProps) {
     let config_context = useContext(ConfigContext);
     
-    let {configurations} = config_context as ConfigState; 
+    let {configurations, current_index} = config_context as ConfigState; 
 
     let [start_box, set_start_box] = useState(current_box);
+    let [current_config, set_current_config] = useState<string|null>(null);
 
     let handle_input = (e: ChangeEvent) => {
         let value = Number((e.target as HTMLInputElement).value);
@@ -84,6 +84,13 @@ function ExecutePane({current_box, status} : ExecuteProps) {
     let start_fn = is_running ? pause_button : start_button;
 
     let start_text = is_running ? "Pause" : "Start";
+
+    let handle_config_select = (e : React.ChangeEvent) => {
+        let file_name = (e.target as HTMLSelectElement).value;
+        // set_current_config(file_name);
+        set_config(file_name); // server request.
+        set_current_config(file_name);
+    };
     
     return (
         <div className="ExecuteGrid">
@@ -92,8 +99,8 @@ function ExecutePane({current_box, status} : ExecuteProps) {
                     <span>{config_title}</span>
                 </div>
                 <div className="ConfigItem">
-                    <select>
-                        {configurations.map((item: string, index:number)=>{
+            <select onChange={handle_config_select} value={current_config ? current_config : configurations[current_index as number]}>
+                        {configurations.map((item : string, index : number)=>{
                             return (<option value={item} key={index} > {item} </option>)
                         })}
                     </select>
