@@ -1,7 +1,7 @@
 @import '../../master.scss';
 
 
-$top-height: 60%;
+$top-height: 50%;
 // $bottom-height: 100% - $top-height;
 $bottom-height: 100% - $top-height;
 
@@ -11,193 +11,212 @@ $bottom-height: 100% - $top-height;
     min-height: 0;
 }
 
-// Create a grid to hold everthing
+
+$col-1 : 30%;
+$col-2 : 30%;
+$col-3 : 100% - $col-1 - $col-2;
+
 .GeneralGrid {
+
     display: grid;
-    @include stop-grid-explosion();
     grid-template-rows: $top-height $bottom-height;
-    grid-template-columns: 100%;
-    grid-row-gap: $double-margin;
+    grid-template-columns: $col-1 $col-2 auto;
     padding: $double-margin;
-    .SystemContainer {
-        // @include flex-center();
-        @include stop-grid-explosion();
-        @include grid-coordinate(1,1); 
-        // width: 50%;
-        .SystemGrid {
-            @include grid-coordinate(2,1); 
-            @include stop-grid-explosion();
+    grid-row-gap: $double-margin;
+    grid-column-gap: $double-margin;
+    // height: 100%;
+
+    .ExecuteContainer {
+        // @include grid-coordinate(1,1);
+        height: 100%;
+        .ExecuteGrid {
+            padding-top: $margin;
             display: grid;
-            grid-template-columns: 66% 34%;
-            grid-template-rows: 40% 60%;
-            .StatusBar {
-                @include grid-coordinate(1,1); 
+            grid-template-columns: 100%;
+            grid-template-rows: 20% 20% 60%;
+            @mixin input-stizz() {
+                padding-left: $margin;
+                padding-right: $margin;
+                @include flex-center();
+                justify-content: space-around;
+            }
+            @mixin title-style(){
+                @include flex-center();
+                span {
+                    // font-size: $medium-font;
+                    overflow: hidden;
+                    text-align: center;
+                }
+            }
+
+            .ConfigCell {
                 display: grid;
                 grid-template-rows: 100%;
-                grid-template-columns: 25% 25% 25% 25%;
-                .StatusItem {
+                grid-template-columns: 30% 70%;
+                .ConfigTitle {
+                    @include grid-coordinate(1,1);
+                    padding: 0;
+                    @include title-style();
                     height: 100%;
+                }
+                .BoxStartTitle {
+                    @include grid-coordinate(1,1);
+                    @include title-style();
+                    height: 100%;
+                    padding: 0;
+                }
+                .ConfigItem {
+                    @include grid-coordinate(1,2);
+                    @include flex-center;
+                    height: 100%;
+                    padding: 0;
+                    padding-right: $double-margin;
+                    padding-left: $double-margin;
+                }
+
+                .BoxStartItem {
+                    @include grid-coordinate(1,2);
+                    @include flex-center;
+                    height: 100%;
+                    padding: 0;
+                    padding-right: $double-margin;
+                    padding-left: $double-margin;
+                }
+                input {
+                    border-radius: $border-radius;
+                    color: $dark-blue;
+                    border: $container-border;
+                    font-size: 1em;
                     width: 100%;
+                    padding: $margin;
+                }
+                select {
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    appearance: none; 
+                    border-radius: $border;
+                    border: $container-border;
+                    color: $dark-blue;
+                    font-size: 1em;
+                    width: 100%;
+                    padding: $margin;
+                }
+            }
+
+
+            @mixin button-stizz() {
+                @include flex-center();
+                .ButtonContainer {
                     @include flex-center();
                     flex-direction: column;
+                    border-radius: $border-radius;
+                    width: 50%;
+                    height: 70%;
+                    cursor: pointer;
+                    color: white;
                     span {
-                        font-size: $medium-font;
-                        letter-spacing: 1.0pt;
-                        overflow: hidden;
-                        white-space: nowrap;
+                        font-size: $huge-font;
                     }
-                    .StatusValue {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-weight: $bold-font;
-                        font-size: $large-font;
+                    #button-text {
                         padding-top: $margin;
+                        font-size: $normal-font-size;
+                        font-size: $large-font;
                     }
                 }
-            }
-
-            .Visualizer {
-                @include stretch-grid(1,2,2,2);
-                canvas {
+                .ButtonContainer:hover {
+                    @include shadow();
                 }
             }
 
-            $ex-t: 25%;
-            $ex-b: 100% - (2 * $ex-t);
-            
-            .ExecuteGrid {
-                border-top: $container-border;
-                @include grid-coordinate(2,1);
+            .ButtonGrid {
+                @include grid-coordinate(3,1);
                 display: grid;
-                grid-template-columns: 66% 34%;
-                grid-template-rows: 50% 50%;
-                @mixin input-stizz() {
-                    padding-left: $margin;
-                    padding-right: $margin;
-                    @include flex-center();
-                    justify-content: space-around;
-                }
-                @mixin title-style(){
-                    @include flex-center();
-                    span {
-                        font-size: $medium-font;
-                        overflow: hidden;
-                        text-align: center;
-                    }
-                }
-
-                .ConfigCell {
-                    display: grid;
-                    grid-template-rows: 100%;
-                    grid-template-columns: 30% 70%;
-                    .ConfigTitle {
-                        @include grid-coordinate(1,1);
-                        padding: 0;
-                        @include title-style();
-                        height: 100%;
-                    }
-                    .BoxStartTitle {
-                        @include grid-coordinate(1,1);
-                        @include title-style();
-                        height: 100%;
-                        padding: 0;
-                    }
-                    .ConfigItem {
-                        @include grid-coordinate(1,2);
-                        @include flex-center;
-                        height: 100%;
-                        padding: 0;
-                        padding-right: $double-margin;
-                        padding-left: $double-margin;
-                    }
-
-                    .BoxStartItem {
-                        @include grid-coordinate(1,2);
-                        @include flex-center;
-                        height: 100%;
-                        padding: 0;
-                        padding-right: $double-margin;
-                        padding-left: $double-margin;
-                    }
-                    input {
-                        border-radius: $border-radius;
-                        color: $dark-blue;
-                        border: $container-border;
-                        font-size: 1em;
-                        width: 100%;
-                        padding: $margin;
-                    }
-                    select {
-                        -webkit-appearance: none;
-                        -moz-appearance: none;
-                        appearance: none; 
-                        border-radius: $border;
-                        border: $container-border;
-                        color: $dark-blue;
-                        font-size: 1em;
-                        width: 100%;
-                        padding: $margin;
-                    }
-                }
-
-
-                @mixin button-stizz() {
-                    @include flex-center();
+                grid-template-rows:100%;
+                grid-template-columns: 50% 50%;
+                .StartButton {
+                    @include grid-coordinate(1,1);
+                    @include button-stizz();
+                    height: 100%;
                     .ButtonContainer {
-                        @include flex-center();
-                        flex-direction: column;
-                        border-radius: $border-radius;
-                        width: 70%;
-                        height: 70%;
-                        cursor: pointer;
-                        color: white;
-                        span {
-                            font-size: $huge-font;
-                        }
-                        #button-text {
-                            padding-top: $margin;
-                            font-size: $normal-font-size;
-                            font-size: $large-font;
-                        }
-                    }
-                    .ButtonContainer:hover {
-                        @include shadow();
+                        background-color: $green;
                     }
                 }
-
-                .ButtonGrid {
-                    @include stretch-grid(1,2,2,2);
-                    display: grid;
-                    grid-template-rows:100%;
-                    grid-template-columns: 50% 50%;
-                    .StartButton {
-                        @include grid-coordinate(1,1);
-                        @include button-stizz();
-                        height: 100%;
-                        .ButtonContainer {
-                            background-color: $green;
-                        }
-                    }
-                    .StopButton {
-                        @include grid-coordinate(1,2);
-                        @include button-stizz();
-                        height: 100%;
-                        .ButtonContainer {
-                            background-color: $medium-blue;
-                        }
+                .StopButton {
+                    @include grid-coordinate(1,2);
+                    @include button-stizz();
+                    height: 100%;
+                    .ButtonContainer {
+                        background-color: $medium-blue;
                     }
                 }
             }
         }
+
+        
+    
     }
 
+    .StatusContainer {
+        @include grid-coordinate(1,2);
+        .StatusBar {
+            // @include grid-coordinate(1,1); 
+            display: grid;
+            grid-template-rows: 50% 50%;
+            grid-template-columns: 50% 50%;
+            .StatusItem {
+                height: 100%;
+                width: 100%;
+                @include flex-center();
+                flex-direction: column;
+                span {
+                    font-size: $medium-font;
+                    letter-spacing: 1.0pt;
+                    overflow: hidden;
+                    white-space: nowrap;
+                }
+                .StatusValue {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: $bold-font;
+                    font-size: $large-font;
+                    padding-top: $margin;
+                }
+            }
+        }
+
+        
+    }
+
+
+    .VisualizerContainer {
+        border: $container-border();
+        border-radius: $border-radius;
+        @include stretch-grid(1,2,3,3);
+        display: grid;
+        grid-template-rows: 80% 20%;
+        grid-template-columns: 100%;
+        padding-bottom: $double-margin;
+        .LogoContainer {
+            @include flex-center();
+            @include grid-coordinate(2,1);
+            img {
+                width: 80%;
+                height: auto;
+            }
+        }
+        
+    }
+    
     .InformationContainer {
-        @include grid-coordinate(2,1);
+        @include stretch-grid-col(2,1,2);
+        // max-height: 35vh;
+        // height: auto;
+        
         .ErrorLogContainer {
-            width: 100%;
+            // width: 100%;
             overflow-y: auto;
-            max-height: 30vh;
+            max-height: 40vh;
             .ErrorLog {
                 display: flex; 
                 justify-content: space-between;
@@ -225,13 +244,12 @@ $bottom-height: 100% - $top-height;
                 }
             }
         }
+
+
+
+        
     }
 }
-
-
-
-
-
 
 
 

@@ -19,6 +19,10 @@ import Visualizer from "./Visualizer";
 // Styles
 import "./css/General.scss";
 
+// Logo image
+import logo from "../images/vention_logo.png";
+
+
 
 var control = MQTTControl();
 
@@ -240,27 +244,40 @@ function General () {
         value: `${time} Hours`
     });
 
+
     return (
         <div className="GeneralGrid">
-            <div className="SystemContainer">
+            <div className="ExecuteContainer">
                 <div className="StackContainer">
                     <div className="StackTitle">
                         <span>
-                            {"System Status"}
+                            {"Execute"}
                         </span>
                     </div>
-                    <div className="SystemGrid">
-                        <StatusBar items={items} />
-                        <Visualizer />
-                        <ExecutePane status={status} current_box={current_box}/>
-                    </div>
+            <ExecutePane current_box={current_box} status={status} />
                 </div>
+            </div>
+            <div className="StatusContainer">
+                <div className="StackContainer">
+                    <div className="StackTitle">
+                        <span>
+                            {"System"}
+                        </span>
+                    </div>
+                <StatusBar items={items} />
+                </div>
+            </div>
+            <div className="VisualizerContainer">
+                    <Visualizer />
+            <div className="LogoContainer">
+                <img src={logo} />
+            </div>
             </div>
             <div className="InformationContainer">
                 <div className="StackContainer">
                     <div className="StackTitle">
                         <span>
-                            {"Information Console"}
+                            {"Information"}
                         </span>
                     </div>
                     <ErrorLogContainer />
@@ -268,6 +285,7 @@ function General () {
             </div>
         </div>
     );
+
 }
 
 
