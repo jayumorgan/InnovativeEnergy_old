@@ -80,7 +80,7 @@ function ExecutePane({current_box, status} : ExecuteProps) {
         set_start_box(value);
     };
 
-    let box_title = "Start from box";
+    let box_title = "Start From Box";
     let machine_config_title = "Machine Configuration";
     let pallet_config_title = "Pallet Configuration";
 
