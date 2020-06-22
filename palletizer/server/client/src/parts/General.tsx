@@ -234,9 +234,6 @@ function StackContainer( {title, children} : StackProps) {
     );
 } 
 
-
-
-
 interface StatusItem {
     title: string;
     value: any;

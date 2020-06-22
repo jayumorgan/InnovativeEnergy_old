@@ -61,6 +61,10 @@ $right-width: 30%;
         }
         .StopButton {
             @include button-padding();
+            @include flex-center();
+            svg {
+                padding-right: $margin;
+            }
             align-self: flex-end;
             background-color: red;
         }

@@ -6,6 +6,8 @@ import logo from "../images/white-logo.png";
 // Styles
 import "./css/Header.scss";
 
+import {ReactComponent as StopIcon} from "./images/danger.svg";
+
 
 function Header() {
     let handle_back = function() {
@@ -34,6 +36,7 @@ function Header() {
             </div>
             <div className="HeaderItem">
                 <div className="StopButton" onClick={handle_stop}>
+            <StopIcon />
                     <span> {"Stop"} </span>
                 </div>
             </div>
