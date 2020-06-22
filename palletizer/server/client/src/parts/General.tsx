@@ -48,6 +48,21 @@ interface ExecuteProps {
 }
 
 
+function ConfigCell({title , children} : StackProps ) {
+
+    return (
+        <div className="ConfigCell">
+            <div className="ConfigTitle">
+                <span>{title}</span>
+            </div>
+            {children}
+        </div>
+        
+    );
+}
+
+
+
 function ExecutePane({current_box, status} : ExecuteProps) {
     let config_context = useContext(ConfigContext);
 
@@ -56,7 +71,9 @@ function ExecutePane({current_box, status} : ExecuteProps) {
     
 
     let [start_box, set_start_box] = useState(current_box);
-    let [current_config, set_current_config] = useState<string|null>(null);
+    let [machine_current_config, set_machine_current_config] = useState<string|null>(null);
+    let [pallet_current_config, set_pallet_current_config] = useState<string|null>(null);
+    
 
     let handle_input = (e: ChangeEvent) => {
         let value = Number((e.target as HTMLInputElement).value);
@@ -64,7 +81,8 @@ function ExecutePane({current_box, status} : ExecuteProps) {
     };
 
     let box_title = "Start from box";
-    let config_title = "Configuration";
+    let machine_config_title = "Machine Configuration";
+    let pallet_config_title = "Pallet Configuration";
 
     let icons = ["icon-play", "icon-pause", "icon-stop"];
 
@@ -91,34 +109,37 @@ function ExecutePane({current_box, status} : ExecuteProps) {
 
     let start_text = is_running ? "Pause" : "Start";
 
-    let handle_config_select = (e : React.ChangeEvent) => {
+    let handle_config_select = (machine : boolean) => (e : React.ChangeEvent) => {
         let file_name = (e.target as HTMLSelectElement).value;
-        set_config(file_name); // server request.
-        set_current_config(file_name);
+        set_config(file_name, machine); // server request.
+        set_machine_current_config(file_name);
     };
     
     return (
         <div className="ExecuteGrid">
-            <div className="ConfigCell">
-                <div className="ConfigTitle">
-                    <span>{config_title}</span>
-                </div>
+            <ConfigCell title={machine_config_title} >
                 <div className="ConfigItem">
-            <select onChange={handle_config_select} value={current_config ? current_config : machine_configs[machine_index as number]}>
+                    <select onChange={handle_config_select(true)} value={machine_current_config ? machine_current_config : machine_configs[machine_index as number]}>
                         {machine_configs.map((item : string, index : number)=>{
                             return (<option value={item} key={index} > {item} </option>)
                         })}
                     </select>
                 </div>
-            </div>
-            <div className="ConfigCell">
-                <div className="BoxStartTitle">
-                    <span>{box_title}</span>
+            </ConfigCell>
+            <ConfigCell title={pallet_config_title}>
+                <div className="ConfigItem">
+                    <select onChange={handle_config_select(false)} value={pallet_current_config ? pallet_current_config : pallet_configs[pallet_index as number]}>
+                        {pallet_configs.map((item : string, index : number)=>{
+                            return (<option value={item} key={index} > {item} </option>)
+                        })}
+                    </select>
                 </div>
+            </ConfigCell>
+            <ConfigCell title={box_title}>
                 <div className="BoxStartItem">
                     <input type="text" name={box_title} onChange={handle_input} value={start_box} />
                 </div>
-            </div>
+            </ConfigCell>
             <div className="ButtonGrid">
                 <div className="StartButton">
                 <div className="ButtonContainer" onClick={start_fn}>

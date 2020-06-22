@@ -41,11 +41,13 @@ function post_config(filename: string, content: any, callback: any) {
     });
 }
 
-function set_config(file_name: string) {
+function set_config(file_name: string, machine: boolean) {
     let url = "/configs/set";
+    let config_type = machine ? "machine" : "pallet";
 
     let data = {
-        file_name
+        file_name,
+        config_type
     } as any;
 
     axios.post(url, data);
