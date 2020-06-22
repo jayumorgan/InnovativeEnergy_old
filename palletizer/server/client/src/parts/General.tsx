@@ -1,4 +1,4 @@
-import React, {useContext, ChangeEvent, useState} from 'react';
+import React, { useContext, ChangeEvent, useState, ReactElement} from 'react';
 
 // MQTT
 import {MQTTControl} from "../mqtt/MQTT";
@@ -214,6 +214,29 @@ function ErrorLogContainer() {
 }
 
 
+
+interface StackProps {
+    title : string;
+    children: ReactElement;
+}
+
+
+function StackContainer( {title, children} : StackProps) {
+    return (
+        <div className="StackContainer">
+            <div className="StackTitle">
+                <span>
+                    {title}
+                </span>
+            </div>
+            {children}
+        </div>
+    );
+} 
+
+
+
+
 interface StatusItem {
     title: string;
     value: any;
@@ -248,40 +271,25 @@ function General () {
     return (
         <div className="GeneralGrid">
             <div className="ExecuteContainer">
-                <div className="StackContainer">
-                    <div className="StackTitle">
-                        <span>
-                            {"Execute"}
-                        </span>
-                    </div>
-            <ExecutePane current_box={current_box} status={status} />
-                </div>
+                <StackContainer title={"Execute"}>
+                    <ExecutePane current_box={current_box} status={status} />
+                </StackContainer>
             </div>
             <div className="StatusContainer">
-                <div className="StackContainer">
-                    <div className="StackTitle">
-                        <span>
-                            {"System"}
-                        </span>
-                    </div>
-                <StatusBar items={items} />
-                </div>
+                <StackContainer title={"System"}>
+                    <StatusBar items={items} />
+                </StackContainer>
             </div>
             <div className="VisualizerContainer">
                     <Visualizer />
-            <div className="LogoContainer">
-                <img src={logo} />
-            </div>
+                    <div className="LogoContainer">
+                        <img src={logo} />
+                    </div>
             </div>
             <div className="InformationContainer">
-                <div className="StackContainer">
-                    <div className="StackTitle">
-                        <span>
-                            {"Information"}
-                        </span>
-                    </div>
+                <StackContainer title={"Information Console"}>
                     <ErrorLogContainer />
-                </div>
+                </StackContainer>
             </div>
         </div>
     );
