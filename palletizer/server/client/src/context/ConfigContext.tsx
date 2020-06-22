@@ -10,14 +10,11 @@ export { ConfigContext };
 
 function ConfigHub(props: any) {
 
-    let update_configs = () => {
-        console.log("update_configs");
-    };
-    
     let initial_state : ConfigState = {
-        configurations: [] as string[],
-        current_index: null,
-        update_configs
+        machine_configs : [] as string[],
+        pallet_configs: [] as string[],
+        machine_index : null,
+        pallet_index: null
     };
 
     var [state, set_state] = useState(initial_state);

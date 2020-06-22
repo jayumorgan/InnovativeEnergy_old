@@ -30,8 +30,9 @@ export type PartialState = {
 };
 
 export type ConfigState = {
-    configurations : string[];
-    current_index: number|null;
-    update_configs() : void;
+    machine_configs : string[];
+    pallet_configs : string[];
+    machine_index : number|null;
+    pallet_index : number|null;
 }
 

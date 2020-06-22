@@ -9,7 +9,7 @@ import {PalletizerContext} from "../context/PalletizerContext";
 import {ConfigContext} from "../context/ConfigContext";
 
 // Requests
-import {get_config} from "../requests/requests";
+import {get_state_config} from "../requests/requests";
 
 // Types
 import {ConfigState} from "../types/Types";
@@ -44,11 +44,11 @@ interface PalletGeometry {
 }
 
 
-function parse_config(config : any) : PalletGeometry {
-    let box_size = config["BOX_SIZE"] as any;
-    let pallet_rows = config["PALLET_ROWS"] as any;
-    let pallet_cols = config["PALLET_COLUMNS"] as any;
-    let pallet_lays = config["PALLET_LAYERS"] as any;
+function parse_config(pallet : any, machine: any) : PalletGeometry {
+    let box_size = pallet["BOX_SIZE"] as any;
+    let pallet_rows = pallet["PALLET_ROWS"] as any;
+    let pallet_cols = pallet["PALLET_COLUMNS"] as any;
+    let pallet_lays = pallet["PALLET_LAYERS"] as any;
 
     let x = pallet_rows["DIRECTION"] as string;
     let y = pallet_cols["DIRECTION"] as string;
@@ -68,7 +68,7 @@ function parse_config(config : any) : PalletGeometry {
     let height = width/25; // not too small, approximately fixed.
     let norm = Math.sqrt(width ** 2 + length ** 2 + height ** 2);
 
-    let pallet_origin = config["PALLET_ORIGIN"];
+    let pallet_origin = pallet["PALLET_ORIGIN"];
     let shift_x = pallet_origin[x] as number;
     let shift_y = pallet_origin[y] as number;
     let shift_z = pallet_origin[z] as number;
@@ -225,7 +225,12 @@ function Visualizer(){
     let config_context = useContext(ConfigContext);
     
     let {current_box, coordinates, status} = palletizer_context;
-    let {configurations, current_index} = config_context as ConfigState; 
+    let  {
+        machine_configs,
+        machine_index,
+        pallet_configs,
+        pallet_index
+    } = config_context as ConfigState; 
 
     let controls = useRef<VisualizerControls | null>(null);
 
@@ -345,12 +350,12 @@ function Visualizer(){
 
     // current index is configuration file index.
     useEffect(()=>{
-        
-        if (current_index != null && configurations.length > current_index){
+        if (machine_index !== null && pallet_index !== null) {
             let consume_config = async () => {
-                let res_data = await get_config(configurations[current_index as number]) as any;
+                let res_data = await get_state_config({machine_configs, pallet_configs, machine_index, pallet_index} as ConfigState);
+                let {pallet, machine} = res_data;
 
-                let g = parse_config(res_data) as PalletGeometry;
+                let g = parse_config(pallet, machine) as PalletGeometry;
                 
                 geometry.current = g;
 
@@ -370,9 +375,9 @@ function Visualizer(){
             };
             
             consume_config();
+            
         }
-
-    },[current_index]);
+    },[machine_index, pallet_index]);
 
     useEffect(()=>{
         if (coordinates && geometry.current && coordinates.length > 0){

@@ -56,10 +56,15 @@ def compute_coordinates(box_size, pallet_origin, pallet_rows, pallet_cols, palle
 class Machine:
 
     def __init__(self):
-        self.config = cf.load_selected_config()
-        cf.output(self.config)
 
-        axes = self.config["AXES"]
+        config = cf.load_selected_config()
+
+        self.pallet_config = config["pallet"]
+        self.machine_config = config["machine"]
+        
+        cf.output(config)
+
+        axes = self.machine_config["AXES"]
         self.x = axes["x"]
         self.x_0 = 0
         
@@ -69,22 +74,24 @@ class Machine:
         self.z = axes["z"]
         self.z_0 = 0
         
-        gain = self.config["GAIN"]
-        speed = self.config["SPEED"]
-        acceleration = self.config["ACCELERATION"]
-        box_size = self.config["BOX_SIZE"]
+        gain = self.machine_config["GAIN"]
+        speed = self.machine_config["SPEED"]
+        acceleration = self.machine_config["ACCELERATION"]
+        network = self.machine_config["NETWORK"]
 
-        network = self.config["NETWORK"]
         
-        pallet_columns = self.config["PALLET_COLUMNS"]
-        pallet_rows = self.config["PALLET_ROWS"]
-        pallet_layers = self.config["PALLET_LAYERS"]
+        box_size = self.pallet_config["BOX_SIZE"]
+
+        
+        pallet_columns = self.pallet_config["PALLET_COLUMNS"]
+        pallet_rows = self.pallet_config["PALLET_ROWS"]
+        pallet_layers = self.pallet_config["PALLET_LAYERS"]
 
         # Bottom left of pallet.
-        pallet_origin = self.config["PALLET_ORIGIN"]
+        pallet_origin = self.pallet_config["PALLET_ORIGIN"]
 
         # Pickup boxes:
-        self.pick_origin = self.config["PICK_ORIGIN"]
+        self.pick_origin = self.pallet_config["PICK_ORIGIN"]
 
         self.mm = fmm.FakeMachineMotion()
 

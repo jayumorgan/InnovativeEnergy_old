@@ -9,10 +9,22 @@ function get_configs(callback: any){
     });
 }
 
-async function get_config(filename : string) {
-    let res = await axios.get("/config/" + filename);
+async function get_config(filename : string, machine: boolean) {
+    let res = await axios.get((machine ? "/machine/" : "/pallet/") + filename);
     return res.data;
 }
+
+async function get_state_config(state : ConfigState) {
+    let {machine_configs, pallet_configs, machine_index, pallet_index} = state;
+    let machine_file = machine_configs[machine_index as number];
+    let pallet_file = pallet_configs[pallet_index as number];
+
+    let pallet_data = await get_config(pallet_file, false);
+    let machine_data = await get_config(machine_file, true);
+
+    return {machine: machine_data, pallet : pallet_data};
+}
+
 
 
 function post_config(filename: string, content: any, callback: any) {
@@ -45,5 +57,6 @@ export {
     get_configs,
     get_config,
     post_config,
-    set_config
+    set_config,
+    get_state_config
 };

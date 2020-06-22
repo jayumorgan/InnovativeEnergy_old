@@ -39,10 +39,11 @@ function Modal({children, close}: ModalProps) {
 interface EditorProps {
     file_name : string;
     title : string;
+    machine: boolean;
     close(): any;
 }
 
-function Editor({file_name, title, close} : EditorProps) {
+function Editor({file_name, title, machine, close} : EditorProps) {
     
     let handle_edit = (value:string) => {
     }
@@ -61,7 +62,7 @@ function Editor({file_name, title, close} : EditorProps) {
     
     useEffect(()=>{
         let fetch_data = async ()=>{
-            let res_data = await get_config(file_name) as any;
+            let res_data = await get_config(file_name, machine) as any;
             set_data(JSON.stringify(res_data, null, "\t"));
             
         }

@@ -50,8 +50,10 @@ interface ExecuteProps {
 
 function ExecutePane({current_box, status} : ExecuteProps) {
     let config_context = useContext(ConfigContext);
+
+
+    let {machine_configs, pallet_configs, machine_index, pallet_index} = config_context as ConfigState;
     
-    let {configurations, current_index} = config_context as ConfigState; 
 
     let [start_box, set_start_box] = useState(current_box);
     let [current_config, set_current_config] = useState<string|null>(null);
@@ -102,8 +104,8 @@ function ExecutePane({current_box, status} : ExecuteProps) {
                     <span>{config_title}</span>
                 </div>
                 <div className="ConfigItem">
-            <select onChange={handle_config_select} value={current_config ? current_config : configurations[current_index as number]}>
-                        {configurations.map((item : string, index : number)=>{
+            <select onChange={handle_config_select} value={current_config ? current_config : machine_configs[machine_index as number]}>
+                        {machine_configs.map((item : string, index : number)=>{
                             return (<option value={item} key={index} > {item} </option>)
                         })}
                     </select>
