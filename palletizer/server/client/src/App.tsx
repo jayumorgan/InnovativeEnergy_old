@@ -26,16 +26,16 @@ function App() {
           <Router>
             <div className="App">
                 <Header />
-                <Switch>
-                  <Route path="/Configuration">
-                      <NavBar tabs={tab_options} selected_index={config_index}/>
-                      <Configuration />
-                  </Route>
-                  <Route path="/">
-                      <NavBar tabs={tab_options} selected_index={general_index}/>
-                      <General />
-                  </Route>
-              </Switch>
+                  <Switch>
+                    <Route path="/Configuration">
+                        <NavBar tabs={tab_options} selected_index={config_index}/>
+                        <Configuration />
+                    </Route>
+                    <Route path="/">
+                        <NavBar tabs={tab_options} selected_index={general_index}/>
+                        <General />
+                    </Route>
+                </Switch>
               <Footer />
             </div>
           </Router>

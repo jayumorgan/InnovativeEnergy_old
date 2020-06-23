@@ -200,11 +200,12 @@ class Palletizer(pc.PalletizerControl):
         self.update({"current_box": count})
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
-            
             # This should be a loop.
-            self.machine.detect_box()
-            
+            while not self.machine.detect_box():
+                sleep(0.3)
+                # self.machine.detect_box()
             self.machine.start_pressure()
+            # Check pressure during pick ^^ .
             self.move_to_drop(count)
         else:
             print(f"Motion completed, wait on restart..")
@@ -213,7 +214,6 @@ class Palletizer(pc.PalletizerControl):
 
     def move_to_drop(self, count):
         self.control_checks()
-        print(f"Moving to drop: {count}")
         self.machine.move_to_drop(count)
         self.machine.stop_pressure()
         self.move_to_pick(count + 1)

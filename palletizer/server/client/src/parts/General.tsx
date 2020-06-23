@@ -23,7 +23,6 @@ import "./css/General.scss";
 import logo from "../images/vention_logo.png";
 
 
-
 var control = MQTTControl();
 
 
@@ -57,7 +56,6 @@ function ConfigCell({title , children} : StackProps ) {
             </div>
             {children}
         </div>
-        
     );
 }
 

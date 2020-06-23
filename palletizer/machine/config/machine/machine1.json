@@ -16,7 +16,7 @@
 		"GATEWAY": "192.168.0.1",
 		"NETMASK": "255.255.255.0"
 	},
-	"PRESSURE_OUPUT": {
+	"PRESSURE_OUTPUT": {
 		"PIN": 3,
 		"NETWORK_ID" : 1
 	},
