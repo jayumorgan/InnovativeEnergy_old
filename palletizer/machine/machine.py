@@ -79,15 +79,17 @@ class Machine:
         acceleration = self.machine_config["ACCELERATION"]
         network = self.machine_config["NETWORK"]
 
-        
-        box_size = self.pallet_config["BOX_SIZE"]
+        self.pressure_ouput = self.machine_config["PRESSURE_OUTPUT"]
+        self.box_detector = self.machine_config["BOX_DETECTION"]
 
         
+        
+        box_size = self.pallet_config["BOX_SIZE"]
         pallet_columns = self.pallet_config["PALLET_COLUMNS"]
         pallet_rows = self.pallet_config["PALLET_ROWS"]
         pallet_layers = self.pallet_config["PALLET_LAYERS"]
 
-        # Bottom left of pallet.
+        # lowest coordinate value of [x,y,z] (increment from here).
         pallet_origin = self.pallet_config["PALLET_ORIGIN"]
 
         # Pickup boxes:
@@ -104,8 +106,6 @@ class Machine:
         for axis, gain in gain.items():
             axis_number = axes[axis]
             self.mm.configAxis(axis_number,MICROSTEPS.ustep_8,gain)
-
-
 
         self.mm.releaseEstop()
         self.mm.resetSystem()
@@ -127,7 +127,6 @@ class Machine:
         self.mm.emitCombinedAxesAbsoluteMove([self.x, self.y], [x,y])
         self.mm.waitForMotionCompletion()
 
-
     def move_vertical(self, point): # point is z_coordinate
         self.mm.emitAbsoluteMove(self.z, point["z"])
         self.mm.waitForMotionCompletion()
@@ -135,7 +134,6 @@ class Machine:
     def move_all(self, point):
         self.move_planar(point)
         self.move_vertical(point)
-
         
     def move_to_pick(self):
         self.move_all(self.pick_origin)
@@ -145,9 +143,29 @@ class Machine:
         self.move_planar(coordinate)
         self.move_vertical(coordinate)
 
-# Also implement the checks in here.
 
+    def __read_io(self, network_id, pin):
+        return self.mm.digitalRead(network_id, pin)
         
+    def detect_box(self):
+        pin = self.box_detector["PIN"]
+        network_id = self.box_detector["NETWORK_ID"]
+        pin_value = self.__read_io(network_id, pin)
+        return pin_value == 1
+
+
+    def __write_pressure(self, on):
+        pin = self.pressure_ouput["PIN"]
+        network_id = self.pressure_ouput["NETWORK_ID"]
+        self.mm.digitalWrite(network_id, pin, 1 if on else 0)
+        
+    
+    def start_pressure(self):
+        self.__write_pressure(True)
+
+    def stop_pressure(self):
+        self.__write_pressure(False)
+
 
 
 # this should be a function.
@@ -182,6 +200,11 @@ class Palletizer(pc.PalletizerControl):
         self.update({"current_box": count})
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
+            
+            # This should be a loop.
+            self.machine.detect_box()
+            
+            self.machine.start_pressure()
             self.move_to_drop(count)
         else:
             print(f"Motion completed, wait on restart..")
@@ -192,9 +215,7 @@ class Palletizer(pc.PalletizerControl):
         self.control_checks()
         print(f"Moving to drop: {count}")
         self.machine.move_to_drop(count)
-
-        print(f"Releasing pressure")
-
+        self.machine.stop_pressure()
         self.move_to_pick(count + 1)
 
     def command_status_update(self, command):

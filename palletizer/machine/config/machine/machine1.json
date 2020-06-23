@@ -15,5 +15,13 @@
 		"IP_ADDRESS": "192.168.7.2",
 		"GATEWAY": "192.168.0.1",
 		"NETMASK": "255.255.255.0"
+	},
+	"PRESSURE_OUPUT": {
+		"PIN": 3,
+		"NETWORK_ID" : 1
+	},
+	"BOX_DETECTION" : {
+		"PIN" : 2,
+		"NETWORK_ID" : 2
 	}
 }

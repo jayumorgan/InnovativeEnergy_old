@@ -40,3 +40,6 @@ class FakeMachineMotion:
         
     def digitalWrite(self, deviceNetworkId, pin, value):
         print("Writing to (pin,networkID) ",pin, deviceNetworkId, " value ", value)
+
+    def digitalRead(self, deviceNetworkId, pin):
+        return 1
