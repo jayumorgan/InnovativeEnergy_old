@@ -1,6 +1,6 @@
 // Express
 import express from "express";
-import morgan from "morgan";
+// import morgan from "morgan";
 
 // File Handling
 import fs, { BaseEncodingOptions, Dirent } from "fs";
@@ -120,7 +120,7 @@ function set_selected_config(file_name : string, config_type : string,  callback
 // Express app setup.
 const app = express();
 // app.use(express.json());
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 
 let router : express.Router = express.Router();
 
@@ -173,7 +173,8 @@ router.use(express.static(BUILD_PATH));
 
 app.use(router);
 
-// export default router;
+
+export default router;
 
 
 let server = app.listen(PORT, "localhost",()=>{
