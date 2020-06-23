@@ -153,7 +153,6 @@ class Machine:
         pin_value = self.__read_io(network_id, pin)
         return pin_value == 1
 
-
     def __write_pressure(self, on):
         pin = self.pressure_ouput["PIN"]
         network_id = self.pressure_ouput["NETWORK_ID"]

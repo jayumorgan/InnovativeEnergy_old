@@ -15,6 +15,10 @@ let CURRENT_CONFIG_PATH = path.join(CONFIG_ROOT.toString(), 'current_configurati
 let CONFIG_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), 'config');
 let MACHINE_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), "machine");
 let PALLET_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), "pallet");
+let BUILD_PATH : fs.PathLike = path.join(__dirname,"..", "client", "build");
+
+
+
 const PORT = 3011;
 
 interface ConfigUpload {
@@ -158,6 +162,14 @@ router.get("/configs", (req:express.Request, res: express.Response)=>{
 router.get("/", (req: express.Request, res: express.Response)=> {
     res.send("Index worked.");
 });
+
+
+router.get("/palletizer", (req : express.Request, res : express.Response)=>{
+    res.sendFile(path.join(BUILD_PATH.toString(), "index.html").toString());
+    
+});
+
+router.use(express.static(BUILD_PATH));
 
 app.use(router);
 
