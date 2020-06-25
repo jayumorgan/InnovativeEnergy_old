@@ -12,3 +12,4 @@ palletizer/server/client/node_modules
 palletizer/machine/__pycache__/
 palletizer/backup/
 palletizer/deploy
+*.beam
