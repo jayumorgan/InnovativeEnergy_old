@@ -46,20 +46,37 @@ $modal-background : rgba(22,35,56,0.8);
             font-size: 1.2em ;
         }
 
-        .UnlockButton {
+
+        @mixin button-style() {
+            
             border-radius: $border-radius;
             font-size: 1em;
             width: 74%;
             height: 74%;
             cursor: pointer;
             @include flex-center();
-            background-color: $light-grey;
-            background-color: $green;
-            // padding: $margin;
             span {
                 color: $off-white;
             }
+        }
+
+        .UnlockButton {
+            @include button-style();
+            background-color: $green;
+            span {
+                color: $dark-blue;
+            }
+            // padding: $margin;
             // padding: $double-margin;
+        }
+
+        .UnlockButton:hover {
+            @include shadow();
+        }
+
+        .UnlockButtonLocked {
+            @include button-style();
+            background-color: $light-grey;
         }
 
         

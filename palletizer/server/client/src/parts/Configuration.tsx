@@ -101,6 +101,8 @@ function Configuration() {
         machine: true
     });
 
+    let [locked, set_locked] = useState<boolean>(true);
+
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
     
@@ -117,6 +119,11 @@ function Configuration() {
     let close_editor = ()=>{
         set_editor({...editor, edit: false});
     };
+
+
+    let close_unlock = () => {
+        set_locked(false);
+    }
     
     return (
         <Fragment>
@@ -125,7 +132,7 @@ function Configuration() {
             <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_editor(pallet_title)} />
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine}/>}
-            <Unlock close={close_editor} />
+            {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );
 }

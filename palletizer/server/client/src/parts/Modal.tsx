@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState, useRef } from 'react';
+import React, { ReactNode, useEffect, useState, useRef, ReactEventHandler } from 'react';
  
 // Ace Editor
 import AceEditor, { IAceEditorProps } from "react-ace";
@@ -124,28 +124,41 @@ function UnlockItem(props : any) {
 
 function Unlock({close} : UnlockProps) {
 
+    let [valid, set_valid] = useState<boolean>(false);
+
+    let password = "123123";
+    
+    let handle_input = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value === password) {
+            set_valid(true);
+        }else{
+            set_valid(false);
+        }
+    }
+
+    let handle_close = ()=>{
+        valid && close();
+    };
+    
 
     return(
-        <Modal close={close} >
+        <Modal close={handle_close} >
             <div className="Unlock">
-            <UnlockItem>
-                <span id="UnlockTitle">
-                {"Enter password to unlock"}
-                </span>
-            </UnlockItem>
-
-            <UnlockItem>
-                <input type="password" id="unlock" />
-            </UnlockItem>
-
-            <UnlockItem>
-            <div className="UnlockButton">
-                <span>
-                Unlock
-                </span>
-            </div>
-            </UnlockItem>
-            
+                <UnlockItem>
+                    <span id="UnlockTitle">
+                    {"Enter password to unlock"}
+                    </span>
+                </UnlockItem>
+                <UnlockItem>
+                    <input type="password" id="unlock" onChange={handle_input} />
+                </UnlockItem>
+                <UnlockItem>
+                    <div className={"UnlockButton" + (valid ? "" : "Locked")} onClick={handle_close}>
+                        <span>
+                        Unlock
+                        </span>
+                    </div>
+                </UnlockItem>
             </div>
         </Modal>
     );
