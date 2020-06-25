@@ -32,8 +32,7 @@ $modal-background : rgba(22,35,56,0.8);
         flex-direction: column;
         margin-top: $quad-margin;
         margin-bottom: auto;
-        // border-radius: $border-radius;
-        // border: $container-border;
+        width: 70%;
 
         #EditorTitle {
             color: white;
@@ -43,11 +42,10 @@ $modal-background : rgba(22,35,56,0.8);
             background-color: $container-blue;
             border-radius: $border-radius $border-radius 0 0;
             border: $container-border;
-            
         }
 
         .ace_editor, .ace_editor div{
-            font-family:monospace
+            font-family:monospace;
         }
 
         #AceEditor {

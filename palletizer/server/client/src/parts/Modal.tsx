@@ -57,14 +57,17 @@ function Editor({file_name, title, machine, close} : EditorProps) {
         theme: "xcode",
         onChange: handle_edit,
         name: "AceEditor",
-        vale: data
+        vale: data,
+        style: {
+            width: "auto",
+            height: "500px"
+        }
     } as IAceEditorProps;
     
     useEffect(()=>{
         let fetch_data = async ()=>{
             let res_data = await get_config(file_name, machine) as any;
             set_data(JSON.stringify(res_data, null, "\t"));
-            
         }
         fetch_data();
     },[]);
@@ -93,10 +96,10 @@ function Editor({file_name, title, machine, close} : EditorProps) {
                         {"Close"}
                     </span>
                 </div>
-            <div className="SaveEditor" onClick={save_config}>
-                    <span>
-                        {"Save"}
-                    </span>
+                <div className="SaveEditor" onClick={save_config}>
+                        <span>
+                            {"Save"}
+                        </span>
                 </div>
             </div>
         </Modal>
