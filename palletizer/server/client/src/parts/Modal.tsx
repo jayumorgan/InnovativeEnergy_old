@@ -29,9 +29,7 @@ function Modal({children, close}: ModalProps) {
     
     return (
         <div className={modal_class} onClick={close_modal}>
-            <div className="ModalContent">
                 {children}
-            </div>
         </div>
     );
 }
@@ -86,6 +84,7 @@ function Editor({file_name, title, machine, close} : EditorProps) {
     
     return (
         <Modal close={close}>
+            <div className="ModalContent">
             <span id="EditorTitle">
                 {modal_title}
             </span>
@@ -102,12 +101,58 @@ function Editor({file_name, title, machine, close} : EditorProps) {
                         </span>
                 </div>
             </div>
+            </div>
         </Modal>
     );
 }
 
 
-export {Editor};
+interface UnlockProps {
+    close() : void;
+}
+
+
+function UnlockItem(props : any) {
+
+
+    return (
+        <div className="UnlockItem">
+            {props.children}
+        </div>
+    )
+}
+
+function Unlock({close} : UnlockProps) {
+
+
+    return(
+        <Modal close={close} >
+            <div className="Unlock">
+            <UnlockItem>
+                <span id="UnlockTitle">
+                {"Enter password to unlock"}
+                </span>
+            </UnlockItem>
+
+            <UnlockItem>
+                <input type="password" id="unlock" />
+            </UnlockItem>
+
+            <UnlockItem>
+            <div className="UnlockButton">
+                <span>
+                Unlock
+                </span>
+            </div>
+            </UnlockItem>
+            
+            </div>
+        </Modal>
+    );
+}
+
+
+export {Editor, Unlock};
 
 
 export default Modal;

@@ -24,6 +24,58 @@ $modal-background : rgba(22,35,56,0.8);
     align-content: center;
     justify-content: center;
 
+    .Unlock {
+        @include shadow();
+        margin-top: $quad-margin;
+        margin-bottom: auto;
+        background-color: $off-white;
+        color: $dark-blue;
+        border-radius: $border-radius;
+        display: grid;
+        width: 220pt;
+        height: 141pt;
+        grid-template-columns:  100%;
+        grid-template-rows: 30% 30% 30%;
+        // grid-row-gap: $double-margin;
+        .UnlockItem {
+            @include flex-center();
+            height: 100%;
+            width: 100%;
+        }
+        #UnlockTitle {
+            font-size: 1.2em ;
+        }
+
+        .UnlockButton {
+            border-radius: $border-radius;
+            font-size: 1em;
+            width: 74%;
+            height: 74%;
+            cursor: pointer;
+            @include flex-center();
+            background-color: $light-grey;
+            background-color: $green;
+            // padding: $margin;
+            span {
+                color: $off-white;
+            }
+            // padding: $double-margin;
+        }
+
+        
+        input {
+            border-radius: $border-radius;
+            color: $dark-blue;
+            border: $container-border;
+            font-size: 1em;
+            
+            // width: 100%;
+            padding: $margin;
+        }
+            
+    }
+    
+
     .ModalContent {
         @include shadow();
         display: flex;

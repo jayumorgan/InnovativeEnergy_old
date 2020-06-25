@@ -1,6 +1,6 @@
 import React, { useContext, useState, Fragment } from 'react';
 
-import Modal, {Editor} from "./Modal";
+import Modal, {Editor, Unlock} from "./Modal";
 
 import {ConfigContext} from "../context/ConfigContext";
 
@@ -125,6 +125,7 @@ function Configuration() {
             <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_editor(pallet_title)} />
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine}/>}
+            <Unlock close={close_editor} />
         </Fragment>
     );
 }

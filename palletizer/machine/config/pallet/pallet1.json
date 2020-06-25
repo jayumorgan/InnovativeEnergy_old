@@ -20,7 +20,7 @@
 	},
 	"PALLET_COLUMNS": {
 		"DIRECTION": "y",
-		"COUNT": 4
+		"COUNT": 3
 	},
 	"PALLET_LAYERS": {
 		"DIRECTION": "z",

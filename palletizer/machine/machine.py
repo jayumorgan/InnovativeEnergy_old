@@ -189,25 +189,34 @@ class Palletizer(pc.PalletizerControl):
     def move_to_pick(self,count):
         self.control_checks()
         self.update({"current_box": count})
+        self.update_information("Status", "Cycle has completed. Awaiting pallet change.")
+        
+        # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
             # This should be a loop.
             while not self.machine.detect_box():
                 sleep(0.3)
                 # self.machine.detect_box()
-            self.update_information("Status", "Box Detected: Starting Pressure.")
+            # self.update_information("Status", "Box Detected: Starting Pressure.")
             self.machine.start_pressure()
             # Check pressure during pick ^^ .
+            self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
             self.move_to_drop(count)
+
         else:
             print(f"Motion completed, wait on restart..")
             self.update({"status": "Complete"})
+            self.update_information("Status", "Cycle has completed. Awaiting pallet change.")
             self.start(0)
 
     def move_to_drop(self, count):
         self.control_checks()
         self.machine.move_to_drop(count)
-        self.update_information("Status", "Dropping Box: Releasing Pressure.")
+        self.update_information("Warning", "Low air pressure detected. Check air pressure source.")
+        
+        # self.update_information("Status", "Dropping Box: Releasing Pressure.")
+        # self.update_information("Warning", "Box")
         self.machine.stop_pressure()
         self.move_to_pick(count + 1)
 

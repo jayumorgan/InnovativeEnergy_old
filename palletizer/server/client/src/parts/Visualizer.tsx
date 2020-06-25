@@ -260,8 +260,8 @@ function Visualizer(){
             render_scene();
         };
         
-        let axes_helper = new Three.AxesHelper(1);
-        scene.add(axes_helper);
+        // let axes_helper = new Three.AxesHelper(1);
+        // scene.add(axes_helper);
 
         let current_box_count = 0;
         let cardboard_box : Three.Mesh;

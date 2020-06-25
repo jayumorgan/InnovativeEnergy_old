@@ -21,6 +21,11 @@ import "./css/General.scss";
 
 // Logo image
 import logo from "../images/vention_logo.png";
+import {ReactComponent as BellImage} from "./images/bell.svg";
+import {ReactComponent as DangerImage} from "./images/danger.svg";
+import {ReactComponent as ExclamationImage} from "./images/exclamation-circle.svg";
+import {ReactComponent as InfoImage} from "./images/info-circle.svg";
+import {ReactComponent as CircleImage} from "./images/circle.svg";
 
 
 var control = MQTTControl();
@@ -160,6 +165,33 @@ interface StatusBarProps {
     items: StatusItem[];
 }
 
+
+function circle_image_style(value: string) : any {
+    let color : string = "gray";     
+    switch (value) {
+
+            case "Running" : {
+                color = "rgb(91,196,126)";
+                break;
+            }
+            case "Paused" : {
+                color = "rgb(250, 234, 47)"
+                break;
+            }
+            case "Stopped" : {
+                color = "red";
+                break;
+            }
+            default : {
+                color = "grey";
+                break;
+            }
+            
+    }
+
+    return {fill : color};
+}
+
 function StatusBar({items} : StatusBarProps) {
     return (
         <div className="StatusBar">
@@ -168,6 +200,8 @@ function StatusBar({items} : StatusBarProps) {
                     <div className="StatusItem" key={index}>
                         <span>{item.title.toUpperCase()}</span>
                         <div className="StatusValue">
+                        {item.title.toUpperCase() === "STATUS" && 
+                            <CircleImage style={circle_image_style(item.value)}/>}
                             <span>
                                 {item.value}
                             </span>
@@ -188,6 +222,7 @@ interface InformationLogProps {
 
 
 function InformationLog({DateString, Description, Type}: InformationLogProps) {
+    console.log({DateString, Description, Type});
 
     let date = new Date(DateString);
     let hours = date.getHours();
@@ -198,11 +233,38 @@ function InformationLog({DateString, Description, Type}: InformationLogProps) {
     let date_string =  make_date_string(day, month, year);
     let time_string = make_time_string(hours, minutes);
 
+    let image : ReactElement;
+
+    switch (Type) {
+           case "Status" : {
+               image = (<InfoImage />);
+               break;
+           }
+            case "Error" : {
+                image = (<ExclamationImage id={"Error"} />);
+                break;
+            }
+            case "Warning" : {
+                image = (<BellImage />);
+                break;
+            }
+            default : {
+                image = (<InfoImage />);
+                break;
+            }
+    }
+    
+
     return (
         <div className="InformationLog">
-            <div className="InformationLogDate">
-                <span>{time_string}</span>
-            <span id="DateString"> {date_string} </span>
+            <div className="InformationLogLeft">
+                <div className="InformationLogImage">
+                        {image}
+                </div>
+                <div className="InformationLogDate">
+                    <span>{time_string}</span>
+                <span id="DateString"> {date_string} </span>
+                </div>
             </div>
             <span>
                 {Description}
@@ -221,6 +283,16 @@ function InformationLogContainer() {
     let palletizer_context = useContext(PalletizerContext);
 
     let {information} = palletizer_context as PalletizerState;
+    information = information.reverse();
+
+
+    if (information.length < 2) {
+        information = [{DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"},
+{DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"},
+                       {DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"},
+                       {DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"}
+                      ]
+    }
 
     return (
         <div className="InformationLogContainer">
@@ -279,7 +351,7 @@ function General () {
     });
     items.push({
         title: "Time Remaining",
-        value: `${time} Hours`
+        value: `${time} Minutes`
     });
 
 

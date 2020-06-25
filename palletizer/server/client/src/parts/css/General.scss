@@ -174,6 +174,12 @@ $col-3 : 100% - $col-1 - $col-2;
                     font-weight: $bold-font;
                     font-size: $large-font;
                     padding-top: $margin;
+                    svg {
+                        height: 20pt;
+                        width: 20pt;
+                        // fill: red;
+                        padding-right: $margin;
+                    }
                 }
             }
         }
@@ -202,35 +208,63 @@ $col-3 : 100% - $col-1 - $col-2;
         @include stretch-grid-col(2,1,2);
         // max-height: 35vh;
         // height: auto;
+        height: 100%;
         
         .InformationLogContainer {
             // width: 100%;
             overflow-y: auto;
+            // height: 40vh;
             max-height: 40vh;
-            min-height: 40vh;
+            // min-height: 100%;
             .InformationLog {
                 display: flex; 
-                justify-content: space-between;
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 20% 60% 20%;
+                // justify-content: space-between;
                 border-bottom: $container-border;
                 padding: $double-margin;
-                align-items: center;
-                .InformationLogDate {
-                    display: flex;
-                    flex-direction: column;
-                    align-content: center;
-                    justify-content: center;
-                    span {
-                        text-align: left;
-                        padding-bottom: $margin;
+                // align-items: center;
+                .InformationLogLeft {
+                    display: grid;
+                    grid-template-columns: 30% 70%;
+                    grid-column-rows: 100%;
+                    grid-column-gap: $margin;
+                    .InformationLogImage {
+                        @include flex-center();
+                        justify-content: flex-start;
+                        svg {
+                            width: 20pt;
+                            height: auto;
+                            fill: $dark-blue;
+                        }
+                        g {
+                            fill: $dark-blue;
+                        }
+                        #Error {
+                            fill: red;
+                        }
                     }
-                    #DateString {
-                        font-weight: $bold-font;
-                        padding-bottom: 0;
+                    .InformationLogDate {
+                        display: flex;
+                        flex-direction: column;
+                        align-content: center;
+                        justify-content: center;
+                        span {
+                            text-align: left;
+                            padding-bottom: $margin;
+                        }
+                        #DateString {
+                            font-weight: $bold-font;
+                            padding-bottom: 0;
+                        }
                     }
+                    
                 }
 
                 .ErrorDismiss {
                     text-decoration: underline;
+                    text-align: right;
                     cursor: pointer;
                 }
             }
