@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+from datetime import datetime as dt
 import paho.mqtt.client as mqtt
 import json
 from threading import Thread, RLock
@@ -12,9 +12,7 @@ MQTT_IP = "127.0.0.1"
 MQTT_PORT = 1883
 MQTT_TIMEOUT = 60
 
-
-
-# Decorator for locking>
+# Decorator for locking
 
 class PalletizerControl:
 
@@ -22,6 +20,7 @@ class PalletizerControl:
         # Setup the state client.
         self.state_client = mqtt.Client()
         self.state_topic = PALLETIZER_TOPIC + "state"
+        self.info_topic = PALLETIZER_TOPIC + "information"
 
         self.state = {
             "status" : "Sleep",
@@ -31,6 +30,8 @@ class PalletizerControl:
             "time": 0,
             "coordinates": []
         }
+
+        self.information = []
 
         # For requests for state.
         self.req_topic = PALLETIZER_TOPIC + "request"
@@ -88,7 +89,6 @@ class PalletizerControl:
 
         self.state_client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
         pub = self.state_client.publish(self.state_topic, data)
-
         self.state_client.disconnect()
 
     def update(self, updates, force=False):
@@ -103,4 +103,23 @@ class PalletizerControl:
 
         if update or force:
             self.__publish(state)
-    
+
+    def update_information(self,Type, Description):
+        information = {
+            "Type" : Type,
+            "Description" : Description,
+            "Date" : dt.now().strftime("%Y-%m-%d %H:%M:%S") 
+        }
+        self.__lock.acquire()
+        self.information.append(information)
+        length = len(self.information)
+        self.information = self.information[length - 10 : length]
+        information = self.information
+        self.__lock.release()
+
+        data = json.dumps(information)
+
+        self.state_client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
+        pub = self.state_client.publish(self.info_topic, data)
+        self.state_client.disconnect()
+

@@ -8,7 +8,7 @@ const TOPIC = "palletizer/";
 
 // MQTT example: https://www.cloudamqp.com/docs/nodejs_mqtt.html
 
-function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient {
+function MQTTSubscriber(handle_information: any, handle_state: any) : mqtt.MqttClient {
 
     let options = {
         clientId: "server-MQTTSubscriber",
@@ -25,7 +25,7 @@ function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient 
             // console.log("Subscribed to " + TOPIC + "state...");
         });
 
-        client.subscribe(TOPIC + "error", ()=>{
+        client.subscribe(TOPIC + "information", ()=>{
             // console.log("Subscribed to " + TOPIC + "error...");
         });
 
@@ -41,8 +41,8 @@ function MQTTSubscriber(handle_error: any, handle_state: any) : mqtt.MqttClient 
                 handle_state(message);
                 break;
             }
-            case TOPIC + "error" : {
-                handle_error(message);
+            case TOPIC + "information" : {
+                handle_information(message);
                 break;
             }
             default : {

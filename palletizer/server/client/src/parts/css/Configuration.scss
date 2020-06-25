@@ -16,7 +16,6 @@ $scroll-height: 100% - $add-height;
         display: grid;
         grid-template-rows:  $scroll-height $add-height;
         grid-template-columns: 100%;
-
         .ConfigScroll {
             @include grid-coordinate(1,1);
             display: flex;
@@ -30,7 +29,6 @@ $scroll-height: 100% - $add-height;
             margin-top: $double-margin;
             padding-bottom: $margin;
             overflow-y: auto;
-
             .ConfigCell {
                 width: 95%;
                 border: $container-border;
@@ -69,7 +67,6 @@ $scroll-height: 100% - $add-height;
                 }
             }
         }
-
         .ConfigAdd {
             @include grid-coordinate(2,1);
             @include flex-center();

@@ -10,6 +10,7 @@ import {ConfigState} from "../types/Types";
 import "./css/Configuration.scss";
 import "./css/Login.scss";
 
+// Use : https://app.quicktype.io for data validation.
 
 interface ConfigContainerProps {
     title: string;

@@ -4,9 +4,10 @@ export type ReducerAction = {
 };
 
 
-export type PalletizerError = {
-    date: Date;
-    description: string;
+export type PalletizerInformation = {
+    Date: Date;
+    Description: string;
+    Type: string;
 }
 
 
@@ -16,7 +17,7 @@ export type PalletizerState = {
     current_box: number; 
     total_box: number;
     time: number; // hours? 
-    errors: PalletizerError[];
+    information: PalletizerInformation[];
     coordinates: any[];
 };
 

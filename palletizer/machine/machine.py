@@ -58,13 +58,12 @@ class Machine:
     def __init__(self):
 
         config = cf.load_selected_config()
-
         self.pallet_config = config["pallet"]
         self.machine_config = config["machine"]
-        
         cf.output(config)
 
         axes = self.machine_config["AXES"]
+
         self.x = axes["x"]
         self.x_0 = 0
         
@@ -82,8 +81,6 @@ class Machine:
         self.pressure_ouput = self.machine_config["PRESSURE_OUTPUT"]
         self.box_detector = self.machine_config["BOX_DETECTION"]
 
-        
-        
         box_size = self.pallet_config["BOX_SIZE"]
         pallet_columns = self.pallet_config["PALLET_COLUMNS"]
         pallet_rows = self.pallet_config["PALLET_ROWS"]
@@ -102,7 +99,6 @@ class Machine:
         self.mm.emitSpeed(speed)
         self.mm.emitAcceleration(acceleration)
 
-
         for axis, gain in gain.items():
             axis_number = axes[axis]
             self.mm.configAxis(axis_number,MICROSTEPS.ustep_8,gain)
@@ -110,9 +106,7 @@ class Machine:
         self.mm.releaseEstop()
         self.mm.resetSystem()
 
-
         self.box_count = len(self.coordinates)
-        
         for c in self.coordinates:
             print(c)
 
@@ -143,7 +137,6 @@ class Machine:
         self.move_planar(coordinate)
         self.move_vertical(coordinate)
 
-
     def __read_io(self, network_id, pin):
         return self.mm.digitalRead(network_id, pin)
         
@@ -164,7 +157,6 @@ class Machine:
 
     def stop_pressure(self):
         self.__write_pressure(False)
-
 
 
 # this should be a function.
@@ -203,6 +195,7 @@ class Palletizer(pc.PalletizerControl):
             while not self.machine.detect_box():
                 sleep(0.3)
                 # self.machine.detect_box()
+            self.update_information("Status", "Box Detected: Starting Pressure.")
             self.machine.start_pressure()
             # Check pressure during pick ^^ .
             self.move_to_drop(count)
@@ -214,6 +207,7 @@ class Palletizer(pc.PalletizerControl):
     def move_to_drop(self, count):
         self.control_checks()
         self.machine.move_to_drop(count)
+        self.update_information("Status", "Dropping Box: Releasing Pressure.")
         self.machine.stop_pressure()
         self.move_to_pick(count + 1)
 
@@ -238,7 +232,6 @@ class Palletizer(pc.PalletizerControl):
         while True:
             command = self.get_command()
             self.command_status_update(command)
-
             if interrupted:
                 if command == "START":
                     break
