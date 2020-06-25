@@ -180,14 +180,16 @@ function StatusBar({items} : StatusBarProps) {
 }
 
 
-interface ErrorLogProps {
-    date: Date;
-    description: string;
+interface InformationLogProps {
+    DateString: string;
+    Description: string;
+    Type: string;
 }
 
 
-function ErrorLog({date, description}: ErrorLogProps) {
+function InformationLog({DateString, Description, Type}: InformationLogProps) {
 
+    let date = new Date(DateString);
     let hours = date.getHours();
     let minutes = date.getMinutes();
     let day = date.getDate();
@@ -197,13 +199,13 @@ function ErrorLog({date, description}: ErrorLogProps) {
     let time_string = make_time_string(hours, minutes);
 
     return (
-        <div className="ErrorLog">
-            <div className="ErrorLogDate">
+        <div className="InformationLog">
+            <div className="InformationLogDate">
                 <span>{time_string}</span>
             <span id="DateString"> {date_string} </span>
             </div>
             <span>
-            {description}
+                {Description}
             </span>
             <div className="ErrorDismiss">
                 <span>
@@ -214,21 +216,16 @@ function ErrorLog({date, description}: ErrorLogProps) {
     );
 }
 
-function ErrorLogContainer() {
+function InformationLogContainer() {
     
-    let errors = [] as ErrorLogProps[];
-    
-    for (let i = 0; i < 15; i++){
-        let date = new Date();
-        let description = "./"+String(i)+" Segmentation fault (core dumped)";
-        let item = {"date": date, description: description} as ErrorLogProps;
-        errors.push(item);
-    }
+    let palletizer_context = useContext(PalletizerContext);
+
+    let {information} = palletizer_context as PalletizerState;
 
     return (
-        <div className="ErrorLogContainer">
-            {errors.map((err : ErrorLogProps, index : number) => {
-                return (<ErrorLog {...err} key={index} />)
+        <div className="InformationLogContainer">
+            {information.map((err : InformationLogProps, index : number) => {
+                return (<InformationLog {...err} key={index} />)
             })}
         </div>
     );
@@ -306,7 +303,7 @@ function General () {
             </div>
             <div className="InformationContainer">
                 <StackContainer title={"Information Console"}>
-                    <ErrorLogContainer />
+                    <InformationLogContainer />
                 </StackContainer>
             </div>
         </div>

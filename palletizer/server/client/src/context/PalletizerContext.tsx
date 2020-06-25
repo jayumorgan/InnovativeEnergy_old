@@ -9,8 +9,7 @@ import {PalletizerState, PalletizerInformation, PartialState, ReducerAction} fro
 function PalletizerReducer(state : PalletizerState, action : ReducerAction) {
     switch (action.type_of) {
         case "INFORMATION" : {
-            state.information.push(action.payload as PalletizerInformation)
-            return state;
+            return {...state, information : action.payload as PalletizerInformation[]};
         }
         case "STATE" : {
             return {information: state.information, ...(action.payload as PartialState)} as PalletizerState;

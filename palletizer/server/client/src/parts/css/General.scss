@@ -17,15 +17,12 @@ $col-2 : 30%;
 $col-3 : 100% - $col-1 - $col-2;
 
 .GeneralGrid {
-
     display: grid;
     grid-template-rows: $top-height $bottom-height;
     grid-template-columns: $col-1 $col-2 auto;
     padding: $double-margin;
     grid-row-gap: $double-margin;
     grid-column-gap: $double-margin;
-    // height: 100%;
-
     .ExecuteContainer {
         // @include grid-coordinate(1,1);
         height: 100%;
@@ -48,7 +45,6 @@ $col-3 : 100% - $col-1 - $col-2;
                     text-align: center;
                 }
             }
-
             .ConfigCell {
                 display: grid;
                 grid-template-rows: 100%;
@@ -104,8 +100,6 @@ $col-3 : 100% - $col-1 - $col-2;
                     padding: $margin;
                 }
             }
-
-
             @mixin button-stizz() {
                 @include flex-center();
                 .ButtonContainer {
@@ -153,9 +147,6 @@ $col-3 : 100% - $col-1 - $col-2;
                 }
             }
         }
-
-        
-    
     }
 
     .StatusContainer {
@@ -186,8 +177,6 @@ $col-3 : 100% - $col-1 - $col-2;
                 }
             }
         }
-
-        
     }
 
 
@@ -207,7 +196,6 @@ $col-3 : 100% - $col-1 - $col-2;
                 height: auto;
             }
         }
-        
     }
     
     .InformationContainer {
@@ -215,17 +203,18 @@ $col-3 : 100% - $col-1 - $col-2;
         // max-height: 35vh;
         // height: auto;
         
-        .ErrorLogContainer {
+        .InformationLogContainer {
             // width: 100%;
             overflow-y: auto;
             max-height: 40vh;
-            .ErrorLog {
+            min-height: 40vh;
+            .InformationLog {
                 display: flex; 
                 justify-content: space-between;
                 border-bottom: $container-border;
                 padding: $double-margin;
                 align-items: center;
-                .ErrorLogDate {
+                .InformationLogDate {
                     display: flex;
                     flex-direction: column;
                     align-content: center;

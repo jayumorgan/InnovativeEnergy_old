@@ -108,7 +108,7 @@ class PalletizerControl:
         information = {
             "Type" : Type,
             "Description" : Description,
-            "Date" : dt.now().strftime("%Y-%m-%d %H:%M:%S") 
+            "DateString" : dt.now().strftime("%Y/%m/%d %H:%M:%S") 
         }
         self.__lock.acquire()
         self.information.append(information)

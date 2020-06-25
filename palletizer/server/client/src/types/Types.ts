@@ -5,10 +5,10 @@ export type ReducerAction = {
 
 
 export type PalletizerInformation = {
-    Date: Date;
+    DateString: string;
     Description: string;
     Type: string;
-}
+};
 
 
 export type PalletizerState = {
