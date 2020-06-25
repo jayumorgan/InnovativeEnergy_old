@@ -123,7 +123,6 @@ function UnlockItem(props : any) {
 }
 
 function Unlock({close} : UnlockProps) {
-
     let [valid, set_valid] = useState<boolean>(false);
 
     let password = "123123";
@@ -134,13 +133,12 @@ function Unlock({close} : UnlockProps) {
         }else{
             set_valid(false);
         }
-    }
+    };
 
     let handle_close = ()=>{
         valid && close();
     };
     
-
     return(
         <Modal close={handle_close} >
             <div className="Unlock">

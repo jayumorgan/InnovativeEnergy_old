@@ -210,8 +210,52 @@ $col-3 : 100% - $col-1 - $col-2;
         // max-height: 35vh;
         // height: auto;
         height: 100%;
-        
+
+        .StackTitle {
+            @include grid-coordinate(1,1);
+            border-radius: $border-radius $border-radius 0 0;
+            border-bottom: $container-border;
+            background-color: $container-blue;
+            padding-left: $double-margin;
+            color:white;
+            // @include flex-center();
+            // justify-content: flex-start;
+            display: grid;
+            grid-template-rows: 100%;
+            grid-template-columns: 50% 50%;
+            letter-spacing: 1pt;
+            font-size: $medium-font;
+            height: $stack-top-row;
+
+            .InformationLegend {
+                padding-right: $double-margin;
+                display: grid;
+                grid-template-rows:auto;
+                grid-template-columns: 33% 33% 34%;
+                grid-column-gap: $margin;
+                .InformationLegendItem {
+                    width: 96%;
+                    padding-top: $margin/2;
+                    padding-bottom: $margin/2;
+                    @include flex-center();
+                    $svg-size: 20pt;
+                    border-radius: $svg-size;
+                    // @include shadow();
+                    span {
+                        padding-left: $margin;
+                    }
+                    svg {
+                        height: $svg-size;
+                        width: $svg-size;
+                        fill: white;
+                    }
+                }
+            }
+            
+        }
+
         .InformationLogContainer {
+            // @include stretch-grid-col(2,1,2);
             // width: 100%;
             overflow-y: auto;
             // height: 40vh;

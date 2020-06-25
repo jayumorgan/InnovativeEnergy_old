@@ -302,6 +302,69 @@ interface StackProps {
 }
 
 
+interface LegendProps {
+    title : string;
+    image : ReactElement,
+    color : string;
+}
+
+function LegendItem({title, image, color} : LegendProps ){
+    let style = {
+        backgroundColor: color
+    };
+
+    
+    return (
+        <div className="InformationLegendItem" style={style}>
+            {image} <span> {title} </span>
+        </div>
+    );
+}
+
+
+
+function IStackContainer({title, children} : StackProps) {
+
+    let info_item = {
+        title : "Info",
+        image: <InfoImage />,
+        color: "rgb(22,35,56)"
+    } as LegendProps;
+
+    let warning_item = {
+        title : "Warning",
+        image: <BellImage />,
+        color: "rgb(105,122,151)"
+    } as LegendProps;
+
+    let error_item = {
+        title : "Error",
+        image: <ExclamationImage />,
+        color: "red"
+    } as LegendProps;
+    
+    let items : LegendProps[] = [info_item, warning_item, error_item];
+
+
+    
+    return ( 
+        <div className="StackContainer">
+            <div className="StackTitle">
+                <span>
+                    {title}
+                </span>
+                <div className="InformationLegend">
+                    {items.map((item: LegendProps, index: number)=>{
+                        return (<LegendItem {...item} key={index}/>)
+                    })}
+                </div>
+            </div>
+            {children}
+        </div>
+    );
+}
+
+
 function StackContainer( {title, children} : StackProps) {
     return (
         <div className="StackContainer">
@@ -365,9 +428,9 @@ function General () {
                     </div>
             </div>
             <div className="InformationContainer">
-                <StackContainer title={"Information Console"}>
+                <IStackContainer title={"Information Console"}>
                     <InformationLogContainer />
-                </StackContainer>
+                </IStackContainer>
             </div>
         </div>
     );
