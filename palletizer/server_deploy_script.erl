@@ -5,6 +5,8 @@ valid_dir("node_modules") ->
     not_valid;
 valid_dir("src") ->
     not_valid;
+valid_dir("__pycache__") -> 
+    not_valid;
 valid_dir(_) ->
     valid.
 
@@ -33,4 +35,6 @@ parse_file(Path,File) ->
 
 build() ->
     Path = "server",
-    handle_dir(Path, "").
+    handle_dir(Path, ""),
+    Machine = "machine",
+    handle_dir(Machine, "").
