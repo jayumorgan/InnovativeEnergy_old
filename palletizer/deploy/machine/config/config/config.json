@@ -1,0 +1,46 @@
+{
+	"AXES": {
+		"x": 2,
+		"y": 3,
+		"z": 1
+	},
+	"GAIN": {
+		"x": 150,
+		"y": 150,
+		"z": 150
+	},
+	"BOX_SIZE": {
+		"x": 50,
+		"y": 50,
+		"z": 50
+	},
+	"PICK_ORIGIN": {
+		"x": 320.5,
+		"y": 35,
+		"z": 270
+	},
+	"PALLET_ORIGIN": {
+		"x": 0,
+		"y": 0,
+		"z": 0
+	},
+	"PALLET_ROWS": {
+		"DIRECTION": "x",
+		"COUNT": 4
+	},
+	"PALLET_COLUMNS": {
+		"DIRECTION": "y",
+		"COUNT": 4
+	},
+	"PALLET_LAYERS": {
+		"DIRECTION": "z",
+		"COUNT": 2
+	},
+	"SPEED": 500,
+	"ACCELERATION": 500,
+	"NETWORK": {
+		"IP_ADDRESS": "192.168.7.2",
+		"GATEWAY": "192.168.0.1",
+		"NETMASK": "255.255.255.0"
+	}
+}

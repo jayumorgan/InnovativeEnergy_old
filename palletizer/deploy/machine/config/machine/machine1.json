@@ -1,0 +1,27 @@
+{
+	"AXES": {
+		"x": 2,
+		"y": 3,
+		"z": 1
+	},
+	"GAIN": {
+		"x": 150,
+		"y": 150,
+		"z": 150
+	},
+	"SPEED": 500,
+	"ACCELERATION": 500,
+	"NETWORK": {
+		"IP_ADDRESS": "192.168.7.2",
+		"GATEWAY": "192.168.0.1",
+		"NETMASK": "255.255.255.0"
+	},
+	"PRESSURE_OUTPUT": {
+		"PIN": 3,
+		"NETWORK_ID" : 1
+	},
+	"BOX_DETECTION" : {
+		"PIN" : 2,
+		"NETWORK_ID" : 2
+	}
+}
