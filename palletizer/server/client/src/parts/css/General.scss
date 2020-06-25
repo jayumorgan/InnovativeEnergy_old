@@ -23,6 +23,7 @@ $col-3 : 100% - $col-1 - $col-2;
     padding: $double-margin;
     grid-row-gap: $double-margin;
     grid-column-gap: $double-margin;
+    height: 75vh;
     .ExecuteContainer {
         // @include grid-coordinate(1,1);
         height: 100%;

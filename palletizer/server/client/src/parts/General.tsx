@@ -285,15 +285,6 @@ function InformationLogContainer() {
     let {information} = palletizer_context as PalletizerState;
     information = information.reverse();
 
-
-    if (information.length < 2) {
-        information = [{DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"},
-{DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"},
-                       {DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"},
-                       {DateString: "2020/06/25 15:18:15", Description: "No boxes available at pick location. Operator assistance required.", Type: "Error"}
-                      ]
-    }
-
     return (
         <div className="InformationLogContainer">
             {information.map((err : InformationLogProps, index : number) => {
