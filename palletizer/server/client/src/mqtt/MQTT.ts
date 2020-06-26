@@ -2,7 +2,7 @@ import mqtt from "mqtt";
 
 // Config + Globals.
 const PORT = 9001;
-const SERVER_IP = "127.0.0.1";
+const SERVER_IP = window.location.hostname;
 const MQTT_SERVER = "ws://" + SERVER_IP + ":" + PORT; 
 const TOPIC = "palletizer/";
 
@@ -88,6 +88,25 @@ function MQTTControl() {
 }
 
 
+function MQTTEstop() {
+
+    let options = {
+        clientId: "server-MQTTEstop"
+    };
+
+    let topic = "estop/trigger/request";
+
+    let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
+
+    client.on("connect", ()=> {
+       // console.log("Connected to estop client"); 
+    });
+    
+    client.publish(topic, "Command is irrelevant");
+}
+
+
+
 function RequestState() {
 
     let options = {
@@ -103,4 +122,4 @@ function RequestState() {
 
 
 
-export {MQTTSubscriber, MQTTControl, RequestState};
+export {MQTTSubscriber, MQTTControl, RequestState, MQTTEstop};

@@ -6,6 +6,9 @@ import logo from "../images/white-logo.png";
 // Styles
 import "./css/Header.scss";
 
+//Estop
+import {MQTTEstop} from "../mqtt/MQTT";
+
 import {ReactComponent as StopIcon} from "./images/danger.svg";
 
 
@@ -15,7 +18,7 @@ function Header() {
     };
 
     let handle_stop = function() {
-        console.log("Handle ESTOP.");
+        MQTTEstop();
     };
 
     return (

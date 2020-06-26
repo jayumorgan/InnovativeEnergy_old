@@ -5,15 +5,17 @@ import express from "express";
 import fs, { BaseEncodingOptions, Dirent } from "fs";
 import path from "path";
 
+// Python process.
+import {spawn} from "child_process";
 
 // Configuration
 let CONFIG_ROOT : fs.PathLike = path.join(__dirname, '..', '..', 'machine', 'config');
 let CURRENT_CONFIG_PATH = path.join(CONFIG_ROOT.toString(), 'current_configuration.json');
 let CONFIG_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), 'config');
-let MACHINE_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), "machine");
-let PALLET_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), "pallet");
-let BUILD_PATH : fs.PathLike = path.join(__dirname,"..", "client", "build");
-
+let MACHINE_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), 'machine');
+let PALLET_PATH : fs.PathLike = path.join(CONFIG_ROOT.toString(), 'pallet');
+let BUILD_PATH : fs.PathLike = path.join(__dirname,'..', 'client', 'build');
+let PYTHON_PATH : fs.PathLike = path.join(__dirname, '..', '..', 'machine', 'machine.py');
 
 interface ConfigUpload {
     filename : string;
@@ -161,5 +163,28 @@ router.get("/palletizer", (req : express.Request, res : express.Response)=>{
 });
 
 router.use(express.static(BUILD_PATH));
+
+function start_machine() {
+    let file_path = PYTHON_PATH.toString();
+
+    console.log("Python path: " + file_path);
+    
+    let python_process = spawn("python3", [file_path]);
+
+    // Does this work?
+    python_process.stdout.on('data', (chunk: any) => {
+        console.log("machine.py: " + chunk.toString('utf-8'));
+    });
+    python_process.stderr.on("data", (chunk: any) => {
+        
+        console.log("machine.py: " + chunk.toString('utf-8'));
+    });
+    python_process.on("close", ()=>{
+        console.log("machine.py closed.");
+    });
+}
+
+
+export {start_machine};
 
 export default router;

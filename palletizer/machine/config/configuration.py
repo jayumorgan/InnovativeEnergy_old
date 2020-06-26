@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 import json
 
+
+import pathlib
+
+FILE_PATH = str(pathlib.Path(__file__).parent.absolute()) + "/"
+
+print(FILE_PATH)
+
+
 def load_config(name, machine):
-    filename = "./config/" + ("machine/" if machine else "pallet/") + name
+    filename = FILE_PATH + ("machine/" if machine else "pallet/") + name
     with open(filename) as config:
         return json.load(config)
 
 def load_selected_config():
-    with open("./config/current_configuration.json") as current_config:
+    with open(FILE_PATH + "/current_configuration.json") as current_config:
         
         machine_file = None
         pallet_file = None

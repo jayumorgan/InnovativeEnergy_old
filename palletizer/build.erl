@@ -1,4 +1,4 @@
--module(server_deploy_script).
+-module(build).
 -export([build/0]).
 
 valid_dir("node_modules") ->

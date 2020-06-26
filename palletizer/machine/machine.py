@@ -181,6 +181,7 @@ class Palletizer(pc.PalletizerControl):
     def start(self,count):
         # Setup the machine. (load configuration)
         self.machine = Machine()
+        
         self.total_box_count = self.machine.box_count
         self.update({
             "status": "Waiting",
@@ -198,7 +199,6 @@ class Palletizer(pc.PalletizerControl):
     def move_to_pick(self,count):
         self.control_checks()
         self.update({"current_box": count})
-        self.update_information("Status", "Cycle has completed. Awaiting pallet change.")
         
         # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
