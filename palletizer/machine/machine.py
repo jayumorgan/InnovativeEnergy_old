@@ -205,36 +205,17 @@ class Palletizer(pc.PalletizerControl):
         # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
-
-            detect_box_failure_count = 0
-            while not self.machine.detect_box():
-                if detect_box_failure_count == 0:
-                    self.update_information("Warning", "No boxes available at pick location. Will retry")
-                elif detect_box_failure_count == 5:
-                    self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
-                detect_box_failure_count += 1
-                print("No box detected...")
-                sleep(1)
+            warn_string = "No box detected at pick location. Will try again."
+            fail_string = "No box available at pick location. Operator assistance required."
+            self.warning_loop(self.machine.detect_box, warn_string, fail_string)
 
             self.machine.start_pressure()
-            failed_pick_count = 0
-            while not self.machine.check_for_pick():
-                print("No Pcik")
-                self.machine.stop_pressure()
-                
-                if failed_pick_count == 0:
-                    self.update_information("Warning", "Box pick failed. Retrying")
-                elif failed_pick_count == 5:
-                    self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
+            warn_string = "Box pick failed. Will try again"
+            fail_string = "Unable to pick box. Operator assistance required."
 
-                failed_pick_count += 1
-
-                sleep(1)
-
-                self.machine.start_pressure()
+            self.warning_loop(self.machine.check_for_pick, warn_string, fail_string, operation=self.machine.start_pressure)
 
             self.move_to_drop(count)
-
         else:
             print("Motion completed, wait on restart..")
             self.update({"status": "Complete"})
@@ -244,15 +225,29 @@ class Palletizer(pc.PalletizerControl):
     def move_to_drop(self, count):
         self.control_checks()
         self.machine.move_to_drop(count)
+
         self.machine.stop_pressure()
 
-        drop_attempts = 0
-        while self.machine.check_for_pick() and drop_attempts < 2:
-            print("Trying to drop.")
-            sleep(1)
-            drop_attempts += 1
-            self.machine.stop_pressure()
+        fail_string = "Unable to drop box. Operator asssistance required"
+        warn_string = "Unable to drop box. Retrying"
+
+        self.warning_loop(self.machine.check_for_pick, warn_string, fail_string,operation=self.machine.stop_pressure, limit=2)
+        
         self.move_to_pick(count + 1)
+
+    def warning_loop(self, check_fn, warn_string, fail_string,operation=(lambda *args : None),limit=5):
+        count = 0
+        while not check_fn():
+            sleep(1)
+            if count == 1:
+                self.update_information("Warning", warn_string)
+            if count == limit:
+                self.update_information("Error", fail_string)
+                self.machine_fail()
+                self.control_checks()
+                count = -1
+            operation()
+            count += 1
 
     def command_status_update(self, command):
         if command != None:

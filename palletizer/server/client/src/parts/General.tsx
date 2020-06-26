@@ -222,7 +222,6 @@ interface InformationLogProps {
 
 
 function InformationLog({DateString, Description, Type}: InformationLogProps) {
-    console.log({DateString, Description, Type});
 
     let date = new Date(DateString);
     let hours = date.getHours();
@@ -283,7 +282,6 @@ function InformationLogContainer() {
     let palletizer_context = useContext(PalletizerContext);
 
     let {information} = palletizer_context as PalletizerState;
-    information = information.reverse();
 
     return (
         <div className="InformationLogContainer">

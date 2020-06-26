@@ -103,6 +103,7 @@ function MQTTEstop() {
     });
     
     client.publish(topic, "Command is irrelevant");
+
 }
 
 

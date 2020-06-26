@@ -21,6 +21,7 @@ class PalletizerControl:
         self.state_client = mqtt.Client()
         self.state_topic = PALLETIZER_TOPIC + "state"
         self.info_topic = PALLETIZER_TOPIC + "information"
+        self.estop_topic = "estop/trigger/request"
 
         self.state = {
             "status" : "Sleep",
@@ -54,7 +55,7 @@ class PalletizerControl:
         self.control_client.on_message = self.__on_message
         self.control_client.on_connect = self.__on_connect
         self.control_client.connect(MQTT_IP, MQTT_PORT, MQTT_TIMEOUT)
-        self.control_client.subscribe([(self.control_topic, 0), (self.req_topic, 0)])
+        self.control_client.subscribe([(self.control_topic, 0), (self.req_topic, 0), (self.estop_topic, 0)])
         self.control_client.loop_forever()
 
     def __on_connect(self, client, userdata, flags, result_code):    
@@ -63,13 +64,23 @@ class PalletizerControl:
     def __on_message(self,client, userdata, msg):
         topic = msg.topic
         message = msg.payload.decode("utf-8")
+        print("Message " + message, flush=True)
         if topic == self.control_topic:
             self.__lock.acquire()
             self.commands.append(message)
             self.__lock.release()
-        else:
-            # force state update.
+        elif topic == self.req_topic:
+            # force status update
             self.update({}, force=True)
+        elif topic == self.estop_topic:
+            print("ESTOP",flush=True)
+            self.machine_fail()
+        else:
+            print("Unhandled topic -- PalletizerControl.py:78.")
+
+    def machine_fail(self):
+        self.commands.append("STOP")
+        self.update({"status": "Stopped"})
             
 
     def get_command(self):
