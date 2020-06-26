@@ -1,8 +1,13 @@
 import axios, { AxiosResponse } from "axios";
 import {ConfigState} from "../types/Types";
 
+
+function get_url(url : string) : string {
+    return "/palletizer" + url;
+}
+
 function get_configs(callback: any){
-    let url = "/configs";
+    let url = get_url("/configs");
     axios.get(url).then((res: AxiosResponse)=>{
         let data = res.data as ConfigState; 
         callback(data); 
@@ -10,7 +15,8 @@ function get_configs(callback: any){
 }
 
 async function get_config(filename : string, machine: boolean) {
-    let res = await axios.get((machine ? "/machine/" : "/pallet/") + filename);
+    let url = get_url((machine ? "/machine/" : "/pallet/") + filename);
+    let res = await axios.get(url);
     return res.data;
 }
 
@@ -25,10 +31,8 @@ async function get_state_config(state : ConfigState) {
     return {machine: machine_data, pallet : pallet_data};
 }
 
-
-
 function post_config(filename: string, content: any, callback: any) {
-    let url = "/configs/new";
+    let url = get_url("/configs/new");
 
     let data = {
         filename: filename,
@@ -42,7 +46,8 @@ function post_config(filename: string, content: any, callback: any) {
 }
 
 function set_config(file_name: string, machine: boolean) {
-    let url = "/configs/set";
+    let url = get_url("/configs/set");
+
     let config_type = machine ? "machine" : "pallet";
 
     let data = {
@@ -52,8 +57,6 @@ function set_config(file_name: string, machine: boolean) {
 
     axios.post(url, data);
 }
-
-
 
 export {
     get_configs,

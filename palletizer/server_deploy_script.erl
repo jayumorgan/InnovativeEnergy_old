@@ -34,6 +34,10 @@ parse_file(Path,File) ->
     end.
 
 build() ->
+    Rem = os:cmd("rm -rf build/"),
+    TScompile = os:cmd("cd server/ && tsc"),
+    Reactbuild = os:cmd("cd server/client && npm run build"),
+    io:fwrite("Remove = ~s, TScompile = ~s, React build = ~s ~n", [Rem, TScompile, Reactbuild]),
     Path = "server",
     handle_dir(Path, ""),
     Machine = "machine",
