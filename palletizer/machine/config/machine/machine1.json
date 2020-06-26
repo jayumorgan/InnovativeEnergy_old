@@ -12,9 +12,13 @@
 	"SPEED": 500,
 	"ACCELERATION": 500,
 	"NETWORK": {
-		"IP_ADDRESS": "192.168.7.2",
+		"IP_ADDRESS": "192.168.0.3",
 		"GATEWAY": "192.168.0.1",
 		"NETMASK": "255.255.255.0"
+	},
+	"PRESSURE_INPUT" : {
+		"PIN" : 0,
+		"NETWORK_ID" : 1
 	},
 	"PRESSURE_OUTPUT": {
 		"PIN": 3,
@@ -22,6 +26,6 @@
 	},
 	"BOX_DETECTION" : {
 		"PIN" : 2,
-		"NETWORK_ID" : 2
+		"NETWORK_ID" : 1
 	}
 }

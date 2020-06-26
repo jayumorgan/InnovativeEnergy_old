@@ -80,6 +80,7 @@ class Machine:
 
         self.pressure_ouput = self.machine_config["PRESSURE_OUTPUT"]
         self.box_detector = self.machine_config["BOX_DETECTION"]
+        self.pressure_input = self.machine_config["PRESSURE_INPUT"]
 
         box_size = self.pallet_config["BOX_SIZE"]
         pallet_columns = self.pallet_config["PALLET_COLUMNS"]
@@ -146,6 +147,14 @@ class Machine:
         pin_value = self.__read_io(network_id, pin)
         return pin_value == 1
 
+    def check_for_pick(self):
+        pin = self.pressure_input["PIN"]
+        network_id = self.pressure_input["NETWORK_ID"]
+        pin_value = self.__read_io(network_id, pin)
+        return pin_value == 1
+    
+        
+
     def __write_pressure(self, on):
         pin = self.pressure_ouput["PIN"]
         network_id = self.pressure_ouput["NETWORK_ID"]
@@ -194,13 +203,32 @@ class Palletizer(pc.PalletizerControl):
         # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
-            # This should be a loop.
+
+            detect_box_failure_count = 0
             while not self.machine.detect_box():
-                sleep(0.3)
-                # self.machine.detect_box()
-            # self.update_information("Status", "Box Detected: Starting Pressure.")
+                if detect_box_failure_count == 0:
+                    self.update_information("Warning", "No boxes available at pick location. Will retry")
+                elif detect_box_failure_count == 5:
+                    self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
+                detect_box_failure_count += 1
+                sleep(1)
+
             self.machine.start_pressure()
-            # Check pressure during pick ^^ .
+            failed_pick_count = 0
+            while not self.machine.check_for_pick():
+                self.machine.stop_pressure()
+                
+                if failed_pick_count == 0:
+                    self.update_information("Warning", "Box pick failed. Retrying")
+                elif failed_pick_count == 5:
+                    self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
+
+                    failed_pick_count += 1
+
+                sleep(1)
+
+                self.machine.start_pressure()
+
             self.move_to_drop(count)
 
         else:
@@ -212,12 +240,10 @@ class Palletizer(pc.PalletizerControl):
     def move_to_drop(self, count):
         self.control_checks()
         self.machine.move_to_drop(count)
-        self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
-        self.update_information("Warning", "Low air pressure detected. Check air pressure source.")
-        
-        # self.update_information("Status", "Dropping Box: Releasing Pressure.")
-        # self.update_information("Warning", "Box")
         self.machine.stop_pressure()
+        while self.machine.check_for_pick():
+            sleep(1)
+            self.machine.stop_pressure()
         self.move_to_pick(count + 1)
 
     def command_status_update(self, command):

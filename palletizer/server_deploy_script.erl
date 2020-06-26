@@ -19,7 +19,7 @@ handle_dir(Path, File) ->
         lists:map(fun(F) ->
                           parse_file(DirPath ++ "/", F) end, Files);
        true ->
-            not_valid end .
+            not_valid end.
 
 parse_file(Path,File) ->
     FilePath = Path ++ File,
