@@ -17,7 +17,7 @@ def load_selected_config():
             pallet_file = current_config["pallet"]
         except:
             print("current_config not found or not correctly formatted.")
-        print(f"Loading configuration file: {machine_file}, {pallet_file}")
+        print("Loading configuration file: {}, {}".format(machine_file, pallet_file))
         return {
             "machine" : load_config(machine_file, True),
             "pallet" : load_config(pallet_file, False)

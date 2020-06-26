@@ -57,7 +57,7 @@ class PalletizerControl:
         self.control_client.subscribe([(self.control_topic, 0), (self.req_topic, 0)])
         self.control_client.loop_forever()
 
-    def __on_connect(self, client, userdata, flags):    
+    def __on_connect(self, client, userdata, flags, result_code):    
         print("Control client connected to: " + self.state_topic)
 
     def __on_message(self,client, userdata, msg):

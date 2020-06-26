@@ -33,10 +33,10 @@ class FakeMachineMotion:
         print(mode, ip, gateway, mask)
 
     def emitAbsoluteMove(self, axis, position):
-        print(f"Move: {axis} to {position}")
+        print("Move: {} to {}".format(axis, position))
 
     def emitCombinedAxesAbsoluteMove(self, axes, positions):
-        print(f"Move: {axes} to {positions}")
+        print("Move: {} to {}".format(axes, positions))
         
     def digitalWrite(self, deviceNetworkId, pin, value):
         print("Writing to (pin,networkID) ",pin, deviceNetworkId, " value ", value)

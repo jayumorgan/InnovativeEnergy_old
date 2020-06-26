@@ -3,7 +3,7 @@ import {ConfigState} from "../types/Types";
 
 
 function get_url(url : string) : string {
-    return "/palletizer" + url;
+    return "" + url;
 }
 
 function get_configs(callback: any){
