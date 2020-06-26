@@ -201,7 +201,6 @@ class Palletizer(pc.PalletizerControl):
             # self.update_information("Status", "Box Detected: Starting Pressure.")
             self.machine.start_pressure()
             # Check pressure during pick ^^ .
-            self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
             self.move_to_drop(count)
 
         else:
@@ -213,6 +212,7 @@ class Palletizer(pc.PalletizerControl):
     def move_to_drop(self, count):
         self.control_checks()
         self.machine.move_to_drop(count)
+        self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
         self.update_information("Warning", "Low air pressure detected. Check air pressure source.")
         
         # self.update_information("Status", "Dropping Box: Releasing Pressure.")

@@ -145,6 +145,8 @@ function get_green_cardboard_box(width: number, height: number, length: number) 
     (box.material as Three.Material[]).forEach((mat : Three.Material)=>{
         let m = mat as Three.MeshBasicMaterial;
         m.color.setRGB(0, 1, 0);
+
+                // color = "rgb(250, 234, 47)"
     });
     return box;
 }

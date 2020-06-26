@@ -245,7 +245,7 @@ function InformationLog({DateString, Description, Type}: InformationLogProps) {
                 break;
             }
             case "Warning" : {
-                image = (<BellImage />);
+                image = (<BellImage id={"Warning"} />);
                 break;
             }
             default : {

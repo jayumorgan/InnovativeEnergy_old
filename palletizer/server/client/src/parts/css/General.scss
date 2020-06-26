@@ -289,6 +289,12 @@ $col-3 : 100% - $col-1 - $col-2;
                         #Error {
                             fill: red;
                         }
+                        #Warning {
+                            fill: rgb(105,122,151);
+                            g{
+                                fill: rgb(105,122,151);
+                            }
+                        }
                     }
                     .InformationLogDate {
                         display: flex;
