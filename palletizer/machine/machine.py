@@ -11,6 +11,7 @@ from mqtt import PalletizerControl as pc
 
 # fake machine motion for development.
 from fake_mm import fake_mm as fmm
+import MachineMotion as mm
 
 
 class MICROSTEPS: # from machine motion.
@@ -94,6 +95,7 @@ class Machine:
         self.pick_origin = self.pallet_config["PICK_ORIGIN"]
 
         self.mm = fmm.FakeMachineMotion()
+        # self.mm = mm.MachineMotion(network["IP_ADDRESS"])
 
         self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
         
@@ -225,7 +227,7 @@ class Palletizer(pc.PalletizerControl):
                 elif failed_pick_count == 5:
                     self.update_information("Error", "No boxes available at pick location. Operator assistance required.")
 
-                    failed_pick_count += 1
+                failed_pick_count += 1
 
                 sleep(1)
 
