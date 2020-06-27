@@ -1,5 +1,5 @@
--module(build).
--export([build/0]).
+-module(deploy).
+-export([deploy/0]).
 
 valid_dir("node_modules") ->
     not_valid;
@@ -9,6 +9,26 @@ valid_dir("__pycache__") ->
     not_valid;
 valid_dir(_) ->
     valid.
+
+valid_file_ext(".pyc") ->
+    not_valid;
+valid_file_ext(".DS_Store")->
+    not_valid;
+valid_file_ext(O) ->
+    io:fwrite("Valid ~s,~n", [O]),
+    valid.
+
+valid_file(".DS_Store") ->
+    not_valid;
+valid_file("environment.json")->
+    not_valid;
+valid_file(File) ->
+    Ext = filename:extension(File),
+    valid_file_ext(Ext).
+
+write_env() ->
+    {ok, File} = file:open("deploy/machine/environment.json",[write]),
+    file:write(File, "{\"DEPLOY\" : true}").
 
 handle_dir(Path, File) ->
     DirPath = Path ++ File,
@@ -28,12 +48,20 @@ parse_file(Path,File) ->
     if Isdir ->
             handle_dir(Path, File);
     true ->
-        filelib:ensure_dir("deploy/" ++ Path),
-        io:fwrite("copying file: ~s ~n", [FilePath]),
-        file:copy(FilePath, "deploy/" ++ FilePath)
+        Isvalidfile = valid_file(filename:extension(File)),
+        io:fwrite("Extension: ~s ~n", [filename:extension(File)]),
+        if
+            Isvalidfile == valid ->
+                filelib:ensure_dir("deploy/" ++ Path),
+                io:fwrite("copying file: ~s ~n", [FilePath]),
+                file:copy(FilePath, "deploy/" ++ FilePath);
+        true ->
+                not_valid
+        end,
+            file_check
     end.
 
-build() ->
+deploy() ->
     Rem = os:cmd("rm -rf build/"),
     TScompile = os:cmd("cd server/ && tsc"),
     Reactbuild = os:cmd("cd server/client && npm run build"),
@@ -41,4 +69,5 @@ build() ->
     Path = "server",
     handle_dir(Path, ""),
     Machine = "machine",
-    handle_dir(Machine, "").
+    handle_dir(Machine, ""),
+    write_env().

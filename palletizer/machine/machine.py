@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
 from time import sleep
-
-
-# import ./config/configuration.py
+import json
+import pathlib
 from config import configuration as cf
-
 from mqtt import PalletizerControl as pc
 
+FILE_PATH = str(pathlib.Path(__file__).parent.absolute()) + "/"
+def read_env():
+    with open(FILE_PATH + "environment.json") as environment:
+        data = json.load(environment)
+        deploy = data["DEPLOY"]
+        return deploy
 
 # fake machine motion for development.
 from fake_mm import fake_mm as fmm
@@ -94,8 +98,11 @@ class Machine:
         # Pickup boxes:
         self.pick_origin = self.pallet_config["PICK_ORIGIN"]
 
-        self.mm = fmm.FakeMachineMotion()
-        # self.mm = mm.MachineMotion(network["IP_ADDRESS"])
+        deploy = read_env()
+        if deploy:
+            self.mm = mm.MachineMotion(network["IP_ADDRESS"])
+        else:
+            self.mm = fmm.FakeMachineMotion()
 
         self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
         
