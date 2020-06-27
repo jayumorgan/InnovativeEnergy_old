@@ -1,3 +1,11 @@
+# Deploy to machine
+
+* run deploy.erl (deploy:deploy())
+* scp the deploy directory to the MachineMotion.
+
+
+
+
 # MQTT Setup:
 
 ## Start Server
