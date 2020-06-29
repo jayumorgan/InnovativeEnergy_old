@@ -152,17 +152,11 @@ router.get("/configs", (req:express.Request, res: express.Response)=>{
     });
 });
 
-router.get("/", (req: express.Request, res: express.Response)=> {
-    res.send("Index worked.");
-});
-
-
-router.get("/palletizer", (req : express.Request, res : express.Response)=>{
-    res.sendFile(path.join(BUILD_PATH.toString(), "index.html").toString());
-    
-});
-
 router.use(express.static(BUILD_PATH));
+
+router.get("/*", (req : express.Request, res : express.Response)=>{
+    res.sendFile(path.join(BUILD_PATH.toString(), "index.html").toString());
+});
 
 function start_machine() {
     let file_path = PYTHON_PATH.toString();

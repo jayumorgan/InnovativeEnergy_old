@@ -76,7 +76,8 @@ class Machine:
         self.y_0 = 0
         
         self.z = axes["z"]
-        self.z_0 = 0
+        # home to top part.
+        self.z_0 = 298
         
         gain = self.machine_config["GAIN"]
         speed = self.machine_config["SPEED"]
@@ -113,6 +114,12 @@ class Machine:
             axis_number = axes[axis]
             self.mm.configAxis(axis_number,MICROSTEPS.ustep_8,gain)
 
+        # specify in configuration file.
+        self.mm.configAxisDirection(self.x, mm.DIRECTION.NORMAL)
+        self.mm.configAxisDirection(self.y, mm.DIRECTION.REVERSE)
+        self.mm.configAxisDirection(self.z, mm.DIRECTION.REVERSE)
+            
+            
         self.mm.releaseEstop()
         self.mm.resetSystem()
 
@@ -212,15 +219,16 @@ class Palletizer(pc.PalletizerControl):
         # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
             self.machine.move_to_pick()
-            warn_string = "No box detected at pick location. Will try again."
+            warn_string = "No box detected at pick location. Trying again."
             fail_string = "No box available at pick location. Operator assistance required."
-            self.warning_loop(self.machine.detect_box, warn_string, fail_string)
+            # self.warning_loop(self.machine.detect_box, warn_string, fail_string)
 
             self.machine.start_pressure()
-            warn_string = "Box pick failed. Will try again"
+
+            warn_string = "Box pick failed. Trying again."
             fail_string = "Unable to pick box. Operator assistance required."
 
-            self.warning_loop(self.machine.check_for_pick, warn_string, fail_string, operation=self.machine.start_pressure)
+            # self.warning_loop(self.machine.check_for_pick, warn_string, fail_string, operation=self.machine.start_pressure)
 
             self.move_to_drop(count)
         else:
@@ -238,7 +246,7 @@ class Palletizer(pc.PalletizerControl):
         fail_string = "Unable to drop box. Operator asssistance required"
         warn_string = "Unable to drop box. Retrying"
 
-        self.warning_loop(self.machine.check_for_pick, warn_string, fail_string,operation=self.machine.stop_pressure, limit=2)
+        # self.warning_loop(self.machine.check_for_pick, warn_string, fail_string,operation=self.machine.stop_pressure, limit=2)
         
         self.move_to_pick(count + 1)
 

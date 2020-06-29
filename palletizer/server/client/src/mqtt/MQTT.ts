@@ -2,7 +2,14 @@ import mqtt from "mqtt";
 
 // Config + Globals.
 const PORT = 9001;
-const SERVER_IP = window.location.hostname;
+let SERVER_IP = window.location.hostname;
+
+if (SERVER_IP == "localhost") {
+    SERVER_IP = "127.0.0.1";
+}
+console.log(SERVER_IP);
+
+
 const MQTT_SERVER = "ws://" + SERVER_IP + ":" + PORT; 
 const TOPIC = "palletizer/";
 
@@ -65,7 +72,7 @@ function MQTTControl() {
     let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
 
     client.on("connect",()=> {
-       // console.log("Connected to MQTT control server."); 
+        console.log("Connecting...", options);
     });
 
     let stop_command = "STOP";
@@ -98,7 +105,8 @@ function MQTTEstop() {
 
     let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
 
-    client.on("connect", ()=> {
+    client.on("connect", () => {
+        console.log("Connecting...", options);
        // console.log("Connected to estop client"); 
     });
     
@@ -117,6 +125,10 @@ function RequestState() {
     let topic = TOPIC + "request";
 
     let client : mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
+
+    client.on("connect", () => {
+        console.log("Connecting...", options);
+    });
 
     client.publish(topic, "g");
 }

@@ -14,6 +14,8 @@ valid_file_ext(".pyc") ->
     not_valid;
 valid_file_ext(".DS_Store")->
     not_valid;
+valid_file_ext(".ts") ->
+    not_valid;
 valid_file_ext(O) ->
     io:fwrite("Valid ~s,~n", [O]),
     valid.
@@ -71,3 +73,9 @@ deploy() ->
     Machine = "machine",
     handle_dir(Machine, ""),
     write_env().
+
+
+main(_) -> 
+	deploy().
+
+
