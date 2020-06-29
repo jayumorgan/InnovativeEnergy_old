@@ -11,7 +11,7 @@ def read_env():
     with open(FILE_PATH + "environment.json") as environment:
         data = json.load(environment)
         deploy = data["DEPLOY"]
-        return deploy
+        return True
 
 # fake machine motion for development.
 from fake_mm import fake_mm as fmm
@@ -21,6 +21,46 @@ import MachineMotion as mm
 class MICROSTEPS: # from machine motion.
     ustep_8 = 8
 
+
+QUARTER_TURN = 1480
+NO_TURN = 0
+    
+
+
+def qtip_coordinates(box_size, pallet_origin, layers):
+    x_size = box_size["x"]
+    y_size = box_size["y"]
+    z_size = box_size["z"]
+
+    x_0 = pallet_origin["x"]
+    y_0 = pallet_origin["y"]
+    z_0 = pallet_origin["z"]
+
+    x_off = x_0
+    y_off = y_0
+    z_off = z_0
+
+    vectors = []
+    
+    for i in range(layers):
+        z_off += z_size
+        for j in range(2):
+            vector = {}
+            vector["z"] = z_off
+            if i % 2 == 0:
+                vector["y"] = y_0 + j * y_size
+                vector["x"] = x_0
+                vector["i"] = NO_TURN
+            else:
+                vector["x"] = x_0 + (-1/2 + j) * y_size
+                vector["y"] = y_0 + 1/2 * y_size
+                vector["i"] = QUARTER_TURN
+
+            vectors.append(vector)
+
+
+    return vectors
+    
 
 def compute_coordinates(box_size, pallet_origin, pallet_rows, pallet_cols, pallet_layers):
 
@@ -53,9 +93,36 @@ def compute_coordinates(box_size, pallet_origin, pallet_rows, pallet_cols, palle
                 vector[x] = x_c
                 vector[y] = y_c
                 vector[z] = z_c
+                vector["i"] = QUARTER_TURN
                 coordinates.append(vector)
     
     return coordinates 
+
+
+def compute_pick_locations(pick_origin, length, box_height):
+
+    picks = []
+
+    x = pick_origin["x"]
+    y = pick_origin["y"]
+    z = pick_origin["z"]
+
+    for i in range(length):
+
+        z += box_height
+        
+        coordinate = {
+            "x" : x,
+            "y" : y,
+            "z" : z,
+            "i" : NO_TURN
+        }
+
+        picks.append(coordinate)
+
+
+    picks.reverse()
+    return picks
 
     
 class Machine:
@@ -78,11 +145,14 @@ class Machine:
         self.z = axes["z"]
         # home to top part.
         self.z_0 = 298
+
+        self.i_0 = 0
         
         gain = self.machine_config["GAIN"]
         speed = self.machine_config["SPEED"]
         acceleration = self.machine_config["ACCELERATION"]
         network = self.machine_config["NETWORK"]
+        rotation_network = self.machine_config["ROTATION_NETWORK"]
 
         self.pressure_ouput = self.machine_config["PRESSURE_OUTPUT"]
         self.box_detector = self.machine_config["BOX_DETECTION"]
@@ -99,13 +169,20 @@ class Machine:
         # Pickup boxes:
         self.pick_origin = self.pallet_config["PICK_ORIGIN"]
 
+
+
         deploy = read_env()
         if deploy:
             self.mm = mm.MachineMotion(network["IP_ADDRESS"])
+            self.rmm = mm.MachineMotion(rotation_network["IP_ADDRESS"])
         else:
             self.mm = fmm.FakeMachineMotion()
 
-        self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
+
+        self.coordinates = qtip_coordinates(box_size,
+                                            pallet_origin,
+                                            pallet_layers["COUNT"] * 2)
+        # self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
         
         self.mm.emitSpeed(speed)
         self.mm.emitAcceleration(acceleration)
@@ -122,20 +199,48 @@ class Machine:
             
         self.mm.releaseEstop()
         self.mm.resetSystem()
+        self.rmm.releaseEstop()
+        self.rmm.resetSystem()
 
         self.box_count = len(self.coordinates)
-        for c in self.coordinates:
-            print(c)
+        
+        temp = compute_pick_locations(self.pick_origin,
+                                                     int(self.box_count / 2),
+                                                     box_size["z"])
+
+        temp2 = []
+
+        self.pick_locations = []
+
+        for k in temp:
+            x = k.copy()
+            x["x"] = 105
+
+            self.pick_locations.append(k)
+            self.pick_locations.append(x)
+
+        for index, c in enumerate(self.coordinates):
+            print("Pick Location: ", self.pick_locations[index], "Drop Location", c)
 
     def home(self):
         self.move_vertical({"z":self.z_0})
-        self.move_planar({"x": self.x_0, "y":self.y_0})
+        self.mm.emitHome(self.x)
+        self.mm.emitHome(self.y)
+        self.mm.waitForMotionCompletion()
+        self.mm.emitHome(self.z)
+        self.mm.waitForMotionCompletion()
+        self.move_vertical({"z":self.z_0})
+        self.mm.waitForMotionCompletion()
+        self.rmm.emitHomeAll()
+        self.rmm.waitForMotionCompletion()
             
     def move_planar(self, point): # Point is 2D [x,y] coordinate.
         self.mm.emitAbsoluteMove(self.z, self.z_0)
+        self.rmm.emitAbsoluteMove(1, point["i"])
         self.mm.waitForMotionCompletion()
         [x,y] = [point["x"], point["y"]] 
         self.mm.emitCombinedAxesAbsoluteMove([self.x, self.y], [x,y])
+        self.rmm.waitForMotionCompletion()
         self.mm.waitForMotionCompletion()
 
     def move_vertical(self, point): # point is z_coordinate
@@ -146,9 +251,12 @@ class Machine:
         self.move_planar(point)
         self.move_vertical(point)
         
-    def move_to_pick(self):
-        self.move_all(self.pick_origin)
-
+    def move_to_pick(self, count):
+        coordinate = self.pick_locations[count]
+        
+        self.move_all(coordinate)
+        
+        
     def move_to_drop(self, index):
         coordinate = self.coordinates[index]
         self.move_planar(coordinate)
@@ -218,7 +326,7 @@ class Palletizer(pc.PalletizerControl):
         
         # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
-            self.machine.move_to_pick()
+            self.machine.move_to_pick(count)
             warn_string = "No box detected at pick location. Trying again."
             fail_string = "No box available at pick location. Operator assistance required."
             # self.warning_loop(self.machine.detect_box, warn_string, fail_string)
@@ -233,6 +341,7 @@ class Palletizer(pc.PalletizerControl):
             self.move_to_drop(count)
         else:
             print("Motion completed, wait on restart..")
+            self.machine.home()
             self.update({"status": "Complete"})
             self.update_information("Status", "Cycle has completed. Awaiting pallet change.")
             self.start(0)
@@ -242,6 +351,7 @@ class Palletizer(pc.PalletizerControl):
         self.machine.move_to_drop(count)
 
         self.machine.stop_pressure()
+        sleep(0.4)
 
         fail_string = "Unable to drop box. Operator asssistance required"
         warn_string = "Unable to drop box. Retrying"

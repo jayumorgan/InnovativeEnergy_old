@@ -1,0 +1,29 @@
+{
+	"BOX_SIZE": {
+		"x": 222,
+		"y": 88,
+		"z": 52
+	},
+	"PICK_ORIGIN": {
+		"x": 315.7,
+		"y": 355.8,
+		"z": 13.2
+	},
+	"PALLET_ORIGIN": {
+		"x": 50,
+		"y": 0,
+		"z": -33
+	},
+	"PALLET_ROWS": {
+		"DIRECTION": "x",
+		"COUNT": 1
+	},
+	"PALLET_COLUMNS": {
+		"DIRECTION": "y",
+		"COUNT": 1
+	},
+	"PALLET_LAYERS": {
+		"DIRECTION": "z",
+		"COUNT": 2
+	}
+}

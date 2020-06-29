@@ -144,11 +144,13 @@ def HTTPSend(host, path, data=None) :
             lConn.close()
             return str(lResponse) # Casting as a string is necessary for python3
         except Exception :
-            logging.warning("Could not GET %s: %s" % (path, traceback.format_exc()))
+            logging.warning("Could not GET %s: %s" % (path, traceback.format_exc()), self.IP)
             if lConn :
                 lConn.close()
                 lConn = None
-            time.sleep(1)
+            # time.sleep(1)
+            break
+            
     return ""
 
 #
@@ -1083,7 +1085,8 @@ class MachineMotion :
             reply = ["echo", "ok", "COMPLETED"]
 
         #Check if not error message
-        if ( "echo" in reply and "ok" in reply ) :
+        print("Wait for motion completion reply", reply, self.IP)
+        if ( "echo" in reply or "ok" in reply ) :
 
             #Recursively calls the function until motion is completed
             if ("COMPLETED" in reply) : return

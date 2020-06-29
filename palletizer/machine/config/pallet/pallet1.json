@@ -7,12 +7,12 @@
 	"PICK_ORIGIN": {
 		"x": 315.7,
 		"y": 355.8,
-		"z": 33
+		"z": 13.2
 	},
 	"PALLET_ORIGIN": {
 		"x": 0,
 		"y": 0,
-		"z": 0
+		"z": -33
 	},
 	"PALLET_ROWS": {
 		"DIRECTION": "x",

@@ -43,3 +43,6 @@ class FakeMachineMotion:
 
     def digitalRead(self, deviceNetworkId, pin):
         return 0
+
+    def configAxisDirection(self, axes, directions):
+        pass

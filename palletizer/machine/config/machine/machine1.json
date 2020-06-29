@@ -16,6 +16,11 @@
 		"GATEWAY": "192.168.0.1",
 		"NETMASK": "255.255.255.0"
 	},
+	"ROTATION_NETWORK" : {
+		"IP_ADDRESS": "192.168.0.2",
+		"GATEWAY" : "192.168.0.1",
+		"NETMASK" : "255.255.255.0"
+	},
 	"PRESSURE_INPUT" : {
 		"PIN" : 0,
 		"NETWORK_ID" : 1
