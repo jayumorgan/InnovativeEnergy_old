@@ -11,7 +11,7 @@ def read_env():
     with open(FILE_PATH + "environment.json") as environment:
         data = json.load(environment)
         deploy = data["DEPLOY"]
-        return True
+        return deploy
 
 # fake machine motion for development.
 from fake_mm import fake_mm as fmm
@@ -172,12 +172,13 @@ class Machine:
 
 
         deploy = read_env()
+        print(deploy)
         if deploy:
             self.mm = mm.MachineMotion(network["IP_ADDRESS"])
             self.rmm = mm.MachineMotion(rotation_network["IP_ADDRESS"])
         else:
             self.mm = fmm.FakeMachineMotion()
-
+            self.rmm = fmm.FakeMachineMotion()
 
         self.coordinates = qtip_coordinates(box_size,
                                             pallet_origin,

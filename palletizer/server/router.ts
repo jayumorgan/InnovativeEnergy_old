@@ -69,7 +69,7 @@ function get_configurations(callback : (c : ConfigData|null) => void) {
             });
 
             pallet_configs.forEach((item: any, index: number) => {
-                item = item as Dirent
+                item = item as Dirent;
                 if (item.isFile() && path.extname(item.name) === ".json") {
                     p_configs.push(item.name);
                     if (pallet && item.name === pallet){
