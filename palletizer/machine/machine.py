@@ -180,10 +180,10 @@ class Machine:
             self.mm = fmm.FakeMachineMotion()
             self.rmm = fmm.FakeMachineMotion()
 
-        self.coordinates = qtip_coordinates(box_size,
-                                            pallet_origin,
-                                            pallet_layers["COUNT"] * 2)
-        # self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
+        #self.coordinates = qtip_coordinates(box_size,
+                                           # pallet_origin,
+                                           # pallet_layers["COUNT"] * 2)
+        self.coordinates = compute_coordinates(box_size,pallet_origin, pallet_rows, pallet_columns, pallet_layers)
         
         self.mm.emitSpeed(speed)
         self.mm.emitAcceleration(acceleration)

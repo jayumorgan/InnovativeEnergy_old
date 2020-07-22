@@ -1,10 +1,12 @@
 import React, { useContext, useState, Fragment } from 'react';
 
-import Modal, {Editor, Unlock} from "./Modal";
+import Modal, { Editor, Unlock } from "./Modal";
 
-import {ConfigContext} from "../context/ConfigContext";
+import PalletConfigurator from "./TeachPallet";
 
-import {ConfigState} from "../types/Types";
+import { ConfigContext } from "../context/ConfigContext";
+
+import { ConfigState } from "../types/Types";
 
 // Styles
 import "./css/Configuration.scss";
@@ -15,15 +17,16 @@ import "./css/Login.scss";
 interface ConfigContainerProps {
     title: string;
     configs: string[];
-    start_editor(fn: string) : any;
+    start_editor(fn: string): any;
+    start_add_config: () => void;
 }
 
 interface ConfigCellProps {
     file_name: string;
-    start_editor(fn:string) : any;
+    start_editor(fn: string): any;
 }
 
-function ConfigCell({file_name, start_editor} : ConfigCellProps) {
+function ConfigCell({ file_name, start_editor }: ConfigCellProps) {
 
     let handle_edit = () => {
         console.log("Edit config " + file_name);
@@ -33,7 +36,7 @@ function ConfigCell({file_name, start_editor} : ConfigCellProps) {
     let handle_delete = () => {
         console.log("Delete config " + file_name);
     };
-    
+
     return (
         <div className="ConfigCell">
             <span> {file_name} </span>
@@ -41,8 +44,8 @@ function ConfigCell({file_name, start_editor} : ConfigCellProps) {
                 <span> Edit </span>
             </div>
             <div className="DeleteConfigButton" onClick={handle_delete}>
-            <span className="icon-delete">
-            </span>
+                <span className="icon-delete">
+                </span>
                 <span id="button-text">
                     Delete
                 </span>
@@ -51,27 +54,21 @@ function ConfigCell({file_name, start_editor} : ConfigCellProps) {
     );
 }
 
-function ConfigContainer(props: ConfigContainerProps) {
+function ConfigContainer({ title, configs, start_editor, start_add_config }: ConfigContainerProps) {
 
-    let {title, configs, start_editor} = props;
-
-    let handle_add = ()=>{
-        console.log("Handle: Add " + title);
-    };
-
-    return(
+    return (
         <div className="StackContainer">
             <div className="StackTitle">
                 <span> {title} </span>
             </div>
             <div className="ConfigGrid">
                 <div className="ConfigScroll" >
-                    {configs.map((file_name, index)=>{
+                    {configs.map((file_name, index) => {
                         return (<ConfigCell file_name={file_name} key={index} start_editor={start_editor} />)
                     })}
                 </div>
                 <div className="ConfigAdd">
-                    <div className="AddConfigButton" onClick={handle_add} >
+                    <div className="AddConfigButton" onClick={start_add_config} >
                         <span> {"Add " + title.toLowerCase()} </span>
                     </div>
                 </div>
@@ -91,8 +88,8 @@ interface EditorConfig {
 function Configuration() {
 
     let config_context = useContext(ConfigContext);
-    
-    let {machine_configs, pallet_configs} = config_context as ConfigState;
+
+    let { machine_configs, pallet_configs } = config_context as ConfigState;
 
     var [editor, set_editor] = useState<EditorConfig>({
         title: "",
@@ -103,10 +100,12 @@ function Configuration() {
 
     let [locked, set_locked] = useState<boolean>(true);
 
+    let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
+
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
-    
-    let start_editor = (title : string) => (fn: string) => {
+
+    let start_editor = (title: string) => (fn: string) => {
         let edit = {
             filename: fn,
             title: title,
@@ -116,22 +115,31 @@ function Configuration() {
         set_editor(edit);
     }
 
-    let close_editor = ()=>{
-        set_editor({...editor, edit: false});
+    let close_editor = () => {
+        set_editor({ ...editor, edit: false });
     };
 
 
     let close_unlock = () => {
         set_locked(false);
     }
-    
+
+    let new_pallet = (val: boolean) => () => {
+        set_add_pallet_config(val);
+    };
+
+    let add_new_machine = () => {
+        console.log("Add Machine Config");
+    };
+
     return (
         <Fragment>
             <div className="ConfigContainer">
-            <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_editor(machine_title)} />
-            <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_editor(pallet_title)} />
+                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_editor(machine_title)} start_add_config={add_new_machine} />
+                <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_editor(pallet_title)} start_add_config={new_pallet(true)} />
             </div>
-            {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine}/>}
+            {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}
+            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );

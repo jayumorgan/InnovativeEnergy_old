@@ -3,7 +3,7 @@ import express from "express";
 import morgan from "morgan";
 
 // Router
-import router, {start_machine} from "./router";
+import router, { start_machine } from "./router";
 
 // Types
 import { AddressInfo } from "net";
@@ -18,10 +18,11 @@ app.use(morgan('dev'));
 
 app.use(router);
 
-let server = app.listen(PORT, ()=>{
+
+let server = app.listen(PORT, () => {
 
     let address = server.address() as AddressInfo;
-    let address_string = "http://"+address.address+":"+address.port;
-    
+    let address_string = "http://" + address.address + ":" + address.port;
+
     console.log(`Server running at ${address_string}.`);
 });

@@ -38,7 +38,7 @@ interface CurrentConfig {
 }
 
 function get_configurations(callback : (c : ConfigData|null) => void) {
-
+    
     fs.readFile(CURRENT_CONFIG_PATH, {encoding : 'utf-8'}, (err : NodeJS.ErrnoException | null, data : string) => {
         if (err) {
             console.log("Error (get_selected_config) server.ts: ", err);
