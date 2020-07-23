@@ -12,7 +12,7 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 // import "./css/Configuration.scss";
 // import "./css/Login.scss";
 import "./css/TeachMode.scss";
-
+import "./css/Jogger.scss";
 
 enum PalletTeachState {
     PALLET_CORNERS,
@@ -24,20 +24,22 @@ enum PalletTeachState {
 };
 
 function JoggerDisplay() {
-
+    let joggerDiameter = "300pt";
+    let halfDiameter = "150pt";
     return (
 	<div className="JoggerContainer">
-	    <span>
-		How to handle the jogger display.
-	    </span>
+	    <div className="JoggerContainerInner">
+		<svg height="300" width="300">
+		    <circle cx="0" cy="150" r="100" fill="blue" />
+		</svg>
+	    </div>
 	</div>
     );
 };
 
-
-
-
-
+/* <div className="JoggerCircle">
+ * </div>
+ *  */
 
 function PickLocationElement() {
     return (
@@ -118,9 +120,11 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 	    <div className="TeachModeContainer">
 		<div className="TeachModeHeader">
 		    <div className="StatusBar">
-			<span>
-			    Pallet Configuration Setup
-			</span>
+			<div className="StatusBarTitle">
+			    <span>
+				Pallet Configuration Setup
+			    </span>
+			</div>
 			<CurrentStepBar completion_fraction={completionFraction} />
 		    </div>
 		</div>

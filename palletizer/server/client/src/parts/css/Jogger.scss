@@ -1,0 +1,29 @@
+@import "../../master.scss";
+
+
+$jogger-diameter: 300pt;
+
+.JoggerContainer {
+    @include flex-center();
+    
+
+    .JoggerContainerInner {
+	height: $jogger-diameter;
+	width: $jogger-diameter;
+	padding: $margin;
+	// This holds the raising and lower operators a and a-dagger.
+	background-color: purple;
+	.JoggerCircle {
+	    
+
+	    height: $jogger-diameter;
+	    width: $jogger-diameter;
+	    border-radius: $jogger-diameter/2;
+	    background-color: red;
+	    
+	}
+
+    }
+
+    
+}

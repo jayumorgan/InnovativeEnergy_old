@@ -14,7 +14,7 @@
     width: 70%;
     background-color: $off-white;
     border-radius: $border-radius;
-    min-height: 20%;
+    min-height: 50%;
     color: $dark-blue;
 
     .TeachModeHeader {
@@ -25,6 +25,14 @@
 	    grid-template-columns: 50% 50%;
 	    padding: $double-margin;
 	    border-radius: $border-radius $border-radius 0 0;
+	    .StatusBarTitle {
+		@include flex-center();
+		justify-content: flex-start;
+		span {
+		    font-size: $medium-font;
+		    font-weight: $bold-font;
+		}
+	    }
 	    .CurrentStepBar {
 		@include flex-center();
 		padding: $margin;
