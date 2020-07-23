@@ -1,0 +1,65 @@
+@import "../../master.scss";
+
+
+
+
+.TeachModeContainer {
+    @include shadow();
+    display: flex;
+    align-content: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    margin-top: $quad-margin;
+    margin-bottom: auto;
+    width: 70%;
+    background-color: $off-white;
+    border-radius: $border-radius;
+    min-height: 20%;
+    color: $dark-blue;
+
+    .TeachModeHeader {
+	.StatusBar {
+	    background-color: $light-blue;
+	    display: grid;
+	    grid-template-rows: 100%;
+	    grid-template-columns: 50% 50%;
+	    padding: $double-margin;
+	    border-radius: $border-radius $border-radius 0 0;
+	    .CurrentStepBar {
+		@include flex-center();
+		padding: $margin;
+		.ProgressBar {
+		    $pb-height: 25pt;
+		    background-color: $light-grey;
+		    width: 100%;
+		    height: $pb-height;
+		    border-radius: $pb-height/2;
+		    .ProgressBarFilled {
+			height: $pb-height;
+			background-color: $green;
+			border-radius: $pb-height/2;
+			@include flex-center();
+		    }
+		}
+	    }
+	}
+
+	.DescriptionLine {
+	    @include flex-center;
+	    justify-content: flex-start;
+	    span {
+		padding-left: $margin;
+	    }
+
+	}
+	
+    }
+}
+
+.PickLocationGrid {
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 50% 50%;
+
+    
+}

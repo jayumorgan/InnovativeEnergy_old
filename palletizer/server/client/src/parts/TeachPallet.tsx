@@ -11,6 +11,8 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 // Styles
 // import "./css/Configuration.scss";
 // import "./css/Login.scss";
+import "./css/TeachMode.scss";
+
 
 enum PalletTeachState {
     PALLET_CORNERS,
@@ -21,25 +23,68 @@ enum PalletTeachState {
     SUMMARY
 };
 
+function JoggerDisplay() {
+
+    return (
+	<div className="JoggerContainer">
+	    <span>
+		How to handle the jogger display.
+	    </span>
+	</div>
+    );
+};
+
+
+
+
+
 
 function PickLocationElement() {
     return (
-        <span>
-            {"Pick Location"}
-        </span>
+	<div className="PickLocationGrid">
+	    <JoggerDisplay />
+	    <span>
+		"Here is the pick location element." 
+	    </span>
+	</div>
     );
 }
-
 
 interface PalletConfiguratorProps {
     close: () => void;
 };
+
+interface CurrentStepBarProps {
+    completion_fraction: number;
+};
+
+
+function CurrentStepBar({completion_fraction} : CurrentStepBarProps) {
+    let style = {
+	width: `${completion_fraction * 100}%`
+    } as React.CSSProperties;
+    return (
+	<div className="CurrentStepBar">
+	    <div className="ProgressBar">
+		<div className="ProgressBarFilled" style={style}>
+		    <span>
+			1/5
+		    </span>
+		</div>
+	    </div>
+	</div>
+    );
+    
+}
+
 
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
+
+    let [completionFraction, setCompletionFraction] = useState<number>(1/5);
 
     let ChildElement: ReactElement = (<></>);
 
@@ -68,11 +113,20 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
     };
 
-
-
     return (
         <Modal close={close}>
-            {ChildElement}
+	    <div className="TeachModeContainer">
+		<div className="TeachModeHeader">
+		    <div className="StatusBar">
+			<span>
+			    Pallet Configuration Setup
+			</span>
+			<CurrentStepBar completion_fraction={completionFraction} />
+		    </div>
+		</div>
+
+		{ChildElement}
+	    </div>
         </Modal>
     );
 };
