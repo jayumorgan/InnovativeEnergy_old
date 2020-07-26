@@ -1,4 +1,4 @@
-import React, { useContext, useState, Fragment, ReactElement } from 'react';
+import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
 import Modal from "./Modal";
 
@@ -20,43 +20,43 @@ import Left from "./images/left.png";
 import Right from "./images/right.png";
 
 enum Directions {
-    UP="Up",
-    DOWN="Down",
-    LEFT="Left",
-    RIGHT="Right"
+    UP = "Up",
+    DOWN = "Down",
+    LEFT = "Left",
+    RIGHT = "Right"
 };
 
 interface ArrowImageProps {
-    direction : Directions;
+    direction: Directions;
 };
 
-function ArrowImage({direction} : ArrowImageProps) {
-    let image : string;
+function ArrowImage({ direction }: ArrowImageProps) {
+    let image: string;
 
     switch (direction) {
-	case (Directions.UP) : {
-	    image = Up;
-	    break;
-	};
-	case(Directions.DOWN) : {
-	    image = Down;
-	    break;
-	};
-	case (Directions.LEFT) : {
-	    image = Left;
-	    break;
-	};
-	case (Directions.RIGHT) : {
-	    image = Right;
-	    break;
-	    console.log("Right image");
-	};
+        case (Directions.UP): {
+            image = Up;
+            break;
+        };
+        case (Directions.DOWN): {
+            image = Down;
+            break;
+        };
+        case (Directions.LEFT): {
+            image = Left;
+            break;
+        };
+        case (Directions.RIGHT): {
+            image = Right;
+            break;
+            console.log("Right image");
+        };
     };
-    console.log(direction, image);    
+    console.log(direction, image);
     return (
-	<div className={direction}>
-	    <img src={image}/>
-	</div>
+        <div className={direction}>
+            <img src={image} />
+        </div>
     );
 };
 
@@ -72,38 +72,60 @@ enum PalletTeachState {
 function JogIncrement() {
 
     return (
-	<div className="JogIncrement">
-	    <input type="number" min="1" max="1000"/>
-	    <span>
-		mm
+        <div className="JogIncrement">
+            <input type="number" min="1" max="1000" />
+            <span>
+                mm
 	    </span>
-	</div>
+        </div>
     );
-}
+};
 
 
 function JoggerDisplay() {
 
-    let directions : Directions[] = [
-	Directions.UP,
-	Directions.DOWN,
-	Directions.LEFT,
-	Directions.RIGHT
+    let directions: Directions[] = [
+        Directions.UP,
+        Directions.DOWN,
+        Directions.LEFT,
+        Directions.RIGHT
     ];
-    
-      return (
-	<div className="JoggerContainer">
-	    <div className="JoggerContainerInner">
-		<div className="JoggerCircle">
-		    <JogIncrement />
-		    {directions.map((d: Directions, index: number)=>{
-			return (
-			    <ArrowImage direction={d} key={index} />
-			)
-		    })}
-		</div>
-	    </div>
-	</div>
+
+
+    let input_name = "PalletName";
+    let handle_input = (e: ChangeEvent) => {
+        // let value = Number((e.target as HTMLInputElement).value);
+        // set_start_box(value);
+    };
+
+    let pallet_name = "Pallet 1";
+
+    return (
+        <div className="JoggerContainer">
+            <div className="JoggerInformation">
+                <div className="PalletName">
+                    <input type="text" name={input_name} onChange={handle_input} placeholder={pallet_name} />
+                </div>
+            </div>
+
+
+            <div className="JoggerContainerInner">
+                <div className="JoggerCircle">
+                    <div className="SelectPointButton">
+                        <div className="SelectButton">
+                            <span>
+                                SELECT
+			    </span>
+                        </div>
+                    </div>
+                    {directions.map((d: Directions, index: number) => {
+                        return (
+                            <ArrowImage direction={d} key={index} />
+                        )
+                    })}
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -113,12 +135,12 @@ function JoggerDisplay() {
 
 function PickLocationElement() {
     return (
-	<div className="PickLocationGrid">
-	    <JoggerDisplay />
-	    <span>
-		"Here is the pick location element." 
+        <div className="PickLocationGrid">
+            <JoggerDisplay />
+            <span>
+                "Here is the pick location element."
 	    </span>
-	</div>
+        </div>
     );
 }
 
@@ -133,22 +155,22 @@ interface CurrentStepBarProps {
 
 
 
-function CurrentStepBar({completion_fraction} : CurrentStepBarProps) {
+function CurrentStepBar({ completion_fraction }: CurrentStepBarProps) {
     let style = {
-	width: `${completion_fraction * 100}%`
+        width: `${completion_fraction * 100}%`
     } as React.CSSProperties;
     return (
-	<div className="CurrentStepBar">
-	    <div className="ProgressBar">
-		<div className="ProgressBarFilled" style={style}>
-		    <span>
-			1/5
+        <div className="CurrentStepBar">
+            <div className="ProgressBar">
+                <div className="ProgressBarFilled" style={style}>
+                    <span>
+                        1/5
 		    </span>
-		</div>
-	    </div>
-	</div>
+                </div>
+            </div>
+        </div>
     );
-    
+
 }
 
 
@@ -158,13 +180,16 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
 
-    let [completionFraction, setCompletionFraction] = useState<number>(1/5);
+    let [completionFraction, setCompletionFraction] = useState<number>(1 / 5);
 
     let ChildElement: ReactElement = (<></>);
 
+    let instruction: string = "Instruction";
+
     switch (teachState) {
         case (PalletTeachState.PICK_LOCATION): {
-            ChildElement = (<PickLocationElement />)
+            ChildElement = (<PickLocationElement />);
+            instruction = "Move and select box pick location";
             break;
         };
         case (PalletTeachState.PALLET_CORNERS): {
@@ -180,7 +205,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         }
         case (PalletTeachState.SUMMARY): {
-            break
+            break;
         }
         default: {
             console.log("Default Pallet Configurator Case -- unhandled");
@@ -189,20 +214,24 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     return (
         <Modal close={close}>
-	    <div className="TeachModeContainer">
-		<div className="TeachModeHeader">
-		    <div className="StatusBar">
-			<div className="StatusBarTitle">
-			    <span>
-				Pallet Configuration Setup
+            <div className="TeachModeContainer">
+                <div className="TeachModeHeader">
+                    <div className="StatusBar">
+                        <div className="StatusBarTitle">
+                            <span>
+                                Pallet Configurator
 			    </span>
-			</div>
-			<CurrentStepBar completion_fraction={completionFraction} />
-		    </div>
-		</div>
-
-		{ChildElement}
-	    </div>
+                        </div>
+                        <CurrentStepBar completion_fraction={completionFraction} />
+                    </div>
+                </div>
+                <div className="InstructionLine">
+                    <span>
+                        {instruction}
+                    </span>
+                </div>
+                {ChildElement}
+            </div>
         </Modal>
     );
 };
