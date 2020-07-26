@@ -1,5 +1,5 @@
 #!/bin/bash
 
-mosquitto -c /etc/mosquitto/mosquitto.conf
+mosquitto -c /mosquitto/mosquitto.conf
 
 

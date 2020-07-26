@@ -98,7 +98,8 @@ function Configuration() {
         machine: true
     });
 
-    let [locked, set_locked] = useState<boolean>(true);
+    console.log("Unlock for development");
+    let [locked, set_locked] = useState<boolean>(false);
 
     let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
 
@@ -113,12 +114,11 @@ function Configuration() {
             machine: title === machine_title
         } as EditorConfig;
         set_editor(edit);
-    }
+    };
 
     let close_editor = () => {
         set_editor({ ...editor, edit: false });
     };
-
 
     let close_unlock = () => {
         set_locked(false);

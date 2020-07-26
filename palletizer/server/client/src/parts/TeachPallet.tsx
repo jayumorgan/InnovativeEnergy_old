@@ -24,14 +24,11 @@ enum PalletTeachState {
 };
 
 function JoggerDisplay() {
-    let joggerDiameter = "300pt";
-    let halfDiameter = "150pt";
-    return (
+      return (
 	<div className="JoggerContainer">
 	    <div className="JoggerContainerInner">
-		<svg height="300" width="300">
-		    <circle cx="0" cy="150" r="100" fill="blue" />
-		</svg>
+		<div className="JoggerCircle">
+		</div>
 	    </div>
 	</div>
     );
