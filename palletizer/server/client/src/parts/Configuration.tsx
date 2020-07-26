@@ -101,7 +101,8 @@ function Configuration() {
     console.log("Unlock for development");
     let [locked, set_locked] = useState<boolean>(false);
 
-    let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
+    // True for development
+    let [add_pallet_config, set_add_pallet_config] = useState<boolean>(true);
 
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";

@@ -14,6 +14,52 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 
+import Up from "./images/up.png";
+import Down from "./images/down.png";
+import Left from "./images/left.png";
+import Right from "./images/right.png";
+
+enum Directions {
+    UP="Up",
+    DOWN="Down",
+    LEFT="Left",
+    RIGHT="Right"
+};
+
+interface ArrowImageProps {
+    direction : Directions;
+};
+
+function ArrowImage({direction} : ArrowImageProps) {
+    let image : string;
+
+    switch (direction) {
+	case (Directions.UP) : {
+	    image = Up;
+	    break;
+	};
+	case(Directions.DOWN) : {
+	    image = Down;
+	    break;
+	};
+	case (Directions.LEFT) : {
+	    image = Left;
+	    break;
+	};
+	case (Directions.RIGHT) : {
+	    image = Right;
+	    break;
+	    console.log("Right image");
+	};
+    };
+    console.log(direction, image);    
+    return (
+	<div className={direction}>
+	    <img src={image}/>
+	</div>
+    );
+};
+
 enum PalletTeachState {
     PALLET_CORNERS,
     PICK_LOCATION,
@@ -23,11 +69,38 @@ enum PalletTeachState {
     SUMMARY
 };
 
+function JogIncrement() {
+
+    return (
+	<div className="JogIncrement">
+	    <input type="number" min="1" max="1000"/>
+	    <span>
+		mm
+	    </span>
+	</div>
+    );
+}
+
+
 function JoggerDisplay() {
+
+    let directions : Directions[] = [
+	Directions.UP,
+	Directions.DOWN,
+	Directions.LEFT,
+	Directions.RIGHT
+    ];
+    
       return (
 	<div className="JoggerContainer">
 	    <div className="JoggerContainerInner">
 		<div className="JoggerCircle">
+		    <JogIncrement />
+		    {directions.map((d: Directions, index: number)=>{
+			return (
+			    <ArrowImage direction={d} key={index} />
+			)
+		    })}
 		</div>
 	    </div>
 	</div>
@@ -56,6 +129,8 @@ interface PalletConfiguratorProps {
 interface CurrentStepBarProps {
     completion_fraction: number;
 };
+
+
 
 
 function CurrentStepBar({completion_fraction} : CurrentStepBarProps) {
