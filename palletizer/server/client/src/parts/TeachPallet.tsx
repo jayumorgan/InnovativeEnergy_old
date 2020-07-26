@@ -13,6 +13,8 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 // import "./css/Login.scss";
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
+import "./css/BoxSize.scss";
+
 
 import Up from "./images/up.png";
 import Down from "./images/down.png";
@@ -68,23 +70,6 @@ enum PalletTeachState {
     ASSIGN_LAYOUT,
     SUMMARY
 };
-
-function JogIncrement() {
-    return (
-        <div className="JogIncrement">
-            <input type="number" min="1" max="1000" />
-            <span>
-                mm
-	    </span>
-        </div>
-    );
-};
-
-
-
-
-
-
 
 
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
@@ -338,15 +323,12 @@ interface PalletConfiguratorProps {
 };
 
 interface CurrentStepBarProps {
-    completion_fraction: number;
+    fraction: Fraction;
 };
 
-
-
-
-function CurrentStepBar({ completion_fraction }: CurrentStepBarProps) {
+function CurrentStepBar({ fraction }: CurrentStepBarProps) {
     let style = {
-        width: `${completion_fraction * 100
+        width: `${fraction.n / fraction.d * 100
             }% `
     } as React.CSSProperties;
     return (
@@ -354,22 +336,44 @@ function CurrentStepBar({ completion_fraction }: CurrentStepBarProps) {
             <div className="ProgressBar">
                 <div className="ProgressBarFilled" style={style}>
                     <span>
-                        1/5
-		    </span>
+                        {String(fraction.n) + "/" + String(fraction.d)}
+                    </span>
                 </div>
             </div>
         </div>
     );
 }
 
+interface Fraction {
+    n: number;
+    d: number;
+};
+
+//---------------Box Size---------------
+
+
+function BoxSizeElement() {
+    // Must have fixed width. 
+    return (
+        <span>
+            Box Size
+	</span>
+    );
+};
+
+
+
+
+
+
 
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
 
-    let [completionFraction, setCompletionFraction] = useState<number>(1 / 5);
+    let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: 2, d: 5 } as Fraction);
 
     let ChildElement: ReactElement = (<></>);
 
@@ -378,13 +382,15 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     switch (teachState) {
         case (PalletTeachState.PICK_LOCATION): {
             ChildElement = (<PickLocationElement />);
-            instruction = "Move and select box pickup location";
+            instruction = "Move and select box pickup location.";
             break;
         };
         case (PalletTeachState.PALLET_CORNERS): {
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
+            ChildElement = (<BoxSizeElement />);
+            instruction = "Enter box dimensions."
             break;
         }
         case (PalletTeachState.LAYER_SETUP): {
@@ -411,7 +417,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
                                 Pallet Configurator
 			    </span>
                         </div>
-                        <CurrentStepBar completion_fraction={completionFraction} />
+                        <CurrentStepBar fraction={completionFraction} />
                     </div>
                 </div>
                 <div className="InstructionLine">
