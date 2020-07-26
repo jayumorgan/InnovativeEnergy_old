@@ -85,7 +85,7 @@ $jogger-diameter: 300pt;
 .JoggerContainer {
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: auto $jogger-diameter*(4/3);
+    grid-template-rows: auto $jogger-diameter*(5/3);
     min-height: $jogger-diameter * (4/3);
     padding-bottom: $margin;
 
@@ -104,11 +104,14 @@ $jogger-diameter: 300pt;
 
 
     .JoggerInformation {
+	margin: $margin;
         .PalletName {
             @include flex-center();
             padding: $margin;
             @include jin-style(80%, $medium-font);
-
+	    input {
+		@include shadow();
+	    }
         }
 
         .MoveItemContainer {
@@ -152,196 +155,216 @@ $jogger-diameter: 300pt;
         }
     }
 
-    .JoggerContainerInner {
+    .JoggerCentering {
+        height: 100%;
         width: 100%;
-        min-width: $jogger-diameter;
-        height: $jogger-diameter * (4/3);
-        padding: $margin;
-        display: grid;
-        grid-template-rows: $jogger-diameter/6 $jogger-diameter $jogger-diameter/6;
-        grid-template-columns: 100%;
 
-        // Raising and lower operators.
-        .JoggerRaiseLower {
-            cursor: pointer;
-            @include flex-center();
+        @include flex-center();
 
-            svg {
-                #ArrowLine {
-                    stroke: $light-grey;
-                }
 
-                #ArrowText {
-                    fill: none;
+        .JoggerContainerInner {
+            width: 100%;
+            min-width: $jogger-diameter;
+            height: $jogger-diameter * (4/3);
+            padding: $margin;
+            display: grid;
+            grid-template-rows: $jogger-diameter/6 $jogger-diameter $jogger-diameter/6;
+            grid-template-columns: 100%;
+
+            // Raising and lower operators.
+            .JoggerRaiseLower {
+                cursor: pointer;
+                @include flex-center();
+
+                svg {
+                    #ArrowLine {
+                        stroke: $light-grey;
+                    }
+
+                    #ArrowText {
+                        fill: none;
+                    }
                 }
             }
-        }
 
-        .JoggerRaiseLower:hover {
-            svg {
-                transform: scale(1.1);
+            .JoggerRaiseLower:hover {
+                svg {
+                    transform: scale(1.1);
 
-                #ArrowLine {
-                    stroke: $dark-blue;
-                }
+                    #ArrowLine {
+                        stroke: $dark-blue;
+                    }
 
-                #ArrowText {
-                    fill: $dark-blue;
+                    #ArrowText {
+                        fill: $dark-blue;
+                    }
                 }
             }
-        }
 
-        .JoggerCircleContainer {
-            @include flex-center();
+            .JoggerCircleContainer {
+                @include flex-center();
 
-            .JoggerCircle {
-                height: $jogger-diameter;
-                width: $jogger-diameter;
-                border-radius: $jogger-diameter/2;
-                background-color: $light-blue;
-                display: grid;
-                grid-template-rows: 33.3% 33.3% 33.3%;
-                grid-template-columns: 33.3% 33.3% 33.3%;
+                .JoggerCircle {
+                    height: $jogger-diameter;
+                    width: $jogger-diameter;
+                    border-radius: $jogger-diameter/2;
+                    background-color: $light-blue;
+                    display: grid;
+                    grid-template-rows: 33.3% 33.3% 33.3%;
+                    grid-template-columns: 33.3% 33.3% 33.3%;
 
-                @include shadow();
+                    @include shadow();
 
-                @mixin arrow-image() {
-                    cursor: pointer;
-
-                    :hover {
-                        transform: scale(1.1);
-                        //			filter: blur(3px);
-                        //	-webkit-filter : blur(3px);
-                        //	box-shadow: 0 0 10px 10px rgba(0, 140, 186, 0.5);
-                    }
-
-                    img {}
-                }
-
-                // For Center Jog Increment
-
-                .JogIncrement {
-                    @include grid-coordinate(2, 2);
-                    @include flex-center();
-
-                    input {
-                        font-size: 1em;
-                        width: 60pt;
-                        -webkit-appearance: none;
-                        -moz-appearance: none;
-                        margin: 0;
-                    }
-
-                    span {
-                        padding-left: $margin;
-                        font-size: 1em;
-                    }
-
-
-                }
-
-                .SelectPointButton {
-                    @include flex-center();
-                    @include grid-coordinate(2, 2);
-                    $select-diameter: 80pt;
-
-                    .SelectButton {
+                    @mixin arrow-image() {
                         cursor: pointer;
+
+                        :hover {
+                            transform: scale(1.1);
+                            //			filter: blur(3px);
+                            //	-webkit-filter : blur(3px);
+                            //	box-shadow: 0 0 10px 10px rgba(0, 140, 186, 0.5);
+                        }
+
+                        img {}
+                    }
+
+                    // For Center Jog Increment
+
+                    .JogIncrement {
+                        @include grid-coordinate(2, 2);
                         @include flex-center();
-                        height: $select-diameter;
-                        width: $select-diameter;
-                        border-radius: $select-diameter/2;
-                        background-color: $green;
-                        color: $dark-blue;
+
+                        input {
+                            font-size: 1em;
+                            width: 60pt;
+                            -webkit-appearance: none;
+                            -moz-appearance: none;
+                            margin: 0;
+                        }
+
+                        span {
+                            padding-left: $margin;
+                            font-size: 1em;
+                        }
+
+
                     }
 
-                    .SelectButton:hover {
-                        color: white;
-                        @include shadow();
+                    .SelectPointButton {
+                        @include flex-center();
+                        @include grid-coordinate(2, 2);
+                        $select-diameter: 80pt;
 
+                        .SelectButton {
+                            cursor: pointer;
+                            @include flex-center();
+                            height: $select-diameter;
+                            width: $select-diameter;
+                            border-radius: $select-diameter/2;
+                            background-color: $green;
+                            color: $dark-blue;
+                        }
+
+                        .SelectButton:hover {
+                            color: white;
+                            @include shadow();
+
+                        }
                     }
+
+
+                    .Up {
+                        @include arrow-image();
+                        @include flex-center();
+                        @include grid-coordinate(1, 2);
+                    }
+
+                    .Down {
+                        @include arrow-image();
+                        @include flex-center();
+                        @include grid-coordinate(3, 2);
+                    }
+
+                    .Left {
+                        @include arrow-image();
+                        @include flex-center();
+                        @include grid-coordinate(2, 1);
+                    }
+
+                    .Right {
+                        @include arrow-image();
+                        @include flex-center();
+                        @include grid-coordinate(2, 3);
+                    }
+
                 }
-
-
-                .Up {
-                    @include arrow-image();
-                    @include flex-center();
-                    @include grid-coordinate(1, 2);
-                }
-
-                .Down {
-                    @include arrow-image();
-                    @include flex-center();
-                    @include grid-coordinate(3, 2);
-                }
-
-                .Left {
-                    @include arrow-image();
-                    @include flex-center();
-                    @include grid-coordinate(2, 1);
-                }
-
-                .Right {
-                    @include arrow-image();
-                    @include flex-center();
-                    @include grid-coordinate(2, 3);
-                }
-
             }
         }
     }
 
 }
 
+.CoordinateDisplay {
+    margin: $margin;
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: 100%;
 
+
+    .Coordinate {
+        @include flex-center();
+        cursor: default;
+        flex-direction: row;
+        font-size: $large-font;
+        //border: 2pt solid $dark-grey;
+        border-radius: $border-radius * 2;
+        margin: $margin;
+        background: $blue-gradient;
+        color: white;
+        @include shadow();
+
+        .Axis {
+            font-weight: $bold-font;
+            padding-right: $margin;
+        }
+
+        .Value {}
+    }
+}
 
 .PickLocationMap {
 
     display: grid;
-    grid-template-rows: 20% 80%;
+    grid-template-rows: 15% 85%;
     grid-template-columns: 100%;
 
+    .Map {
+        @include flex-center();
+	padding: $margin * 2;
+        svg {
+            $stroke: $dark-blue;
+            width: 100%;
+            height: 100%;
+            
 
-    .CoordinateDisplay {
-	margin: $margin;
-	display: grid;
-	grid-template-columns: 33% 33% 33%;
-	grid-template-rows: 100%;
-	
+            rect {
+                width: 100%;
+                fill: none;
+                stroke: $light-grey;
+                stroke-width: 3;
+            }
 
-	.Coordinate {
-	    @include flex-center();
-	    flex-direction: row;
-	    font-size: $large-font;
-	    //border: 2pt solid $dark-grey;
-	    border-radius: $border-radius * 2;
-	    margin: $margin;
-	    background: $blue-gradient;
-		color: white;
-	    @include shadow();
-	    .Axis {
-		font-weight: $bold-font;
-		padding-right: $margin;
-	    }
+            circle {
+                fill: none;
+                stroke: $stroke;
+                stroke-width: 2;
+            }
 
-	    .Value {
+            line {
+                stroke: $stroke;
+                stroke-width: 2;
+            }
 
-	    }
-	    
-
-	    
-	}
-	
+        }
     }
-    
-    
-    
-
-    
-
-
-
 }
-
-
-
