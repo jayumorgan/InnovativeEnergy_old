@@ -81,6 +81,12 @@ function JogIncrement() {
 };
 
 
+
+
+
+
+
+
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
     let coordinates: string = "";
 
@@ -98,6 +104,33 @@ function MakeTriangleCoordinates(up: boolean, height: number, width: number, sca
 
     return coordinates;
 };
+
+interface AProps {
+    dagger: boolean;
+};
+
+
+function A({ dagger }: AProps) {
+    let stroke_color = "rgb(22,35,56)";
+    let stroke_width = 5;
+    let frame_height = 50;
+    let frame_width = 200;
+    let scale = 2 / 10;
+
+    let text = (dagger) ? "Raise" : "Lower";
+    let text_x = frame_width / 2 - 30;
+    let text_y = (dagger) ? frame_height - 10 : 0 + 15;
+
+    return (
+        <div className="JoggerRaiseLower">
+            <svg width={frame_width} height={frame_height}>
+                <polyline id="ArrowLine" points={MakeTriangleCoordinates(dagger, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" stroke-width={stroke_width} />
+                <text id="ArrowText" x={text_x} y={text_y} font-size="20"> {text} </text>
+            </svg>
+        </div>
+    );
+};
+
 
 
 
@@ -117,13 +150,6 @@ function JoggerDisplay() {
     };
 
     let pallet_name = "Pallet 1";
-
-    let stroke_color = "rgb(22,35,56)";
-    let stroke_width = 5;
-    let frame_height = 50;
-    let frame_width = 200;
-
-    let scale = 2 / 10;
 
     return (
         <div className="JoggerContainer">
@@ -170,16 +196,8 @@ function JoggerDisplay() {
                 </div>
             </div>
             <div className="JoggerContainerInner">
-                <div className="JoggerRaiseLower">
-                    <svg width={frame_width} height={frame_height}>
-                        <polyline id="ArrowLine" points={MakeTriangleCoordinates(true, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" stroke-width={stroke_width} />
-                        <text id="ArrowText" x={frame_width / 2 - 30} y={frame_height - 10} font-size="20"> Raise </text>
-                    </svg>
-                </div>
-
-
+                <A dagger={true} />
                 <div className="JoggerCircleContainer">
-
                     <div className="JoggerCircle">
                         <div className="SelectPointButton">
                             <div className="SelectButton">
@@ -195,12 +213,7 @@ function JoggerDisplay() {
                         })}
                     </div>
                 </div>
-                <div className="JoggerRaiseLower">
-                    <svg width={frame_width} height={frame_height}>
-                        <polyline id="ArrowLine" points={MakeTriangleCoordinates(false, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" stroke-width={stroke_width} />
-                        <text id="ArrowText" x={frame_width / 2 - 30} y={0 + 17} font-size="20"> Lower </text>
-                    </svg>
-                </div>
+                <A dagger={false} />
             </div>
         </div>
     );
@@ -210,13 +223,51 @@ function JoggerDisplay() {
  * </div>
  *  */
 
+interface CoordinateItemProps {
+    axis: string;
+    value: number;
+};
+
+function CoordinateItem({ axis, value }: CoordinateItemProps) {
+
+    return (
+        <div className="Coordinate">
+            <span className="Axis">
+                {axis.toUpperCase() + " :"}
+            </span>
+            <span className="Value">
+                {value}
+            </span>
+        </div>
+    );
+}
+
+function PickLocationMap() {
+
+    let coordinates = {
+        x: 20,
+        y: 10,
+        z: 400
+    } as { [key: string]: number };
+    return (
+        <div className="PickLocationMap">
+            <div className="CoordinateDisplay">
+                {Object.keys(coordinates).map((key: string, index: number) => {
+                    return (
+                        <CoordinateItem axis={key} value={coordinates[key]} key={index} />
+                    )
+                })}
+            </div>
+        </div>
+    );
+}
+
+
 function PickLocationElement() {
     return (
         <div className="PickLocationGrid">
             <JoggerDisplay />
-            <span>
-                "Here is the pick location element."
-	    </span>
+            <PickLocationMap />
         </div>
     );
 }
