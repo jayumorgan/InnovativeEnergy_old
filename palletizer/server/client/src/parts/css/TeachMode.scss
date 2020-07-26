@@ -16,55 +16,62 @@
     color: $dark-blue;
 
     .TeachModeHeader {
-	.StatusBar {
-	    background: $blue-gradient;
-	    display: grid;
-	    grid-template-rows: 100%;
-	    grid-template-columns: 50% 50%;
-	    padding: $double-margin;
-	    border-radius: $border-radius $border-radius 0 0;
-	    color: white;
-	    .StatusBarTitle {
-		@include flex-center();
-		justify-content: flex-start;
-		span {
-		    font-size: $medium-font;
-		    font-weight: $bold-font;
-		}
-	    }
-	    .CurrentStepBar {
-		@include flex-center();
-		padding: $margin;
-		.ProgressBar {
-		    $pb-height: 30pt;
-		    background-color: $off-white;
-		    width: 100%;
-		    height: $pb-height;
-		    border-radius: $pb-height/2;
-		    .ProgressBarFilled {
-			height: $pb-height;
-			background-color: $green;
-			border-radius: $pb-height/2;
-			@include flex-center();
-		    }
-		    @include white-shadow();
-		}
-	    }
-	}
+        .StatusBar {
+            background: $blue-gradient;
+            display: grid;
+            grid-template-rows: 100%;
+            grid-template-columns: 50% 50%;
+            padding: $double-margin;
+            border-radius: $border-radius $border-radius 0 0;
+            color: white;
 
-	
+            .StatusBarTitle {
+                @include flex-center();
+                justify-content: flex-start;
+
+                span {
+                    font-size: $medium-font;
+                    font-weight: $bold-font;
+                }
+            }
+
+            .CurrentStepBar {
+                @include flex-center();
+                padding: $margin;
+
+                .ProgressBar {
+                    $pb-height: 30pt;
+                    background-color: $off-white;
+                    width: 100%;
+                    height: $pb-height;
+                    border-radius: $pb-height/2;
+
+                    .ProgressBarFilled {
+                        height: $pb-height;
+                        background-color: $green;
+                        border-radius: $pb-height/2;
+                        @include flex-center();
+                    }
+
+                    @include white-shadow();
+                }
+            }
+        }
+
+
     }
 
     .InstructionLine {
-	@include flex-center;
-	//justify-content: flex-start;
-	padding: $margin;
-	span {
-	    padding-left: $margin;
-	    font-size: $medium-font;
-	}
+        @include flex-center;
+        //justify-content: flex-start;
+        padding: $margin;
+
+        span {
+            padding-left: $margin;
+            font-size: $medium-font;
+        }
     }
-    
+
 }
 
 
@@ -73,7 +80,7 @@
     width: 100%;
     display: grid;
     grid-template-rows: 100%;
-    grid-template-columns: 50% 50%;   
+    grid-template-columns: 50% 50%;
 }
 
 
@@ -83,131 +90,218 @@ $jogger-diameter: 300pt;
 .JoggerContainer {
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: 50% 50%;
-    min-height: $jogger-diameter * 2;
+    grid-template-rows: auto $jogger-diameter*(4/3);
+    min-height: $jogger-diameter * (4/3);
+    padding-bottom: $margin;
+
+    min-width: $jogger-diameter * (4/3);
+
+    @mixin jin-style($width, $fs) {
+        input {
+            border-radius: $border-radius;
+            color: $dark-blue;
+            border: $container-border;
+            font-size: $fs;
+            width: $width;
+            padding: $margin;
+        }
+    }
 
 
     .JoggerInformation {
-	.PalletName {
-	    @include flex-center();
-	    padding: $margin;
-	    input {
-		border-radius: $border-radius;
-                color: $dark-blue;
-                border: $container-border;
-                font-size: 1.3em;
-                width: 80%;
-                padding: $margin;
+        .PalletName {
+            @include flex-center();
+            padding: $margin;
+            @include jin-style(80%, $medium-font);
+
+        }
+
+        .MoveItemContainer {
+            display: grid;
+            grid-template-rows: 100%;
+            grid-template-columns: 50% 50%;
+
+            .MoveItem {
+                padding-top: $margin;
+                display: grid;
+                grid-template-rows: 50% 50%;
+                grid-template-columns: 100%;
+
+                .MoveTitle {
+                    @include flex-center();
+
+                    span {
+                        font-size: $medium-font;
+                    }
+                }
+
+                .MoveInput {
+                    @include flex-center();
+                    padding: $margin;
+
+                    .InputContainer {
+                        width: 60%;
+                        @include flex-center();
+                        @include jin-style(70%, 1em);
+                    }
+
+                    font-size: $medium-font;
+
+                    .UnitContainer {
+                        width: 40%;
+                        @include flex-center();
+                        justify-content: flex-start;
+                    }
+
+                    // Input and units.
+                }
             }
-	}
-
-	.MoveItem {
-
-	}
-	
+        }
     }
 
-    
-    
     .JoggerContainerInner {
+        // @include flex-center();	
+        width: 100%;
+        min-width: $jogger-diameter;
+        height: $jogger-diameter * (4/3);
+        padding: $margin;
 
-	@include flex-center();
-	width: 100%;
-	min-width: 300px;
-	height: calc({#width} / 2);
-	padding: $margin;
-	
-	// This holds the raising and lower operators a and a-dagger.
+        display: grid;
+        grid-template-rows: $jogger-diameter/6 $jogger-diameter $jogger-diameter/6;
+        grid-template-columns: 100%;
+        // This holds the raising and lower operators a and a-dagger.
 
-	.JoggerCircle {
-	    height: $jogger-diameter;
-	    width: $jogger-diameter;
-	    border-radius: $jogger-diameter/2;
-	    background-color: $light-blue;
-	    display: grid;
-	    grid-template-rows: 33.3% 33.3% 33.3%;
-	    grid-template-columns: 33.3% 33.3% 33.3%;
+        .JoggerRaiseLower {
+            cursor: pointer;
+            @include flex-center();
 
-	    @include shadow();
-	    @mixin arrow-image() {
-		cursor: pointer;
-		:hover{
-		    transform: scale(1.1);
-//			filter: blur(3px);
-		//	-webkit-filter : blur(3px);
-		//	box-shadow: 0 0 10px 10px rgba(0, 140, 186, 0.5);
-		    }
 
-		img {
-		
-		}
-	    }
+            svg {
+                #ArrowLine {
+                    stroke: $light-grey;
+                }
 
-	    // For Center Jog Increment
+                #ArrowText {
+                    fill: none;
 
-	    .JogIncrement {
-		@include grid-coordinate(2,2);
-		@include flex-center();
-		input {
-		    font-size: 1em;
-		    width: 60pt;
-		    -webkit-appearance: none;
-		    -moz-appearance: none;
-		    margin: 0;
-		}
-		span {
-		    padding-left: $margin;
-		    font-size : 1em;
-		}
-		
-				
-	    }
+                }
+            }
+        }
 
-	    .SelectPointButton {
-		@include flex-center();
-		@include grid-coordinate(2,2);
-		$select-diameter: 80pt;
-		.SelectButton {
-		    cursor:pointer;
-		    @include flex-center();
-		    height: $select-diameter;
-		    width: $select-diameter;
-		    border-radius: $select-diameter/2;
-		    background-color: $green;
-		    color: $dark-blue;
-		}
-		.SelectButton:hover {
-		    color: white;
-		    @include shadow();
+        .JoggerRaiseLower:hover {
+            svg {
+                transform: scale(1.1);
 
-		}
-	    }
-	    
-	    
-	    .Up {
-		@include arrow-image();
-		@include flex-center();
-		@include grid-coordinate(1,2);
-	    }
+                #ArrowLine {
+                    stroke: $dark-blue;
+                }
 
-	    .Down {
-		@include arrow-image();
-		@include flex-center();
-		@include grid-coordinate(3,2);
-	    }
+                #ArrowText {
+                    fill: $dark-blue;
+                }
+            }
+        }
 
-	    .Left {
-		@include arrow-image();
-		@include flex-center();
-		@include grid-coordinate(2,1);
-	    }
+        .JoggerCircleContainer {
+            @include flex-center();
 
-	    .Right {
-		@include arrow-image();
-		@include flex-center();
-		@include grid-coordinate(2,3);
-	    }
-	    
-	}
+
+
+            .JoggerCircle {
+                height: $jogger-diameter;
+                width: $jogger-diameter;
+                border-radius: $jogger-diameter/2;
+                background-color: $light-blue;
+                display: grid;
+                grid-template-rows: 33.3% 33.3% 33.3%;
+                grid-template-columns: 33.3% 33.3% 33.3%;
+
+                @include shadow();
+
+                @mixin arrow-image() {
+                    cursor: pointer;
+
+                    :hover {
+                        transform: scale(1.1);
+                        //			filter: blur(3px);
+                        //	-webkit-filter : blur(3px);
+                        //	box-shadow: 0 0 10px 10px rgba(0, 140, 186, 0.5);
+                    }
+
+                    img {}
+                }
+
+                // For Center Jog Increment
+
+                .JogIncrement {
+                    @include grid-coordinate(2, 2);
+                    @include flex-center();
+
+                    input {
+                        font-size: 1em;
+                        width: 60pt;
+                        -webkit-appearance: none;
+                        -moz-appearance: none;
+                        margin: 0;
+                    }
+
+                    span {
+                        padding-left: $margin;
+                        font-size: 1em;
+                    }
+
+
+                }
+
+                .SelectPointButton {
+                    @include flex-center();
+                    @include grid-coordinate(2, 2);
+                    $select-diameter: 80pt;
+
+                    .SelectButton {
+                        cursor: pointer;
+                        @include flex-center();
+                        height: $select-diameter;
+                        width: $select-diameter;
+                        border-radius: $select-diameter/2;
+                        background-color: $green;
+                        color: $dark-blue;
+                    }
+
+                    .SelectButton:hover {
+                        color: white;
+                        @include shadow();
+
+                    }
+                }
+
+
+                .Up {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(1, 2);
+                }
+
+                .Down {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(3, 2);
+                }
+
+                .Left {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(2, 1);
+                }
+
+                .Right {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(2, 3);
+                }
+
+            }
+        }
     }
+
 }

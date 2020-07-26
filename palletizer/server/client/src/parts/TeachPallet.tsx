@@ -70,7 +70,6 @@ enum PalletTeachState {
 };
 
 function JogIncrement() {
-
     return (
         <div className="JogIncrement">
             <input type="number" min="1" max="1000" />
@@ -82,6 +81,26 @@ function JogIncrement() {
 };
 
 
+function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
+    let coordinates: string = "";
+
+    let s_h = height * scale;
+    let s_w = height * scale;
+
+    width -= s_w;
+    height -= s_h;
+
+    for (let i = 0; i < 3; i++) {
+        let x = (i / 2) * width + ((i % 2 === 0) ? ((i === 0) ? s_w / 2 : -s_w / 2) : 0);
+        let y = i % 2 === 0 ? (up ? height - s_h / 2 : 0 + s_h / 2) : (up ? 0 + s_h / 2 : height - s_h / 2);
+        coordinates += `${x},${y} `;
+    }
+
+    return coordinates;
+};
+
+
+
 function JoggerDisplay() {
 
     let directions: Directions[] = [
@@ -91,7 +110,6 @@ function JoggerDisplay() {
         Directions.RIGHT
     ];
 
-
     let input_name = "PalletName";
     let handle_input = (e: ChangeEvent) => {
         // let value = Number((e.target as HTMLInputElement).value);
@@ -100,29 +118,88 @@ function JoggerDisplay() {
 
     let pallet_name = "Pallet 1";
 
+    let stroke_color = "rgb(22,35,56)";
+    let stroke_width = 5;
+    let frame_height = 50;
+    let frame_width = 200;
+
+    let scale = 2 / 10;
+
     return (
         <div className="JoggerContainer">
             <div className="JoggerInformation">
                 <div className="PalletName">
                     <input type="text" name={input_name} onChange={handle_input} placeholder={pallet_name} />
                 </div>
-            </div>
-
-
-            <div className="JoggerContainerInner">
-                <div className="JoggerCircle">
-                    <div className="SelectPointButton">
-                        <div className="SelectButton">
+                <div className="MoveItemContainer">
+                    <div className="MoveItem">
+                        <div className="MoveTitle">
                             <span>
-                                SELECT
-			    </span>
+                                {"Distance"}
+                            </span>
+                        </div>
+                        <div className="MoveInput">
+                            <div className="InputContainer">
+                                <input type="number" value={100} />
+                            </div>
+                            <div className="UnitContainer">
+                                <span>
+                                    mm
+				</span>
+                            </div>
                         </div>
                     </div>
-                    {directions.map((d: Directions, index: number) => {
-                        return (
-                            <ArrowImage direction={d} key={index} />
-                        )
-                    })}
+                    <div className="MoveItem">
+                        <div className="MoveTitle">
+                            <span>
+
+                                {"Speed"}
+                            </span>
+                        </div>
+                        <div className="MoveInput">
+                            <div className="InputContainer">
+                                <input type="number" value={100} />
+                            </div>
+                            <div className="UnitContainer">
+                                <span>
+                                    mm/s
+				</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="JoggerContainerInner">
+                <div className="JoggerRaiseLower">
+                    <svg width={frame_width} height={frame_height}>
+                        <polyline id="ArrowLine" points={MakeTriangleCoordinates(true, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" stroke-width={stroke_width} />
+                        <text id="ArrowText" x={frame_width / 2 - 30} y={frame_height - 10} font-size="20"> Raise </text>
+                    </svg>
+                </div>
+
+
+                <div className="JoggerCircleContainer">
+
+                    <div className="JoggerCircle">
+                        <div className="SelectPointButton">
+                            <div className="SelectButton">
+                                <span>
+                                    SELECT
+				</span>
+                            </div>
+                        </div>
+                        {directions.map((d: Directions, index: number) => {
+                            return (
+                                <ArrowImage direction={d} key={index} />
+                            )
+                        })}
+                    </div>
+                </div>
+                <div className="JoggerRaiseLower">
+                    <svg width={frame_width} height={frame_height}>
+                        <polyline id="ArrowLine" points={MakeTriangleCoordinates(false, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" stroke-width={stroke_width} />
+                        <text id="ArrowText" x={frame_width / 2 - 30} y={0 + 17} font-size="20"> Lower </text>
+                    </svg>
                 </div>
             </div>
         </div>
@@ -170,7 +247,6 @@ function CurrentStepBar({ completion_fraction }: CurrentStepBarProps) {
             </div>
         </div>
     );
-
 }
 
 
@@ -189,7 +265,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     switch (teachState) {
         case (PalletTeachState.PICK_LOCATION): {
             ChildElement = (<PickLocationElement />);
-            instruction = "Move and select box pick location";
+            instruction = "Move and select box pickup location";
             break;
         };
         case (PalletTeachState.PALLET_CORNERS): {
