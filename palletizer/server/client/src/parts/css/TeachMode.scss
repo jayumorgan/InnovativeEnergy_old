@@ -4,7 +4,152 @@ $jogger-diameter: 300pt;
 $content-height: $jogger-diameter * 7/3;
 $content-width: $jogger-diameter * 11/3;
 
-$container-height: $jogger-diameter * 3;
+//$container-height: $jogger-diameter * 2.65;
+
+$container-height: $jogger-diameter * 10/4;
+$container-width: $jogger-diameter * 7/2;
+
+
+.TeachContainer {
+    height: $container-height;
+    width: $content-width;
+    background-color: $off-white;
+    margin-top: $quad-margin;
+    border-radius: $border-radius;
+    @include shadow();
+    display: grid;
+    color: $dark-blue;
+    $ch: $container-height;
+    grid-template-rows: $ch/10 $ch/10 auto;
+
+    .TeachModeHeader {
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 10% 80% 10%;
+        background: $blue-gradient;
+
+        .TeachButton {
+            cursor: pointer;
+            @include flex-center();
+            color: $light-grey;
+            font-size: $medium-font;
+        }
+
+        .TeachButton:hover {
+            color: $green;
+        }
+
+        .StatusBar {
+            display: grid;
+            grid-template-rows: 50% 50%;
+            grid-template-columns: 100%;
+            border-radius: $border-radius $border-radius 0 0;
+            color: white;
+            height: 100%;
+
+            .StatusBarTitle {
+                @include flex-center();
+                flex-direction: column;
+                justify-content: flex-end;
+
+                span {
+                    font-size: $medium-font;
+                    font-weight: $bold-font;
+                }
+            }
+
+            .StatusBarCompletion {
+                @include flex-center();
+
+                .CompletionContainer {
+                    @include flex-center();
+                    width: 20%;
+                    justify-content: space-between;
+
+                    svg {
+                        circle {
+                            stroke: none;
+                        }
+
+                        #complete {
+                            fill: $green;
+                        }
+
+                        #incomplete {
+                            fill: $light-grey;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .TeachModeInstruction {
+        @include flex-center();
+
+        span {
+            font-size: 2em;
+            letter-spacing: 5pt;
+            font-variant: small-caps;
+
+        }
+    }
+
+    .TechModeContent {
+        height: 100%;
+        width: 100%;
+
+
+    }
+
+
+    .TeachModeFooter {
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 20% 60% 20%;
+
+
+        .TeachButton {
+            cursor: pointer;
+            @include flex-center();
+            padding: $margin;
+            padding-left: $margin * 3;
+            padding-right: $margin * 3;
+            color: $light-grey;
+            font-size: $medium-font;
+        }
+
+        .TeachButton:hover {
+            color: $green;
+        }
+
+        .CurrentStepBar {
+            @include flex-center();
+            padding: $margin;
+
+            .ProgressBar {
+                //  @include cshadow($dark-blue);
+                $pb-height: 30pt;
+                background-color: $light-grey;
+                width: 60%;
+                height: $pb-height;
+                border-radius: $pb-height/2;
+
+                .ProgressBarFilled {
+                    height: $pb-height;
+                    background-color: $green;
+                    border-radius: $pb-height/2;
+                    @include flex-center();
+                }
+
+                //                    @include white-shadow();
+            }
+        }
+    }
+}
+
+
+
 
 
 .TeachModeContainer {
@@ -12,40 +157,41 @@ $container-height: $jogger-diameter * 3;
     display: grid;
     height: $container-height;
     grid-template-columns: 100%;
-    grid-template-rows: auto auto auto auto;
-    
-//    display: flex;
-  //  align-content: center;
-    //justify-content: flex-start;
-   // flex-direction: column;
+    grid-template-rows: auto auto auto;
+    // display: flex;
+    // align-content: center;
+    // justify-content: flex-start;
+    // flex-direction: column;
     margin-top: $quad-margin;
-    margin-bottom: auto;
+    //    margin-bottom: auto;
     //min-width: 50%;
     width: $content-width;
     background-color: $off-white;
     border-radius: $border-radius;
     color: $dark-blue;
 
-    .TeachModeFooter{
-	@include flex-center();
-	justify-content: space-between;
-//	margin: $margin;
-	margin-left: $margin * 2;
-	margin-right: $margin * 2;
-	margin-bottom: $margin * 2;
-	.TeachButton {
-	    cursor: pointer;
-	    @include flex-center();
-	    padding: $margin;
-	    padding-left: $margin * 3;
-	    
-	    color: $light-grey;
-	    font-size: $medium-font;
-	    
-	}
-	.TeachButton:hover {
-	    color: $green;
-	}
+    .TeachModeFooter {
+        @include flex-center();
+        align-items: flex-end;
+        justify-content: space-between;
+        //	margin: $margin;
+        margin-left: $margin * 2;
+        margin-right: $margin * 2;
+        margin-bottom: $margin * 2;
+
+        .TeachButton {
+            cursor: pointer;
+            @include flex-center();
+            padding: $margin;
+            padding-left: $margin * 3;
+            padding-right: $margin * 3;
+            color: $light-grey;
+            font-size: $medium-font;
+        }
+
+        .TeachButton:hover {
+            color: $green;
+        }
     }
 
     .TeachModeHeader {
@@ -53,7 +199,7 @@ $container-height: $jogger-diameter * 3;
             background: $blue-gradient;
             display: grid;
             grid-template-rows: 100%;
-            grid-template-columns: 50% 50%;
+            grid-template-columns: 60% 40%;
             padding: $double-margin;
             border-radius: $border-radius $border-radius 0 0;
             color: white;
@@ -61,6 +207,7 @@ $container-height: $jogger-diameter * 3;
             .StatusBarTitle {
                 @include flex-center();
                 justify-content: flex-start;
+
                 span {
                     font-size: $medium-font;
                     font-weight: $bold-font;
@@ -72,6 +219,7 @@ $container-height: $jogger-diameter * 3;
                 padding: $margin;
 
                 .ProgressBar {
+                    @include cshadow($green);
                     $pb-height: 30pt;
                     background-color: $off-white;
                     width: 100%;
@@ -85,7 +233,7 @@ $container-height: $jogger-diameter * 3;
                         @include flex-center();
                     }
 
-                    @include white-shadow();
+                    //                    @include white-shadow();
                 }
             }
         }
@@ -93,12 +241,48 @@ $container-height: $jogger-diameter * 3;
 
     .InstructionLine {
         @include flex-center;
-        //justify-content: flex-start;
+        background-color: red;
+        //        justify-content: flex-start;
         padding: $margin;
 
         span {
             padding-left: $margin;
-            font-size: $medium-font;
+            font-size: $large-font;
+            //  padding-bottom: $margin;
+        }
+
+        border-bottom: 1pt solid $dark-blue;
+    }
+}
+
+
+//---------------Pick Location---------------
+@mixin jin-style($width, $fs) {
+    input {
+        border-radius: $border-radius;
+        color: $dark-blue;
+        border: $container-border;
+        font-size: $fs;
+        width: $width;
+        //padding: $margin;
+        // Testing this out.
+        text-align: center;
+    }
+}
+
+
+.PickLocation {
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto;
+
+    .PalletTitle {
+        @include flex-center();
+        padding: $margin;
+        @include jin-style(40%, $medium-font);
+
+        input {
+            @include shadow();
         }
     }
 }
@@ -111,223 +295,244 @@ $container-height: $jogger-diameter * 3;
     grid-template-columns: 50% 50%;
 }
 
-@mixin jin-style($width, $fs) {
-    input {
-        border-radius: $border-radius;
-        color: $dark-blue;
-        border: $container-border;
-        font-size: $fs;
-        width: $width;
-        padding: $margin;
-	// Testing this out.
-	text-align: center;
-    }
-}
 
-.JoggerContainer {
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: auto $jogger-diameter*(5/3);
-    .JoggerInformation {
-        margin: $margin;
 
-        .PalletName {
-            @include flex-center();
-            padding: $margin;
-            @include jin-style(80%, $medium-font);
 
-            input {
-                @include shadow();
-            }
-        }
 
-        .MoveItemContainer {
+.JoggerInformation {
+    height: 100%;
+    @include flex-center();
+
+
+    .MoveItemContainer {
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 50% 50%;
+
+        .MoveItem {
+            padding-top: $margin;
             display: grid;
-            grid-template-rows: 100%;
-            grid-template-columns: 50% 50%;
-
-            .MoveItem {
-                padding-top: $margin;
-                display: grid;
-                grid-template-rows: 50% 50%;
-                grid-template-columns: 100%;
-
-                .MoveTitle {
-                    @include flex-center();
-
-                    span {
-                        font-size: $medium-font;
-                    }
-                }
-
-                .MoveInput {
-                    @include flex-center();
-                    padding: $margin;
-
-                    .InputContainer {
-                        width: 60%;
-                        @include flex-center();
-                        @include jin-style(70%, 1em);
-                    }
-
-                    font-size: $medium-font;
-
-                    .UnitContainer {
-                        width: 40%;
-                        @include flex-center();
-                        justify-content: flex-start;
-                    }
-                }
-            }
-        }
-    }
-
-    .JoggerCentering {
-        height: 100%;
-        width: 100%;
-
-        @include flex-center();
-
-
-        .JoggerContainerInner {
-            width: 100%;
-            min-width: $jogger-diameter;
-            height: $jogger-diameter * (4/3);
-            padding: $margin;
-            display: grid;
-            grid-template-rows: $jogger-diameter/6 $jogger-diameter $jogger-diameter/6;
+            grid-template-rows: 50% 50%;
             grid-template-columns: 100%;
 
-            // Raising and lower operators.
-            .JoggerRaiseLower {
-                cursor: pointer;
+            .MoveTitle {
                 @include flex-center();
 
-                svg {
-                    #ArrowLine {
-                        stroke: $light-grey;
-                    }
-
-                    #ArrowText {
-                        fill: none;
-                    }
+                span {
+                    font-size: $medium-font;
                 }
             }
 
-            .JoggerRaiseLower:hover {
-                svg {
-                    transform: scale(1.1);
-
-                    #ArrowLine {
-                        stroke: $dark-blue;
-                    }
-
-                    #ArrowText {
-                        fill: $dark-blue;
-                    }
-                }
-            }
-
-            .JoggerCircleContainer {
+            .MoveInput {
                 @include flex-center();
+                padding: $margin;
 
-                .JoggerCircle {
-                    height: $jogger-diameter;
-                    width: $jogger-diameter;
-                    border-radius: $jogger-diameter/2;
-                    background-color: $light-blue;
-                    display: grid;
-                    grid-template-rows: 33.3% 33.3% 33.3%;
-                    grid-template-columns: 33.3% 33.3% 33.3%;
+                .InputContainer {
+                    width: 60%;
+                    @include flex-center();
+                    @include jin-style(70%, 1em);
+                }
 
-                    @include shadow();
+                font-size: $medium-font;
 
-                    @mixin arrow-image() {
-                        cursor: pointer;
-
-                        :hover {
-                            transform: scale(1.1);
-                            //			filter: blur(3px);
-                            //	-webkit-filter : blur(3px);
-                            //	box-shadow: 0 0 10px 10px rgba(0, 140, 186, 0.5);
-                        }
-
-                        img {}
-                    }
-
-                    // For Center Jog Increment
-
-                    .JogIncrement {
-                        @include grid-coordinate(2, 2);
-                        @include flex-center();
-
-                        input {
-                            font-size: 1em;
-                            width: 60pt;
-                            -webkit-appearance: none;
-                            -moz-appearance: none;
-                            margin: 0;
-                        }
-
-                        span {
-                            padding-left: $margin;
-                            font-size: 1em;
-                        }
-
-
-                    }
-
-                    .SelectPointButton {
-                        @include flex-center();
-                        @include grid-coordinate(2, 2);
-                        $select-diameter: 80pt;
-
-                        .SelectButton {
-                            cursor: pointer;
-                            @include flex-center();
-                            height: $select-diameter;
-                            width: $select-diameter;
-                            border-radius: $select-diameter/2;
-                            background-color: $green;
-                            color: $dark-blue;
-                        }
-
-                        .SelectButton:hover {
-                            color: white;
-                            @include shadow();
-
-                        }
-                    }
-
-
-                    .Up {
-                        @include arrow-image();
-                        @include flex-center();
-                        @include grid-coordinate(1, 2);
-                    }
-
-                    .Down {
-                        @include arrow-image();
-                        @include flex-center();
-                        @include grid-coordinate(3, 2);
-                    }
-
-                    .Left {
-                        @include arrow-image();
-                        @include flex-center();
-                        @include grid-coordinate(2, 1);
-                    }
-
-                    .Right {
-                        @include arrow-image();
-                        @include flex-center();
-                        @include grid-coordinate(2, 3);
-                    }
+                .UnitContainer {
+                    width: 40%;
+                    @include flex-center();
+                    justify-content: flex-start;
                 }
             }
         }
     }
 }
+
+.JoggerCentering {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: 100%;
+
+    //        @include flex-center();
+    .JoggerContainerInner {
+        width: 100%;
+        display: grid;
+        grid-template-rows: auto auto auto;
+        grid-template-columns: 100%;
+
+        // Raising and lower operators.
+        .JoggerRaiseLower {
+            cursor: pointer;
+            @include flex-center();
+
+            svg {
+                #ArrowLine {
+                    stroke: $light-grey;
+                }
+
+                #ArrowText {
+                    fill: none;
+                }
+            }
+        }
+
+        .JoggerRaiseLower:hover {
+            svg {
+                transform: scale(1.1);
+
+                #ArrowLine {
+                    stroke: $dark-blue;
+                }
+
+                #ArrowText {
+                    fill: $dark-blue;
+                }
+            }
+        }
+
+        .JoggerCircleContainer {
+            @include flex-center();
+
+            .JoggerCircle {
+                height: $jogger-diameter;
+                width: $jogger-diameter;
+                border-radius: $jogger-diameter/2;
+                background-color: $light-blue;
+                display: grid;
+                grid-template-rows: 33.3% 33.3% 33.3%;
+                grid-template-columns: 33.3% 33.3% 33.3%;
+
+                @include shadow();
+
+                @mixin arrow-image() {
+                    cursor: pointer;
+
+                    :hover {
+                        transform: scale(1.1);
+                    }
+
+                    img {}
+                }
+
+                .JogIncrement {
+                    @include grid-coordinate(2, 2);
+                    @include flex-center();
+
+                    input {
+                        font-size: 1em;
+                        width: 60pt;
+                        -webkit-appearance: none;
+                        -moz-appearance: none;
+                        margin: 0;
+                    }
+
+                    span {
+                        padding-left: $margin;
+                        font-size: 1em;
+                    }
+                }
+
+                .SelectPointButton {
+                    @include flex-center();
+                    @include grid-coordinate(2, 2);
+                    $select-diameter: 80pt;
+
+                    .SelectButton {
+                        cursor: pointer;
+                        @include flex-center();
+                        height: $select-diameter;
+                        width: $select-diameter;
+                        border-radius: $select-diameter/2;
+                        background-color: $green;
+                        color: $dark-blue;
+                    }
+
+                    .SelectButton:hover {
+                        color: white;
+                        @include shadow();
+
+                    }
+                }
+
+                .Up {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(1, 2);
+                }
+
+                .Down {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(3, 2);
+                }
+
+                .Left {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(2, 1);
+                }
+
+                .Right {
+                    @include arrow-image();
+                    @include flex-center();
+                    @include grid-coordinate(2, 3);
+                }
+            }
+        }
+    }
+
+
+    .JoggerParameters {
+
+        height: 100%;
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 50% 50%;
+	//margin: $margin;
+
+
+        .JoggerParameter {
+            @include flex-center();
+	   // width: 90%;
+
+            .ParameterContainer {
+		width: 60%;
+                display: grid;
+                grid-template-rows: 50% 50%;
+        
+		
+                //border: $blue-border;
+		border-radius: $border-radius;
+		background-color: $light-blue;
+		color: $dark-blue;
+		padding: $margin;
+		@include shadow();
+
+                .Title {
+                    @include flex-center();
+                    font-size: 1.2em;
+		    padding-bottom: $margin;
+                }
+
+                .Input {
+                
+                    @include flex-center();
+                    @include jin-style(30%, 1.2em);
+		    padding-bottom: $margin;
+
+                    input {
+                        text-align: center;
+			padding: none;
+			padding-left: $margin;
+			@include shadow();
+		
+                    }
+                }
+            }
+
+        }
+    }
+}
+
 
 .CoordinateDisplay {
     margin: $margin;
@@ -344,7 +549,7 @@ $container-height: $jogger-diameter * 3;
         //border: 2pt solid $dark-grey;
         border-radius: $border-radius * 2;
         margin: $margin;
-        background: $blue-gradient;
+        background-color: $dark-blue;
         color: white;
         @include shadow();
 
@@ -403,48 +608,55 @@ $container-height: $jogger-diameter * 3;
     display: grid;
     grid-template-rows: 80% 20%;
     grid-template-columns: 100%;
+
     .BoxSizeInputContainer {
-	//width: 100%;
-       // height: 100%;
-	padding: $margin;
+        //width: 100%;
+        // height: 100%;
+        padding: $margin;
         @include flex-center();
         flex-direction: row;
         justify-content: space-around;
-	//padding: $margin;
+
+        //padding: $margin;
         .BoxSizeInput {
             //border: $blue-border;
-	    //background: $blue-gradient;
-	    background-color: $dark-blue;;
+            //background: $blue-gradient;
+            background-color: $dark-blue;
+            ;
             padding: $margin;
-	    color: white;
-	    width: 30%;
-	    border-radius: $border-radius;
-	    @include shadow();
-	    span {
-		font-size: $medium-font;
-	    }
-	    
+            color: white;
+            width: 30%;
+            border-radius: $border-radius;
+            @include shadow();
+
+            span {
+                font-size: $medium-font;
+            }
+
             @include flex-center();
             justify-content: space-around;
-	    
+
             .NameContainer {
-		@include flex-center();
-                span {                    
-                }
+                @include flex-center();
+
+                span {}
             }
+
             .InputHolder {
-		width: 50%;
+                width: 50%;
                 display: grid;
                 grid-template-rows: 100%;
                 grid-template-columns: 60% 40%;
                 padding-left: $margin;
                 @include jin-style(80%, $medium-font);
-		input {
-		    text-align: center;
-		}
-		span{
-		    padding-left: $margin;
-		}
+
+                input {
+                    text-align: center;
+                }
+
+                span {
+                    padding-left: $margin;
+                }
             }
         }
     }

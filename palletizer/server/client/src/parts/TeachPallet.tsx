@@ -116,6 +116,32 @@ function A({ dagger }: AProps) {
 };
 
 
+interface JoggerParameterProps {
+    title: string;
+    value: number;
+}
+
+
+function JoggerParameter({ title, value }: JoggerParameterProps) {
+
+    return (
+        <div className="JoggerParameter">
+            <div className="ParameterContainer">
+                <div className="Title">
+                    <span>
+                        {title}
+                    </span>
+                </div>
+                <div className="Input">
+                    <input type="number" value={value} />
+                </div>
+            </div>
+        </div>
+    );
+
+}
+
+
 
 function JoggerDisplay() {
 
@@ -132,72 +158,32 @@ function JoggerDisplay() {
         // set_start_box(value);
     };
 
-    let pallet_name = "Pallet 1";
-
     return (
-        <div className="JoggerContainer">
-            <div className="JoggerInformation">
-                <div className="PalletName">
-                    <input type="text" name={input_name} onChange={handle_input} placeholder={pallet_name} />
-                </div>
-                <div className="MoveItemContainer">
-                    <div className="MoveItem">
-                        <div className="MoveTitle">
-                            <span>
-                                {"Distance"}
-                            </span>
-                        </div>
-                        <div className="MoveInput">
-                            <div className="InputContainer">
-                                <input type="number" value={100} />
-                            </div>
-                            <div className="UnitContainer">
+
+        <div className="JoggerCentering">
+            <div className="JoggerContainerInner">
+                <A dagger={true} />
+                <div className="JoggerCircleContainer">
+                    <div className="JoggerCircle">
+                        <div className="SelectPointButton">
+                            <div className="SelectButton">
                                 <span>
-                                    mm
+                                    SELECT
 				</span>
                             </div>
                         </div>
-                    </div>
-                    <div className="MoveItem">
-                        <div className="MoveTitle">
-                            <span>
-                                {"Speed"}
-                            </span>
-                        </div>
-                        <div className="MoveInput">
-                            <div className="InputContainer">
-                                <input type="number" value={100} />
-                            </div>
-                            <div className="UnitContainer">
-                                <span>
-                                    mm/s
-				</span>
-                            </div>
-                        </div>
+                        {directions.map((d: Directions, index: number) => {
+                            return (
+                                <ArrowImage direction={d} key={index} />
+                            )
+                        })}
                     </div>
                 </div>
+                <A dagger={false} />
             </div>
-            <div className="JoggerCentering">
-                <div className="JoggerContainerInner">
-                    <A dagger={true} />
-                    <div className="JoggerCircleContainer">
-                        <div className="JoggerCircle">
-                            <div className="SelectPointButton">
-                                <div className="SelectButton">
-                                    <span>
-                                        SELECT
-				</span>
-                                </div>
-                            </div>
-                            {directions.map((d: Directions, index: number) => {
-                                return (
-                                    <ArrowImage direction={d} key={index} />
-                                )
-                            })}
-                        </div>
-                    </div>
-                    <A dagger={false} />
-                </div>
+            <div className="JoggerParameters">
+                <JoggerParameter title={"Distance (mm)"} value={110} />
+                <JoggerParameter title={"Speed (mm/s)"} value={120} />
             </div>
         </div>
     );
@@ -294,7 +280,7 @@ function PickLocationMap() {
                 })}
             </div>
             <div className="Map">
-                <svg width="500" height="500">
+                <svg width="200" height="200">
                     <g transform="scale(1,1)">
                         <rect width="100%" height="100%" />
                         <CrossHairs {...crossProps} />
@@ -305,14 +291,26 @@ function PickLocationMap() {
     );
 }
 
+/* 
+ * <div className="PalletTitle">
+ * <input type="text" name={input_name} onChange={handle_input} placeholder={pallet_seq_name} />
+ * </div>
+ *  */
 
 function PickLocationElement() {
+
+    let pallet_seq_name = "Pallet Sequence 1";
+    let input_name = "PalletSequenceTitle";
+
+    let handle_input = (c: ChangeEvent) => {
+        console.log("Handle change pallet seq name.");
+    };
     return (
         <div className="PickLocationGrid">
             <JoggerDisplay />
-            <PickLocationMap />
         </div>
     );
+    //    <PickLocationMap />
 }
 
 interface PalletConfiguratorProps {
@@ -323,19 +321,34 @@ interface CurrentStepBarProps {
     fraction: Fraction;
 };
 
-function CurrentStepBar({ fraction }: CurrentStepBarProps) {
-    let style = {
-        width: `${fraction.n / fraction.d * 100
-            }% `
-    } as React.CSSProperties;
+
+interface DotProps {
+    complete: boolean;
+}
+
+function CompletionDot({ complete }: DotProps) {
+
+    let circle_id = complete ? "complete" : "incomplete";
+
     return (
-        <div className="CurrentStepBar">
-            <div className="ProgressBar">
-                <div className="ProgressBarFilled" style={style}>
-                    <span>
-                        {String(fraction.n) + "/" + String(fraction.d)}
-                    </span>
-                </div>
+        <svg height="15" width="15">
+            <g transform="scale(1,1)">
+                <circle cx="50%" cy="50%" r="50%" id={circle_id} />
+            </g>
+        </svg>
+    );
+};
+
+
+function CompletionDots({ fraction }: CurrentStepBarProps) {
+    let arr = new Array(fraction.d).fill(null).map((_, i) => i + 1);
+    console.log(arr);
+    return (
+        <div className="StatusBarCompletion">
+            <div className="CompletionContainer">
+                {arr.map((index: number) => {
+                    return (<CompletionDot complete={index <= fraction.n} key={index} />)
+                })}
             </div>
         </div>
     );
@@ -408,13 +421,11 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
 
     let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: 2, d: 5 } as Fraction);
 
     let ChildElement: ReactElement = (<></>);
-
-    let instruction: string = "Instruction";
 
     let handleNext = () => {
         // Linked list...
@@ -439,10 +450,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         };
     };
 
+    let instruction: string = "default instruction";
+
     switch (teachState) {
         case (PalletTeachState.PICK_LOCATION): {
             ChildElement = (<PickLocationElement />);
-            instruction = "Move and select box pickup location.";
+            instruction = "Move to box pick location and click select";
             break;
         };
         case (PalletTeachState.PALLET_CORNERS): {
@@ -450,7 +463,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         };
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSizeElement />);
-            instruction = "Enter box dimensions."
+            instruction = "Enter the dimensions of the box"
             break;
         }
         case (PalletTeachState.LAYER_SETUP): {
@@ -464,39 +477,40 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
         default: {
             console.log("Default Pallet Configurator Case -- unhandled");
+
         }
     };
 
     return (
         <Modal close={close}>
-            <div className="TeachModeContainer">
+            <div className="TeachContainer">
                 <div className="TeachModeHeader">
+                    <div className="TeachButton" onClick={handleBack}>
+                        <span>
+                            Back
+			</span>
+                    </div>
                     <div className="StatusBar">
                         <div className="StatusBarTitle">
                             <span>
                                 Pallet Configurator
 			    </span>
                         </div>
-                        <CurrentStepBar fraction={completionFraction} />
-                    </div>
-                </div>
-                <div className="InstructionLine">
-                    <span>
-                        {instruction}
-                    </span>
-                </div>
-                {ChildElement}
-                <div className="TeachModeFooter">
-                    <div className="TeachButton" onClick={handleBack}>
-                        <span>
-                            Back
-			</span>
+                        <CompletionDots fraction={completionFraction} />
                     </div>
                     <div className="TeachButton" onClick={handleNext}>
                         <span>
                             Next
 			</span>
                     </div>
+                </div>
+                <div className="TeachModeInstruction">
+                    <span>
+                        {instruction.toLowerCase()}
+                    </span>
+                </div>
+                <div className="TeachModeContent">
+                    {ChildElement}
                 </div>
             </div>
         </Modal>
