@@ -4,13 +4,12 @@ import Modal from "./Modal";
 
 import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../services/TeachMode";
 
-//import {ConfigContext} from "../context/ConfigContext";
 
-//import {ConfigState} from "../types/Types";
+// 3D display of box.
+import Box from "./BoxDisplay";
 
-// Styles
-// import "./css/Configuration.scss";
-// import "./css/Login.scss";
+
+
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";
@@ -159,7 +158,6 @@ function JoggerDisplay() {
     };
 
     return (
-
         <div className="JoggerCentering">
             <div className="JoggerContainerInner">
                 <A dagger={true} />
@@ -272,13 +270,6 @@ function PickLocationMap() {
 
     return (
         <div className="PickLocationMap">
-            <div className="CoordinateDisplay">
-                {Object.keys(coordinates).map((key: string, index: number) => {
-                    return (
-                        <CoordinateItem axis={key} value={coordinates[key]} key={index} />
-                    )
-                })}
-            </div>
             <div className="Map">
                 <svg width="200" height="200">
                     <g transform="scale(1,1)">
@@ -286,6 +277,13 @@ function PickLocationMap() {
                         <CrossHairs {...crossProps} />
                     </g>
                 </svg>
+            </div>
+            <div className="CoordinateDisplay">
+                {Object.keys(coordinates).map((key: string, index: number) => {
+                    return (
+                        <CoordinateItem axis={key} value={coordinates[key]} key={index} />
+                    )
+                })}
             </div>
         </div>
     );
@@ -308,6 +306,7 @@ function PickLocationElement() {
     return (
         <div className="PickLocationGrid">
             <JoggerDisplay />
+            <PickLocationMap />
         </div>
     );
     //    <PickLocationMap />
@@ -342,7 +341,7 @@ function CompletionDot({ complete }: DotProps) {
 
 function CompletionDots({ fraction }: CurrentStepBarProps) {
     let arr = new Array(fraction.d).fill(null).map((_, i) => i + 1);
-    console.log(arr);
+
     return (
         <div className="StatusBarCompletion">
             <div className="CompletionContainer">
@@ -366,21 +365,18 @@ interface BoxSizeInputProps {
     value?: number;
 };
 function BoxSizeInput({ name, value }: BoxSizeInputProps) {
+
     value = value ? value : 10;
+
     return (
         <div className="BoxSizeInput">
-            <span>
-                {name}
-            </span>
             <div className="InputHolder">
-                <div>
-                    <input type="number" value={value} />
-                </div>
-                <div className="NameContainer">
-                    <span>
-                        mm
-		    </span>
-                </div>
+                <span>
+                    {name}
+                </span>
+            </div>
+            <div className="InputHolder">
+                <input type="number" value={value} />
             </div>
         </div>
     );
@@ -397,31 +393,25 @@ function BoxSizeElement() {
 
     return (
         <div className="BoxSizeGrid">
-            <div className="BoxSizeDisplay">
-                <span>
-                    Box Size Display...
-		</span>
+            <div className="BoxDisplay">
+                <Box />
             </div>
-            <div className="BoxSizeInputContainer">
-                {inputs.map((name: string, index: number) => {
-                    return (<BoxSizeInput name={name} key={index} />)
-                })}
+            <div className="BoxSizeContainer">
+                <div className="BoxSizeInputContainer">
+                    {inputs.map((name: string, index: number) => {
+                        return (<BoxSizeInput name={name} key={index} />)
+                    })}
+                </div>
             </div>
         </div>
     );
 };
 
-
-
-
-
-
-
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
 
     let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: 2, d: 5 } as Fraction);
 
@@ -439,7 +429,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             };
         };
     };
-
 
     let handleBack = () => {
         switch (teachState) {
