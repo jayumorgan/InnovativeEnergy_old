@@ -1,18 +1,52 @@
 @import "../../master.scss";
 
+$jogger-diameter: 300pt;
+$content-height: $jogger-diameter * 7/3;
+$content-width: $jogger-diameter * 11/3;
+
+$container-height: $jogger-diameter * 3;
+
 
 .TeachModeContainer {
     @include shadow();
-    display: flex;
-    align-content: center;
-    justify-content: flex-start;
-    flex-direction: column;
+    display: grid;
+    height: $container-height;
+    grid-template-columns: 100%;
+    grid-template-rows: auto auto auto auto;
+    
+//    display: flex;
+  //  align-content: center;
+    //justify-content: flex-start;
+   // flex-direction: column;
     margin-top: $quad-margin;
     margin-bottom: auto;
-    min-width: 50%;
+    //min-width: 50%;
+    width: $content-width;
     background-color: $off-white;
     border-radius: $border-radius;
     color: $dark-blue;
+
+    .TeachModeFooter{
+	@include flex-center();
+	justify-content: space-between;
+//	margin: $margin;
+	margin-left: $margin * 2;
+	margin-right: $margin * 2;
+	margin-bottom: $margin * 2;
+	.TeachButton {
+	    cursor: pointer;
+	    @include flex-center();
+	    padding: $margin;
+	    padding-left: $margin * 3;
+	    
+	    color: $light-grey;
+	    font-size: $medium-font;
+	    
+	}
+	.TeachButton:hover {
+	    color: $green;
+	}
+    }
 
     .TeachModeHeader {
         .StatusBar {
@@ -27,7 +61,6 @@
             .StatusBarTitle {
                 @include flex-center();
                 justify-content: flex-start;
-
                 span {
                     font-size: $medium-font;
                     font-weight: $bold-font;
@@ -56,8 +89,6 @@
                 }
             }
         }
-
-
     }
 
     .InstructionLine {
@@ -80,37 +111,34 @@
     grid-template-columns: 50% 50%;
 }
 
-$jogger-diameter: 300pt;
+@mixin jin-style($width, $fs) {
+    input {
+        border-radius: $border-radius;
+        color: $dark-blue;
+        border: $container-border;
+        font-size: $fs;
+        width: $width;
+        padding: $margin;
+	// Testing this out.
+	text-align: center;
+    }
+}
 
 .JoggerContainer {
     display: grid;
     grid-template-columns: 100%;
     grid-template-rows: auto $jogger-diameter*(5/3);
-    min-height: $jogger-diameter * (4/3);
-    padding-bottom: $margin;
-
-    min-width: $jogger-diameter * (4/3);
-
-    @mixin jin-style($width, $fs) {
-        input {
-            border-radius: $border-radius;
-            color: $dark-blue;
-            border: $container-border;
-            font-size: $fs;
-            width: $width;
-            padding: $margin;
-        }
-    }
-
     .JoggerInformation {
-	margin: $margin;
+        margin: $margin;
+
         .PalletName {
             @include flex-center();
             padding: $margin;
             @include jin-style(80%, $medium-font);
-	    input {
-		@include shadow();
-	    }
+
+            input {
+                @include shadow();
+            }
         }
 
         .MoveItemContainer {
@@ -295,12 +323,10 @@ $jogger-diameter: 300pt;
                         @include flex-center();
                         @include grid-coordinate(2, 3);
                     }
-
                 }
             }
         }
     }
-
 }
 
 .CoordinateDisplay {
@@ -339,12 +365,13 @@ $jogger-diameter: 300pt;
 
     .Map {
         @include flex-center();
-	padding: $margin * 2;
+        padding: $margin * 2;
+
         svg {
             $stroke: $dark-blue;
             width: 100%;
             height: 100%;
-            
+
 
             rect {
                 width: 100%;
@@ -364,6 +391,61 @@ $jogger-diameter: 300pt;
                 stroke-width: 2;
             }
 
+        }
+    }
+}
+
+
+
+//---------------Box Size---------------
+.BoxSizeGrid {
+    //height: $content-height;
+    display: grid;
+    grid-template-rows: 80% 20%;
+    grid-template-columns: 100%;
+    .BoxSizeInputContainer {
+	//width: 100%;
+       // height: 100%;
+	padding: $margin;
+        @include flex-center();
+        flex-direction: row;
+        justify-content: space-around;
+	//padding: $margin;
+        .BoxSizeInput {
+            //border: $blue-border;
+	    //background: $blue-gradient;
+	    background-color: $dark-blue;;
+            padding: $margin;
+	    color: white;
+	    width: 30%;
+	    border-radius: $border-radius;
+	    @include shadow();
+	    span {
+		font-size: $medium-font;
+	    }
+	    
+            @include flex-center();
+            justify-content: space-around;
+	    
+            .NameContainer {
+		@include flex-center();
+                span {                    
+                }
+            }
+            .InputHolder {
+		width: 50%;
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 60% 40%;
+                padding-left: $margin;
+                @include jin-style(80%, $medium-font);
+		input {
+		    text-align: center;
+		}
+		span{
+		    padding-left: $margin;
+		}
+            }
         }
     }
 }

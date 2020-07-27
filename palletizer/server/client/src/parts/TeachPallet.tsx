@@ -34,7 +34,6 @@ interface ArrowImageProps {
 
 function ArrowImage({ direction }: ArrowImageProps) {
     let image: string;
-
     switch (direction) {
         case (Directions.UP): {
             image = Up;
@@ -118,7 +117,6 @@ function A({ dagger }: AProps) {
 
 
 
-
 function JoggerDisplay() {
 
     let directions: Directions[] = [
@@ -163,7 +161,6 @@ function JoggerDisplay() {
                     <div className="MoveItem">
                         <div className="MoveTitle">
                             <span>
-
                                 {"Speed"}
                             </span>
                         </div>
@@ -351,13 +348,53 @@ interface Fraction {
 
 //---------------Box Size---------------
 
+interface BoxSizeInputProps {
+    name: string;
+    value?: number;
+};
+function BoxSizeInput({ name, value }: BoxSizeInputProps) {
+    value = value ? value : 10;
+    return (
+        <div className="BoxSizeInput">
+            <span>
+                {name}
+            </span>
+            <div className="InputHolder">
+                <div>
+                    <input type="number" value={value} />
+                </div>
+                <div className="NameContainer">
+                    <span>
+                        mm
+		    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 function BoxSizeElement() {
-    // Must have fixed width. 
+    // Must have fixed width.
+    let inputs = [
+        "Length",
+        "Width",
+        "Height"
+    ] as string[];
+
     return (
-        <span>
-            Box Size
-	</span>
+        <div className="BoxSizeGrid">
+            <div className="BoxSizeDisplay">
+                <span>
+                    Box Size Display...
+		</span>
+            </div>
+            <div className="BoxSizeInputContainer">
+                {inputs.map((name: string, index: number) => {
+                    return (<BoxSizeInput name={name} key={index} />)
+                })}
+            </div>
+        </div>
     );
 };
 
@@ -378,6 +415,29 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     let ChildElement: ReactElement = (<></>);
 
     let instruction: string = "Instruction";
+
+    let handleNext = () => {
+        // Linked list...
+        switch (teachState) {
+            case PalletTeachState.PICK_LOCATION: {
+                setTeachState(PalletTeachState.BOX_SIZE);
+                break;
+            };
+            case PalletTeachState.BOX_SIZE: {
+                break;
+            };
+        };
+    };
+
+
+    let handleBack = () => {
+        switch (teachState) {
+            case PalletTeachState.BOX_SIZE: {
+                setTeachState(PalletTeachState.PICK_LOCATION);
+                break;
+            }
+        };
+    };
 
     switch (teachState) {
         case (PalletTeachState.PICK_LOCATION): {
@@ -426,6 +486,18 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
                     </span>
                 </div>
                 {ChildElement}
+                <div className="TeachModeFooter">
+                    <div className="TeachButton" onClick={handleBack}>
+                        <span>
+                            Back
+			</span>
+                    </div>
+                    <div className="TeachButton" onClick={handleNext}>
+                        <span>
+                            Next
+			</span>
+                    </div>
+                </div>
             </div>
         </Modal>
     );
