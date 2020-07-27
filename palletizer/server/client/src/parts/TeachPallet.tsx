@@ -386,9 +386,9 @@ function BoxSizeInput({ name, value }: BoxSizeInputProps) {
 function BoxSizeElement() {
     // Must have fixed width.
     let inputs = [
-        "Length",
-        "Width",
-        "Height"
+        "Length (mm)",
+        "Width (mm)",
+        "Height (mm)"
     ] as string[];
 
     return (
