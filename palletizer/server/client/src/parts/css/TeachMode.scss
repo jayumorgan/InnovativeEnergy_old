@@ -561,54 +561,63 @@
      grid-template-columns: 100%;
 
      .BoxDisplay {
-	 
-
-	 @include flex-center();
-     }
-     .BoxSizeContainer {
-	 @include flex-center();
-
-	    
-     .BoxSizeInputContainer {
-         padding: $margin;
-         @include flex-center();
-         flex-direction: row;
-         justify-content: space-around;
-	 width: 80%;
-
-         .BoxSizeInput {
-             background-color: $light-blue;
-             padding: $margin;
-             color: $dark-blue;
-             width: 30%;
-	     height: 35%;
-             border-radius: $border-radius;
-	     @include flex-center();
-
-	     flex-direction: row;
-	     justify-content: space-around;
-	     
-	     @include shadow();
-
-             span {
-                 font-size: $medium-font;
-		 white-space: nowrap;
-             }
-	     
-             .InputHolder {
-		 width: auto;
-		 @include flex-center();
-                 @include jin-style(50%, $medium-font);
-	//	 padding: none;
-                 input {
-                     text-align: center;
-		     padding: none;
-		     padding-left: $margin;
-		      
-                 }
-
+         .BoxMount {
+             height: 100%;
+             width: 100%;
+             background-color: white;
+             canvas {
+                 height: 100%;
+                 // width: 100%;
              }
          }
+         @include flex-center();
      }
+
+     .BoxSizeContainer {
+         @include flex-center();
+
+
+         .BoxSizeInputContainer {
+             padding: $margin;
+             @include flex-center();
+             flex-direction: row;
+             justify-content: space-around;
+             width: 80%;
+
+             .BoxSizeInput {
+                 background-color: $light-blue;
+                 padding: $margin;
+                 color: $dark-blue;
+                 width: 30%;
+                 height: 35%;
+                 border-radius: $border-radius;
+                 @include flex-center();
+
+                 flex-direction: row;
+                 justify-content: space-around;
+
+                 @include shadow();
+
+                 span {
+                     font-size: $medium-font;
+                     white-space: nowrap;
+                 }
+
+                 .InputHolder {
+                     width: auto;
+                     @include flex-center();
+                     @include jin-style(50%, $medium-font);
+
+                     //	 padding: none;
+                     input {
+                         text-align: center;
+                         padding: none;
+                         padding-left: $margin;
+
+                     }
+
+                 }
+             }
+         }
      }
  }

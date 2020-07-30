@@ -8,8 +8,6 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 // 3D display of box.
 import Box from "./BoxDisplay";
 
-
-
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";

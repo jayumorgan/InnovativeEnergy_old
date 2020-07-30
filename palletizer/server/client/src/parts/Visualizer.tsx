@@ -153,7 +153,7 @@ function get_green_cardboard_box(width: number, height: number, length: number):
 }
 
 
-function get_cardboard_box(width: number, height: number, length: number): Three.Mesh {
+export function get_cardboard_box(width: number, height: number, length: number): Three.Mesh {
 
     let loader = new Three.TextureLoader();
     let texture = loader.load(carboard);

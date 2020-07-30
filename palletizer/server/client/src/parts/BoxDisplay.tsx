@@ -1,9 +1,15 @@
-
-
 import React, { useRef, useEffect } from "react";
 
-
 import * as Three from "three";
+
+
+import { get_cardboard_box } from "./Visualizer";
+import { MeshDepthMaterial, MeshBasicMaterialParameters } from "three";
+
+
+import wood from "./images/wood.jpg";
+import carboard from "./images/cardboard.jpg";
+import vcardboard from "./images/vcardboard.jpg";
 
 function Box() {
 
@@ -53,11 +59,39 @@ function Box() {
         scene.add(groundMesh);
 
         let camera = new Three.PerspectiveCamera(45, width / height, 1, 1000);
-        camera.position.set(0, 1.2, 1.2);
+        camera.position.set(2, 0.5, 0.75);
         camera.lookAt(0, 0, 0);
 
-        renderer.render(scene, camera);
-    });
+        let render_scene = () => {
+            renderer.render(scene, camera);
+        };
+
+        //let box = get_cardboard_box(0.5, 0.75, 0.5);
+        var geometry = new Three.BoxGeometry(0.5, 0.5, 0.5);
+        let material = new Three.MeshPhongMaterial({ color: "red" });
+
+        var box = new Three.Mesh(geometry, material);
+        scene.add(box);
+
+
+        render_scene();
+        let handleResize = () => {
+            if (MountElement.current) {
+                width = (MountElement.current as HTMLDivElement).clientWidth;
+                height = (MountElement.current as HTMLDivElement).clientHeight;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                render_scene();
+
+            }
+        };
+
+        //        render_scene();
+
+        (MountElement.current as HTMLDivElement).appendChild(renderer.domElement);
+        window.addEventListener('resize', handleResize);
+    }, []);
 
     return (
         <div className="BoxMount" ref={MountElement} />
