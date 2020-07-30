@@ -469,7 +469,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PALLET_CORNERS);
 
     let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: teachState + 1, d: 5 } as Fraction);
 
