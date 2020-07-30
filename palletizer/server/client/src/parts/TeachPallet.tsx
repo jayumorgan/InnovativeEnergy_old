@@ -7,7 +7,7 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 
 // 3D display of box.
 import Box, { BoxDimensions } from "./BoxDisplay";
-import { PalletRender } from "./PalletRender";
+import PalletRender from "./PalletRender";
 
 
 import "./css/TeachMode.scss";
@@ -49,17 +49,14 @@ function ArrowImage({ direction }: ArrowImageProps) {
         case (Directions.RIGHT): {
             image = Right;
             break;
-            console.log("Right image");
         };
     };
-    console.log(direction, image);
     return (
         <div className={direction}>
             <img src={image} />
         </div>
     );
 };
-
 
 
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
@@ -440,12 +437,11 @@ function BoxSizeElement() {
 
 
 function PalletDisplay() {
-
-
-
-
-
-
+    return (
+        <div className="PalletDisplay">
+            <PalletRender />
+        </div>
+    );
 };
 
 
@@ -453,13 +449,10 @@ function PalletCorners() {
     return (
         <div className="PickLocationGrid">
             <JoggerDisplay />
-            <span>
-                Pallet Corner Chooser...
-	    </span>
+            <PalletDisplay />
         </div>
     );
 };
-
 
 
 enum PalletTeachState {

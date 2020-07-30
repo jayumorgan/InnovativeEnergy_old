@@ -457,11 +457,13 @@
              height: 100%;
              width: 100%;
              background-color: white;
+
              canvas {
                  height: 100%;
                  // width: 100%;
              }
          }
+
          @include flex-center();
      }
 
@@ -517,20 +519,16 @@
 
  //---------------Pallet Corners---------------
 
- .PalletCorners {
-     display : grid;
-     grid-template-rows: 100%;
-     grid-template-columns: 50% 50%;
-
-     
-     
-     
-     
+ .PalletDisplay {
+     .PalletMount {
+         height: 100%;
+         width: 100%;
+         background-color: white;
+         canvas {
+             height: 100%;
+	     width: 100%;
+             // width: 100%;
+         }
+     }
 
  }
-
-     
-
- 
-
- 
