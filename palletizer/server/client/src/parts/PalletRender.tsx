@@ -4,7 +4,13 @@ import * as THREE from "three";
 
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
+
+import WoodTexture from "./images/woodTexture.jpg";
+import { Object3D } from "three";
+
+
 let PalletModel = process.env.PUBLIC_URL + "/models/Pallet.glb";
+
 
 function PalletRender() {
 
@@ -46,7 +52,6 @@ function PalletRender() {
         var axesHelper = new THREE.AxesHelper(5);
         scene.add(axesHelper);
 
-        let loader = new GLTFLoader();
 
         let model: THREE.Group;
 
@@ -54,6 +59,13 @@ function PalletRender() {
             renderer.render(scene, camera);
             /*             requestAnimationFrame(animate); */
         };
+
+        let color = {
+            texture: WoodTexture,
+            size: [2, 2, 2],
+            shininess: 0
+        };
+
 
         let handleResize = () => {
             if (MountElement.current) {
@@ -73,18 +85,42 @@ function PalletRender() {
             }
         };
 
-        loader.load(PalletModel, (gltf: GLTF) => {
-            model = gltf.scene;
-            model.scale.set(2, 2, 2);
-            model.position.y = -1;
-            model.rotateY(Math.PI / 2);
-            scene.add(model);
-            //            animate();
-            handleResize();
-        }, undefined, (error: ErrorEvent) => {
-            console.log(error);
-        });
 
+        let txt_lodaer = new THREE.TextureLoader();
+
+        txt_lodaer.load(color.texture, (txt: THREE.Texture) => {
+            txt.repeat.set(color.size[0], color.size[1]);
+
+            txt.wrapS = THREE.RepeatWrapping;
+            txt.wrapT = THREE.RepeatWrapping;
+
+            txt.rotation = Math.PI / 2;
+
+            let new_mtl = new THREE.MeshPhongMaterial({
+                map: txt,
+                shininess: color.shininess ? color.shininess : 10
+            });
+
+            let loader = new GLTFLoader();
+
+            loader.load(PalletModel, (gltf: GLTF) => {
+                model = gltf.scene;
+                model.scale.set(2, 2, 2);
+                model.position.y = -1;
+                model.rotateY(Math.PI / 2);
+
+                model.traverse((o: Object3D) => {
+                    if (o instanceof THREE.Mesh) {
+                        (o as THREE.Mesh).material = new_mtl;
+                    }
+                });
+                scene.add(model);
+                //            animate();
+                handleResize();
+            }, undefined, (error: ErrorEvent) => {
+                console.log(error);
+            });
+        });
 
         //        render_scene();
         (MountElement.current as HTMLDivElement).appendChild(renderer.domElement);
