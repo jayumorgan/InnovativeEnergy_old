@@ -26,15 +26,17 @@ interface Animation {
 // attach a function reference
 function Box({ length, height, width }: BoxDimensions) {
 
-    let norm = Math.sqrt(length ** 2 + height ** 2 + width ** 2);
+    // Compute vector norm and divide by 4 (so that resulting dimensions are multiplied by sqrt(3)) -- for scaline
+    let norm = Math.sqrt(length ** 2 + height ** 2 + width ** 2) / Math.sqrt(3);
+
     let l = length / norm;
     let h = height / norm;
     let w = width / norm;
-    console.log("Updating 3d component", l, h, w);
 
     let MountElement = useRef<HTMLDivElement>(null);
-    //    let BoxMesh: Three.Mesh;
-    let [Scene, SetScene] = useState<Animation | null>(null);
+
+    let [animation, setAnimation] = useState<Animation | null>(null);
+
     useEffect(() => {
         let width = (MountElement.current as HTMLDivElement).clientWidth;
         let height = (MountElement.current as HTMLDivElement).clientHeight;
@@ -78,17 +80,15 @@ function Box({ length, height, width }: BoxDimensions) {
         scene.add(groundMesh);
 
         let camera = new Three.PerspectiveCamera(45, width / height, 1, 1000);
-        camera.position.set(1.5, 0.5, 0.75);
+        camera.position.set(1.5, 1, 1.5);
         camera.lookAt(0, 0, 0);
-
-
 
         let render_scene = () => {
             renderer.render(scene, camera);
         };
 
-        //let box = get_cardboard_box(0.5, 0.75, 0.5);
-        let geometry = new Three.BoxGeometry(l, w, h);
+
+        let geometry = new Three.BoxGeometry(1, 1, 1);
         let material = new Three.MeshPhongMaterial({ color: "#DC9F61" });
         let box = new Three.Mesh(geometry, material);
         box.name = "BoxMesh";
@@ -110,19 +110,20 @@ function Box({ length, height, width }: BoxDimensions) {
         (MountElement.current as HTMLDivElement).appendChild(renderer.domElement);
         window.addEventListener('resize', handleResize);
 
-        SetScene({ scene, render: render_scene } as Animation);
+        setAnimation({ scene, render: render_scene } as Animation);
     }, []);
 
+
+
     useEffect(() => {
-        let s = Scene;
-        console.log("SCEEE", s);
-        if (s) {
-            console.log("In!");
-            let bmesh = s.getObjectByName("BoxMesh");
-            if (bmesh) {
-                console.log("Alter Scale");
-                bmesh.scale.set(l, w, h);
-            }
+        if (animation && animation.scene) {
+            let s = animation.scene;
+            let box_mesh = s.getObjectByName("BoxMesh") as Three.Mesh;
+            box_mesh && console.log("BM Sacle ", (box_mesh.geometry as Three.BoxGeometry).parameters);
+            // box_mesh && box_mesh.
+            box_mesh && box_mesh.scale.set(l, h, w);
+
+            box_mesh && animation.render();
         }
     }, [l, h, w]);
     return (

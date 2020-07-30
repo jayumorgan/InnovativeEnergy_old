@@ -58,14 +58,6 @@ function ArrowImage({ direction }: ArrowImageProps) {
     );
 };
 
-enum PalletTeachState {
-    PALLET_CORNERS,
-    PICK_LOCATION,
-    BOX_SIZE,
-    LAYER_SETUP,
-    ASSIGN_LAYOUT,
-    SUMMARY
-};
 
 
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
@@ -105,8 +97,8 @@ function A({ dagger }: AProps) {
     return (
         <div className="JoggerRaiseLower">
             <svg width={frame_width} height={frame_height}>
-                <polyline id="ArrowLine" points={MakeTriangleCoordinates(dagger, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" stroke-width={stroke_width} />
-                <text id="ArrowText" x={text_x} y={text_y} font-size="20"> {text} </text>
+                <polyline id="ArrowLine" points={MakeTriangleCoordinates(dagger, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" strokeWidth={stroke_width} />
+                <text id="ArrowText" x={text_x} y={text_y} fontSize="20"> {text} </text>
             </svg>
         </div>
     );
@@ -441,36 +433,69 @@ function BoxSizeElement() {
     );
 };
 
+
+//---------------Pallet Corners---------------
+
+
+function PalletDisplay() {
+
+
+
+
+
+
+};
+
+
+function PalletCorners() {
+    return (
+        <div className="PickLocationGrid">
+            <JoggerDisplay />
+            <span>
+                Pallet Corner Chooser...
+	    </span>
+        </div>
+    );
+};
+
+
+
+enum PalletTeachState {
+    PICK_LOCATION, // 0
+    BOX_SIZE,
+    PALLET_CORNERS,
+    ASSIGN_LAYOUT,
+    LAYER_SETUP,
+    SUMMARY
+};
+
+
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PICK_LOCATION);
 
-    let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: 2, d: 5 } as Fraction);
+    let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: teachState + 1, d: 5 } as Fraction);
+
 
     let ChildElement: ReactElement = (<></>);
 
     let handleNext = () => {
-        // Linked list...
-        switch (teachState) {
-            case PalletTeachState.PICK_LOCATION: {
-                setTeachState(PalletTeachState.BOX_SIZE);
-                break;
-            };
-            case PalletTeachState.BOX_SIZE: {
-                break;
-            };
-        };
+        let state = teachState;
+        setTeachState(++teachState);
+        setCompletionFraction({ n: completionFraction.n + 1, d: completionFraction.d });
     };
 
     let handleBack = () => {
-        switch (teachState) {
-            case PalletTeachState.BOX_SIZE: {
-                setTeachState(PalletTeachState.PICK_LOCATION);
-                break;
-            }
-        };
+        console.log(teachState, "teach state");
+        if (teachState > 0) {
+            let state = teachState;
+            console.log(state, "State 1");
+            setTeachState(--teachState);
+            console.log(state, "State 2");
+            setCompletionFraction({ n: completionFraction.n - 1, d: completionFraction.d });
+        }
     };
 
     let instruction: string = "default instruction";
@@ -482,6 +507,8 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         };
         case (PalletTeachState.PALLET_CORNERS): {
+            ChildElement = (<PalletCorners />);
+            instruction = "Select any three corners of the pallet";
             break;
         };
         case (PalletTeachState.BOX_SIZE): {

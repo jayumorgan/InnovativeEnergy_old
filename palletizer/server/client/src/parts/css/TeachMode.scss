@@ -146,114 +146,6 @@
      }
  }
 
-
-
-
-
- .TeachModeContainer {
-     @include shadow();
-     display: grid;
-     height: $container-height;
-     grid-template-columns: 100%;
-     grid-template-rows: auto auto auto;
-     // display: flex;
-     // align-content: center;
-     // justify-content: flex-start;
-     // flex-direction: column;
-     margin-top: $quad-margin;
-     //    margin-bottom: auto;
-     //min-width: 50%;
-     width: $content-width;
-     background-color: $off-white;
-     border-radius: $border-radius;
-     color: $dark-blue;
-
-     .TeachModeFooter {
-         @include flex-center();
-         align-items: flex-end;
-         justify-content: space-between;
-         //	margin: $margin;
-         margin-left: $margin * 2;
-         margin-right: $margin * 2;
-         margin-bottom: $margin * 2;
-
-         .TeachButton {
-             cursor: pointer;
-             @include flex-center();
-             padding: $margin;
-             padding-left: $margin * 3;
-             padding-right: $margin * 3;
-             color: $light-grey;
-             font-size: $medium-font;
-         }
-
-         .TeachButton:hover {
-             color: $green;
-         }
-     }
-
-     .TeachModeHeader {
-         .StatusBar {
-             background: $blue-gradient;
-             display: grid;
-             grid-template-rows: 100%;
-             grid-template-columns: 60% 40%;
-             padding: $double-margin;
-             border-radius: $border-radius $border-radius 0 0;
-             color: white;
-
-             .StatusBarTitle {
-                 @include flex-center();
-                 justify-content: flex-start;
-
-                 span {
-                     font-size: $medium-font;
-                     font-weight: $bold-font;
-                 }
-             }
-
-             .CurrentStepBar {
-                 @include flex-center();
-                 padding: $margin;
-
-                 .ProgressBar {
-                     @include cshadow($green);
-                     $pb-height: 30pt;
-                     background-color: $off-white;
-                     width: 100%;
-                     height: $pb-height;
-                     border-radius: $pb-height/2;
-
-                     .ProgressBarFilled {
-                         height: $pb-height;
-                         background-color: $green;
-                         border-radius: $pb-height/2;
-                         @include flex-center();
-                     }
-
-                     //                    @include white-shadow();
-                 }
-             }
-         }
-     }
-
-     .InstructionLine {
-         @include flex-center;
-         background-color: red;
-         //        justify-content: flex-start;
-         padding: $margin;
-
-         span {
-             padding-left: $margin;
-             font-size: $large-font;
-             //  padding-bottom: $margin;
-         }
-
-         border-bottom: 1pt solid $dark-blue;
-     }
- }
-
-
  //---------------Pick Location---------------
  @mixin jin-style($width, $fs) {
      input {
@@ -621,3 +513,24 @@
          }
      }
  }
+
+
+ //---------------Pallet Corners---------------
+
+ .PalletCorners {
+     display : grid;
+     grid-template-rows: 100%;
+     grid-template-columns: 50% 50%;
+
+     
+     
+     
+     
+
+ }
+
+     
+
+ 
+
+ 
