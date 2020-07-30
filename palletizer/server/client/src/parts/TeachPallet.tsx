@@ -6,7 +6,7 @@ import { PalletConfiguration, Pallet, PickLocation, Layer, Corner } from "../ser
 
 
 // 3D display of box.
-import Box from "./BoxDisplay";
+import Box, { BoxDimensions } from "./BoxDisplay";
 
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
@@ -135,7 +135,6 @@ function JoggerParameter({ title, value }: JoggerParameterProps) {
             </div>
         </div>
     );
-
 }
 
 
@@ -360,11 +359,16 @@ interface Fraction {
 
 interface BoxSizeInputProps {
     name: string;
-    value?: number;
+    value: number;
+    update: (val: number) => void;
 };
-function BoxSizeInput({ name, value }: BoxSizeInputProps) {
 
-    value = value ? value : 10;
+function BoxSizeInput({ name, value, update }: BoxSizeInputProps) {
+
+    let handle_update = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = (e.target.value as unknown) as number;
+        update(val);
+    };
 
     return (
         <div className="BoxSizeInput">
@@ -374,12 +378,18 @@ function BoxSizeInput({ name, value }: BoxSizeInputProps) {
                 </span>
             </div>
             <div className="InputHolder">
-                <input type="number" value={value} />
+                <input type="number" value={value} onChange={handle_update} />
             </div>
         </div>
     );
 };
 
+
+enum DimensionEnum {
+    L,
+    W,
+    H
+};
 
 function BoxSizeElement() {
     // Must have fixed width.
@@ -389,16 +399,42 @@ function BoxSizeElement() {
         "Height (mm)"
     ] as string[];
 
+    let l_name = "Length (mm)";
+    let h_name = "Height (mm)";
+    let w_name = "Width (mm)";
+
+    let [boxDim, setBoxDim] = useState<BoxDimensions>({ length: 10, width: 10, height: 10 });
+
+    let update_dim = (dimension: DimensionEnum) => (val: number) => {
+        console.log("Updating dimension", val);
+        let newDim = { ...boxDim } as BoxDimensions;
+        switch (dimension) {
+            case (DimensionEnum.L): {
+                newDim.length = val;
+                break;
+            };
+            case (DimensionEnum.W): {
+                newDim.width = val;
+                break;
+            };
+            case (DimensionEnum.H): {
+                newDim.height = val;
+                break;
+            }
+        }
+        setBoxDim(newDim);
+    };
+
     return (
         <div className="BoxSizeGrid">
             <div className="BoxDisplay">
-                <Box />
+                <Box {...boxDim} />
             </div>
             <div className="BoxSizeContainer">
                 <div className="BoxSizeInputContainer">
-                    {inputs.map((name: string, index: number) => {
-                        return (<BoxSizeInput name={name} key={index} />)
-                    })}
+                    <BoxSizeInput name={l_name} value={boxDim.length} update={update_dim(DimensionEnum.L)} />
+                    <BoxSizeInput name={h_name} value={boxDim.height} update={update_dim(DimensionEnum.H)} />
+                    <BoxSizeInput name={w_name} value={boxDim.width} update={update_dim(DimensionEnum.W)} />
                 </div>
             </div>
         </div>

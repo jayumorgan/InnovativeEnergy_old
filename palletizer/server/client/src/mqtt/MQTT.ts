@@ -4,7 +4,7 @@ import mqtt from "mqtt";
 const PORT = 9001;
 let SERVER_IP = window.location.hostname;
 
-if (SERVER_IP == "localhost") {
+if (SERVER_IP === "localhost") {
     SERVER_IP = "127.0.0.1";
 }
 console.log(SERVER_IP);
