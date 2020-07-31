@@ -128,9 +128,11 @@ function JoggerParameter({ title, value }: JoggerParameterProps) {
     );
 }
 
+interface JoggerProps {
+    selectAction: ()=>void;
+}
 
-
-function JoggerDisplay() {
+function JoggerDisplay({selectAction} : JoggerProps) {
 
     let directions: Directions[] = [
         Directions.UP,
@@ -152,7 +154,7 @@ function JoggerDisplay() {
                 <div className="JoggerCircleContainer">
                     <div className="JoggerCircle">
                         <div className="SelectPointButton">
-                            <div className="SelectButton">
+            <div className="SelectButton" onClick={selectAction}>
                                 <span>
                                     SELECT
 				</span>
@@ -291,9 +293,13 @@ function PickLocationElement() {
     let handle_input = (c: ChangeEvent) => {
         console.log("Handle change pallet seq name.");
     };
+
+    let selectAction = () => {
+	console.log("Jogger Position Selected");
+    };
     return (
         <div className="PickLocationGrid">
-            <JoggerDisplay />
+            <JoggerDisplay selectAction={selectAction} />
             <PickLocationMap />
         </div>
     );
@@ -436,20 +442,58 @@ function BoxSizeElement() {
 //---------------Pallet Corners---------------
 
 
-function PalletDisplay() {
-    return (
-        <div className="PalletDisplay">
-            <PalletRender />
-        </div>
-    );
+
+enum Corners {
+    ONE,
+    TWO,
+    THREE
 };
 
 
 function PalletCorners() {
+
+    let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
+
+    let title = "Select Corner " + String(cornerNumber as number + 1);
+    let selectAction = () => {
+	if (cornerNumber === Corners.THREE) {
+	    console.log("Done");
+	} else {
+	    setCornerNumber(cornerNumber as number + 1);
+	}
+    };
+
+    let backAction = () => {
+	if (cornerNumber !== Corners.ONE) {
+	    setCornerNumber(cornerNumber as number - 1);
+	}
+    };
+
+    
     return (
         <div className="PickLocationGrid">
-            <JoggerDisplay />
-            <PalletDisplay />
+            <JoggerDisplay selectAction={selectAction} />
+	    <div className="PalletDisplay">
+	    <div className="PalletDisplayHeader">
+	    <div className="CornerBackButton">
+	    {(cornerNumber as number > 0) &&
+		<div className="BackButton" onClick={backAction}>
+		<span>
+		{"Back"}
+	     </span>
+		</div>
+		}
+	    </div>
+	    <div className="CenterText">
+	    <span>
+	    {title}
+	    </span> 
+	    </div>
+	    </div>
+	    <div className="DisplayContainer">
+            <PalletRender cornerNumber={cornerNumber as number}/>
+            </div>
+	    </div>
         </div>
     );
 };
@@ -501,16 +545,16 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             instruction = "Move to box pick location and click select";
             break;
         };
-        case (PalletTeachState.PALLET_CORNERS): {
-            ChildElement = (<PalletCorners />);
-            instruction = "Select any three corners of the pallet";
-            break;
-        };
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSizeElement />);
             instruction = "Enter the dimensions of the box"
             break;
         }
+	case (PalletTeachState.PALLET_CORNERS): {
+            ChildElement = (<PalletCorners />);
+            instruction = "Move to and select three pallet corners";
+            break;
+        };  
         case (PalletTeachState.LAYER_SETUP): {
             break;
         }

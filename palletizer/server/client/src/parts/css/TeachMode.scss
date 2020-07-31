@@ -520,14 +520,53 @@
  //---------------Pallet Corners---------------
 
  .PalletDisplay {
-     .PalletMount {
-         height: 100%;
-         width: 100%;
-         background-color: white;
-         canvas {
+     display: grid;
+     grid-template-rows: 5% 95%;
+
+     .PalletDisplayHeader {
+         display: grid;
+         grid-template-rows: 100%;
+         grid-template-columns: 15% 70% 15%;
+         .CornerBackButton {
+             @include flex-center();
+	     justify-content: flex-start;
+             .BackButton {
+		 padding-left: $margin;
+		 cursor: pointer;
+		 span {
+		     font-size: $medium-font;
+		     //color: $light-grey;
+		 }
+	     }
+	     .BackButton:hover {
+		 span {
+		     color: $green;
+		 }
+	     }
+         }
+
+         .CenterText {
+             @include flex-center();
+             span {
+                 font-size: $large-font;
+		 font-weight: $bold-font;
+                 letter-spacing: 2pt;
+               //  font-variant: small-caps;
+             }
+         }
+     }
+
+     .DisplayContainer {
+         .PalletMount {
+             width: 100%;
              height: 100%;
-	     width: 100%;
-             // width: 100%;
+
+             canvas {
+                 height: 100%;
+                 width: 100%;
+		 
+                 // width: 100%;
+             }
          }
      }
 
