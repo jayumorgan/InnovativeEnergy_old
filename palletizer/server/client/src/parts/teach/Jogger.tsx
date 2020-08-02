@@ -31,7 +31,7 @@ function ArrowImage({ direction }: ArrowImageProps) {
         case (Directions.DOWN): {
             image = Down;
             break;
-        };
+        };T
         case (Directions.LEFT): {
             image = Left;
             break;
