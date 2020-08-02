@@ -17,7 +17,6 @@ export interface BoxDimensions {
     width: number;
 };
 
-
 interface Animation {
     scene: Three.Scene;
     render: () => void;

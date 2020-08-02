@@ -129,10 +129,10 @@ function JoggerParameter({ title, value }: JoggerParameterProps) {
 }
 
 interface JoggerProps {
-    selectAction: ()=>void;
+    selectAction: () => void;
 }
 
-function JoggerDisplay({selectAction} : JoggerProps) {
+function JoggerDisplay({ selectAction }: JoggerProps) {
 
     let directions: Directions[] = [
         Directions.UP,
@@ -154,7 +154,7 @@ function JoggerDisplay({selectAction} : JoggerProps) {
                 <div className="JoggerCircleContainer">
                     <div className="JoggerCircle">
                         <div className="SelectPointButton">
-            <div className="SelectButton" onClick={selectAction}>
+                            <div className="SelectButton" onClick={selectAction}>
                                 <span>
                                     SELECT
 				</span>
@@ -295,7 +295,7 @@ function PickLocationElement() {
     };
 
     let selectAction = () => {
-	console.log("Jogger Position Selected");
+        console.log("Jogger Position Selected");
     };
     return (
         <div className="PickLocationGrid">
@@ -456,44 +456,44 @@ function PalletCorners() {
 
     let title = "Select Corner " + String(cornerNumber as number + 1);
     let selectAction = () => {
-	if (cornerNumber === Corners.THREE) {
-	    console.log("Done");
-	} else {
-	    setCornerNumber(cornerNumber as number + 1);
-	}
+        if (cornerNumber === Corners.THREE) {
+            console.log("Done");
+        } else {
+            setCornerNumber(cornerNumber as number + 1);
+        }
     };
 
     let backAction = () => {
-	if (cornerNumber !== Corners.ONE) {
-	    setCornerNumber(cornerNumber as number - 1);
-	}
+        if (cornerNumber !== Corners.ONE) {
+            setCornerNumber(cornerNumber as number - 1);
+        }
     };
 
-    
+
     return (
         <div className="PickLocationGrid">
             <JoggerDisplay selectAction={selectAction} />
-	    <div className="PalletDisplay">
-	    <div className="PalletDisplayHeader">
-	    <div className="CornerBackButton">
-	    {(cornerNumber as number > 0) &&
-		<div className="BackButton" onClick={backAction}>
-		<span>
-		{"Back"}
-	     </span>
-		</div>
-		}
-	    </div>
-	    <div className="CenterText">
-	    <span>
-	    {title}
-	    </span> 
-	    </div>
-	    </div>
-	    <div className="DisplayContainer">
-            <PalletRender cornerNumber={cornerNumber as number}/>
+            <div className="PalletDisplay">
+                <div className="PalletDisplayHeader">
+                    <div className="CornerBackButton">
+                        {(cornerNumber as number > 0) &&
+                            <div className="BackButton" onClick={backAction}>
+                                <span>
+                                    {"Back"}
+                                </span>
+                            </div>
+                        }
+                    </div>
+                    <div className="CenterText">
+                        <span>
+                            {title}
+                        </span>
+                    </div>
+                </div>
+                <div className="DisplayContainer">
+                    <PalletRender cornerNumber={cornerNumber as number} />
+                </div>
             </div>
-	    </div>
         </div>
     );
 };
@@ -534,6 +534,8 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             setTeachState(--teachState);
             console.log(state, "State 2");
             setCompletionFraction({ n: completionFraction.n - 1, d: completionFraction.d });
+        } else {
+            close();
         }
     };
 
@@ -550,11 +552,11 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             instruction = "Enter the dimensions of the box"
             break;
         }
-	case (PalletTeachState.PALLET_CORNERS): {
+        case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners />);
             instruction = "Move to and select three pallet corners";
             break;
-        };  
+        };
         case (PalletTeachState.LAYER_SETUP): {
             break;
         }
@@ -570,14 +572,15 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
     };
 
+
     return (
         <Modal close={close}>
             <div className="TeachContainer">
                 <div className="TeachModeHeader">
                     <div className="TeachButton" onClick={handleBack}>
                         <span>
-                            Back
-			</span>
+                            {((teachState === PalletTeachState.PICK_LOCATION) ? "Close" : "Back")}
+                        </span>
                     </div>
                     <div className="StatusBar">
                         <div className="StatusBarTitle">

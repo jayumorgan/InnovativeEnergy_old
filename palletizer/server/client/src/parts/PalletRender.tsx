@@ -17,32 +17,32 @@ interface RenderProps {
 }
 
 function getPyramid() {
-    let geometry = new THREE.ConeGeometry( 0.05, 0.2, 4 );
+    let geometry = new THREE.ConeGeometry(0.05, 0.2, 4);
     let material = new THREE.MeshPhongMaterial({
-	color: 0x5fdf39, specular: 0xffffff, shininess: 250,
-	side: THREE.DoubleSide, vertexColors: true
-	});
-//    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-    let cone = new THREE.Mesh( geometry, material );
+        color: 0x5fdf39, specular: 0xffffff, shininess: 250,
+        side: THREE.DoubleSide, vertexColors: true
+    });
+    //    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    let cone = new THREE.Mesh(geometry, material);
     return cone;
-//    scene.add( cone );
+    //    scene.add( cone );
 };
 
 
 //--------------- Awful logic + mess. clean up.
-function setPyramidPosition( cone : THREE.Mesh , cornerNumber: number) {
+function setPyramidPosition(cone: THREE.Mesh, cornerNumber: number) {
 
     let z_sign = (cornerNumber % 2 == 0) ? -1 : 1;
     let off_sign = (cornerNumber < 2) ? -1 : 1;
     if (cornerNumber === 2) {
-	z_sign = 1;
+        z_sign = 1;
     }
     cone.position.y = 0.3;
     cone.position.x = off_sign * 0.82;
     cone.position.z = z_sign * 1.2;
     cone.rotation.z = off_sign * Math.PI * 11 / 12;
     cone.rotation.x = z_sign * Math.PI / 25;
-    cone.rotation.y = z_sign * Math.PI / 4;  
+    cone.rotation.y = z_sign * Math.PI / 4;
 };
 
 interface Animation {
@@ -50,11 +50,11 @@ interface Animation {
     render: () => void;
 }
 
-function PalletRender({cornerNumber} : RenderProps) {
+function PalletRender({ cornerNumber }: RenderProps) {
 
     let MountElement = useRef<HTMLDivElement>(null);
 
-    let [animation, setAnimation] = useState<Animation|null>(null); 
+    let [animation, setAnimation] = useState<Animation | null>(null);
 
     useEffect(() => {
         let width = (MountElement.current as HTMLDivElement).clientWidth;
@@ -69,7 +69,7 @@ function PalletRender({cornerNumber} : RenderProps) {
         camera.position.z = 0;
         camera.position.y = cameraFar;
         camera.lookAt(0, 0, 0);
-	
+
         scene.background = new THREE.Color(0xf1f1f1);
         scene.fog = new THREE.Fog(0xf1f1f1, 20, 100);
 
@@ -87,7 +87,7 @@ function PalletRender({cornerNumber} : RenderProps) {
         var axesHelper = new THREE.AxesHelper(5);
         scene.add(axesHelper);
 
-	
+
         let model: THREE.Group;
 
         let animate = () => {
@@ -145,17 +145,17 @@ function PalletRender({cornerNumber} : RenderProps) {
                 });
                 scene.add(model);
 
-		console.log(model.position);
+                console.log(model.position);
 
-		let cone = getPyramid();
-		setPyramidPosition(cone, cornerNumber);
-		cone.name = "Pyramid"
-	
-		scene.add(cone);
+                let cone = getPyramid();
+                setPyramidPosition(cone, cornerNumber);
+                cone.name = "Pyramid"
+
+                scene.add(cone);
 
                 handleResize();
-		
-		setAnimation({scene, render: handleResize});
+
+                setAnimation({ scene, render: handleResize });
             }, undefined, (error: ErrorEvent) => {
                 console.log(error);
             });
@@ -166,24 +166,23 @@ function PalletRender({cornerNumber} : RenderProps) {
         animate();
     }, []);
 
-    useEffect(()=>{
-	if (animation !== null) {
-	    let {scene, render} = animation;
-	    let cone = scene.getObjectByName("Pyramid");
-	    console.log("Animate ");
-	    if (cone) {
-		setPyramidPosition(cone as THREE.Mesh, cornerNumber);
-		render();
-	    }
-	}
+    useEffect(() => {
+        if (animation !== null) {
+            let { scene, render } = animation;
+            let cone = scene.getObjectByName("Pyramid");
+            console.log("Animate ");
+            if (cone) {
+                setPyramidPosition(cone as THREE.Mesh, cornerNumber);
+                render();
+            }
+        }
     }, [cornerNumber, animation]);
 
-    
+
 
     return (
-            <div className="PalletMount" ref={MountElement} />
+        <div className="PalletMount" ref={MountElement} />
     );
 };
-
 
 export default PalletRender;
