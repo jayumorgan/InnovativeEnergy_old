@@ -95,6 +95,10 @@
 
                     .MiniRender {
                         @include flex-center();
+			img {
+			    width: 50%;
+			    height: auto;
+			}
 
                         .BoxMount {
                             height: 100%;

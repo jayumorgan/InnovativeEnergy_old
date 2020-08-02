@@ -196,7 +196,7 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
     };
     let instruction: string;
     if (summaryScreen) {
-        instruction = "Add or edit boxes";
+        instruction = "Add and edit boxes";
         return (
             <ContentItem instruction={instruction}>
                 <SummaryScreen allBoxes={allBoxes} startEdit={startEdit} />

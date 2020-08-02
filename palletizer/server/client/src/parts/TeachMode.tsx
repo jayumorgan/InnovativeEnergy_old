@@ -13,7 +13,7 @@ import BoxSize from "./teach/BoxSize";
 
 import { BoxDimensions } from "./teach/3D/BoxRender";
 
-
+import { Coordinate, PalletGeometry } from "./teach/structures/Data";
 
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
@@ -62,8 +62,21 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let allBoxes = [] as BoxDimensions[];
+
+    let allPallets = [] as PalletGeometry[];
+
     for (let i = 0; i < 10; i++) {
         allBoxes.push({ width: 10, height: 10, length: i + 1 });
+
+        let coord: Coordinate = {
+            x: 10,
+            y: 10,
+            z: 10
+        };
+
+        let pal = new PalletGeometry(coord, coord, coord);
+
+        allPallets.push(pal);
     }
 
     switch (teachState) {
@@ -86,8 +99,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
-            ChildElement = (<PalletCorners />);
-
+            ChildElement = (<PalletCorners allPallets={allPallets} />);
             completionFraction.n = 3;
             break;
         };

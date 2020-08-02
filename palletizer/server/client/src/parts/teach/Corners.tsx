@@ -2,6 +2,9 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import ContentItem, { ContentItemProps } from "./ContentItem";
 
+import { Coordinate, PlaneDimensions, PalletGeometry } from "./structures/Data";
+
+
 import Jogger from "./Jogger";
 
 import PalletRender from "./3D/PalletRender";
@@ -11,6 +14,7 @@ import PlusIcon, { IconProps } from "./PlusIcon";
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
 
+import PalletImage from "../images/Pallet.jpg";
 
 enum Corners {
     ONE,
@@ -19,11 +23,73 @@ enum Corners {
 };
 
 
+interface DimensionCellProps {
+    axis: string;
+    value: number;
+}
+
+
+function DimensionCell({ axis, value }: DimensionCellProps) {
+    return (
+        <div className="DimensionCell">
+            <span>
+                {axis + ": " + String(value)}
+            </span>
+        </div>
+    );
+}
+
+
+
+function PalletCell() {
+    let width = 100;
+    let height = 100;
+    let length = 100;
+
+    return (
+        <div className="BoxCellContainer">
+            <div className="BoxCell">
+                <div className="MiniRender">
+                    <img src={PalletImage} />
+                </div>
+                <div className="BoxDetails">
+                    <div className="BoxName">
+                        <span>
+                            {"Pallet 1"}
+                        </span>
+                    </div>
+                    <div className="BoxDimensions">
+                        <DimensionCell axis={"Width"} value={width} />
+                        <DimensionCell axis={"Length"} value={length} />
+                        <DimensionCell axis={"Height"} value={height} />
+                    </div>
+                </div>
+                <div className="Buttons">
+                    <div className="EditButton">
+                        <div className="Button">
+                            <span>
+                                {"Edit"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="DeleteButton">
+                        <div className="Button">
+                            <span>
+                                {"Delete"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
 
 interface NewPalletCellProps {
     startEdit: () => void;
 }
-
 
 function NewPalletCell({ startEdit }: NewPalletCellProps) {
     let iconSize = {
@@ -49,15 +115,21 @@ function NewPalletCell({ startEdit }: NewPalletCellProps) {
 
 interface SummaryProps {
     startEdit: () => void;
+    allPallets: PalletGeometry[];
 };
 
 
-function CornerSummary({ startEdit }: SummaryProps) {
+function CornerSummary({ startEdit, allPallets }: SummaryProps) {
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
                     <NewPalletCell startEdit={startEdit} />
+                    {allPallets.map((pallet: PalletGeometry, index: number) => {
+                        return (
+                            <PalletCell key={index} />
+                        );
+                    })}
                 </div>
             </div>
         </div>
@@ -65,10 +137,12 @@ function CornerSummary({ startEdit }: SummaryProps) {
 };
 
 
+interface PalletCornerProps {
+    //    allPallets =
+    allPallets: PalletGeometry[];
+}
 
-
-
-function PalletCorners() {
+function PalletCorners({ allPallets }: PalletCornerProps) {
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
 
@@ -97,10 +171,10 @@ function PalletCorners() {
     let instruction: string;
 
     if (summaryScreen) {
-        instruction = "Add or edit pallets";
+        instruction = "Add and edit pallets";
         return (
             <ContentItem instruction={instruction} >
-                <CornerSummary startEdit={startEdit} />
+                <CornerSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );
     } else {
