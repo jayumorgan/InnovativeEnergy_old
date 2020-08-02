@@ -1,14 +1,198 @@
 @import "../../../master.scss";
+@import "../../css/TeachMode.scss";
+
 
 
 .BoxSummary {
     width: 100%;
     height: 100%;
     @include flex-center();
-    .AddBoxButton {
-	@include flex-center();
-	
+
+    .BoxScrollContainer {
+        //padding: $margin * 2;
+        height: 100%;
+        width: 100%;
+        //  margin: $margin * 2;
+
+        .BoxScroll {
+            margin: 1%;
+            width: 98%;
+            height: 96%;
+	    max-height: $container-height * 8/10;
+	    overflow: scroll;
+	   
+            .BoxCellContainer {
+                padding: 1%;
+                width: 98%;
+                height: $container-height / 8;
+		
+                @include flex-center();
+
+                .NewBoxCell {
+                    cursor: pointer;
+                    width: 96%;
+                    height: 100%;
+                    border: $container-border;
+                    border-radius: $border-radius;
+                    @include shadow();
+                    display: grid;
+                    grid-template-columns: 20% 60% 30%;
+
+                    .BoxName {
+                        width: 100%;
+                        @include flex-center();
+                        justify-content: flex-start;
+
+                        span {
+                            color: $dark-blue;
+                            font-size: 2em;
+                        }
+                    }
+
+                    .Icon {
+                        padding: $margin;
+                        padding-left: 3%;
+                        @include flex-center();
+
+                        svg {
+                            line {
+                                stroke: $dark-blue;
+                                stroke-width: 4pt;
+                            }
+                        }
+                    }
+                }
+
+                .NewBoxCell:hover {
+                    @include size-shadow(15px);
+
+                    span {
+                        color: $green;
+                    }
+
+                    .Icon {
+                        svg {
+                            line {
+                                stroke: $green;
+                            }
+                        }
+                    }
+                }
+
+                .BoxCell {
+                    cursor: pointer;
+                    width: 96%;
+                    height: 100%;
+                    border: $container-border;
+                    border-radius: $border-radius;
+                    @include shadow();
+
+                    justify-content: flex-start;
+
+                    display: grid;
+                    grid-template-rows: 100%;
+                    grid-template-columns: 20% 50% 30%;
+
+                    .MiniRender {
+                        @include flex-center();
+
+                        .BoxMount {
+                            height: 100%;
+                            width: 50%;
+                            background-color: white;
+
+                            canvas {
+                                height: 100%;
+                                // width: 100%;
+                            }
+                        }
+                    }
+
+                    .BoxDetails {
+                        display: grid;
+                        grid-template-rows: 50% 50%;
+                        grid-template-columns: 100%;
+
+                        .BoxName {
+                            @include flex-center();
+                            justify-content: flex-start;
+
+                            span {
+                                font-size: 2em;
+                            }
+                        }
+
+                        .BoxDimensions {
+                            display: grid;
+                            grid-template-rows: 100%;
+                            grid-template-columns: 33% 33% 33%;
+
+                            .DimensionCell {
+                                @include flex-center();
+                                justify-content: flex-start;
+
+                                span {
+                                    font-size: $medium-font;
+                                }
+                            }
+                        }
+                    }
+
+                    .Buttons {
+                        display: grid;
+                        grid-template-rows: 100%;
+                        grid-template-columns: 50% 50%;
+                        color: white;
+
+                        .EditButton {
+                            @include flex-center();
+			    
+                            span {
+                                font-size: $large-font;
+                            }
+                        }
+
+                        .EditButton:hover {
+                            color: $green;
+			    .Button {
+				@include shadow();
+			    }
+                        }
+
+                        .DeleteButton {
+                            @include flex-center();
+                            span {
+                                font-size: $large-font;
+                            }
+                        }
+
+                        .DeleteButton:hover {
+                            color: red;
+			    .Button {
+				@include shadow();
+			    }
+                        }
+
+
+			.Button {
+			    //			    width: 50%;
+			    width: 70%;
+			    @include flex-center();
+			    padding: $margin;
+			    //height: 70%;
+			    background-color: $medium-blue;
+			    border-radius: $border-radius;
+			}
+
+			
+                    }
+                }
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
     }
 }
-
-

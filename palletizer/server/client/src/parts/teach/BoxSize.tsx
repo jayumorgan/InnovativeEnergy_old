@@ -46,34 +46,135 @@ interface SummaryScreenProps {
     allBoxes: BoxDimensions[];
 }
 
-function SummaryScreen({ allBoxes }: SummaryScreenProps) {
 
-    if (allBoxes.length === 0) {
-        return (
-            <div className="BoxSummary">
-                <div className="AddBoxButton">
-                    <span>
-                        {"Add A New Box"}
-                    </span>
+interface IconProps {
+    height: number;
+    width: number;
+}
+
+function PlusIcon({height, width} : IconProps) {
+    let line_1 = {
+        x1: "50%",
+        y1: "0%",
+        x2: "50%",
+        y2: "100%"
+    } as any;
+
+    let line_2 = {
+        x1: "0%",
+        x2: "100%",
+        y1: "50%",
+        y2: "50%"
+    } as any;
+
+    return (
+        <svg height={height} width={width}>
+            <g transform="scale(1,1)">
+                <line {...line_1} />
+                <line {...line_2} />
+            </g>
+        </svg>
+    );
+}
+
+function NewBoxCell() {
+    let iconSize = {
+	height: 50,
+	width: 50
+    } as IconProps;
+    
+    return (
+        <div className="BoxCellContainer">
+            <div className="NewBoxCell">
+                <div className="Icon">
+                    <PlusIcon {...iconSize}/>
+                </div>
+		<div className="BoxName">
+                <span>
+                    {"Add A New Box"}
+                </span>
+		</div>
+            </div>
+        </div>
+    );
+};
+
+
+interface DimensionCellProps {
+    axis : string;
+    value : number;
+}
+
+function DimensionCell({axis, value} : DimensionCellProps) {
+
+    return (
+	<div className="DimensionCell">
+	    <span>
+		{axis + ": " + String(value)}
+	    </span>
+	</div>
+    );
+}
+
+
+function BoxCell({width, height, length} : BoxDimensions) {
+    return (
+	<div className="BoxCellContainer">
+	    <div className="BoxCell">
+		<div className="MiniRender">
+		    <Box width={width} height={height} length={length} />
+		</div>
+		<div className="BoxDetails">
+		    <div className="BoxName">
+			<span>
+			    {"Box 1"}
+			</span>
+		    </div>
+		    <div className="BoxDimensions">
+			<DimensionCell axis={"Width"} value={width} />
+		    	<DimensionCell axis={"Length"} value={length} />
+			<DimensionCell axis={"Height"} value={height} />
+		    </div>
+		</div>
+		<div className="Buttons">
+		    <div className="EditButton">
+			<div className="Button">
+			<span>
+			    {"Edit"}
+			</span>
+			</div>
+		    </div>
+		    <div className="DeleteButton">
+			<div className="Button">
+			<span>
+			    {"Delete"}
+			</span>
+			</div>
+		    </div>
+		</div>
+	    </div>
+	</div>
+	
+    );
+}
+
+function SummaryScreen({ allBoxes }: SummaryScreenProps) {
+    
+    return (
+        <div className="BoxSummary">
+            <div className="BoxScrollContainer">
+                <div className="BoxScroll">
+		    <NewBoxCell />
+		    {allBoxes.map((val: BoxDimensions, index: number)=>{
+			return (
+			    <BoxCell {...val}/>
+			)
+		    })}
                 </div>
             </div>
-        );
-
-    } else {
-
-        return (
-            <div className="BoxSummary">
-                <span>
-                    Stuff
-		</span>
-
-            </div>
-        );
-
-    }
-
-
-}
+        </div>
+    );
+};
 
 interface BoxSizeProps {
     allBoxes: BoxDimensions[];
@@ -97,7 +198,6 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
 
 
     let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
-
     //    setInstruction(summaryScreen ? "View and Edit Boxes" : "Enter box dimensions");
 
     let update_dim = (dimension: DimensionEnum) => (val: number) => {
@@ -121,11 +221,13 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
     };
 
 
+
+    
+
     if (summaryScreen) {
         return (
             <SummaryScreen allBoxes={allBoxes} />
         );
-
     } else {
         return (
             <div className="BoxSizeGrid">

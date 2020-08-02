@@ -38,17 +38,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [headerTitle, setHeaderTitle] = useState<string>("Pallet Configurator");
     
-
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
-
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
    
     let instruction = "Default instruction";
     
-
-//    let [completionFraction, setCompletionFraction] = useState<Fraction>({ n:  1, d: 5 } as Fraction);
-
     let completionFraction = {n: 0 , d: 6} as Fraction;
 
     let ChildElement: ReactElement = (<></>);
@@ -68,6 +63,11 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
     };
 
+    let allBoxes = [] as BoxDimensions[];
+    for (let i = 0; i < 10; i++) {
+	allBoxes.push({width: 10, height: 10, length: i + 1});
+    }
+
     switch (teachState) {
 	case (PalletTeachState.CONFIG_NAME) : {
 	    ChildElement = (<ConfigurationName handleUpdate={setHeaderTitle} />);
@@ -82,7 +82,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
-            ChildElement = (<BoxSize allBoxes={[] as BoxDimensions[]} />);
+            ChildElement = (<BoxSize allBoxes={allBoxes} />);
             instruction = "Add or remove boxes"
 	    completionFraction.n = 2;
             break;

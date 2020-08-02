@@ -62,11 +62,16 @@ $normal-font-size: 1em;
     justify-content: center;
 }
 
-@mixin shadow() {
-    -moz-box-shadow: 0 0 10px $dark-grey;
-    -webkit-box-shadow: 0 0 10px $dark-grey;
-    box-shadow: 0 0 10px $dark-grey;
+@mixin size-shadow($size) {
+   -moz-box-shadow: 0 0 $size $dark-grey;
+    -webkit-box-shadow: 0 0 $size $dark-grey;
+    box-shadow: 0 0 $size $dark-grey;
 }
+
+@mixin shadow() {
+    @include size-shadow(10px);
+}
+
 
 @mixin white-shadow() {
     -moz-box-shadow: 0 0 5px white;

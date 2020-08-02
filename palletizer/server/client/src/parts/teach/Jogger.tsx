@@ -20,7 +20,6 @@ interface ArrowImageProps {
     direction: Directions;
 };
 
-
 function ArrowImage({ direction }: ArrowImageProps) {
     let image: string;
     switch (direction) {
@@ -31,7 +30,7 @@ function ArrowImage({ direction }: ArrowImageProps) {
         case (Directions.DOWN): {
             image = Down;
             break;
-        };T
+        };
         case (Directions.LEFT): {
             image = Left;
             break;
@@ -47,7 +46,6 @@ function ArrowImage({ direction }: ArrowImageProps) {
         </div>
     );
 };
-
 
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
     let coordinates: string = "";

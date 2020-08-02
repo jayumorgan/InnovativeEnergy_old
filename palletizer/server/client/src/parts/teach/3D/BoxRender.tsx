@@ -41,8 +41,8 @@ function Box({ length, height, width }: BoxDimensions) {
 
         let scene = new Three.Scene();
         scene = new Three.Scene();
-        scene.background = new Three.Color(0xa0a0a0);
-        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
+        scene.background = new Three.Color(0xfbfbfb);
+//        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
 
         let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
         hemiLight.position.set(0, 20, 0);
@@ -63,7 +63,7 @@ function Box({ length, height, width }: BoxDimensions) {
         var groundMesh = new Three.Mesh(
             new Three.PlaneBufferGeometry(40, 40),
             new Three.MeshPhongMaterial({
-                color: 0x999999,
+                color: 0xfbfbfb,
                 depthWrite: false
             })
         );
@@ -86,6 +86,8 @@ function Box({ length, height, width }: BoxDimensions) {
         let box = new Three.Mesh(geometry, material);
         box.name = "BoxMesh";
 
+	box.scale.set(l,h,w);
+
         scene.add(box);
 
         render_scene();
@@ -106,8 +108,6 @@ function Box({ length, height, width }: BoxDimensions) {
         setAnimation({ scene, render: render_scene } as Animation);
     }, []);
 
-
-
     useEffect(() => {
         if (animation && animation.scene) {
             let s = animation.scene;
@@ -119,6 +119,7 @@ function Box({ length, height, width }: BoxDimensions) {
             box_mesh && animation.render();
         }
     }, [l, h, w]);
+    
     return (
         <div className="BoxMount" ref={MountElement} />
     );
