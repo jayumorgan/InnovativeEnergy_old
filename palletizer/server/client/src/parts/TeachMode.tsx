@@ -4,26 +4,24 @@ import Modal from "./Modal";
 
 import { PalletConfiguration } from "../services/TeachMode";
 
-
+import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
 import PickLocation from "./teach/PickLocation";
 import PalletCorners from "./teach/Corners";
-
-
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
+
+import {BoxDimensions} from "./teach/3D/BoxRender";
+
 
 
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";
-/* <div className="JoggerCircle">
- * </div>
- *  */
-
 
 
 enum PalletTeachState {
+    CONFIG_NAME,
     PICK_LOCATION, // 0
     BOX_SIZE,
     PALLET_CORNERS,
@@ -38,59 +36,73 @@ interface PalletConfiguratorProps {
 
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
+    let [headerTitle, setHeaderTitle] = useState<string>("Pallet Configurator");
+    
+
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PALLET_CORNERS);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
-    let [completionFraction, setCompletionFraction] = useState<Fraction>({ n: teachState + 1, d: 5 } as Fraction);
+   
+    let instruction = "Default instruction";
+    
 
+//    let [completionFraction, setCompletionFraction] = useState<Fraction>({ n:  1, d: 5 } as Fraction);
+
+    let completionFraction = {n: 0 , d: 6} as Fraction;
 
     let ChildElement: ReactElement = (<></>);
 
     let handleNext = () => {
         let state = teachState;
-        setTeachState(++teachState);
-        setCompletionFraction({ n: completionFraction.n + 1, d: completionFraction.d });
+	setTeachState(++teachState);
     };
 
     let handleBack = () => {
         console.log(teachState, "teach state");
         if (teachState > 0) {
             let state = teachState;
-            console.log(state, "State 1");
             setTeachState(--teachState);
-            console.log(state, "State 2");
-            setCompletionFraction({ n: completionFraction.n - 1, d: completionFraction.d });
         } else {
             close();
         }
     };
 
-    let instruction: string = "default instruction";
-
     switch (teachState) {
+	case (PalletTeachState.CONFIG_NAME) : {
+	    ChildElement = (<ConfigurationName handleUpdate={setHeaderTitle} />);
+	    instruction = "Enter a name for your new pallet configuration";
+	    completionFraction.n = 0;
+	    break;
+	}   
         case (PalletTeachState.PICK_LOCATION): {
             ChildElement = (<PickLocation />);
             instruction = "Move to box pick location and click select";
+	    completionFraction.n = 1;
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
-            ChildElement = (<BoxSize />);
-            instruction = "Enter the dimensions of the box"
+            ChildElement = (<BoxSize allBoxes={[] as BoxDimensions[]} />);
+            instruction = "Add or remove boxes"
+	    completionFraction.n = 2;
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners />);
             instruction = "Move to and select three pallet corners";
+	    completionFraction.n = 3;
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
+	    completionFraction.n = 4;
             break;
         }
         case (PalletTeachState.ASSIGN_LAYOUT): {
+	    completionFraction.n = 5;
             break;
         }
         case (PalletTeachState.SUMMARY): {
+	    completionFraction.n = 6;
             break;
         }
         default: {
@@ -106,13 +118,13 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
                 <div className="TeachModeHeader">
                     <div className="TeachButton" onClick={handleBack}>
                         <span>
-                            {((teachState === PalletTeachState.PICK_LOCATION) ? "Close" : "Back")}
+                            {((teachState as number  === 0) ? "Close" : "Back")}
                         </span>
                     </div>
                     <div className="StatusBar">
                         <div className="StatusBarTitle">
                             <span>
-                                Pallet Configurator
+                                {headerTitle}
 			    </span>
                         </div>
                         <CompletionDots fraction={completionFraction} />

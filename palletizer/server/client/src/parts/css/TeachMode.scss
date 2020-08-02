@@ -8,6 +8,7 @@
  $container-width: $jogger-diameter * 7/2;
 
 
+
  .TeachContainer {
      height: $container-height;
      width: $content-width;
@@ -86,7 +87,7 @@
          @include flex-center();
 
          span {
-             font-size: 2em;
+             font-size: 2.5em;
              letter-spacing: 5pt;
              font-variant: small-caps;
 
@@ -185,193 +186,6 @@
      grid-template-columns: 50% 50%;
  }
 
-
- .JoggerCentering {
-     height: 100%;
-     width: 100%;
-     display: grid;
-     grid-template-rows: auto auto;
-     grid-template-columns: 100%;
-
-     //        @include flex-center();
-     .JoggerContainerInner {
-         width: 100%;
-         display: grid;
-         grid-template-rows: auto auto auto;
-         grid-template-columns: 100%;
-
-         // Raising and lower operators.
-         .JoggerRaiseLower {
-             cursor: pointer;
-             @include flex-center();
-
-             svg {
-                 #ArrowLine {
-                     stroke: $light-grey;
-                 }
-
-                 #ArrowText {
-                     fill: none;
-                 }
-             }
-         }
-
-         .JoggerRaiseLower:hover {
-             svg {
-                 transform: scale(1.1);
-
-                 #ArrowLine {
-                     stroke: $dark-blue;
-                 }
-
-                 #ArrowText {
-                     fill: $dark-blue;
-                 }
-             }
-         }
-
-         .JoggerCircleContainer {
-             @include flex-center();
-
-             .JoggerCircle {
-                 height: $jogger-diameter;
-                 width: $jogger-diameter;
-                 border-radius: $jogger-diameter/2;
-                 background-color: $light-blue;
-                 display: grid;
-                 grid-template-rows: 33.3% 33.3% 33.3%;
-                 grid-template-columns: 33.3% 33.3% 33.3%;
-
-                 @include shadow();
-
-                 @mixin arrow-image() {
-                     cursor: pointer;
-
-                     :hover {
-                         transform: scale(1.1);
-                     }
-
-                     img {}
-                 }
-
-                 .JogIncrement {
-                     @include grid-coordinate(2, 2);
-                     @include flex-center();
-
-                     input {
-                         font-size: 1em;
-                         width: 60pt;
-                         -webkit-appearance: none;
-                         -moz-appearance: none;
-                         margin: 0;
-                     }
-
-                     span {
-                         padding-left: $margin;
-                         font-size: 1em;
-                     }
-                 }
-
-                 .SelectPointButton {
-                     @include flex-center();
-                     @include grid-coordinate(2, 2);
-                     $select-diameter: 80pt;
-
-                     .SelectButton {
-                         cursor: pointer;
-                         @include flex-center();
-                         height: $select-diameter;
-                         width: $select-diameter;
-                         border-radius: $select-diameter/2;
-                         background-color: $green;
-                         color: $dark-blue;
-                     }
-
-                     .SelectButton:hover {
-                         color: white;
-                         @include shadow();
-
-                     }
-                 }
-
-                 .Up {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(1, 2);
-                 }
-
-                 .Down {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(3, 2);
-                 }
-
-                 .Left {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(2, 1);
-                 }
-
-                 .Right {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(2, 3);
-                 }
-             }
-         }
-     }
-
-     .JoggerParameters {
-
-         height: 100%;
-         display: grid;
-         grid-template-rows: 100%;
-         grid-template-columns: 50% 50%;
-         //margin: $margin;
-
-
-         .JoggerParameter {
-             @include flex-center();
-             // width: 90%;
-
-             .ParameterContainer {
-                 width: 60%;
-                 display: grid;
-                 grid-template-rows: 50% 50%;
-
-
-                 //border: $blue-border;
-                 border-radius: $border-radius;
-                 background-color: $light-blue;
-                 color: $dark-blue;
-                 padding: $margin;
-                 @include shadow();
-
-                 .Title {
-                     @include flex-center();
-                     font-size: 1.2em;
-                     padding-bottom: $margin;
-                 }
-
-                 .Input {
-
-                     @include flex-center();
-                     @include jin-style(30%, 1.2em);
-                     padding-bottom: $margin;
-
-                     input {
-                         text-align: center;
-                         padding: none;
-                         padding-left: $margin;
-                         @include shadow();
-
-                     }
-                 }
-             }
-
-         }
-     }
- }
 
 
  .CoordinateDisplay {
@@ -527,31 +341,36 @@
          display: grid;
          grid-template-rows: 100%;
          grid-template-columns: 15% 70% 15%;
+
          .CornerBackButton {
              @include flex-center();
-	     justify-content: flex-start;
+             justify-content: flex-start;
+
              .BackButton {
-		 padding-left: $margin;
-		 cursor: pointer;
-		 span {
-		     font-size: $medium-font;
-		     //color: $light-grey;
-		 }
-	     }
-	     .BackButton:hover {
-		 span {
-		     color: $green;
-		 }
-	     }
+                 padding-left: $margin;
+                 cursor: pointer;
+
+                 span {
+                     font-size: $medium-font;
+                     //color: $light-grey;
+                 }
+             }
+
+             .BackButton:hover {
+                 span {
+                     color: $green;
+                 }
+             }
          }
 
          .CenterText {
              @include flex-center();
+
              span {
                  font-size: $large-font;
-		 font-weight: $bold-font;
+                 font-weight: $bold-font;
                  letter-spacing: 2pt;
-               //  font-variant: small-caps;
+                 //  font-variant: small-caps;
              }
          }
      }
@@ -564,9 +383,33 @@
              canvas {
                  height: 100%;
                  width: 100%;
-		 
+
                  // width: 100%;
              }
+         }
+     }
+
+ }
+
+
+ .ConfigurationName {
+    width: 100%;
+    height: 100%;
+    @include flex-center();
+
+     .NameHolder {
+	 height: 100%;
+	 width: 100%;
+         @include flex-center();
+	 margin-top: 40%;
+	 flex-direction: column;
+         justify-content: flex-start;
+         @include jin-style(50%, 2em);
+
+         input {
+             //margin-top: 30%;
+             padding: $margin;
+             @include shadow();
          }
      }
 
