@@ -1,11 +1,10 @@
-
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
-
+import ContentItem, { ContentItemProps } from "./ContentItem";
 
 // 3D display of box.
 import Box, { BoxDimensions } from "./3D/BoxRender";
-
+import PlusIcon, { IconProps } from "./PlusIcon";
 
 import "./css/BoxSize.scss";
 
@@ -42,58 +41,30 @@ function BoxSizeInput({ name, value, update }: BoxSizeInputProps) {
     );
 };
 
-interface SummaryScreenProps {
-    allBoxes: BoxDimensions[];
+
+
+interface NewBoxCellProps {
+    startEdit: () => void;
 }
 
 
-interface IconProps {
-    height: number;
-    width: number;
-}
-
-function PlusIcon({height, width} : IconProps) {
-    let line_1 = {
-        x1: "50%",
-        y1: "0%",
-        x2: "50%",
-        y2: "100%"
-    } as any;
-
-    let line_2 = {
-        x1: "0%",
-        x2: "100%",
-        y1: "50%",
-        y2: "50%"
-    } as any;
-
-    return (
-        <svg height={height} width={width}>
-            <g transform="scale(1,1)">
-                <line {...line_1} />
-                <line {...line_2} />
-            </g>
-        </svg>
-    );
-}
-
-function NewBoxCell() {
+function NewBoxCell({ startEdit }: NewBoxCellProps) {
     let iconSize = {
-	height: 50,
-	width: 50
+        height: 50,
+        width: 50
     } as IconProps;
-    
+
     return (
         <div className="BoxCellContainer">
-            <div className="NewBoxCell">
+            <div className="NewBoxCell" onClick={startEdit}>
                 <div className="Icon">
-                    <PlusIcon {...iconSize}/>
+                    <PlusIcon {...iconSize} />
                 </div>
-		<div className="BoxName">
-                <span>
-                    {"Add A New Box"}
-                </span>
-		</div>
+                <div className="BoxName">
+                    <span>
+                        {"Add A New Box"}
+                    </span>
+                </div>
             </div>
         </div>
     );
@@ -101,75 +72,79 @@ function NewBoxCell() {
 
 
 interface DimensionCellProps {
-    axis : string;
-    value : number;
+    axis: string;
+    value: number;
 }
 
-function DimensionCell({axis, value} : DimensionCellProps) {
+function DimensionCell({ axis, value }: DimensionCellProps) {
 
     return (
-	<div className="DimensionCell">
-	    <span>
-		{axis + ": " + String(value)}
-	    </span>
-	</div>
+        <div className="DimensionCell">
+            <span>
+                {axis + ": " + String(value)}
+            </span>
+        </div>
     );
 }
 
 
-function BoxCell({width, height, length} : BoxDimensions) {
+function BoxCell({ width, height, length }: BoxDimensions) {
     return (
-	<div className="BoxCellContainer">
-	    <div className="BoxCell">
-		<div className="MiniRender">
-		    <Box width={width} height={height} length={length} />
-		</div>
-		<div className="BoxDetails">
-		    <div className="BoxName">
-			<span>
-			    {"Box 1"}
-			</span>
-		    </div>
-		    <div className="BoxDimensions">
-			<DimensionCell axis={"Width"} value={width} />
-		    	<DimensionCell axis={"Length"} value={length} />
-			<DimensionCell axis={"Height"} value={height} />
-		    </div>
-		</div>
-		<div className="Buttons">
-		    <div className="EditButton">
-			<div className="Button">
-			<span>
-			    {"Edit"}
-			</span>
-			</div>
-		    </div>
-		    <div className="DeleteButton">
-			<div className="Button">
-			<span>
-			    {"Delete"}
-			</span>
-			</div>
-		    </div>
-		</div>
-	    </div>
-	</div>
-	
+        <div className="BoxCellContainer">
+            <div className="BoxCell">
+                <div className="MiniRender">
+                    <Box width={width} height={height} length={length} />
+                </div>
+                <div className="BoxDetails">
+                    <div className="BoxName">
+                        <span>
+                            {"Box 1"}
+                        </span>
+                    </div>
+                    <div className="BoxDimensions">
+                        <DimensionCell axis={"Width"} value={width} />
+                        <DimensionCell axis={"Length"} value={length} />
+                        <DimensionCell axis={"Height"} value={height} />
+                    </div>
+                </div>
+                <div className="Buttons">
+                    <div className="EditButton">
+                        <div className="Button">
+                            <span>
+                                {"Edit"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="DeleteButton">
+                        <div className="Button">
+                            <span>
+                                {"Delete"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     );
 }
 
-function SummaryScreen({ allBoxes }: SummaryScreenProps) {
-    
+interface SummaryScreenProps {
+    allBoxes: BoxDimensions[];
+    startEdit: () => void;
+}
+
+function SummaryScreen({ allBoxes, startEdit }: SummaryScreenProps) {
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
-		    <NewBoxCell />
-		    {allBoxes.map((val: BoxDimensions, index: number)=>{
-			return (
-			    <BoxCell {...val}/>
-			)
-		    })}
+                    <NewBoxCell startEdit={startEdit} />
+                    {allBoxes.map((val: BoxDimensions, index: number) => {
+                        return (
+                            <BoxCell {...val} />
+                        )
+                    })}
                 </div>
             </div>
         </div>
@@ -179,8 +154,6 @@ function SummaryScreen({ allBoxes }: SummaryScreenProps) {
 interface BoxSizeProps {
     allBoxes: BoxDimensions[];
 }
-
-
 
 function BoxSize({ allBoxes }: BoxSizeProps) {
     // Must have fixed width.
@@ -196,9 +169,11 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
 
     let [boxDim, setBoxDim] = useState<BoxDimensions>({ length: 10, width: 10, height: 10 });
 
-
     let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
-    //    setInstruction(summaryScreen ? "View and Edit Boxes" : "Enter box dimensions");
+
+    let startEdit = () => {
+        setSummaryScreen(false);
+    };
 
     let update_dim = (dimension: DimensionEnum) => (val: number) => {
         console.log("Updating dimension", val);
@@ -219,29 +194,31 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
         }
         setBoxDim(newDim);
     };
-
-
-
-    
-
+    let instruction: string;
     if (summaryScreen) {
+        instruction = "Add or edit boxes";
         return (
-            <SummaryScreen allBoxes={allBoxes} />
+            <ContentItem instruction={instruction}>
+                <SummaryScreen allBoxes={allBoxes} startEdit={startEdit} />
+            </ContentItem>
         );
     } else {
+        instruction = "Enter box dimensions";
         return (
-            <div className="BoxSizeGrid">
-                <div className="BoxDisplay">
-                    <Box {...boxDim} />
-                </div>
-                <div className="BoxSizeContainer">
-                    <div className="BoxSizeInputContainer">
-                        <BoxSizeInput name={l_name} value={boxDim.length} update={update_dim(DimensionEnum.L)} />
-                        <BoxSizeInput name={h_name} value={boxDim.height} update={update_dim(DimensionEnum.H)} />
-                        <BoxSizeInput name={w_name} value={boxDim.width} update={update_dim(DimensionEnum.W)} />
+            <ContentItem instruction={instruction} >
+                <div className="BoxSizeGrid">
+                    <div className="BoxDisplay">
+                        <Box {...boxDim} />
+                    </div>
+                    <div className="BoxSizeContainer">
+                        <div className="BoxSizeInputContainer">
+                            <BoxSizeInput name={l_name} value={boxDim.length} update={update_dim(DimensionEnum.L)} />
+                            <BoxSizeInput name={h_name} value={boxDim.height} update={update_dim(DimensionEnum.H)} />
+                            <BoxSizeInput name={w_name} value={boxDim.width} update={update_dim(DimensionEnum.W)} />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </ContentItem>
         );
     }
 };

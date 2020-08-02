@@ -1,5 +1,8 @@
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
+import ContentItem, { ContentItemProps } from "./ContentItem";
+
+
 
 import Jogger from "./Jogger";
 
@@ -109,11 +112,16 @@ function PickLocation() {
     let selectAction = () => {
         console.log("Jogger Position Selected");
     };
+
+    let instruction = "Move and select box pick location";
+
     return (
-        <div className="PickLocationGrid">
-            <Jogger selectAction={selectAction} />
-            <PickLocationMap />
-        </div>
+        <ContentItem instruction={instruction}>
+            <div className="PickLocationGrid">
+                <Jogger selectAction={selectAction} />
+                <PickLocationMap />
+            </div>
+        </ContentItem>
     );
     //    <PickLocationMap />
 }

@@ -11,7 +11,7 @@ import PalletCorners from "./teach/Corners";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
 
-import {BoxDimensions} from "./teach/3D/BoxRender";
+import { BoxDimensions } from "./teach/3D/BoxRender";
 
 
 
@@ -37,20 +37,18 @@ interface PalletConfiguratorProps {
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [headerTitle, setHeaderTitle] = useState<string>("Pallet Configurator");
-    
+
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
-   
-    let instruction = "Default instruction";
-    
-    let completionFraction = {n: 0 , d: 6} as Fraction;
+
+    let completionFraction = { n: 0, d: 6 } as Fraction;
 
     let ChildElement: ReactElement = (<></>);
 
     let handleNext = () => {
         let state = teachState;
-	setTeachState(++teachState);
+        setTeachState(++teachState);
     };
 
     let handleBack = () => {
@@ -65,44 +63,44 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let allBoxes = [] as BoxDimensions[];
     for (let i = 0; i < 10; i++) {
-	allBoxes.push({width: 10, height: 10, length: i + 1});
+        allBoxes.push({ width: 10, height: 10, length: i + 1 });
     }
 
     switch (teachState) {
-	case (PalletTeachState.CONFIG_NAME) : {
-	    ChildElement = (<ConfigurationName handleUpdate={setHeaderTitle} />);
-	    instruction = "Enter a name for your new pallet configuration";
-	    completionFraction.n = 0;
-	    break;
-	}   
+        case (PalletTeachState.CONFIG_NAME): {
+            ChildElement = (<ConfigurationName handleUpdate={setHeaderTitle} />);
+
+            completionFraction.n = 0;
+            break;
+        }
         case (PalletTeachState.PICK_LOCATION): {
             ChildElement = (<PickLocation />);
-            instruction = "Move to box pick location and click select";
-	    completionFraction.n = 1;
+
+            completionFraction.n = 1;
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSize allBoxes={allBoxes} />);
-            instruction = "Add or remove boxes"
-	    completionFraction.n = 2;
+
+            completionFraction.n = 2;
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners />);
-            instruction = "Move to and select three pallet corners";
-	    completionFraction.n = 3;
+
+            completionFraction.n = 3;
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
-	    completionFraction.n = 4;
+            completionFraction.n = 4;
             break;
         }
         case (PalletTeachState.ASSIGN_LAYOUT): {
-	    completionFraction.n = 5;
+            completionFraction.n = 5;
             break;
         }
         case (PalletTeachState.SUMMARY): {
-	    completionFraction.n = 6;
+            completionFraction.n = 6;
             break;
         }
         default: {
@@ -118,14 +116,14 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
                 <div className="TeachModeHeader">
                     <div className="TeachButton" onClick={handleBack}>
                         <span>
-                            {((teachState as number  === 0) ? "Close" : "Back")}
+                            {((teachState as number === 0) ? "Close" : "Back")}
                         </span>
                     </div>
                     <div className="StatusBar">
                         <div className="StatusBarTitle">
                             <span>
                                 {headerTitle}
-			    </span>
+                            </span>
                         </div>
                         <CompletionDots fraction={completionFraction} />
                     </div>
@@ -135,14 +133,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 			</span>
                     </div>
                 </div>
-                <div className="TeachModeInstruction">
-                    <span>
-                        {instruction.toLowerCase()}
-                    </span>
-                </div>
-                <div className="TeachModeContent">
-                    {ChildElement}
-                </div>
+                {ChildElement}
             </div>
         </Modal>
     );
