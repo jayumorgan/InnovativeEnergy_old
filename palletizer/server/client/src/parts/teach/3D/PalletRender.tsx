@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
 
-import WoodTexture from "./images/woodTexture.jpg";
+import WoodTexture from "../../images/woodTexture.jpg";
 import { Object3D } from "three";
 
 
@@ -31,7 +31,6 @@ function getPyramid() {
 
 //--------------- Awful logic + mess. clean up.
 function setPyramidPosition(cone: THREE.Mesh, cornerNumber: number) {
-
     let z_sign = (cornerNumber % 2 == 0) ? -1 : 1;
     let off_sign = (cornerNumber < 2) ? -1 : 1;
     if (cornerNumber === 2) {

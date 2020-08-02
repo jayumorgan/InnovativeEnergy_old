@@ -2,7 +2,7 @@ import React, { useContext, useState, Fragment } from 'react';
 
 import Modal, { Editor, Unlock } from "./Modal";
 
-import PalletConfigurator from "./TeachPallet";
+import PalletConfigurator from "./TeachMode";
 
 import { ConfigContext } from "../context/ConfigContext";
 

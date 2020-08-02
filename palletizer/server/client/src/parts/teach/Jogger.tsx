@@ -6,6 +6,9 @@ import Down from "../images/down.png";
 import Left from "../images/left.png";
 import Right from "../images/right.png";
 
+
+import "./css/Jogger.scss";
+
 enum Directions {
     UP = "Up",
     DOWN = "Down",

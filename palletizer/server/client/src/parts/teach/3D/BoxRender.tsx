@@ -3,13 +3,8 @@ import React, { useRef, useEffect, useState } from "react";
 import * as Three from "three";
 
 
-import { get_cardboard_box } from "./Visualizer";
+import { get_cardboard_box } from "../../Visualizer";
 import { MeshDepthMaterial, MeshBasicMaterialParameters } from "three";
-
-
-//import wood from "./images/wood.jpg";
-//import carboard from "./images/cardboard.jpg";
-//import vcardboard from "./images/vcardboard.jpg";
 
 export interface BoxDimensions {
     length: number;

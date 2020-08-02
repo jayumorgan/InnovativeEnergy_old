@@ -4,7 +4,7 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 
 // 3D display of box.
-import Box, { BoxDimensions } from "../BoxDisplay";
+import Box, { BoxDimensions } from "./3D/BoxRender";
 
 //---------------Box Size---------------
 

@@ -2,7 +2,7 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import Jogger from "./Jogger";
 
-import PalletRender from "../PalletRender";
+import PalletRender from "./3D/PalletRender";
 
 
 enum Corners {
