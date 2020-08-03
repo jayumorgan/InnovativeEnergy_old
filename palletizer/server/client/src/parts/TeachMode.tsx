@@ -13,9 +13,8 @@ import BoxSize from "./teach/BoxSize";
 
 import Layout from "./teach/Layout";
 
-import { BoxDimensions } from "./teach/3D/BoxRender";
 
-import { Coordinate, PalletGeometry } from "./teach/structures/Data";
+import { Coordinate, PalletGeometry, BoxObject } from "./teach/structures/Data";
 
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
@@ -42,7 +41,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.LAYOUT_SETUP);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
 
     let completionFraction = { n: 0, d: 6 } as Fraction;
 
@@ -63,12 +62,14 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
     };
 
-    let allBoxes = [] as BoxDimensions[];
+    let allBoxes = [] as BoxObject[];
 
     let allPallets = [] as PalletGeometry[];
 
     for (let i = 0; i < 10; i++) {
-        allBoxes.push({ width: 10, height: 10, length: i + 1 });
+
+        let box = new BoxObject("Box " + String(i + 1), { width: 10, height: 10, length: 10 }, { x: 200, y: 200, z: 200 });
+        allBoxes.push(box);
 
         let c1: Coordinate = {
             x: 0,

@@ -3,8 +3,10 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 import ContentItem, { ContentItemProps } from "./ContentItem";
 
 // 3D display of box.
-import Box, { BoxDimensions } from "./3D/BoxRender";
+import Box from "./3D/BoxRender";
 import PlusIcon, { IconProps } from "./PlusIcon";
+
+import { BoxObject, BoxDimensions } from "./structures/Data";
 
 import "./css/BoxSize.scss";
 
@@ -81,14 +83,21 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
     return (
         <div className="DimensionCell">
             <span>
-                {axis + ": " + String(value)}
+                {axis + ": "}
             </span>
+            <input type="number" value={value} />
         </div>
     );
 }
 
+interface BoxProps {
+    box: BoxObject;
+};
 
-function BoxCell({ width, height, length }: BoxDimensions) {
+function BoxCell({ box }: BoxProps) {
+    let placeholder = box.name;
+    let { width, length, height } = box.dimensions;
+
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
@@ -97,9 +106,7 @@ function BoxCell({ width, height, length }: BoxDimensions) {
                 </div>
                 <div className="BoxDetails">
                     <div className="BoxName">
-                        <span>
-                            {"Box 1"}
-                        </span>
+                        <input type="text" placeholder="Box 1" value={box.name} />
                     </div>
                     <div className="BoxDimensions">
                         <DimensionCell axis={"Width"} value={width} />
@@ -125,12 +132,52 @@ function BoxCell({ width, height, length }: BoxDimensions) {
                 </div>
             </div>
         </div>
-
     );
-}
+};
+/* 
+ * function BoxCell({ width, height, length }: BoxDimensions) {
+ *     return (
+ *         <div className="BoxCellContainer">
+ *             <div className="BoxCell">
+ *                 <div className="MiniRender">
+ *                     <Box width={width} height={height} length={length} />
+ *                 </div>
+ *                 <div className="BoxDetails">
+ *                     <div className="BoxName">
+ *                         <span>
+ *                             {"Box 1"}
+ *                         </span>
+ *                     </div>
+ *                     <div className="BoxDimensions">
+ *                         <DimensionCell axis={"Width"} value={width} />
+ *                         <DimensionCell axis={"Length"} value={length} />
+ *                         <DimensionCell axis={"Height"} value={height} />
+ *                     </div>
+ *                 </div>
+ *                 <div className="Buttons">
+ *                     <div className="EditButton">
+ *                         <div className="Button">
+ *                             <span>
+ *                                 {"Edit"}
+ *                             </span>
+ *                         </div>
+ *                     </div>
+ *                     <div className="DeleteButton">
+ *                         <div className="Button">
+ *                             <span>
+ *                                 {"Delete"}
+ *                             </span>
+ *                         </div>
+ *                     </div>
+ *                 </div>
+ *             </div>
+ *         </div>
+ * 	
+ *     );
+ * } */
 
 interface SummaryScreenProps {
-    allBoxes: BoxDimensions[];
+    allBoxes: BoxObject[];
     startEdit: () => void;
 }
 
@@ -140,9 +187,9 @@ function SummaryScreen({ allBoxes, startEdit }: SummaryScreenProps) {
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
                     <NewBoxCell startEdit={startEdit} />
-                    {allBoxes.map((val: BoxDimensions, index: number) => {
+                    {allBoxes.map((val: BoxObject, index: number) => {
                         return (
-                            <BoxCell {...val} />
+                            <BoxCell box={val} />
                         )
                     })}
                 </div>
@@ -152,8 +199,16 @@ function SummaryScreen({ allBoxes, startEdit }: SummaryScreenProps) {
 };
 
 interface BoxSizeProps {
-    allBoxes: BoxDimensions[];
+    allBoxes: BoxObject[];
 }
+
+
+// New Box Cell -- pretty eacy to setup.
+// Cool
+
+
+
+
 
 function BoxSize({ allBoxes }: BoxSizeProps) {
     // Must have fixed width.
@@ -206,15 +261,19 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
         instruction = "Enter box dimensions";
         return (
             <ContentItem instruction={instruction} >
-                <div className="BoxSizeGrid">
-                    <div className="BoxDisplay">
-                        <Box {...boxDim} />
+                <div className="BoxContent">
+                    <div className="ConfigurationName">
                     </div>
-                    <div className="BoxSizeContainer">
-                        <div className="BoxSizeInputContainer">
-                            <BoxSizeInput name={l_name} value={boxDim.length} update={update_dim(DimensionEnum.L)} />
-                            <BoxSizeInput name={h_name} value={boxDim.height} update={update_dim(DimensionEnum.H)} />
-                            <BoxSizeInput name={w_name} value={boxDim.width} update={update_dim(DimensionEnum.W)} />
+                    <div className="BoxSizeGrid">
+                        <div className="BoxDisplay">
+                            <Box {...boxDim} />
+                        </div>
+                        <div className="BoxSizeContainer">
+                            <div className="BoxSizeInputContainer">
+                                <BoxSizeInput name={l_name} value={boxDim.length} update={update_dim(DimensionEnum.L)} />
+                                <BoxSizeInput name={h_name} value={boxDim.height} update={update_dim(DimensionEnum.H)} />
+                                <BoxSizeInput name={w_name} value={boxDim.width} update={update_dim(DimensionEnum.W)} />
+                            </div>
                         </div>
                     </div>
                 </div>

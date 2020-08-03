@@ -4,9 +4,8 @@ import ContentItem, { ContentItemProps } from "./ContentItem";
 
 import PlusIcon, { IconProps } from "./PlusIcon";
 
-import { BoxDimensions } from "./3D/BoxRender";
 
-import { PalletGeometry, PlaneDimensions } from "./structures/Data";
+import { PalletGeometry, PlaneDimensions, BoxDimensions, BoxObject } from "./structures/Data";
 
 import "./css/Layout.scss";
 
@@ -253,7 +252,7 @@ function LayoutSummary({ startEdit }: SummaryProps) {
 
 
 interface LayoutProps {
-    allBoxes: BoxDimensions[];
+    allBoxes: BoxObject[];
     allPallets: PalletGeometry[];
 };
 
@@ -290,11 +289,11 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                     </div>
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
-                            {allBoxes.map((box: BoxDimensions, key: number) => {
+                            {allBoxes.map((box: BoxObject, key: number) => {
                                 return (
                                     <div className="BoxCellContainer" key={key}>
                                         <div className="BoxCell">
-                                            <BoxImage {...box} />
+                                            <BoxImage {...box.dimensions} />
                                             <div className="BoxDetails">
                                                 <div className="BoxName">
                                                     <span>
@@ -302,9 +301,9 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                                                     </span>
                                                 </div>
                                                 <div className="BoxDimensions">
-                                                    <DimensionCell axis={"Width"} value={box.width} />
-                                                    <DimensionCell axis={"Length"} value={box.length} />
-                                                    <DimensionCell axis={"Height"} value={box.height} />
+                                                    <DimensionCell axis={"Width"} value={box.dimensions.width} />
+                                                    <DimensionCell axis={"Length"} value={box.dimensions.length} />
+                                                    <DimensionCell axis={"Height"} value={box.dimensions.height} />
                                                 </div>
                                             </div>
                                         </div>

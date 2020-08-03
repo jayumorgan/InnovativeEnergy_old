@@ -260,76 +260,248 @@
 
 
  //---------------Box Size---------------
- .BoxSizeGrid {
-     height: 100%;
+
+ .BoxContentGrid {
      display: grid;
-     grid-template-rows: 80% 20%;
+     grid-template-rows: 10% 90%;
      grid-template-columns: 100%;
 
-     .BoxDisplay {
-         .BoxMount {
-             height: 100%;
-             width: 100%;
-             background-color: white;
+     ate-columns: 100%;
 
-             canvas {
+     .BoxName {}
+
+     .BoxSizeGrid {
+         height: 100%;
+         display: grid;
+         grid-template-rows: 80% 20%;
+         grid-template-columns: 100%;
+
+         .BoxDisplay {
+             .BoxMount {
                  height: 100%;
-                 // width: 100%;
+                 width: 100%;
+                 background-color: white;
+
+                 canvas {
+                     height: 100%;
+                     // width: 100%;
+                 }
              }
+
+             @include flex-center();
          }
 
-         @include flex-center();
-     }
-
-     .BoxSizeContainer {
-         @include flex-center();
-
-
-         .BoxSizeInputContainer {
-             padding: $margin;
+         .BoxSizeContainer {
              @include flex-center();
-             flex-direction: row;
-             justify-content: space-around;
-             width: 80%;
 
-             .BoxSizeInput {
-                 background-color: $light-blue;
+
+             .BoxSizeInputContainer {
                  padding: $margin;
-                 color: $dark-blue;
-                 width: 30%;
-                 height: 35%;
-                 border-radius: $border-radius;
                  @include flex-center();
-
                  flex-direction: row;
                  justify-content: space-around;
+                 width: 80%;
 
-                 @include shadow();
-
-                 span {
-                     font-size: $medium-font;
-                     white-space: nowrap;
-                 }
-
-                 .InputHolder {
-                     width: auto;
+                 .BoxSizeInput {
+                     background-color: $light-blue;
+                     padding: $margin;
+                     color: $dark-blue;
+                     width: 30%;
+                     height: 35%;
+                     border-radius: $border-radius;
                      @include flex-center();
-                     @include jin-style(50%, $medium-font);
 
-                     //	 padding: none;
-                     input {
-                         text-align: center;
-                         padding: none;
-                         padding-left: $margin;
+                     flex-direction: row;
+                     justify-content: space-around;
 
+                     @include shadow();
+
+                     span {
+                         font-size: $medium-font;
+                         white-space: nowrap;
                      }
 
+                     .InputHolder {
+                         width: auto;
+                         @include flex-center();
+                         @include jin-style(50%, $medium-font);
+
+                         //	 padding: none;
+                         input {
+                             text-align: center;
+                             padding: none;
+                             padding-left: $margin;
+
+                         }
+
+                     }
                  }
              }
          }
      }
  }
 
+ //---------------Pallet Corners---------------
+
+ .PalletDisplay {
+     display: grid;
+     grid-template-rows: 5% 95%;
+
+     .PalletDisplayHeader {
+         display: grid;
+         grid-template-rows: 100%;
+         grid-template-columns: 15% 70% 15%;
+
+         .CornerBackButton {
+             @include flex-center();
+             justify-content: flex-start;
+
+             .BackButton {
+                 padding-left: $margin;
+                 cursor: pointer;
+
+                 span {
+                     font-size: $medium-font;
+                     //color: $light-grey;
+                 }
+             }
+
+             .BackButton:hover {
+                 span {
+                     color: $green;
+                 }
+             }
+         }
+
+         .CenterText {
+             @include flex-center();
+
+             span {
+                 font-size: $large-font;
+                 font-weight: $bold-font;
+                 letter-spacing: 2pt;
+                 //  font-variant: small-caps;
+             }
+         }
+     }
+
+     .DisplayContainer {
+         .PalletMount {
+             width: 100%;
+             height: 100%;
+
+             canvas {
+                 height: 100%;
+                 width: 100%;
+
+                 // width: 100%;
+             }
+         }
+     }
+
+ }
+
+
+
+ .BoxContent {
+     display: grid;
+     grid-template-rows: 10% 90%;
+     grid-template-columns: 100%;
+
+     .ConfigurationName {
+         width: 100%;
+         height: 100%;
+         @include flex-center();
+
+         .NameHolder {
+             height: 100%;
+             width: 100%;
+             @include flex-center();
+             margin-top: 40%;
+             flex-direction: column;
+             justify-content: flex-start;
+             @include jin-style(50%, 2em);
+
+             input {
+                 //margin-top: 30%;
+                 padding: $margin;
+                 @include shadow();
+             }
+         }
+
+     }
+
+
+     .BoxSizeGrid {
+         height: 100%;
+         display: grid;
+         grid-template-rows: 80% 20%;
+         grid-template-columns: 100%;
+
+         .BoxDisplay {
+             .BoxMount {
+                 height: 100%;
+                 width: 100%;
+                 background-color: white;
+
+                 canvas {
+                     height: 100%;
+                     // width: 100%;
+                 }
+             }
+
+             @include flex-center();
+         }
+
+         .BoxSizeContainer {
+             @include flex-center();
+
+
+             .BoxSizeInputContainer {
+                 padding: $margin;
+                 @include flex-center();
+                 flex-direction: row;
+                 justify-content: space-around;
+                 width: 80%;
+
+                 .BoxSizeInput {
+                     background-color: $light-blue;
+                     padding: $margin;
+                     color: $dark-blue;
+                     width: 30%;
+                     height: 35%;
+                     border-radius: $border-radius;
+                     @include flex-center();
+
+                     flex-direction: row;
+                     justify-content: space-around;
+
+                     @include shadow();
+
+                     span {
+                         font-size: $medium-font;
+                         white-space: nowrap;
+                     }
+
+                     .InputHolder {
+                         width: auto;
+                         @include flex-center();
+                         @include jin-style(50%, $medium-font);
+
+                         //	 padding: none;
+                         input {
+                             text-align: center;
+                             padding: none;
+                             padding-left: $margin;
+
+                         }
+
+                     }
+                 }
+             }
+         }
+     }
+ }
 
  //---------------Pallet Corners---------------
 
@@ -393,16 +565,16 @@
 
 
  .ConfigurationName {
-    width: 100%;
-    height: 100%;
-    @include flex-center();
+     width: 100%;
+     height: 100%;
+     @include flex-center();
 
      .NameHolder {
-	 height: 100%;
-	 width: 100%;
+         height: 100%;
+         width: 100%;
          @include flex-center();
-	 margin-top: 40%;
-	 flex-direction: column;
+         margin-top: 40%;
+         flex-direction: column;
          justify-content: flex-start;
          @include jin-style(50%, 2em);
 

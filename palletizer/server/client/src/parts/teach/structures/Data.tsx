@@ -1,5 +1,8 @@
-
-
+export interface BoxDimensions {
+    length: number;
+    height: number;
+    width: number;
+};
 
 export interface Coordinate {
     x: number;
@@ -22,8 +25,6 @@ function Area2D(c1: Coordinate, c2: Coordinate) {
     return Math.abs(x1 * y2 - x2 * y1);
 }
 
-
-
 interface Coordinate2D {
     x: number;
     y: number;
@@ -45,6 +46,22 @@ function Subtract2D(c1: Coordinate, c2: Coordinate) {
 function Norm2D(v: Coordinate2D) {
     return Math.sqrt(v.x ** 2 + v.y ** 2);
 }
+
+export class BoxObject {
+    name: string;
+    dimensions: BoxDimensions;
+    pickLocation: Coordinate;
+
+
+    constructor(name: string, dimensions: BoxDimensions, pick: Coordinate) {
+        this.name = name;
+        this.dimensions = dimensions;
+        this.pickLocation = pick;
+    };
+
+}
+
+
 
 export class PalletGeometry {
     name: string;

@@ -2,15 +2,12 @@ import React, { useRef, useEffect, useState } from "react";
 
 import * as Three from "three";
 
+import { BoxDimensions } from "../structures/Data";
+
 
 import { get_cardboard_box } from "../../Visualizer";
 import { MeshDepthMaterial, MeshBasicMaterialParameters } from "three";
 
-export interface BoxDimensions {
-    length: number;
-    height: number;
-    width: number;
-};
 
 interface Animation {
     scene: Three.Scene;
@@ -42,7 +39,7 @@ function Box({ length, height, width }: BoxDimensions) {
         let scene = new Three.Scene();
         scene = new Three.Scene();
         scene.background = new Three.Color(0xfbfbfb);
-//        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
+        //        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
 
         let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
         hemiLight.position.set(0, 20, 0);
@@ -86,7 +83,7 @@ function Box({ length, height, width }: BoxDimensions) {
         let box = new Three.Mesh(geometry, material);
         box.name = "BoxMesh";
 
-	box.scale.set(l,h,w);
+        box.scale.set(l, h, w);
 
         scene.add(box);
 
@@ -119,7 +116,7 @@ function Box({ length, height, width }: BoxDimensions) {
             box_mesh && animation.render();
         }
     }, [l, h, w]);
-    
+
     return (
         <div className="BoxMount" ref={MountElement} />
     );
