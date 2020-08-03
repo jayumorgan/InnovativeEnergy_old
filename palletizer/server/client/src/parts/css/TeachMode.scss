@@ -19,7 +19,7 @@
      display: grid;
      color: $dark-blue;
      $ch: $container-height;
-     grid-template-rows: $ch/10 $ch/10 auto;
+     grid-template-rows: $ch/10 $ch/12 auto;
 
      .TeachModeHeader {
          display: grid;

@@ -4,18 +4,19 @@
 
 .LayoutContainer {
     display: grid;
-    grid-template-rows: auto auto;
+    grid-template-rows: 10% auto;
     grid-template-columns: 30% 70%;
     // Left Side : Box Scroll;
     .LayoutName {
         @include stretch-grid-col(1, 1, 2);
         @include flex-center();
+	border-bottom: $container-border;
         .NameHolder {
             @include flex-center();
             width: 70%;
             flex-direction: column;
             justify-content: flex-start;
-            @include jin-style(50%, 2em);
+            @include jin-style(50%, 1.5em);
             input {
                 //margin-top: 30%;
                 padding: $margin;
@@ -59,12 +60,10 @@
                         display: grid;
                         grid-template-rows: 50% 50%;
                         grid-template-columns: 100%;
-
                         .BoxName {
                             @include flex-center();
                             justify-content: flex-start;
                             align-items: flex-end;
-
                             span {
                                 font-size: 2em;
                             }
@@ -99,13 +98,27 @@
 	width: 100%;
 	height: 100%;
 	display: grid;
-	grid-template-rows: auto auto;
+	grid-template-rows: 10% auto;
 	grid-template-columns: 100%;
 	.LayoutDropDown {
 	    width: 100%;
 	    @include flex-center();
+	    select {
+		padding: $margin;
+		width: 50%;
+		font-size: 1.5em;
+		background-color: $light-grey;
+		color: $dark-blue;
+		
+	    }
+	    
+	}
+	.LayoutDisplay {
+	    width: 100%;
+	    @include flex-center();
+	    
+
 
 	}
-
     }
 }

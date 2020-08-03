@@ -6,7 +6,7 @@ import PlusIcon, { IconProps } from "./PlusIcon";
 
 import { BoxDimensions } from "./3D/BoxRender";
 
-import { PalletGeometry } from "./structures/Data";
+import { PalletGeometry, PlaneDimensions } from "./structures/Data";
 
 import "./css/Layout.scss";
 
@@ -34,23 +34,105 @@ function LayoutDropDown({ allPallets }: DropDownProps) {
     );
 };
 
-
-
-
 interface LayoutModelProps {
     pallet: PalletGeometry;
 
 }
+
+
+
+
 function LayoutModel({ pallet }: LayoutModelProps) {
+    let size = 650;
+    let dimensions: PlaneDimensions = pallet.getDimensions();
+
+    let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
+
+    let w = dimensions.width / norm * size;
+    let l = dimensions.length / norm * size;
+
+    // Scale up the coordinates to take maximum size.
+    let scale = (w >= l) ? size / w : size / l;
+
+    w *= scale;
+    l *= scale;
+
+    let cx = size / 2;
+    let cy = size / 2;
+
+    let logColor = "#D2AB6F";
+
+    let bottomLog: Rect = {
+        x: cx - w / 2,
+        y: size - (size - l) / 2 - size / 10,
+        width: w,
+        height: size / 10,
+        fill: logColor,
+        stroke: logColor,
+        strokeWidth: 0
+    };
+
+    let topLog: Rect = {
+        x: cx - w / 2,
+        y: (size - l) / 2,
+        width: w,
+        height: size / 10,
+        fill: logColor,
+        stroke: logColor,
+        strokeWidth: 0
+    };
+
+    // Horizontal planks....
+    let plankColor = "#E6BF83";
+
+    let planks = [] as Rect[];
+    let plankNumber = 6;
+    let spaceFraction = 2 / 3;
+    let plankWidth = w * spaceFraction / plankNumber;
+    let iX = (w - plankNumber * plankWidth) / (plankNumber - 1) + plankWidth;
+    let startX = (size - w) / 2;
+    let Y = (size - l) / 2;
+
+    for (let i = 0; i < plankNumber; i++) {
+        let plk: Rect = {
+            x: startX + i * iX,
+            y: Y,
+            width: plankWidth,
+            height: l,
+            fill: plankColor,
+            stroke: plankColor,
+            strokeWidth: 0
+        };
+        planks.push(plk);
+    }
+
+
+
+
+
+
+
+
+
+    console.log(dimensions, w, l);
 
     return (
-        <div className="LayoutModel">
-            <svg>
+        <div className="LayoutDisplay">
+            <svg width={size} height={size} >
+                <rect {...bottomLog} />
+                <rect {...topLog} />
 
-
+                {planks.map((r: Rect, index: number) => {
+                    return (
+                        <rect {...r} key={index} />
+                    );
+                })}
+                {/* <rect {...rect} /> */}
             </svg>
         </div>
     );
+
+
 };
 //---------------Box Image Props---------------
 interface BoxImageProps {
@@ -81,13 +163,16 @@ function BoxImage({ width, length }: BoxImageProps) {
     let x = 50 - w / 2;
     let y = 50 - h / 2;
 
+    let cardboard = "#AD8762";
+    let box = "#DC9F61";
+
     let rect: Rect = {
         x,
         y,
         width: w,
         height: h,
-        fill: "#AD8762",
-        stroke: "black",
+        fill: box,
+        stroke: cardboard,
         strokeWidth: "1"
     };
     return (
@@ -230,6 +315,7 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                     </div>
                     <div className="LayoutModel">
                         <LayoutDropDown allPallets={allPallets} />
+                        <LayoutModel pallet={allPallets[0]} />
                     </div>
                 </div>
             </ContentItem>
