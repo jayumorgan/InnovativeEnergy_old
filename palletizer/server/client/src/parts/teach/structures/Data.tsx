@@ -15,11 +15,13 @@ export interface PlaneDimensions {
 
 
 export class PalletGeometry {
+    name: string;
     corner1: Coordinate;
     corner2: Coordinate;
     corner3: Coordinate;
 
-    constructor(c1: Coordinate, c2: Coordinate, c3: Coordinate) {
+    constructor(name: string, c1: Coordinate, c2: Coordinate, c3: Coordinate) {
+        this.name = name;
         this.corner1 = c1;
         this.corner2 = c2;
         this.corner3 = c3;

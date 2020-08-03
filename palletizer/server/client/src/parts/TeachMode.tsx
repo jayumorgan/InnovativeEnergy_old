@@ -85,8 +85,9 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             y: 0,
             z: 0
         };
+        let pallet_name = "Pallet " + String(i + 1);
 
-        let pal = new PalletGeometry(c1, c2, c3);
+        let pal = new PalletGeometry(pallet_name, c1, c2, c3);
 
         allPallets.push(pal);
     }

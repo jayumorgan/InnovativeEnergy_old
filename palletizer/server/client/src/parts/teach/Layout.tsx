@@ -15,6 +15,93 @@ interface NewLayoutCellProps {
 }
 
 
+
+interface DropDownProps {
+    allPallets: PalletGeometry[];
+}
+
+function LayoutDropDown({ allPallets }: DropDownProps) {
+    return (
+        <div className="LayoutDropDown">
+            <select>
+                {allPallets.map((pallet: PalletGeometry, index: number) => {
+                    return (
+                        <option value={index} key={index}> {pallet.name} </option>
+                    );
+                })}
+            </select>
+        </div>
+    );
+};
+
+
+
+
+interface LayoutModelProps {
+    pallet: PalletGeometry;
+
+}
+function LayoutModel({ pallet }: LayoutModelProps) {
+
+    return (
+        <div className="LayoutModel">
+            <svg>
+
+
+            </svg>
+        </div>
+    );
+};
+//---------------Box Image Props---------------
+interface BoxImageProps {
+    width: number;
+    length: number;
+}
+
+
+interface Rect {
+    x: string | number;
+    y: string | number;
+    width: string | number;
+    height: string | number;
+    fill: string;
+    stroke: string;
+    strokeWidth: number | string;
+};
+
+/* <rect x="50" y="20" width="150" height="150"
+ * style="fill:blue;stroke:pink;stroke-width:5;fill-opacity:0.1;stroke-opacity:0.9" /> */
+
+function BoxImage({ width, length }: BoxImageProps) {
+    let norm = Math.sqrt(width ** 2 + length ** 2);
+
+    let w = width / norm * 100;
+    let h = length / norm * 100;
+
+    let x = 50 - w / 2;
+    let y = 50 - h / 2;
+
+    let rect: Rect = {
+        x,
+        y,
+        width: w,
+        height: h,
+        fill: "#AD8762",
+        stroke: "black",
+        strokeWidth: "1"
+    };
+    return (
+        <div className="BoxImage">
+            <svg width="100" height="100">
+                <g transform="scale(1,1)">
+                    <rect {...rect} />
+                </g>
+            </svg>
+        </div>
+    )
+}
+
+
 function NewLayoutCell({ startEdit }: NewLayoutCellProps) {
     let iconSize = {
         height: 50,
@@ -95,6 +182,8 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
     };
 
     let instruction: string;
+    let placeholder = "Pallet Layout " + String(1);
+
 
     if (summaryScreen) {
         instruction = "Create and edit layouts";
@@ -109,15 +198,18 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
         return (
             <ContentItem instruction={instruction}>
                 <div className="LayoutContainer">
+                    <div className="LayoutName">
+                        <div className="NameHolder">
+                            <input type="text" placeholder={placeholder} />
+                        </div>
+                    </div>
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
                             {allBoxes.map((box: BoxDimensions, key: number) => {
                                 return (
                                     <div className="BoxCellContainer" key={key}>
                                         <div className="BoxCell">
-                                            <div className="BoxImage">
-
-                                            </div>
+                                            <BoxImage {...box} />
                                             <div className="BoxDetails">
                                                 <div className="BoxName">
                                                     <span>
@@ -136,7 +228,9 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                             })}
                         </div>
                     </div>
-
+                    <div className="LayoutModel">
+                        <LayoutDropDown allPallets={allPallets} />
+                    </div>
                 </div>
             </ContentItem>
         );
