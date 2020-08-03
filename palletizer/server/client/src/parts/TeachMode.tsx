@@ -40,7 +40,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PALLET_CORNERS);
 
     let completionFraction = { n: 0, d: 6 } as Fraction;
 
@@ -81,7 +81,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             z: 0
         };
         let c3: Coordinate = {
-            x: 100,
+            x: 100 * (i + 1) / 10,
             y: 0,
             z: 0
         };

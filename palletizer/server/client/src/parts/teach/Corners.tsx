@@ -14,6 +14,8 @@ import { LayoutModel } from "./Layout";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
+//import "../css/TeachMode.scss";
+import "./css/Corners.scss";
 
 import PalletImage from "../images/Pallet.jpg";
 
@@ -145,7 +147,7 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
 
     let startEdit = () => {
         setSummaryScreen(false);
@@ -180,26 +182,15 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
         instruction = "Move to and select three pallet corners";
         return (
             <ContentItem instruction={instruction} >
-                <div className="PickLocationGrid">
-                    <Jogger selectAction={selectAction} />
-                    <div className="PalletDisplay">
-                        <div className="PalletDisplayHeader">
-                            <div className="CornerBackButton">
-                                {(cornerNumber as number > 0) &&
-                                    <div className="BackButton" onClick={backAction}>
-                                        <span>
-                                            {"Back"}
-                                        </span>
-                                    </div>
-                                }
-                            </div>
-                            <div className="CenterText">
-                                <span>
-                                    {title}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="DisplayContainer">
+                <div className="CornerGrid">
+                    <div className="SubInstruction">
+                        <span>
+                            {title}
+                        </span>
+                    </div>
+                    <div className="PickLocationGrid">
+                        <Jogger selectAction={selectAction} />
+                        <div className="PalletContainer">
                             <PalletRender cornerNumber={cornerNumber as number} />
                         </div>
                     </div>
