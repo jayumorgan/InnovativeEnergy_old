@@ -11,6 +11,8 @@ import PalletCorners from "./teach/Corners";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
 
+import Layout from "./teach/Layout";
+
 import { BoxDimensions } from "./teach/3D/BoxRender";
 
 import { Coordinate, PalletGeometry } from "./teach/structures/Data";
@@ -25,7 +27,7 @@ enum PalletTeachState {
     PICK_LOCATION, // 0
     BOX_SIZE,
     PALLET_CORNERS,
-    ASSIGN_LAYOUT,
+    LAYOUT_SETUP,
     LAYER_SETUP,
     SUMMARY
 };
@@ -40,7 +42,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.BOX_SIZE);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.LAYOUT_SETUP);
 
     let completionFraction = { n: 0, d: 6 } as Fraction;
 
@@ -68,13 +70,23 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     for (let i = 0; i < 10; i++) {
         allBoxes.push({ width: 10, height: 10, length: i + 1 });
 
-        let coord: Coordinate = {
-            x: 10,
-            y: 10,
-            z: 10
+        let c1: Coordinate = {
+            x: 0,
+            y: 100,
+            z: 0
+        };
+        let c2: Coordinate = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+        let c3: Coordinate = {
+            x: 100,
+            y: 0,
+            z: 0
         };
 
-        let pal = new PalletGeometry(coord, coord, coord);
+        let pal = new PalletGeometry(c1, c2, c3);
 
         allPallets.push(pal);
     }
@@ -103,11 +115,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             completionFraction.n = 3;
             break;
         };
-        case (PalletTeachState.LAYER_SETUP): {
+        case (PalletTeachState.LAYOUT_SETUP): {
+            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} />);
             completionFraction.n = 4;
             break;
         }
-        case (PalletTeachState.ASSIGN_LAYOUT): {
+        case (PalletTeachState.LAYER_SETUP): {
             completionFraction.n = 5;
             break;
         }
@@ -120,7 +133,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
         }
     };
-
 
     return (
         <Modal close={close}>

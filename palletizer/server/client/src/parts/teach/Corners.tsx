@@ -171,7 +171,7 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
     let instruction: string;
 
     if (summaryScreen) {
-        instruction = "Add and edit pallets";
+        instruction = "Create and edit pallets";
         return (
             <ContentItem instruction={instruction} >
                 <CornerSummary startEdit={startEdit} allPallets={allPallets} />
