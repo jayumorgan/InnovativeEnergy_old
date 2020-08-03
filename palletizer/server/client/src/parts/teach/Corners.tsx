@@ -4,11 +4,10 @@ import ContentItem, { ContentItemProps } from "./ContentItem";
 
 import { Coordinate, PlaneDimensions, PalletGeometry } from "./structures/Data";
 
-
 import Jogger from "./Jogger";
 
 import PalletRender from "./3D/PalletRender";
-import PlusIcon, { IconProps } from "./PlusIcon";
+import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
 
 // Styles for summary -- rename later.
@@ -41,11 +40,16 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
 
 
 
-function PalletCell() {
-    let width = 100;
-    let height = 100;
-    let length = 100;
+interface PalletCellProps {
+    pallet: PalletGeometry;
+}
 
+function PalletCell({ pallet }: PalletCellProps) {
+
+    let { width, length } = pallet.getDimensions();
+
+
+    let iconSize = 30;
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
@@ -54,34 +58,27 @@ function PalletCell() {
                 </div>
                 <div className="BoxDetails">
                     <div className="BoxName">
-                        <span>
-                            {"Pallet 1"}
-                        </span>
+                        <input type="text" value={pallet.name} />
                     </div>
                     <div className="BoxDimensions">
                         <DimensionCell axis={"Width"} value={width} />
                         <DimensionCell axis={"Length"} value={length} />
-                        <DimensionCell axis={"Height"} value={height} />
                     </div>
                 </div>
                 <div className="Buttons">
-                    <div className="EditButton">
+                    <div className="SingleEditButton">
                         <div className="Button">
                             <span>
-                                {"Edit"}
+                                {"Edit Corner Positions"}
                             </span>
                         </div>
                     </div>
                     <div className="DeleteButton">
-                        <div className="Button">
-                            <span>
-                                {"Delete"}
-                            </span>
-                        </div>
+                        <XIcon width={30} height={30} />
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -127,7 +124,7 @@ function CornerSummary({ startEdit, allPallets }: SummaryProps) {
                     <NewPalletCell startEdit={startEdit} />
                     {allPallets.map((pallet: PalletGeometry, index: number) => {
                         return (
-                            <PalletCell key={index} />
+                            <PalletCell key={index} pallet={pallet} />
                         );
                     })}
                 </div>

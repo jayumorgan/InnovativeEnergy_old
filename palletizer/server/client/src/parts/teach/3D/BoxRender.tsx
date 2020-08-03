@@ -46,7 +46,7 @@ function Box({ length, height, width }: BoxDimensions) {
         scene.add(hemiLight);
 
         let dirLight = new Three.DirectionalLight(0xffffff);
-        dirLight.position.set(2, 2, 1);
+        dirLight.position.set(2, 2, 0.5);
         dirLight.castShadow = true;
         dirLight.shadow.camera.top = 10;
         dirLight.shadow.camera.bottom = - 10;
@@ -59,9 +59,9 @@ function Box({ length, height, width }: BoxDimensions) {
         // ground
         var groundMesh = new Three.Mesh(
             new Three.PlaneBufferGeometry(40, 40),
-            new Three.MeshPhongMaterial({
+            new Three.MeshBasicMaterial({
                 color: 0xfbfbfb,
-                depthWrite: false
+                /* depthWrite: false */
             })
         );
 

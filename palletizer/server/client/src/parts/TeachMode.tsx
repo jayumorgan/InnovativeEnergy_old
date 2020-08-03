@@ -6,7 +6,7 @@ import { PalletConfiguration } from "../services/TeachMode";
 
 import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
-import PickLocation from "./teach/PickLocation";
+
 import PalletCorners from "./teach/Corners";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
@@ -23,7 +23,6 @@ import "./css/BoxSize.scss";
 
 enum PalletTeachState {
     CONFIG_NAME,
-    PICK_LOCATION, // 0
     BOX_SIZE,
     PALLET_CORNERS,
     LAYOUT_SETUP,
@@ -100,34 +99,28 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             completionFraction.n = 0;
             break;
         }
-        case (PalletTeachState.PICK_LOCATION): {
-            ChildElement = (<PickLocation />);
-
-            completionFraction.n = 1;
-            break;
-        };
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSize allBoxes={allBoxes} />);
 
-            completionFraction.n = 2;
+            completionFraction.n = 1;
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners allPallets={allPallets} />);
-            completionFraction.n = 3;
+            completionFraction.n = 2;
             break;
         };
         case (PalletTeachState.LAYOUT_SETUP): {
             ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} />);
-            completionFraction.n = 4;
+            completionFraction.n = 3;
             break;
         }
         case (PalletTeachState.LAYER_SETUP): {
-            completionFraction.n = 5;
+            completionFraction.n = 4;
             break;
         }
         case (PalletTeachState.SUMMARY): {
-            completionFraction.n = 6;
+            completionFraction.n = 5;
             break;
         }
         default: {

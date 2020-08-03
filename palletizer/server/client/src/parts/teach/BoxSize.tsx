@@ -4,7 +4,10 @@ import ContentItem, { ContentItemProps } from "./ContentItem";
 
 // 3D display of box.
 import Box from "./3D/BoxRender";
-import PlusIcon, { IconProps } from "./PlusIcon";
+import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
+
+import PickLocation from "./PickLocation";
+
 
 import { BoxObject, BoxDimensions } from "./structures/Data";
 
@@ -16,33 +19,6 @@ enum DimensionEnum {
     W,
     H
 };
-
-interface BoxSizeInputProps {
-    name: string;
-    value: number;
-    update: (val: number) => void;
-};
-
-function BoxSizeInput({ name, value, update }: BoxSizeInputProps) {
-    let handle_update = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = (e.target.value as unknown) as number;
-        update(val);
-    };
-
-    return (
-        <div className="BoxSizeInput">
-            <div className="InputHolder">
-                <span>
-                    {name}
-                </span>
-            </div>
-            <div className="InputHolder">
-                <input type="number" value={value} onChange={handle_update} />
-            </div>
-        </div>
-    );
-};
-
 
 
 interface NewBoxCellProps {
@@ -76,16 +52,22 @@ function NewBoxCell({ startEdit }: NewBoxCellProps) {
 interface DimensionCellProps {
     axis: string;
     value: number;
+    update: (val: number) => void;
 }
 
-function DimensionCell({ axis, value }: DimensionCellProps) {
+function DimensionCell({ axis, value, update }: DimensionCellProps) {
+
+    let handle_update = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = (e.target.value as unknown) as number;
+        update(val);
+    };
 
     return (
         <div className="DimensionCell">
             <span>
                 {axis + ": "}
             </span>
-            <input type="number" value={value} />
+            <input type="number" value={value} onChange={handle_update} />
         </div>
     );
 }
@@ -94,87 +76,91 @@ interface BoxProps {
     box: BoxObject;
 };
 
+
 function BoxCell({ box }: BoxProps) {
     let placeholder = box.name;
-    let { width, length, height } = box.dimensions;
+
+    let [dimensions, setDimensions] = useState<BoxDimensions>(box.dimensions);
+
+    let { width, length, height } = dimensions;
+    let { x, y, z } = box.pickLocation;
+
+
+    let update_dim = (dimension: DimensionEnum) => (val: number) => {
+        let newDim = { ...dimensions } as BoxDimensions;
+        switch (dimension) {
+            case (DimensionEnum.L): {
+                newDim.length = val;
+                break;
+            };
+            case (DimensionEnum.W): {
+                newDim.width = val;
+                break;
+            };
+            case (DimensionEnum.H): {
+                newDim.height = val;
+                break;
+            }
+        }
+
+        console.log("Updating dimensions -- update BoxObject");
+        setDimensions(newDim);
+    };
+
+
+    let iconSize = 30;
 
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
                 <div className="MiniRender">
-                    <Box width={width} height={height} length={length} />
+                    <Box {...dimensions} />
                 </div>
                 <div className="BoxDetails">
                     <div className="BoxName">
                         <input type="text" placeholder="Box 1" value={box.name} />
                     </div>
                     <div className="BoxDimensions">
-                        <DimensionCell axis={"Width"} value={width} />
-                        <DimensionCell axis={"Length"} value={length} />
-                        <DimensionCell axis={"Height"} value={height} />
+                        <DimensionCell axis={"Width"} value={width} update={update_dim(DimensionEnum.W)} />
+                        <DimensionCell axis={"Length"} value={length} update={update_dim(DimensionEnum.L)} />
+                        <DimensionCell axis={"Height"} value={height} update={update_dim(DimensionEnum.H)} />
                     </div>
                 </div>
                 <div className="Buttons">
                     <div className="EditButton">
-                        <div className="Button">
-                            <span>
-                                {"Edit"}
-                            </span>
+                        <div className="ButtonContainer">
+                            <div className="Button">
+                                <span>
+                                    {"Select Pick Location"}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="PickLocation">
+                            <div className="Location">
+                                <span>
+                                    {"x: " + String(x)}
+                                </span>
+                            </div>
+                            <div className="Location">
+                                <span>
+                                    {"y: " + String(y)}
+                                </span>
+                            </div>
+                            <div className="Location">
+                                <span>
+                                    {"z: " + String(z)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div className="DeleteButton">
-                        <div className="Button">
-                            <span>
-                                {"Delete"}
-                            </span>
-                        </div>
+                        <XIcon height={iconSize} width={iconSize} />
                     </div>
                 </div>
             </div>
         </div>
     );
 };
-/* 
- * function BoxCell({ width, height, length }: BoxDimensions) {
- *     return (
- *         <div className="BoxCellContainer">
- *             <div className="BoxCell">
- *                 <div className="MiniRender">
- *                     <Box width={width} height={height} length={length} />
- *                 </div>
- *                 <div className="BoxDetails">
- *                     <div className="BoxName">
- *                         <span>
- *                             {"Box 1"}
- *                         </span>
- *                     </div>
- *                     <div className="BoxDimensions">
- *                         <DimensionCell axis={"Width"} value={width} />
- *                         <DimensionCell axis={"Length"} value={length} />
- *                         <DimensionCell axis={"Height"} value={height} />
- *                     </div>
- *                 </div>
- *                 <div className="Buttons">
- *                     <div className="EditButton">
- *                         <div className="Button">
- *                             <span>
- *                                 {"Edit"}
- *                             </span>
- *                         </div>
- *                     </div>
- *                     <div className="DeleteButton">
- *                         <div className="Button">
- *                             <span>
- *                                 {"Delete"}
- *                             </span>
- *                         </div>
- *                     </div>
- *                 </div>
- *             </div>
- *         </div>
- * 	
- *     );
- * } */
 
 interface SummaryScreenProps {
     allBoxes: BoxObject[];
@@ -203,81 +189,36 @@ interface BoxSizeProps {
 }
 
 
-// New Box Cell -- pretty eacy to setup.
-// Cool
-
-
-
-
-
 function BoxSize({ allBoxes }: BoxSizeProps) {
     // Must have fixed width.
-    let inputs = [
-        "Length (mm)",
-        "Width (mm)",
-        "Height (mm)"
-    ] as string[];
-
-    let l_name = "Length (mm)";
-    let h_name = "Height (mm)";
-    let w_name = "Width (mm)";
-
-    let [boxDim, setBoxDim] = useState<BoxDimensions>({ length: 10, width: 10, height: 10 });
-
     let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
 
     let startEdit = () => {
         setSummaryScreen(false);
     };
 
-    let update_dim = (dimension: DimensionEnum) => (val: number) => {
-        console.log("Updating dimension", val);
-        let newDim = { ...boxDim } as BoxDimensions;
-        switch (dimension) {
-            case (DimensionEnum.L): {
-                newDim.length = val;
-                break;
-            };
-            case (DimensionEnum.W): {
-                newDim.width = val;
-                break;
-            };
-            case (DimensionEnum.H): {
-                newDim.height = val;
-                break;
-            }
-        }
-        setBoxDim(newDim);
-    };
     let instruction: string;
     if (summaryScreen) {
         instruction = "Create and edit boxes";
         return (
             <ContentItem instruction={instruction}>
-                <SummaryScreen allBoxes={allBoxes} startEdit={startEdit} />
-            </ContentItem>
-        );
-    } else {
-        instruction = "Enter box dimensions";
-        return (
-            <ContentItem instruction={instruction} >
-                <div className="BoxContent">
-                    <div className="ConfigurationName">
-                    </div>
-                    <div className="BoxSizeGrid">
-                        <div className="BoxDisplay">
-                            <Box {...boxDim} />
-                        </div>
-                        <div className="BoxSizeContainer">
-                            <div className="BoxSizeInputContainer">
-                                <BoxSizeInput name={l_name} value={boxDim.length} update={update_dim(DimensionEnum.L)} />
-                                <BoxSizeInput name={h_name} value={boxDim.height} update={update_dim(DimensionEnum.H)} />
-                                <BoxSizeInput name={w_name} value={boxDim.width} update={update_dim(DimensionEnum.W)} />
-                            </div>
+                <div className="BoxSummary">
+                    <div className="BoxScrollContainer">
+                        <div className="BoxScroll">
+                            <NewBoxCell startEdit={startEdit} />
+                            {allBoxes.map((val: BoxObject, index: number) => {
+                                return (
+                                    <BoxCell box={val} />
+                                )
+                            })}
                         </div>
                     </div>
                 </div>
             </ContentItem>
+        );
+    } else {
+        return (
+            <PickLocation />
         );
     }
 };

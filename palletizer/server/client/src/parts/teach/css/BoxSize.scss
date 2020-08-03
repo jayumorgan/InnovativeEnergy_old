@@ -18,14 +18,14 @@
             margin: 1%;
             width: 98%;
             height: 96%;
-	    max-height: $container-height * 8/10;
-	    overflow: scroll;
-	   
+            max-height: $container-height * 8/10;
+            overflow: scroll;
+
             .BoxCellContainer {
                 padding: 1%;
                 width: 98%;
                 height: $container-height / 8;
-		
+
                 @include flex-center();
 
                 .NewBoxCell {
@@ -48,7 +48,6 @@
                             font-size: 2em;
                         }
                     }
-
                     .Icon {
                         padding: $margin;
                         padding-left: 3%;
@@ -62,7 +61,6 @@
                         }
                     }
                 }
-
                 .NewBoxCell:hover {
                     @include size-shadow(15px);
 
@@ -91,14 +89,15 @@
 
                     display: grid;
                     grid-template-rows: 100%;
-                    grid-template-columns: 20% 40% 40%;
+                    grid-template-columns: 20% 42% 38%;
 
                     .MiniRender {
                         @include flex-center();
-			img {
-			    width: 50%;
-			    height: auto;
-			}
+
+                        img {
+                            width: 50%;
+                            height: auto;
+                        }
 
                         .BoxMount {
                             height: 100%;
@@ -124,12 +123,14 @@
                             span {
                                 font-size: 2em;
                             }
-			    @include jin-style(80%, 2em);
-			    input{
-				text-align: left;
-				padding-left: $margin;
-			    }
-			    
+
+                            @include jin-style(80%, 2em);
+
+                            input {
+                                text-align: left;
+                                padding-left: $margin;
+                            }
+
                         }
 
                         .BoxDimensions {
@@ -139,20 +140,21 @@
 
                             .DimensionCell {
                                 @include flex-center();
-				justify-content: flex-start;
-				color: $dark-blue;
-//                                justify-content: space-around;
+                                justify-content: flex-start;
+                                color: $dark-blue;
+                                //                                justify-content: space-around;
 
                                 span {
                                     font-size: $medium-font;
-				    padding-right: $margin;
+                                    padding-right: $margin;
                                 }
-				@include jin-style(25%, 1.5em);
 
-				input {
-				    text-align: left;
-				    padding-left: $margin;
-				}
+                                @include jin-style(50%, 1.5em);
+
+                                input {
+                                    text-align: left;
+                                    padding-left: $margin;
+                                }
                             }
                         }
                     }
@@ -160,50 +162,120 @@
                     .Buttons {
                         display: grid;
                         grid-template-rows: 100%;
-                        grid-template-columns: 50% 50%;
+                        grid-template-columns: 70% 30%;
                         color: white;
 
+			.SingleEditButton {
+			    @include flex-center();
+			    .Button {
+				@include flex-center();
+				span {
+				    font-size: $large-font;
+				}
+			    }
+
+			}
+			.SingleEditButton:hover {
+			    .Button {
+				background-color: $green;
+				@include shadow();
+			    }
+			}
+
                         .EditButton {
-                            @include flex-center();
-			    
-                            span {
-                                font-size: $large-font;
+                            display: grid;
+                            grid-template-rows: 50% 50%;
+                            grid-template-columns: 100%;
+
+                            .ButtonContainer {
+                                padding-top: $margin;
+                                @include flex-center();
+                                flex-direction: column;
+                                justify-content: flex-start;
+
+                                .Button {
+                                    @include flex-center();
+
+                                    span {
+                                        font-size: $large-font;
+                                    }
+                                }
+
+                            }
+
+
+
+
+                            .PickLocation {
+                                color: $dark-blue;
+                                display: grid;
+                                grid-template-rows: 100%;
+                                grid-template-columns: 33% 33% 33%;
+
+                                .Location {
+                                    @include flex-center();
+
+                                    span {
+                                        font-size: 1.5em;
+
+                                    }
+                                }
                             }
                         }
 
                         .EditButton:hover {
-                            color: $green;
-			    .Button {
-				@include shadow();
-			    }
+                            // color: $green;
+
+                            .Button {
+                                @include shadow();
+                                background-color: $green;
+                            }
                         }
 
                         .DeleteButton {
                             @include flex-center();
+
                             span {
                                 font-size: $large-font;
                             }
+
+                            svg {
+                                line {
+                                    stroke: red;
+                                    stroke-width: 4;
+                                }
+                            }
+
                         }
 
                         .DeleteButton:hover {
                             color: red;
-			    .Button {
-				@include shadow();
-			    }
+
+                            .Button {
+                                @include shadow();
+                            }
+
+                            svg {
+                                line {
+                                    stroke: red;
+                                    stroke-width: 5;
+
+                                }
+                            }
                         }
 
 
-			.Button {
-			    //			    width: 50%;
-			    width: 70%;
-			    @include flex-center();
-			    padding: $margin;
-			    //height: 70%;
-			    background-color: $medium-blue;
-			    border-radius: $border-radius;
-			}
+                        .Button {
+                            //			    width: 50%;
+                            width: 70%;
+                            @include flex-center();
+                            padding: $margin;
+                            //height: 70%;
+                            background-color: $medium-blue;
+                            border-radius: $border-radius;
+                        }
 
-			
+
                     }
                 }
             }
