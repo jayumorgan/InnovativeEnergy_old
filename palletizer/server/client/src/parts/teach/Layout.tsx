@@ -13,8 +13,6 @@ interface NewLayoutCellProps {
     startEdit: () => void;
 }
 
-
-
 interface DropDownProps {
     allPallets: PalletGeometry[];
 }
@@ -35,14 +33,12 @@ function LayoutDropDown({ allPallets }: DropDownProps) {
 
 interface LayoutModelProps {
     pallet: PalletGeometry;
+    size: number; // 650 for half content width;
 
 }
 
 
-
-
-function LayoutModel({ pallet }: LayoutModelProps) {
-    let size = 650;
+export function LayoutModel({ pallet, size }: LayoutModelProps) {
     let dimensions: PlaneDimensions = pallet.getDimensions();
 
     let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
@@ -314,7 +310,7 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                     </div>
                     <div className="LayoutModel">
                         <LayoutDropDown allPallets={allPallets} />
-                        <LayoutModel pallet={allPallets[0]} />
+                        <LayoutModel pallet={allPallets[0]} size={650} />
                     </div>
                 </div>
             </ContentItem>

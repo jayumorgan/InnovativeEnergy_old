@@ -10,6 +10,8 @@ import PalletRender from "./3D/PalletRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
 
+import { LayoutModel } from "./Layout";
+
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
 
@@ -20,7 +22,6 @@ enum Corners {
     TWO,
     THREE
 };
-
 
 interface DimensionCellProps {
     axis: string;
@@ -48,13 +49,14 @@ function PalletCell({ pallet }: PalletCellProps) {
 
     let { width, length } = pallet.getDimensions();
 
-
     let iconSize = 30;
+
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
                 <div className="MiniRender">
-                    <img src={PalletImage} />
+                    <LayoutModel pallet={pallet} size={100} />
+                    {/* <img src={PalletImage} /> */}
                 </div>
                 <div className="BoxDetails">
                     <div className="BoxName">
