@@ -34,7 +34,6 @@ function LayoutDropDown({ allPallets }: DropDownProps) {
 interface LayoutModelProps {
     pallet: PalletGeometry;
     size: number; // 650 for half content width;
-
 }
 
 
@@ -101,33 +100,20 @@ export function LayoutModel({ pallet, size }: LayoutModelProps) {
         planks.push(plk);
     }
 
-
-
-
-
-
-
-
-
-    console.log(dimensions, w, l);
-
     return (
-        <div className="LayoutDisplay">
-            <svg width={size} height={size} >
-                <rect {...bottomLog} />
-                <rect {...topLog} />
 
-                {planks.map((r: Rect, index: number) => {
-                    return (
-                        <rect {...r} key={index} />
-                    );
-                })}
-                {/* <rect {...rect} /> */}
-            </svg>
-        </div>
+        <svg width={size} height={size} >
+            <rect {...bottomLog} />
+            <rect {...topLog} />
+            {planks.map((r: Rect, index: number) => {
+                return (
+                    <rect {...r} key={index} />
+                );
+            })}
+            {/* <rect {...rect} /> */}
+        </svg>
+
     );
-
-
 };
 //---------------Box Image Props---------------
 interface BoxImageProps {
@@ -136,7 +122,7 @@ interface BoxImageProps {
 }
 
 
-interface Rect {
+export interface Rect {
     x: string | number;
     y: string | number;
     width: string | number;
@@ -310,7 +296,9 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                     </div>
                     <div className="LayoutModel">
                         <LayoutDropDown allPallets={allPallets} />
-                        <LayoutModel pallet={allPallets[0]} size={650} />
+                        <div className="LayoutDisplay">
+                            <LayoutModel pallet={allPallets[0]} size={650} />
+                        </div>
                     </div>
                 </div>
             </ContentItem>

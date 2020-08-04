@@ -2,45 +2,40 @@
  //@import "../../css/TeachMode.scss";
 
 
-
-
-
- 
  .CornerGrid {
-
      height: 100%;
      width: 100%;
      display: grid;
-     grid-template-rows:10% 90%;
+     grid-template-rows: 10% 90%;
      grid-template-columns: 100%;
  }
 
 
  .SubInstruction {
      @include flex-center();
+
      span {
-	 font-size: 2em;
-	 font-weight: $bold-font;
+         font-size: 2em;
+         font-weight: $bold-font;
      }
  }
 
-
-
- 
  .PalletContainer {
      display: grid;
      grid-template-rows: 100%;
      grid-template-columns: 100%;
 
-
      .PalletMount {
-	 height: 100%;
-	 width: 100%;
-	 @include flex-center();
-	
+         height: 100%;
+         width: 100%;
+         @include flex-center();
+	 svg {
+	     
+	 }
+
          canvas {
-	     height: 100%;
-	     width: 100%;
+             height: 100%;
+             width: 100%;
              // height: 735px;
              // width: 100%;
 
@@ -48,4 +43,3 @@
          }
      }
  }
-

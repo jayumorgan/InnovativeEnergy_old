@@ -10,7 +10,7 @@ import PalletRender from "./3D/PalletRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
 
-import { LayoutModel } from "./Layout";
+import { Rect, LayoutModel } from "./Layout";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
@@ -40,6 +40,23 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
         </div>
     );
 }
+
+//---------------Pallet Model---------------
+
+
+interface PalletModelProps {
+    pallet: PalletGeometry;
+    size: number; // 650 for half content width;
+}
+
+function PalletModel({ pallet, size }: PalletModelProps) {
+
+    return (
+        <svg width={size} height={size}>
+            <LayoutModel size={size * 9 / 10} pallet={pallet} />
+        </svg>
+    );
+};
 
 
 
@@ -143,6 +160,30 @@ interface PalletCornerProps {
     allPallets: PalletGeometry[];
 }
 
+
+function defaultPallet(): PalletGeometry {
+
+    return new PalletGeometry(
+        "Default Pallet",
+        {
+            x: 0,
+            y: 100,
+            z: 0,
+        },
+        {
+            x: 0,
+            y: 0,
+            z: 0.
+        },
+        {
+            x: 100,
+            y: 0,
+            z: 0
+        }
+    );
+}
+
+
 function PalletCorners({ allPallets }: PalletCornerProps) {
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
@@ -179,6 +220,10 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
             </ContentItem>
         );
     } else {
+
+        let pallet = defaultPallet();
+        let size = 650;
+
         instruction = "Move to and select three pallet corners";
         return (
             <ContentItem instruction={instruction} >
@@ -191,7 +236,10 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
                     <div className="PickLocationGrid">
                         <Jogger selectAction={selectAction} />
                         <div className="PalletContainer">
-                            <PalletRender cornerNumber={cornerNumber as number} />
+                            <div className="PalletMount">
+                                <PalletModel size={size} pallet={pallet} />
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -199,5 +247,7 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
         );
     }
 };
+
+// <PalletRender cornerNumber={cornerNumber as number} />
 
 export default PalletCorners;
