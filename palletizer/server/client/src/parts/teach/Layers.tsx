@@ -240,6 +240,7 @@ interface BoxCellProps {
 
 function BoxCell({ box }: BoxCellProps) {
 
+
     let [isDragging, setIsDragging] = useState<boolean>(false);
 
     let dragStart = () => {
@@ -250,8 +251,11 @@ function BoxCell({ box }: BoxCellProps) {
         setIsDragging(false);
     };
 
+    
     return (
         <div className="BoxCell" onDragStart={dragStart} onDragEnd={dragEnd} draggable>
+	    {!isDragging &&
+	     <>
             <Box {...box.dimensions} />
             <div className="BoxDetails">
                 <div className="BoxName">
@@ -265,6 +269,11 @@ function BoxCell({ box }: BoxCellProps) {
                     <DimensionCell axis={"Height"} value={box.dimensions.height} />
                 </div>
             </div>
+	    </>
+	    }
+	    {isDragging &&
+	     <BoxImage {...box.dimensions}/>
+	    }
         </div>
     );
 
@@ -295,6 +304,7 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
         console.log("On Drop", e);
     };
 
+
     if (summaryScreen) {
 
         instruction = "Create and edit layers";
@@ -321,7 +331,7 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                         <div className="BoxScroll">
                             {allBoxes.map((box: BoxObject, key: number) => {
                                 return (
-                                    <div className="BoxCellContainer" key={key}>
+                                    <div className="BoxCellContainer">
                                         <BoxCell box={box} key={key} />
                                     </div>
                                 )
