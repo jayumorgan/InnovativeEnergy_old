@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import * as Three from "three";
 
 import { BoxDimensions } from "../structures/Data";
-
+import { COLORS } from "../shared/Colors";
 
 import { get_cardboard_box } from "../../Visualizer";
 import { MeshDepthMaterial, MeshBasicMaterialParameters } from "three";
@@ -79,7 +79,7 @@ function Box({ length, height, width }: BoxDimensions) {
         };
 
         let geometry = new Three.BoxGeometry(1, 1, 1);
-        let material = new Three.MeshPhongMaterial({ color: "rgb(89,69,50)" });
+        let material = new Three.MeshPhongMaterial({ color: String(COLORS.BOX) });
         let box = new Three.Mesh(geometry, material);
         box.name = "BoxMesh";
 

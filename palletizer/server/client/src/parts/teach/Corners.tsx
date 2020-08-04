@@ -50,9 +50,11 @@ interface PalletModelProps {
 
 function PalletModel({ pallet, size }: PalletModelProps) {
 
+    let s = size * 9 / 10;
+
     return (
         <svg width={size} height={size}>
-            <LayoutModel size={size * 9 / 10} pallet={pallet} />
+            <LayoutModel size={s} pallet={pallet} outerHeight={s} outerWidth={s} />
         </svg>
     );
 };
@@ -68,12 +70,20 @@ function PalletCell({ pallet }: PalletCellProps) {
     let { width, length } = pallet.getDimensions();
 
     let iconSize = 30;
+    let size = 100;
+
+    let model_props = {
+        pallet,
+        size,
+        outerWidth: size,
+        outerHeight: size
+    };
 
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
                 <div className="MiniRender">
-                    <LayoutModel pallet={pallet} size={100} />
+                    <LayoutModel {...model_props} />
                     {/* <img src={PalletImage} /> */}
                 </div>
                 <div className="BoxDetails">

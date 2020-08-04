@@ -1,13 +1,14 @@
-import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
+import React, { useRef, useState, DragEvent, ReactElement } from 'react';
 
-import ContentItem, { ContentItemProps } from "./ContentItem";
+import ContentItem from "./ContentItem";
 
 import PlusIcon, { IconProps } from "./PlusIcon";
 
+import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, PlaneDimensions, BoxDimensions, BoxObject } from "./structures/Data";
+import { PalletGeometry, PlaneDimensions, BoxObject } from "./structures/Data";
 
 import "./css/Layout.scss";
 
@@ -36,27 +37,28 @@ function LayoutDropDown({ allPallets }: DropDownProps) {
 interface LayoutModelProps {
     pallet: PalletGeometry;
     size: number; // 650 for half content width;
-}
+    outerHeight: number;
+    outerWidth: number;
+    boxes?: BoxPositionObject[];
+};
 
+export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: LayoutModelProps) {
 
-export function LayoutModel({ pallet, size }: LayoutModelProps) {
+    console.log(boxes, "Layout MODEL");
+
     let dimensions: PlaneDimensions = pallet.getDimensions();
 
     let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
 
     let w = dimensions.width / norm * size;
     let l = dimensions.length / norm * size;
-
     // Scale up the coordinates to take maximum size.
     let scale = (w >= l) ? size / w : size / l;
-
     w *= scale;
     l *= scale;
-
     let cx = size / 2;
-    let cy = size / 2;
-
-    let logColor = "#D2AB6F";
+    //  let cy = size / 2;
+    let logColor: string = String(COLORS.LOG);
 
     let bottomLog: Rect = {
         x: cx - w / 2,
@@ -67,7 +69,6 @@ export function LayoutModel({ pallet, size }: LayoutModelProps) {
         stroke: logColor,
         strokeWidth: 0
     };
-
     let topLog: Rect = {
         x: cx - w / 2,
         y: (size - l) / 2,
@@ -77,9 +78,8 @@ export function LayoutModel({ pallet, size }: LayoutModelProps) {
         stroke: logColor,
         strokeWidth: 0
     };
-
     // Horizontal planks....
-    let plankColor = "#E6BF83";
+    let plankColor: string = String(COLORS.PLANK);
 
     let planks = [] as Rect[];
     let plankNumber = 6;
@@ -102,20 +102,69 @@ export function LayoutModel({ pallet, size }: LayoutModelProps) {
         planks.push(plk);
     }
 
-    return (
+    let svg_props = {
+        width: size,
+        height: size,
+        x: (outerWidth - size) / 2,
+        y: (outerHeight - size) / 2
+    } as any;
 
-        <svg width={size} height={size} >
-            <rect {...bottomLog} />
-            <rect {...topLog} />
-            {planks.map((r: Rect, index: number) => {
+
+    let BoxSVGs: Rect[] = [];
+
+    if (boxes) {
+        boxes.forEach(({ position, box }: BoxPositionObject) => {
+            //
+            let { x, y } = position;
+            let { width, length } = box.dimensions;
+
+            width *= size * scale / norm;
+            length *= size * scale / norm;
+
+            let boxColor = String(COLORS.BOX);
+
+            let boxprops: Rect = {
+                x,
+                y,
+                width,
+                height: length,
+                fill: boxColor,
+                stroke: boxColor,
+                strokeWidth: 0
+            };
+
+            BoxSVGs.push(boxprops);
+        });
+    }
+    console.log(BoxSVGs);
+
+    let outerSVG = {
+        x: 0,
+        y: 0,
+        width: outerWidth,
+        height: outerHeight
+    };
+
+
+    return (
+        <svg {...outerSVG} >
+            <svg {...svg_props} >
+                <rect {...bottomLog} />
+                <rect {...topLog} />
+                {planks.map((r: Rect, index: number) => {
+                    return (
+                        <rect {...r} key={index} />
+                    );
+                })}
+            </svg>
+            {BoxSVGs.map((r: Rect, index: number) => {
                 return (
                     <rect {...r} key={index} />
                 );
             })}
-            {/* <rect {...rect} /> */}
         </svg>
-
     );
+
 };
 //---------------Box Image Props---------------
 interface BoxImageProps {
@@ -236,14 +285,16 @@ function LayoutSummary({ startEdit }: SummaryProps) {
 
 interface BoxCellProps {
     box: BoxObject;
+    index: number
 }
 
-function BoxCell({ box }: BoxCellProps) {
+function BoxCell({ box, index }: BoxCellProps) {
 
 
     let [isDragging, setIsDragging] = useState<boolean>(false);
 
-    let dragStart = () => {
+    let dragStart = (ev: DragEvent) => {
+        ev.dataTransfer.setData("BoxIndex", String(index));
         setIsDragging(true);
     };
 
@@ -251,14 +302,8 @@ function BoxCell({ box }: BoxCellProps) {
         setIsDragging(false);
     };
 
-    let style = isDragging ? {
-    }
-    
-    
     return (
         <div className="BoxCell" onDragStart={dragStart} onDragEnd={dragEnd} draggable>
-	    {!isDragging &&
-	     <>
             <Box {...box.dimensions} />
             <div className="BoxDetails">
                 <div className="BoxName">
@@ -272,11 +317,6 @@ function BoxCell({ box }: BoxCellProps) {
                     <DimensionCell axis={"Height"} value={box.dimensions.height} />
                 </div>
             </div>
-	    </>
-	    }
-	    {isDragging &&
-	     <BoxImage {...box.dimensions}/>
-	    }
         </div>
     );
 
@@ -288,9 +328,25 @@ interface LayoutProps {
 };
 
 
+
+interface SVGPosition {
+    x: number;
+    y: number;
+}
+
+interface BoxPositionObject {
+    position: SVGPosition;
+    box: BoxObject;
+};
+
+
 function Layout({ allBoxes, allPallets }: LayoutProps) {
 
     let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
+
+    let DisplayElement = useRef<HTMLDivElement>(null);
+
+    let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
 
     let startEdit = () => {
         setSummaryScreen(false);
@@ -299,19 +355,41 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
     let instruction: string;
     let placeholder = "Pallet Layer " + String(1);
 
-    let dragEnter = (e: any) => {
-        console.log("Drag Enter", e);
+    let dragOver = (e: DragEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        e.preventDefault();
     };
 
-    let onDrop = (e: any) => {
-        console.log("On Drop", e);
+    let onDrop = (e: DragEvent<HTMLDivElement>) => {
+
+        if (DisplayElement.current) {
+            let { clientX, clientY } = e;
+
+            let { x, y } = DisplayElement.current.getBoundingClientRect();
+
+            let prX = clientX - x;
+            let prY = clientY - y;
+
+            let index = parseInt(e.dataTransfer.getData("BoxIndex"));
+
+            let position: SVGPosition = {
+                x: clientX - x,
+                y: clientY - y
+            };
+
+            let bpo: BoxPositionObject = {
+                position,
+                box: allBoxes[index]
+            };
+
+            setModelBoxes([...modelBoxes, bpo]);
+        }
     };
 
 
+    //---------------Display---------------
     if (summaryScreen) {
-
         instruction = "Create and edit layers";
-
         return (
             <ContentItem instruction={instruction}>
                 <LayoutSummary startEdit={startEdit} />
@@ -321,6 +399,11 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
     } else {
 
         instruction = "Drag and drop boxes to create a layer";
+
+        let modelDims = {
+            outerWidth: 1026,
+            outerHeight: 664
+        };
 
         return (
             <ContentItem instruction={instruction}>
@@ -334,8 +417,8 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                         <div className="BoxScroll">
                             {allBoxes.map((box: BoxObject, key: number) => {
                                 return (
-                                    <div className="BoxCellContainer">
-                                        <BoxCell box={box} key={key} />
+                                    <div className="BoxCellContainer" key={key}>
+                                        <BoxCell box={box} key={key} index={key} />
                                     </div>
                                 )
                             })}
@@ -343,8 +426,8 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                     </div>
                     <div className="LayoutModel">
                         <LayoutDropDown allPallets={allPallets} />
-                        <div className="LayoutDisplay" onDragEnter={dragEnter}>
-                            <LayoutModel pallet={allPallets[0]} size={650} />
+                        <div className="LayoutDisplay" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
+                            <LayoutModel pallet={allPallets[0]} size={650} {...modelDims} boxes={modelBoxes} />
                         </div>
                     </div>
                 </div>

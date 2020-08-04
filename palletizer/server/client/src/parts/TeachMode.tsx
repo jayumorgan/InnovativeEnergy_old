@@ -67,7 +67,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     for (let i = 0; i < 10; i++) {
 
-        let box = new BoxObject("Box " + String(i + 1), { width: 10, height: 10, length: 10 }, { x: 200, y: 200, z: 200 });
+        let box = new BoxObject("Box " + String(i + 1), { width: 50, height: 50, length: 50 }, { x: 200, y: 200, z: 200 });
         allBoxes.push(box);
 
         let c1: Coordinate = {
@@ -81,7 +81,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             z: 0
         };
         let c3: Coordinate = {
-            x: 100 * (i + 1) / 2,
+            x: 100,
             y: 0,
             z: 0
         };
