@@ -42,6 +42,67 @@ interface LayoutModelProps {
     boxes?: BoxPositionObject[];
 };
 
+function DraggableRect(rect: Rect) {
+
+    let [rectangle, setRectangle] = useState<Rect>(rect);
+
+    let [active, setActive] = useState<boolean>(false);
+
+    let handleDown = (e: React.PointerEvent) => {
+        let el = e.target;
+        let bb = (e.target as any).getBoundingClientRect();
+        let x = e.clientX - bb.left;
+        let y = e.clientY - bb.top;
+
+        setRectangle({
+            ...rectangle,
+            offset: {
+                x,
+                y
+            }
+        });
+
+        setActive(true);
+    };
+
+    let handleMove = (e: React.PointerEvent) => {
+        let bb = (e.target as any).getBoundingClientRect();
+        let x = e.clientX - bb.left;
+        let y = e.clientY - bb.top;
+        if (active) {
+            let { offset } = rectangle;
+            setRectangle({
+                ...rectangle,
+                x: rectangle.x - (offset.x - x),
+                y: rectangle.y - (offset.y - y)
+            });
+        }
+    };
+
+    let handleUp = (e: React.PointerEvent) => {
+        console.log(e);
+
+        setActive(false);
+    };
+
+    let actions = {
+        onPointerDown: handleDown,
+        onPointerMove: handleMove,
+        onPointerUp: handleUp
+    } as any;
+
+    let fill = active ? String(COLORS.MOVE_BOX) : String(COLORS.CLEAR_BOX);
+
+    return (
+        <rect
+            {...rectangle} fill={fill} {...actions}
+        />
+    );
+};
+
+
+
+
 export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: LayoutModelProps) {
 
     console.log(boxes, "Layout MODEL");
@@ -121,11 +182,11 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
             width *= size * scale / norm;
             length *= size * scale / norm;
 
-            let boxColor = String(COLORS.BOX);
+            let boxColor = String(COLORS.CLEAR_BOX);
 
             let boxprops: Rect = {
-                x,
-                y,
+                x: x - width / 2,
+                y: y - length / 2,
                 width,
                 height: length,
                 fill: boxColor,
@@ -159,7 +220,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
             </svg>
             {BoxSVGs.map((r: Rect, index: number) => {
                 return (
-                    <rect {...r} key={index} />
+                    <DraggableRect {...r} key={index} />
                 );
             })}
         </svg>
@@ -174,13 +235,14 @@ interface BoxImageProps {
 
 
 export interface Rect {
-    x: string | number;
-    y: string | number;
+    x: number;
+    y: number;
     width: string | number;
     height: string | number;
     fill: string;
     stroke: string;
     strokeWidth: number | string;
+    offset?: any
 };
 
 /* <rect x="50" y="20" width="150" height="150"
