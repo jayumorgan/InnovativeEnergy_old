@@ -251,6 +251,9 @@ function BoxCell({ box }: BoxCellProps) {
         setIsDragging(false);
     };
 
+    let style = isDragging ? {
+    }
+    
     
     return (
         <div className="BoxCell" onDragStart={dragStart} onDragEnd={dragEnd} draggable>
