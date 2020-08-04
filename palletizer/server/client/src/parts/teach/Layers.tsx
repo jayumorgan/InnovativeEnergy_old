@@ -5,6 +5,8 @@ import ContentItem, { ContentItemProps } from "./ContentItem";
 import PlusIcon, { IconProps } from "./PlusIcon";
 
 
+import Box from "./3D/BoxRender";
+
 import { PalletGeometry, PlaneDimensions, BoxDimensions, BoxObject } from "./structures/Data";
 
 import "./css/Layout.scss";
@@ -144,8 +146,8 @@ function BoxImage({ width, length }: BoxImageProps) {
     let x = 50 - w / 2;
     let y = 50 - h / 2;
 
-    let cardboard = "#AD8762";
-    let box = "#DC9F61";
+    let cardboard = "rgb(89,69,50)";
+    let box = "rgb(89,69,50)";
 
     let rect: Rect = {
         x,
@@ -156,14 +158,14 @@ function BoxImage({ width, length }: BoxImageProps) {
         stroke: cardboard,
         strokeWidth: "1"
     };
+
+
     return (
-        <div className="BoxImage">
-            <svg width="100" height="100">
-                <g transform="scale(1,1)">
-                    <rect {...rect} />
-                </g>
-            </svg>
-        </div>
+        <svg width="100" height="100">
+            <g transform="scale(1,1)">
+                <rect {...rect} />
+            </g>
+        </svg>
     )
 }
 
@@ -182,7 +184,7 @@ function NewLayoutCell({ startEdit }: NewLayoutCellProps) {
                 </div>
                 <div className="BoxName">
                     <span>
-                        {"Create A New Layout"}
+                        {"Create A New Layer"}
                     </span>
                 </div>
             </div>
@@ -232,6 +234,41 @@ function LayoutSummary({ startEdit }: SummaryProps) {
 
 
 
+interface BoxCellProps {
+    box: BoxObject;
+}
+
+function BoxCell({ box }: BoxCellProps) {
+
+    let [isDragging, setIsDragging] = useState<boolean>(false);
+
+    let dragStart = () => {
+        setIsDragging(true);
+    };
+
+    let dragEnd = () => {
+        setIsDragging(false);
+    };
+
+    return (
+        <div className="BoxCell" onDragStart={dragStart} onDragEnd={dragEnd} draggable>
+            <Box {...box.dimensions} />
+            <div className="BoxDetails">
+                <div className="BoxName">
+                    <span>
+                        {box.name}
+                    </span>
+                </div>
+                <div className="BoxDimensions">
+                    <DimensionCell axis={"Width"} value={box.dimensions.width} />
+                    <DimensionCell axis={"Length"} value={box.dimensions.length} />
+                    <DimensionCell axis={"Height"} value={box.dimensions.height} />
+                </div>
+            </div>
+        </div>
+    );
+
+};
 
 interface LayoutProps {
     allBoxes: BoxObject[];
@@ -241,18 +278,27 @@ interface LayoutProps {
 
 function Layout({ allBoxes, allPallets }: LayoutProps) {
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
 
     let startEdit = () => {
         setSummaryScreen(false);
     };
 
     let instruction: string;
-    let placeholder = "Pallet Layout " + String(1);
+    let placeholder = "Pallet Layer " + String(1);
 
+    let dragEnter = (e: any) => {
+        console.log("Drag Enter", e);
+    };
+
+    let onDrop = (e: any) => {
+        console.log("On Drop", e);
+    };
 
     if (summaryScreen) {
-        instruction = "Create and edit layouts";
+
+        instruction = "Create and edit layers";
+
         return (
             <ContentItem instruction={instruction}>
                 <LayoutSummary startEdit={startEdit} />
@@ -260,7 +306,9 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
         );
 
     } else {
-        instruction = "Drag and drop boxes to create a layout";
+
+        instruction = "Drag and drop boxes to create a layer";
+
         return (
             <ContentItem instruction={instruction}>
                 <div className="LayoutContainer">
@@ -274,29 +322,15 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
                             {allBoxes.map((box: BoxObject, key: number) => {
                                 return (
                                     <div className="BoxCellContainer" key={key}>
-                                        <div className="BoxCell">
-                                            <BoxImage {...box.dimensions} />
-                                            <div className="BoxDetails">
-                                                <div className="BoxName">
-                                                    <span>
-                                                        {"Box 1"}
-                                                    </span>
-                                                </div>
-                                                <div className="BoxDimensions">
-                                                    <DimensionCell axis={"Width"} value={box.dimensions.width} />
-                                                    <DimensionCell axis={"Length"} value={box.dimensions.length} />
-                                                    <DimensionCell axis={"Height"} value={box.dimensions.height} />
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <BoxCell box={box} key={key} />
                                     </div>
-                                );
+                                )
                             })}
                         </div>
                     </div>
                     <div className="LayoutModel">
                         <LayoutDropDown allPallets={allPallets} />
-                        <div className="LayoutDisplay">
+                        <div className="LayoutDisplay" onDragEnter={dragEnter}>
                             <LayoutModel pallet={allPallets[0]} size={650} />
                         </div>
                     </div>

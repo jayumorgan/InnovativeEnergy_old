@@ -79,7 +79,7 @@ function Box({ length, height, width }: BoxDimensions) {
         };
 
         let geometry = new Three.BoxGeometry(1, 1, 1);
-        let material = new Three.MeshPhongMaterial({ color: "#DC9F61" });
+        let material = new Three.MeshPhongMaterial({ color: "rgb(89,69,50)" });
         let box = new Three.Mesh(geometry, material);
         box.name = "BoxMesh";
 

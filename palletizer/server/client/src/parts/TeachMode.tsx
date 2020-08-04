@@ -11,7 +11,7 @@ import PalletCorners from "./teach/Corners";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
 
-import Layout from "./teach/Layout";
+import Layout from "./teach/Layers";
 
 
 import { Coordinate, PalletGeometry, BoxObject } from "./teach/structures/Data";
@@ -25,8 +25,8 @@ enum PalletTeachState {
     CONFIG_NAME,
     BOX_SIZE,
     PALLET_CORNERS,
-    LAYOUT_SETUP,
     LAYER_SETUP,
+    STACK_SETUP,
     SUMMARY
 };
 
@@ -40,7 +40,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [palletConfig, setPalletConfig] = useState<PalletConfiguration>(new PalletConfiguration());
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.PALLET_CORNERS);
+    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.LAYER_SETUP);
 
     let completionFraction = { n: 0, d: 6 } as Fraction;
 
@@ -81,7 +81,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             z: 0
         };
         let c3: Coordinate = {
-            x: 100 * (i + 1) / 10,
+            x: 100 * (i + 1) / 2,
             y: 0,
             z: 0
         };
@@ -96,31 +96,31 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         case (PalletTeachState.CONFIG_NAME): {
             ChildElement = (<ConfigurationName handleUpdate={setHeaderTitle} />);
 
-            completionFraction.n = 0;
+            completionFraction.n = 1;
             break;
         }
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSize allBoxes={allBoxes} />);
 
-            completionFraction.n = 1;
+            completionFraction.n = 2;
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners allPallets={allPallets} />);
-            completionFraction.n = 2;
-            break;
-        };
-        case (PalletTeachState.LAYOUT_SETUP): {
-            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} />);
             completionFraction.n = 3;
             break;
-        }
+        };
         case (PalletTeachState.LAYER_SETUP): {
+            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} />);
             completionFraction.n = 4;
             break;
         }
-        case (PalletTeachState.SUMMARY): {
+        case (PalletTeachState.STACK_SETUP): {
             completionFraction.n = 5;
+            break;
+        }
+        case (PalletTeachState.SUMMARY): {
+            completionFraction.n = 6;
             break;
         }
         default: {

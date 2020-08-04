@@ -9,8 +9,7 @@ import Jogger from "./Jogger";
 import PalletRender from "./3D/PalletRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-
-import { Rect, LayoutModel } from "./Layout";
+import { Rect, LayoutModel } from "./Layers";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
@@ -35,7 +34,7 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
     return (
         <div className="DimensionCell">
             <span>
-                {axis + ": " + String(value)}
+                {axis + ": " + String(value) + "mm"}
             </span>
         </div>
     );
@@ -188,7 +187,7 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
 
     let startEdit = () => {
         setSummaryScreen(false);

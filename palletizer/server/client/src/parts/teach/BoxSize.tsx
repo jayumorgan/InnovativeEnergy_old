@@ -20,11 +20,9 @@ enum DimensionEnum {
     H
 };
 
-
 interface NewBoxCellProps {
     startEdit: () => void;
-}
-
+};
 
 function NewBoxCell({ startEdit }: NewBoxCellProps) {
     let iconSize = {
