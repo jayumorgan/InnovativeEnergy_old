@@ -8,7 +8,7 @@ import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, PlaneDimensions, BoxObject } from "./structures/Data";
+import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject } from "./structures/Data";
 
 import "./css/Layout.scss";
 
@@ -48,6 +48,16 @@ function DraggableRect(rect: Rect) {
 
     let [active, setActive] = useState<boolean>(false);
 
+    let rotate90 = (k: any) => {
+        if (k.key == "r") {
+            let r = { ...rectangle };
+            r.width = rectangle.height;
+            r.height = rectangle.width;
+            setRectangle(r);
+        }
+        console.log(k.key);
+    };
+
     let handleDown = (e: React.PointerEvent) => {
         let el = e.target;
         let bb = (e.target as any).getBoundingClientRect();
@@ -63,6 +73,9 @@ function DraggableRect(rect: Rect) {
         });
 
         setActive(true);
+        document.addEventListener("keydown", rotate90, true);
+
+
     };
 
     let handleMove = (e: React.PointerEvent) => {
@@ -105,7 +118,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
 
     console.log(boxes, "Layout MODEL");
 
-    let dimensions: PlaneDimensions = pallet.getDimensions();
+    let dimensions: PlaneDimensions = getPalletDimensions(pallet);
 
     let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
 

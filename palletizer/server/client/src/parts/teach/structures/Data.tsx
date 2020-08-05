@@ -51,42 +51,28 @@ export interface BoxObject {
     name: string;
     dimensions: BoxDimensions;
     pickLocation: Coordinate;
-    /* 
-     *     constructor(name: string, dimensions: BoxDimensions, pick: Coordinate) {
-     *         this.name = name;
-     *         this.dimensions = dimensions;
-     *         this.pickLocation = pick;
-     *     }; */
-}
+};
 
-
-
-export class PalletGeometry {
+export interface PalletGeometry {
     name: string;
     corner1: Coordinate;
-    corner2: Coordinate; // B
+    corner2: Coordinate;
     corner3: Coordinate;
-
-    constructor(name: string, c1: Coordinate, c2: Coordinate, c3: Coordinate) {
-        this.name = name;
-        this.corner1 = c1;
-        this.corner2 = c2;
-        this.corner3 = c3;
-    }
-
-    getDimensions(): PlaneDimensions { // return width and length;
-        let width_vector = Subtract2D(this.corner1, this.corner2);
-        let length_vector = Subtract2D(this.corner3, this.corner2);
-        let width = Norm2D(width_vector);
-        let length = Norm2D(length_vector);
-
-        let planar_dimensions = {
-            width,
-            length
-        } as PlaneDimensions;
-        return planar_dimensions;
-    }
 }
 
 
+export function getPalletDimensions(pallet: PalletGeometry) {
+    let { name, corner1, corner2, corner3 } = pallet;
+    let width_vector = Subtract2D(corner1, corner2);
+    let length_vector = Subtract2D(corner3, corner2);
+    let width = Norm2D(width_vector);
+    let length = Norm2D(length_vector);
+
+    let planar_dimensions = {
+        width,
+        length
+    } as PlaneDimensions;
+
+    return planar_dimensions;
+}
 

@@ -7,7 +7,7 @@ import Modal from "./Modal";
 import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
 
-import PalletCorners from "./teach/Corners";
+import PalletCorners from "./teach/Pallet";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
 
@@ -52,7 +52,8 @@ function newPalletConfiguration(name: string) {
 
 enum CONF_ACTION {
     SET_NAME,
-    SET_BOXES
+    SET_BOXES,
+    SET_PALLETS
 };
 
 type ConfigAction = {
@@ -67,8 +68,10 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
             return { ...state, name: payload as string };
         };
         case (CONF_ACTION.SET_BOXES): {
-	    console.log("Dispatch add boxes", payload);
             return { ...state, boxes: payload as BoxObject[] };
+        };
+        case (CONF_ACTION.SET_PALLETS): {
+            return { ...state, pallets: payload as PalletGeometry[] };
         };
         default: {
             return state;
@@ -92,8 +95,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let setBoxes = (boxes: BoxObject[]) => {
-	console.log("Setting the boxes");
+        console.log("Setting the boxes");
         dispatchConfiguration({ type: CONF_ACTION.SET_BOXES, payload: boxes as any });
+    };
+
+    let setPallets = (pallets: PalletGeometry[]) => {
+        dispatchConfiguration({ type: CONF_ACTION.SET_PALLETS, payload: pallets as any });
     };
 
     let handleNext = () => {
@@ -110,10 +117,10 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             close();
         }
     };
-    
-    let controlProps : any = {
-	handleNext,
-	handleBack
+
+    let controlProps: any = {
+        handleNext,
+        handleBack
     };
 
     let allBoxes = configuration.boxes;
@@ -121,7 +128,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
-            ChildElement = (<ConfigurationName handleUpdate={setName} name={configuration.name} {...controlProps}   />);
+            ChildElement = (<ConfigurationName handleUpdate={setName} name={configuration.name} {...controlProps} />);
 
             completionFraction.n = 1;
             break;
@@ -133,12 +140,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
-            ChildElement = (<PalletCorners allPallets={allPallets} {...controlProps} />);
+            ChildElement = (<PalletCorners allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
             completionFraction.n = 3;
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
-            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets}  {...controlProps}/>);
+            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets}  {...controlProps} />);
             completionFraction.n = 4;
             break;
         }

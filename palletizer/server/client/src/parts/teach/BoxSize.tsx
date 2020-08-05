@@ -282,20 +282,27 @@ function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
     // Must have fixed width.
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
 
-    console.log(summaryScreen, "Summ Screen", allBoxes);
-
-
     let box: BoxObject = {
-        name: "Box 1",
+        name: "Box " + String(allBoxes.length + 1),
         dimensions: { length: 100, height: 100, width: 100 },
         pickLocation: { x: 0, y: 0, z: 0 }
     };
 
     let [editingBox, setEditingBox] = useState<BoxObject>(box);
 
-    let startEdit = () => {
-        console.log("Start Editing Box,");
+    let [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+    let startEdit = (index: number) => () => {
+        if (index >= 0) {
+            setEditingBox(allBoxes[index]);
+            setEditingIndex(index);
+        } else {
+            setEditingIndex(null);
+            setEditingBox(box);
+        }
+        setSummaryScreen(false);
     };
+
 
     let instruction: string;
 
@@ -321,7 +328,13 @@ function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
             if (summaryScreen) {
                 handleNext();
             } else {
-                setBoxes([...allBoxes, editingBox]);
+                if (editingIndex) {
+                    let b = [...allBoxes];
+                    b[editingIndex] = editingBox;
+                    setBoxes(b);
+                } else {
+                    setBoxes([...allBoxes, editingBox]);
+                }
                 setSummaryScreen(true);
             }
         }
@@ -334,10 +347,10 @@ function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
-                            <NewBoxCell startEdit={startEdit} />
+                            <NewBoxCell startEdit={startEdit(-1)} />
                             {allBoxes.map((val: BoxObject, index: number) => {
                                 return (
-                                    <BoxCell box={val} />
+                                    <BoxCell box={val} key={index} />
                                 )
                             })}
                         </div>

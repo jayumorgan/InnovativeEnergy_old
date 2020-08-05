@@ -2,7 +2,9 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
 
-import { Coordinate, PlaneDimensions, PalletGeometry } from "./structures/Data";
+import { getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
+
+//import { PalletGeometry, getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
 
 import Jogger from "./Jogger";
 
@@ -24,11 +26,20 @@ enum Corners {
     THREE
 };
 
+
+interface PalletGeometry {
+    name: string;
+    corner1: Coordinate;
+    corner2: Coordinate;
+    corner3: Coordinate;
+
+}
+
+
 interface DimensionCellProps {
     axis: string;
     value: number;
 }
-
 
 function DimensionCell({ axis, value }: DimensionCellProps) {
     return (
@@ -67,7 +78,7 @@ interface PalletCellProps {
 
 function PalletCell({ pallet }: PalletCellProps) {
 
-    let { width, length } = pallet.getDimensions();
+    let { width, length } = getPalletDimensions(pallet)
 
     let iconSize = 30;
     let size = 100;
@@ -139,7 +150,7 @@ function NewPalletCell({ startEdit }: NewPalletCellProps) {
 };
 
 interface SummaryProps {
-    startEdit: () => void;
+    startEdit: (index: number) => () => void;
     allPallets: PalletGeometry[];
 };
 
@@ -149,7 +160,7 @@ function CornerSummary({ startEdit, allPallets }: SummaryProps) {
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
-                    <NewPalletCell startEdit={startEdit} />
+                    <NewPalletCell startEdit={startEdit(-1)} />
                     {allPallets.map((pallet: PalletGeometry, index: number) => {
                         return (
                             <PalletCell key={index} pallet={pallet} />
@@ -167,51 +178,85 @@ interface PalletCornerProps {
     allPallets: PalletGeometry[];
     handleNext: () => void;
     handleBack: () => void;
+    setPallets: (pallets: PalletGeometry[]) => void;
 }
 
 
 function defaultPallet(): PalletGeometry {
-
-    return new PalletGeometry(
-        "Default Pallet",
+    let p: PalletGeometry = {
+        name: "Default Pallet",
+        corner1:
         {
             x: 0,
-            y: 100,
+            y: 500,
             z: 0,
         },
-        {
+        corner2: {
             x: 0,
             y: 0,
             z: 0.
         },
-        {
-            x: 100,
+        corner3: {
+            x: 500,
             y: 0,
             z: 0
         }
-    );
+    };
+    return p;
 }
 
-function PalletCorners({ allPallets, handleNext, handleBack }: PalletCornerProps) {
-    let LeftButton: ButtonProps = {
-        name: "Back",
-        action: handleBack
-    };
-
-    let RightButton: ButtonProps = {
-        name: "Next",
-        action: handleNext
-    };
-
-
-
-
+function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: PalletCornerProps) {
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(allPallets.length > 0);
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
+    // Start with a default pallet for editing...
+    let [editingPallet, setEditingPallet] = useState<PalletGeometry>(defaultPallet());
 
-    let startEdit = () => {
+    let [editComplete, setEditComplete] = useState<boolean>(false);
+
+    let LeftButton: ButtonProps = {
+        name: "Back",
+        action: () => {
+            if (summaryScreen) {
+                handleBack()
+            } else {
+                if (allPallets.length > 0) {
+                    setSummaryScreen(true);
+                } else {
+                    handleBack();
+                }
+            }
+        }
+    };
+
+    let RightButton: ButtonProps = {
+        name: summaryScreen ? "Next" : (editComplete ? "Add Pallet" : ""),
+        action: () => {
+            if (summaryScreen) {
+                handleNext();
+            } else {
+                // if All corners are selected.
+                if (editComplete) {
+                    console.log("Check that all corners are selected...");
+                    // Save the data.
+                    setPallets([...allPallets, editingPallet]);
+                    setSummaryScreen(true);
+                }
+
+            }
+        }
+    };
+
+    let startEdit = (index: number) => () => {
+        if (index >= 0) {
+            setEditComplete(true);
+            setEditingPallet(allPallets[index]);
+        } else {
+            setEditComplete(false);
+            setEditingPallet(defaultPallet());
+        }
+        setCornerNumber(Corners.ONE);
         setSummaryScreen(false);
     };
 
@@ -220,6 +265,7 @@ function PalletCorners({ allPallets, handleNext, handleBack }: PalletCornerProps
     let selectAction = () => {
         if (cornerNumber === Corners.THREE) {
             console.log("Done");
+            setEditComplete(true);
         } else {
             setCornerNumber(cornerNumber as number + 1);
         }
@@ -230,6 +276,11 @@ function PalletCorners({ allPallets, handleNext, handleBack }: PalletCornerProps
             setCornerNumber(cornerNumber as number - 1);
         }
     };
+
+    let addCorner = (c: Coordinate) => {
+
+    };
+
 
     let instruction: string;
 
@@ -242,7 +293,6 @@ function PalletCorners({ allPallets, handleNext, handleBack }: PalletCornerProps
         );
     } else {
 
-        let pallet = defaultPallet();
         let size = 650;
 
         instruction = "Move to and select three pallet corners";
@@ -258,9 +308,8 @@ function PalletCorners({ allPallets, handleNext, handleBack }: PalletCornerProps
                         <Jogger selectAction={selectAction} />
                         <div className="PalletContainer">
                             <div className="PalletMount">
-                                <PalletModel size={size} pallet={pallet} />
+                                <PalletModel size={size} pallet={editingPallet} />
                             </div>
-
                         </div>
                     </div>
                 </div>
