@@ -1,6 +1,6 @@
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
-import ContentItem, { ContentItemProps } from "./ContentItem";
+import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
 
 import { Coordinate, PlaneDimensions, PalletGeometry } from "./structures/Data";
 
@@ -112,8 +112,6 @@ function PalletCell({ pallet }: PalletCellProps) {
     );
 }
 
-
-
 interface NewPalletCellProps {
     startEdit: () => void;
 }
@@ -167,6 +165,8 @@ function CornerSummary({ startEdit, allPallets }: SummaryProps) {
 interface PalletCornerProps {
     //    allPallets =
     allPallets: PalletGeometry[];
+    handleNext: () => void;
+    handleBack: () => void;
 }
 
 
@@ -192,8 +192,20 @@ function defaultPallet(): PalletGeometry {
     );
 }
 
+function PalletCorners({ allPallets, handleNext, handleBack }: PalletCornerProps) {
+    let LeftButton: ButtonProps = {
+        name: "Back",
+        action: handleBack
+    };
 
-function PalletCorners({ allPallets }: PalletCornerProps) {
+    let RightButton: ButtonProps = {
+        name: "Next",
+        action: handleNext
+    };
+
+
+
+
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
 
@@ -224,7 +236,7 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
     if (summaryScreen) {
         instruction = "Create and edit pallets";
         return (
-            <ContentItem instruction={instruction} >
+            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
                 <CornerSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );
@@ -235,7 +247,7 @@ function PalletCorners({ allPallets }: PalletCornerProps) {
 
         instruction = "Move to and select three pallet corners";
         return (
-            <ContentItem instruction={instruction} >
+            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="CornerGrid">
                     <div className="SubInstruction">
                         <span>

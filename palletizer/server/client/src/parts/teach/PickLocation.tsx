@@ -98,11 +98,7 @@ function PickLocationMap() {
 };
 
 
-
-
 // This should be moved into the box area
-
-
 function PickLocation() {
 
     let pallet_seq_name = "Pallet Sequence 1";
@@ -119,15 +115,12 @@ function PickLocation() {
     let instruction = "Move and select box pick location";
 
     return (
-        <ContentItem instruction={instruction}>
-            <div className="PickLocationGrid">
-                <Jogger selectAction={selectAction} />
-                <PickLocationMap />
-            </div>
-        </ContentItem>
+        <div className="PickLocationGrid">
+            <Jogger selectAction={selectAction} />
+            <PickLocationMap />
+        </div>
     );
     //    <PickLocationMap />
 }
-
 
 export default PickLocation;

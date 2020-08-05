@@ -47,18 +47,16 @@ function Norm2D(v: Coordinate2D) {
     return Math.sqrt(v.x ** 2 + v.y ** 2);
 }
 
-export class BoxObject {
+export interface BoxObject {
     name: string;
     dimensions: BoxDimensions;
     pickLocation: Coordinate;
-
-
-    constructor(name: string, dimensions: BoxDimensions, pick: Coordinate) {
-        this.name = name;
-        this.dimensions = dimensions;
-        this.pickLocation = pick;
-    };
-
+    /* 
+     *     constructor(name: string, dimensions: BoxDimensions, pick: Coordinate) {
+     *         this.name = name;
+     *         this.dimensions = dimensions;
+     *         this.pickLocation = pick;
+     *     }; */
 }
 
 

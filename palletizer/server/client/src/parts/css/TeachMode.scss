@@ -19,12 +19,14 @@
      display: grid;
      color: $dark-blue;
      $ch: $container-height;
-     grid-template-rows: $ch/10 $ch/12 auto;
+     grid-template-rows: $ch/10 $ch/12 auto $ch/12;
 
      .TeachModeHeader {
+	 
+	 
          display: grid;
          grid-template-rows: 100%;
-         grid-template-columns: 10% 80% 10%;
+         grid-template-columns: 50% 50%;
          background: $blue-gradient;
 
          .TeachButton {
@@ -32,6 +34,7 @@
              @include flex-center();
              color: $light-grey;
              font-size: $medium-font;
+	     cursor: pointer;
          }
 
          .TeachButton:hover {
@@ -45,6 +48,7 @@
              border-radius: $border-radius $border-radius 0 0;
              color: white;
              height: 100%;
+	     width: 100%;
 
              .StatusBarTitle {
                  @include flex-center();
@@ -98,8 +102,45 @@
          height: 100%;
          width: 100%;
 
-
      }
+
+     .TeachModeBottom {
+	 color : $dark-blue;
+	 height: 100%;
+	 width: 100%;
+	 display: grid;
+	 grid-template-columns: 50% 50%;
+	 grid-template-rows: 100%;
+
+	 .Left {
+	     width: 100%;
+	     @include flex-center();
+	     justify-content: flex-start;
+	 }
+
+	 .Right {
+	     width: 100%;
+	     @include flex-center();
+	     justify-content: flex-end;
+	 }
+
+	 .Button {
+	     width: 20%;
+	     @include flex-center();
+	     font-size: $medium-font;
+	     cursor: pointer;
+	     
+	     
+	 }
+	 .Button:hover {
+	     color: $green;
+	 }
+
+	
+     }
+
+
+     
 
 
      .TeachModeFooter {

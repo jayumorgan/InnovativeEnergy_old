@@ -1,6 +1,6 @@
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
-import ContentItem, { ContentItemProps } from "./ContentItem";
+import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
 
 
 import Jogger from "./Jogger";
@@ -81,11 +81,9 @@ interface BoxProps {
 function BoxCell({ box }: BoxProps) {
     let placeholder = box.name;
 
-    let [dimensions, setDimensions] = useState<BoxDimensions>(box.dimensions);
-
+    let { dimensions } = box;
     let { width, length, height } = dimensions;
     let { x, y, z } = box.pickLocation;
-
 
     let update_dim = (dimension: DimensionEnum) => (val: number) => {
         let newDim = { ...dimensions } as BoxDimensions;
@@ -103,9 +101,6 @@ function BoxCell({ box }: BoxProps) {
                 break;
             }
         }
-
-        console.log("Updating dimensions -- update BoxObject");
-        setDimensions(newDim);
     };
 
 
@@ -185,27 +180,63 @@ function SummaryScreen({ allBoxes, startEdit }: SummaryScreenProps) {
     );
 };
 
-
-
-
 //---------------Box Setup Screen---------------
+
+interface CoordinateItemProps {
+    name: string;
+    value: number;
+    setter: (val: number) => void;
+};
+
+function CoordinateItem({ name, value, setter }: CoordinateItemProps) {
+
+    let onChange = (e: ChangeEvent) => {
+        let val = (e.target as any).value as number;
+        setter(+val);
+    }
+
+    return (
+        <div className="CoordinateItem">
+            <div className="CoordinateName">
+                <span>
+                    {name}
+                </span>
+            </div>
+            <div className="CoordinateInput">
+                <input type="number" value={value} onChange={onChange} />
+            </div>
+        </div>
+    );
+    /* <input type="number" value={value} /> */
+};
 
 interface CreateNewBoxProps {
     box: BoxObject;
+    LeftButton: ButtonProps;
+    RightButton: ButtonProps;
+    updateBox: (b: BoxObject) => void;
 };
 
-function CreateNewBox({ box }: CreateNewBoxProps) {
-
-    let [name, setName] = useState<string>(box.name);
+function CreateNewBox({ box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
 
     let pallet_seq_name = "Pallet Sequence 1";
     let input_name = "PalletSequenceTitle";
 
     let handle_input = (e: ChangeEvent) => {
-        let n = (e.target as any).value;
-        setName(n);
+        let name = (e.target as any).value;
+        updateBox({ ...box, name });
+    };
 
-        console.log("Handle change pallet seq name.");
+    let updateCoordinate = (dim: string) => (val: number) => {
+        let { dimensions } = box;
+        let dims = {
+            width: dimensions.width,
+            length: dimensions.length,
+            height: dimensions.height
+        } as any;
+        dims[dim] = val;
+
+        updateBox({ ...box, dimensions: dims as BoxDimensions });
     };
 
     let selectAction = () => {
@@ -215,16 +246,20 @@ function CreateNewBox({ box }: CreateNewBoxProps) {
     let instruction = "Move and select box pick location";
 
     return (
-        <ContentItem instruction={instruction}>
+        <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton}>
             <div className="NewBoxGrid">
                 <div className="BoxName">
-                    <input type="text" value={name} onChange={handle_input} />
+                    <input type="text" value={box.name} onChange={handle_input} />
                 </div>
                 <div className="BoxSetup">
                     <Jogger selectAction={selectAction} />
                     <div className="BoxConfigurator">
                         <Box {...box.dimensions} />
                         <div className="CoordinateDisplay">
+                            <CoordinateItem name={"Width"} value={box.dimensions.width} setter={updateCoordinate("width")} />
+                            <CoordinateItem name={"Length"} value={box.dimensions.length} setter={updateCoordinate("length")} />
+                            <CoordinateItem name={"Height"} value={box.dimensions.height} setter={updateCoordinate("height")} />
+
                         </div>
                     </div>
                 </div>
@@ -236,19 +271,66 @@ function CreateNewBox({ box }: CreateNewBoxProps) {
 interface BoxSizeProps {
     allBoxes: BoxObject[];
     setBoxes: (boxes: BoxObject[]) => void;
+    handleBack: () => void;
+    handleNext: () => void;
+
 }
 
-function BoxSize({ allBoxes, setBoxes }: BoxSizeProps) {
+// How will we update this? 
+
+function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
     // Must have fixed width.
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
-    let startEdit = () => {
-        setSummaryScreen(false);
+
+    console.log(summaryScreen, "Summ Screen", allBoxes);
+
+
+    let box: BoxObject = {
+        name: "Box 1",
+        dimensions: { length: 100, height: 100, width: 100 },
+        pickLocation: { x: 0, y: 0, z: 0 }
     };
+
+    let [editingBox, setEditingBox] = useState<BoxObject>(box);
+
+    let startEdit = () => {
+        console.log("Start Editing Box,");
+    };
+
     let instruction: string;
+
+    let LeftButton: ButtonProps = {
+        name: "Back",
+        action: () => {
+            if (summaryScreen) {
+                handleBack(); // Go to the next screen
+            } else {
+                if (allBoxes.length > 0) {
+                    setSummaryScreen(true);
+                } else {
+                    handleBack();
+                }
+            }
+        }
+    };
+
+    // Only allow the box to be increment
+    let RightButton: ButtonProps = {
+        name: summaryScreen ? "Next" : "Add Box",
+        action: () => {
+            if (summaryScreen) {
+                handleNext();
+            } else {
+                setBoxes([...allBoxes, editingBox]);
+                setSummaryScreen(true);
+            }
+        }
+    };
+
     if (summaryScreen) {
         instruction = "Create and edit boxes";
         return (
-            <ContentItem instruction={instruction}>
+            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
@@ -264,9 +346,8 @@ function BoxSize({ allBoxes, setBoxes }: BoxSizeProps) {
             </ContentItem>
         );
     } else {
-        let box = new BoxObject("Box 1", { length: 100, height: 100, width: 100 }, { x: 0, y: 0, z: 0 });
         return (
-            <CreateNewBox box={box} />
+            <CreateNewBox box={editingBox} LeftButton={LeftButton} RightButton={RightButton} updateBox={setEditingBox} />
         );
     }
 };

@@ -34,8 +34,6 @@ interface PalletConfiguratorProps {
     close: () => void;
 };
 
-
-
 //---------------Pallet Configuration Class---------------
 interface PalletConfiguration {
     name: string;
@@ -52,7 +50,6 @@ function newPalletConfiguration(name: string) {
     } as PalletConfiguration;
 }
 
-
 enum CONF_ACTION {
     SET_NAME,
     SET_BOXES
@@ -63,7 +60,6 @@ type ConfigAction = {
     payload: any
 };
 
-
 function configurationReducer(state: PalletConfiguration, action: ConfigAction) {
     let { payload } = action;
     switch (action.type) {
@@ -71,6 +67,7 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
             return { ...state, name: payload as string };
         };
         case (CONF_ACTION.SET_BOXES): {
+	    console.log("Dispatch add boxes", payload);
             return { ...state, boxes: payload as BoxObject[] };
         };
         default: {
@@ -79,10 +76,7 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
-
-
 //---------------Pallet Configurator Component---------------
-
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [configuration, dispatchConfiguration] = useReducer(configurationReducer, newPalletConfiguration("Pallet Configurator"));
@@ -98,6 +92,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let setBoxes = (boxes: BoxObject[]) => {
+	console.log("Setting the boxes");
         dispatchConfiguration({ type: CONF_ACTION.SET_BOXES, payload: boxes as any });
     };
 
@@ -115,30 +110,35 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             close();
         }
     };
+    
+    let controlProps : any = {
+	handleNext,
+	handleBack
+    };
 
     let allBoxes = configuration.boxes;
     let allPallets = configuration.pallets;
 
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
-            ChildElement = (<ConfigurationName handleUpdate={setName} />);
+            ChildElement = (<ConfigurationName handleUpdate={setName} name={configuration.name} {...controlProps}   />);
 
             completionFraction.n = 1;
             break;
         }
         case (PalletTeachState.BOX_SIZE): {
-            ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} />);
+            ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} {...controlProps} />);
 
             completionFraction.n = 2;
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
-            ChildElement = (<PalletCorners allPallets={allPallets} />);
+            ChildElement = (<PalletCorners allPallets={allPallets} {...controlProps} />);
             completionFraction.n = 3;
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
-            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} />);
+            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets}  {...controlProps}/>);
             completionFraction.n = 4;
             break;
         }
@@ -160,11 +160,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         <Modal close={close}>
             <div className="TeachContainer">
                 <div className="TeachModeHeader">
-                    <div className="TeachButton" onClick={handleBack}>
-                        <span>
-                            {((teachState as number === 0) ? "Close" : "Back")}
-                        </span>
-                    </div>
                     <div className="StatusBar">
                         <div className="StatusBarTitle">
                             <span>
@@ -172,11 +167,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
                             </span>
                         </div>
                         <CompletionDots fraction={completionFraction} />
-                    </div>
-                    <div className="TeachButton" onClick={handleNext}>
-                        <span>
-                            Next
-			</span>
                     </div>
                 </div>
                 {ChildElement}
@@ -186,7 +176,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 };
 
 export default PalletConfigurator;
-
 
 /*
  * let allBoxes = [] as BoxObject[];

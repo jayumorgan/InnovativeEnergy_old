@@ -1,6 +1,6 @@
 import React, { useRef, useState, DragEvent, ReactElement } from 'react';
 
-import ContentItem from "./ContentItem";
+import ContentItem, { ButtonProps } from "./ContentItem";
 
 import PlusIcon, { IconProps } from "./PlusIcon";
 
@@ -14,11 +14,11 @@ import "./css/Layout.scss";
 
 interface NewLayoutCellProps {
     startEdit: () => void;
-}
+};
 
 interface DropDownProps {
     allPallets: PalletGeometry[];
-}
+};
 
 function LayoutDropDown({ allPallets }: DropDownProps) {
     return (
@@ -385,6 +385,8 @@ function BoxCell({ box, index }: BoxCellProps) {
 interface LayoutProps {
     allBoxes: BoxObject[];
     allPallets: PalletGeometry[];
+    handleNext: () => void;
+    handleBack: () => void;
 };
 
 
@@ -400,7 +402,17 @@ interface BoxPositionObject {
 };
 
 
-function Layout({ allBoxes, allPallets }: LayoutProps) {
+function Layout({ allBoxes, allPallets, handleNext, handleBack }: LayoutProps) {
+    let LeftButton: ButtonProps = {
+        name: "Back",
+        action: handleBack
+    };
+
+    let RightButton: ButtonProps = {
+        name: "Next",
+        action: handleNext
+    };
+
 
     let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
 
@@ -451,7 +463,7 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
     if (summaryScreen) {
         instruction = "Create and edit layers";
         return (
-            <ContentItem instruction={instruction}>
+            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
                 <LayoutSummary startEdit={startEdit} />
             </ContentItem>
         );
@@ -466,7 +478,7 @@ function Layout({ allBoxes, allPallets }: LayoutProps) {
         };
 
         return (
-            <ContentItem instruction={instruction}>
+            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
                 <div className="LayoutContainer">
                     <div className="LayoutName">
                         <div className="NameHolder">

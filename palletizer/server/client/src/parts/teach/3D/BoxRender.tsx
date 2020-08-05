@@ -109,7 +109,6 @@ function Box({ length, height, width }: BoxDimensions) {
         if (animation && animation.scene) {
             let s = animation.scene;
             let box_mesh = s.getObjectByName("BoxMesh") as Three.Mesh;
-            box_mesh && console.log("BM Sacle ", (box_mesh.geometry as Three.BoxGeometry).parameters);
             // box_mesh && box_mesh.
             box_mesh && box_mesh.scale.set(l, h, w);
 
