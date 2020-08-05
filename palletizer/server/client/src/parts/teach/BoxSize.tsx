@@ -2,6 +2,9 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import ContentItem, { ContentItemProps } from "./ContentItem";
 
+
+import Jogger from "./Jogger";
+
 // 3D display of box.
 import Box from "./3D/BoxRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
@@ -182,19 +185,65 @@ function SummaryScreen({ allBoxes, startEdit }: SummaryScreenProps) {
     );
 };
 
+
+
+
+//---------------Box Setup Screen---------------
+
+interface CreateNewBoxProps {
+    box: BoxObject;
+};
+
+function CreateNewBox({ box }: CreateNewBoxProps) {
+
+    let [name, setName] = useState<string>(box.name);
+
+    let pallet_seq_name = "Pallet Sequence 1";
+    let input_name = "PalletSequenceTitle";
+
+    let handle_input = (e: ChangeEvent) => {
+        let n = (e.target as any).value;
+        setName(n);
+
+        console.log("Handle change pallet seq name.");
+    };
+
+    let selectAction = () => {
+        console.log("Jogger Position Selected");
+    };
+
+    let instruction = "Move and select box pick location";
+
+    return (
+        <ContentItem instruction={instruction}>
+            <div className="NewBoxGrid">
+                <div className="BoxName">
+                    <input type="text" value={name} onChange={handle_input} />
+                </div>
+                <div className="BoxSetup">
+                    <Jogger selectAction={selectAction} />
+                    <div className="BoxConfigurator">
+                        <Box {...box.dimensions} />
+                        <div className="CoordinateDisplay">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ContentItem>
+    );
+};
+
 interface BoxSizeProps {
     allBoxes: BoxObject[];
+    setBoxes: (boxes: BoxObject[]) => void;
 }
 
-
-function BoxSize({ allBoxes }: BoxSizeProps) {
+function BoxSize({ allBoxes, setBoxes }: BoxSizeProps) {
     // Must have fixed width.
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(true);
-
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
     let startEdit = () => {
         setSummaryScreen(false);
     };
-
     let instruction: string;
     if (summaryScreen) {
         instruction = "Create and edit boxes";
@@ -215,8 +264,9 @@ function BoxSize({ allBoxes }: BoxSizeProps) {
             </ContentItem>
         );
     } else {
+        let box = new BoxObject("Box 1", { length: 100, height: 100, width: 100 }, { x: 0, y: 0, z: 0 });
         return (
-            <PickLocation />
+            <CreateNewBox box={box} />
         );
     }
 };

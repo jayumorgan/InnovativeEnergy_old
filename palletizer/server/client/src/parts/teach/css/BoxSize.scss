@@ -48,6 +48,7 @@
                             font-size: 2em;
                         }
                     }
+
                     .Icon {
                         padding: $margin;
                         padding-left: 3%;
@@ -61,6 +62,7 @@
                         }
                     }
                 }
+
                 .NewBoxCell:hover {
                     @include size-shadow(15px);
 
@@ -165,22 +167,25 @@
                         grid-template-columns: 70% 30%;
                         color: white;
 
-			.SingleEditButton {
-			    @include flex-center();
-			    .Button {
-				@include flex-center();
-				span {
-				    font-size: $large-font;
-				}
-			    }
+                        .SingleEditButton {
+                            @include flex-center();
 
-			}
-			.SingleEditButton:hover {
-			    .Button {
-				background-color: $green;
-				@include shadow();
-			    }
-			}
+                            .Button {
+                                @include flex-center();
+
+                                span {
+                                    font-size: $large-font;
+                                }
+                            }
+
+                        }
+
+                        .SingleEditButton:hover {
+                            .Button {
+                                background-color: $green;
+                                @include shadow();
+                            }
+                        }
 
                         .EditButton {
                             display: grid;
@@ -284,6 +289,58 @@
         ::-webkit-scrollbar {
             width: 0px;
             background: transparent;
+        }
+    }
+}
+
+
+
+
+
+.NewBoxGrid {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-rows: 10% 90%;
+    grid-template-columns: 100%;
+
+    .BoxName {
+        @include flex-center();
+        height: 100%;
+        width: 100%;
+        @include jin-style(50%, 1.5em);
+        border-bottom: $container-border;
+
+        input {
+            padding: $margin;
+        }
+    }
+
+    .BoxSetup {
+        height: 100%;
+        width: 100%;
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 50% 50%;
+
+        .BoxConfigurator {
+            height: 100%;
+            width: 100%;
+            display: grid;
+            grid-template-rows: 80% 20%;
+            grid-template-columns: 100%;
+
+            .BoxDisplayRender {
+                margin-top: 1%;
+                height: 100%;
+                width: 100%;
+            }
+
+            .CoordinateDisplay {
+
+                height: 100%;
+                width: 100%;
+            }
         }
     }
 }

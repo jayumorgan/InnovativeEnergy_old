@@ -184,6 +184,13 @@
      display: grid;
      grid-template-rows: 100%;
      grid-template-columns: 50% 50%;
+
+     .BoxConfigurator {
+         height: 100%;
+         width: 100%;
+
+
+     }
  }
 
 
@@ -350,11 +357,12 @@
      background-color: red;
 
      .PalletMount {
-	 height: 100%;
-	 width: 100%;
-	 @include flex-center();
+         height: 100%;
+         width: 100%;
+         @include flex-center();
+
          canvas {
-	     
+
              // height: 735px;
              // width: 100%;
 

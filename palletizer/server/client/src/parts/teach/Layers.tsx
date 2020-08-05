@@ -80,8 +80,6 @@ function DraggableRect(rect: Rect) {
     };
 
     let handleUp = (e: React.PointerEvent) => {
-        console.log(e);
-
         setActive(false);
     };
 

@@ -2,8 +2,6 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import ContentItem, { ContentItemProps } from "./ContentItem";
 
-
-
 import Jogger from "./Jogger";
 
 interface CoordinateItemProps {
@@ -98,6 +96,11 @@ function PickLocationMap() {
         </div>
     );
 };
+
+
+
+
+// This should be moved into the box area
 
 
 function PickLocation() {
