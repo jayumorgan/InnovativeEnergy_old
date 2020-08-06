@@ -39,18 +39,20 @@ interface LayoutModelProps {
     size: number; // 650 for half content width;
     outerHeight: number;
     outerWidth: number;
-    updateLayer: (b: BoxPosition) => void;
+    setLayerBoxes: (b: BoxPosition2D[]) => void;
+    layer: LayerObject;
     boxes?: BoxPositionObject[];
 };
 
 interface DraggableRectProps {
     rect: Rect;
     updatePosition: (x: number, y: number) => void;
+    index: number;
 }
 
 
 
-function DraggableRect({ rect, updatePosition }: DraggableRectProps) {
+function DraggableRect({ rect, updatePosition, index }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
 
@@ -122,7 +124,7 @@ function DraggableRect({ rect, updatePosition }: DraggableRectProps) {
     );
 };
 
-export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: LayoutModelProps) {
+export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, layer, setLayerBoxes }: LayoutModelProps) {
 
     let dimensions: PlaneDimensions = getPalletDimensions(pallet);
 
@@ -223,7 +225,6 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
         height: outerHeight
     };
 
-
     let updateRectPosition = (x: number, y: number) => {
         // Position of the box relative to the screen
         let palletX = svg_props.x + topLog.x;
@@ -231,10 +232,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
         //Fractions are relative to pallet.
         let fractionX = (x - palletX) / w;
         let fractionY = (y - palletY) / l;
-
-
     };
-
 
     return (
         <svg {...outerSVG} >
@@ -249,7 +247,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
             </svg>
             {BoxSVGs.map((r: Rect, index: number) => {
                 return (
-                    <DraggableRect rect={r} updatePosition={updateRectPosition} key={index} />
+                    <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} />
                 );
             })}
         </svg>
@@ -452,7 +450,6 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
         boxPositions: []
     });
 
-
     let LeftButton: ButtonProps = {
         name: "Back",
         action: handleBack
@@ -468,6 +465,10 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
                 setSummaryScreen(true);
             }
         }
+    };
+
+    let setLayerBoxes = (b: BoxPosition2D[]) => {
+        setEditingLayer({ ...editingLayer, boxPositions: b });
     };
 
 
@@ -550,7 +551,7 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
                     <div className="LayoutModel">
                         <LayoutDropDown allPallets={allPallets} />
                         <div className="LayoutDisplay" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                            <LayoutModel pallet={allPallets[0]} size={650} {...modelDims} boxes={modelBoxes} />
+                            <LayoutModel pallet={allPallets[0]} size={650} {...modelDims} boxes={modelBoxes} setLayerBoxes={setLayerBoxes} layer={editingLayer} />
                         </div>
                     </div>
                 </div>
