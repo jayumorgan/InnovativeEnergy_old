@@ -157,7 +157,7 @@ interface SummaryProps {
 
 function CornerSummary({ startEdit, allPallets }: SummaryProps) {
 
-    console.log(allPallets, "Summary");
+
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
@@ -243,7 +243,7 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
                     console.log("Check that all corners are selected...");
                     // Save the data.
                     let newPallets = [...allPallets, editingPallet];
-                    console.log(newPallets, "new pallets", allPallets, editingPallet);
+
                     setPallets(newPallets);
                     setSummaryScreen(true);
                 }
@@ -302,9 +302,6 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
     };
 
     let instruction: string;
-
-
-    console.log(editingPallet);
 
     if (summaryScreen) {
         instruction = "Create and edit pallets";
