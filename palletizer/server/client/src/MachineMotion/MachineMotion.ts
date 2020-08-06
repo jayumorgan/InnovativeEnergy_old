@@ -26,14 +26,13 @@ export interface NetworkConfiguration {
 
 
 class MachineMotion {
-    myConfiguration: NetworkConfiguration
+    myConfiguration: NetworkConfiguration;
+    axes = {
+        1: "X",
+        2: "Y",
+        3: "Z"
+    } as { [key: number]: string };
 
-    // =
-    //     mode: NETWORK_MODE.dhcp,
-    //     machineIp: "192.169.7.2",
-    //     machineNetmask: "",
-    //     machineGateway: ""
-    // };
 
 
     constructor(networkConfig: NetworkConfiguration) {
@@ -72,16 +71,7 @@ class MachineMotion {
     };
 
     emitRelativeMove(axis: number, position: number) {
-        let axes = {
-            1: "X",
-            2: "Y",
-            3: "Z"
-        } as { [key: number]: string };
-
-
-        let a = axes[axis];
-
-
+        let a = this.axes[axis];
         this.emitGCode("G91", (res: AxiosResponse) => {
             this.emitGCode("G0 " + a + String(position));
         });
@@ -94,18 +84,14 @@ class MachineMotion {
 
 
 
-    getCurrentPositions(callback: (positions: Coordinate) => void) {
+    getCurrentPositions(axes: Axes, callback: (positions: Coordinate) => void) {
         let gcode = "M114";
         this.emitGCode(gcode, (res: AxiosResponse) => {
-            console.log("Get positions callback -- transform into coordinate", res);
             let response = res.data as string;
-            //echo:N1831 M114*28 ↵X:100.00 Y:100.00 Z:100.00 E:0.00 Count X: -1067 Y:1353 Z:-1067 ↵ok
-            // positions[1] = float(reply[reply.find('X')+2:(reply.find('Y')-1)])
-            // positions[2] = float(reply[reply.find('Y')+2:(reply.find('Z')-1)])
-            // positions[3] = float(reply[reply.find('Z')+2:(reply.find('E')-1)])
-            let Xreg: RegExp = /X:([\d\.]+)/;
-            let Yreg: RegExp = /Y:([\d\.]+)/;
-            let Zreg: RegExp = /Z:([\d\.]+)/;
+
+            let Xreg: RegExp = /X:([\d\.\-]+)/;
+            let Yreg: RegExp = /Y:([\d\.\-]+)/;
+            let Zreg: RegExp = /Z:([\d\.\-]+)/;
 
             let XMatch = Xreg.exec(response);
             let YMatch = Yreg.exec(response);
@@ -116,11 +102,19 @@ class MachineMotion {
                 let YVal: number = + YMatch[1];
                 let ZVal: number = + ZMatch[1];
 
-                console.log(XMatch, YMatch, ZMatch);
+                let vals = [XVal, YVal, ZVal] as number[];
 
-                console.log(XVal, YVal, ZVal);
+                let coord: Coordinate = {
+                    x: vals[axes.x - 1],
+                    y: vals[axes.y - 1],
+                    z: vals[axes.z - 1]
+                };
 
-                callback({ x: 100, y: 0, z: 100 } as Coordinate);
+                console.log(coord);
+
+                callback(coord);
+            } else {
+                console.log("Regex Error", response);
             }
         });
     };
@@ -164,7 +158,7 @@ export class TeachModeController {
 
     getPosition(callback: (positions: Coordinate) => void) {
 
-        this.mm.getCurrentPositions(callback);
+        this.mm.getCurrentPositions(this.axes, callback);
     };
 
     Move(direction: AxesDirections, positive: boolean) {

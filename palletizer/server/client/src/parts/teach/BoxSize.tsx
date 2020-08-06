@@ -12,7 +12,7 @@ import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 import PickLocation from "./PickLocation";
 
 
-import { BoxObject, BoxDimensions } from "./structures/Data";
+import { BoxObject, BoxDimensions, Coordinate } from "./structures/Data";
 
 import "./css/BoxSize.scss";
 
@@ -239,8 +239,8 @@ function CreateNewBox({ box, LeftButton, RightButton, updateBox }: CreateNewBoxP
         updateBox({ ...box, dimensions: dims as BoxDimensions });
     };
 
-    let selectAction = () => {
-        console.log("Jogger Position Selected");
+    let selectAction = (c: Coordinate) => {
+        updateBox({ ...box, pickLocation: c });
     };
 
     let instruction = "Move and select box pick location";

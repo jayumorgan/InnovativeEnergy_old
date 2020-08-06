@@ -90,6 +90,9 @@ function PalletCell({ pallet }: PalletCellProps) {
         outerHeight: size
     };
 
+    console.log(pallet.corner1, pallet.corner2, pallet.corner3);
+
+
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
