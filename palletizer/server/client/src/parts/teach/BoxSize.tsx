@@ -284,7 +284,7 @@ function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
 
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
-        dimensions: { length: 100, height: 100, width: 100 },
+        dimensions: { length: 10, height: 10, width: 10 },
         pickLocation: { x: 0, y: 0, z: 0 }
     };
 

@@ -39,14 +39,27 @@ interface LayoutModelProps {
     size: number; // 650 for half content width;
     outerHeight: number;
     outerWidth: number;
+    updateLayer: (b: BoxPosition) => void;
     boxes?: BoxPositionObject[];
 };
 
-function DraggableRect(rect: Rect) {
+interface DraggableRectProps {
+    rect: Rect;
+    updatePosition: (x: number, y: number) => void;
+}
+
+
+
+function DraggableRect({ rect, updatePosition }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
 
     let [active, setActive] = useState<boolean>(false);
+
+    let setRectPosition = (r: Rect) => {
+        updatePosition(r.x, r.y);
+
+    };
 
     let rotate90 = (k: any) => {
         if (k.key == "r") {
@@ -71,11 +84,8 @@ function DraggableRect(rect: Rect) {
                 y
             }
         });
-
         setActive(true);
         document.addEventListener("keydown", rotate90, true);
-
-
     };
 
     let handleMove = (e: React.PointerEvent) => {
@@ -93,6 +103,7 @@ function DraggableRect(rect: Rect) {
     };
 
     let handleUp = (e: React.PointerEvent) => {
+        setRectPosition(rectangle);
         setActive(false);
     };
 
@@ -111,12 +122,7 @@ function DraggableRect(rect: Rect) {
     );
 };
 
-
-
-
 export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: LayoutModelProps) {
-
-    console.log(boxes, "Layout MODEL");
 
     let dimensions: PlaneDimensions = getPalletDimensions(pallet);
 
@@ -141,6 +147,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
         stroke: logColor,
         strokeWidth: 0
     };
+
     let topLog: Rect = {
         x: cx - w / 2,
         y: (size - l) / 2,
@@ -208,13 +215,24 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
             BoxSVGs.push(boxprops);
         });
     }
-    console.log(BoxSVGs);
 
     let outerSVG = {
         x: 0,
         y: 0,
         width: outerWidth,
         height: outerHeight
+    };
+
+
+    let updateRectPosition = (x: number, y: number) => {
+        // Position of the box relative to the screen
+        let palletX = svg_props.x + topLog.x;
+        let palletY = topLog.y;
+        //Fractions are relative to pallet.
+        let fractionX = (x - palletX) / w;
+        let fractionY = (y - palletY) / l;
+
+
     };
 
 
@@ -231,7 +249,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes }: La
             </svg>
             {BoxSVGs.map((r: Rect, index: number) => {
                 return (
-                    <DraggableRect {...r} key={index} />
+                    <DraggableRect rect={r} updatePosition={updateRectPosition} key={index} />
                 );
             })}
         </svg>
@@ -427,7 +445,6 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
     let DisplayElement = useRef<HTMLDivElement>(null);
 
     let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
-
 
     let [editingLayer, setEditingLayer] = useState<LayerObject>({
         name: "Layer " + String(allLayers.length + 1),

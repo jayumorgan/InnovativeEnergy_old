@@ -135,12 +135,9 @@ export class TeachModeController {
     }
 
     getPosition(callback: (positions: Coordinate) => void) {
-	let pos = {x : 100 , y : Math.random() * 200 , z : 0};
+	let pos = {x : 0 , y :  100 + Math.random() * 500 , z : 0};
 	console.log(pos);
 	callback(pos as Coordinate);
-
-	
-
         //this.mm.getCurrentPositions(callback);
     };
 
