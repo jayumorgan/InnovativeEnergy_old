@@ -507,6 +507,19 @@ interface BoxPositionObject {
     box: BoxObject;
 };
 
+function defaultLayer(index: number) {
+    let l: LayerObject = {
+        name: "Layer " + String(index),
+        pallet: allPallets[0],
+        boxPositions: [],
+        height: 0
+    };
+
+    return l;
+
+};
+
+
 function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handleBack }: LayoutProps) {
 
     // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
@@ -517,14 +530,9 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
 
     let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
 
-    let [editingLayer, setEditingLayer] = useState<LayerObject>({
-        name: "Layer " + String(allLayers.length + 1),
-        pallet: allPallets[0],
-        boxPositions: []
-    });
+    let [editingLayer, setEditingLayer] = useState<LayerObject>(defaultLayer(allLayers.length + 1));
 
     let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
-
 
     let LeftButton: ButtonProps = {
         name: "Back",
@@ -537,29 +545,34 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
             if (summaryScreen) {
                 handleNext()
             } else {
-                let goodBoxes: BoxPosition2D[] = [];
+                if (tempBoxes.length > 0) {
 
-                tempBoxes.forEach((b: BoxPosition2D) => {
-                    let { x, y } = b.position;
-                    console.log("Also check that it is less that the size of the pallet <1 (and box relative to pallet size)")
-                    if (x >= 0 && y >= 0) {
-                        goodBoxes.push(b);
-                    }
-                });
+                    let h = 0;
+                    let goodBoxes: BoxPosition2D[] = [];
 
-                let newLayer = {
-                    ...editingLayer,
-                    boxPositions: goodBoxes
-                } as LayerObject;
+                    tempBoxes.forEach((b: BoxPosition2D) => {
+                        let { x, y } = b.position;
+                        console.log("Also check that it is less that the size of the pallet <1 (and box relative to pallet size)")
+                        if (x >= 0 && y >= 0) {
+                            goodBoxes.push(b);
+                            if (b.box.dimensions.height > h) {
+                                h = b.box.dimensions.height;
+                            }
+                        }
+                    });
 
-                setLayers([...allLayers, newLayer]);
-                setSummaryScreen(true);
+                    let newLayer = {
+                        ...editingLayer,
+                        boxPositions: goodBoxes,
+                        height: h
+                    } as LayerObject;
+
+                    setEditingLayer(defaultLayer(allLayers.length + 2));
+                    setLayers([...allLayers, newLayer]);
+                    setSummaryScreen(true);
+                }
             }
         }
-    };
-
-    let setLayerBoxes = (b: BoxPosition2D[]) => {
-        setEditingLayer({ ...editingLayer, boxPositions: b });
     };
 
     let startEdit = () => {

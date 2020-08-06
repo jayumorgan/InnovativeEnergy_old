@@ -136,6 +136,8 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     let allPallets = configuration.pallets;
     let allLayers = configuration.layers;
 
+
+
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
             ChildElement = (<ConfigurationName handleUpdate={setName} name={configuration.name} {...controlProps} />);

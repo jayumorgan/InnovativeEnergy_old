@@ -182,6 +182,5 @@ export class TeachModeController {
             };
         }
         this.mm.emitRelativeMove(axis, positive ? this.distance : -1 * this.distance);
-    }
-
+    };
 };

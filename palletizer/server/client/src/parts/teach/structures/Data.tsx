@@ -10,12 +10,10 @@ export interface Coordinate {
     z: number
 };
 
-
 export interface PlaneDimensions {
     width: number;
     length: number;
 };
-
 
 function Area2D(c1: Coordinate, c2: Coordinate) {
     let x1 = c1.x;
@@ -58,8 +56,7 @@ export interface PalletGeometry {
     corner1: Coordinate;
     corner2: Coordinate;
     corner3: Coordinate;
-}
-
+};
 
 export function getPalletDimensions(pallet: PalletGeometry) {
     let { name, corner1, corner2, corner3 } = pallet;
@@ -67,14 +64,12 @@ export function getPalletDimensions(pallet: PalletGeometry) {
     let length_vector = Subtract2D(corner3, corner2);
     let width = Norm2D(width_vector);
     let length = Norm2D(length_vector);
-
     let planar_dimensions = {
         width,
         length
     } as PlaneDimensions;
-
     return planar_dimensions;
-}
+};
 
 
 export interface BoxPosition2D {
@@ -86,6 +81,15 @@ export interface LayerObject {
     name: string;
     pallet: PalletGeometry;
     boxPositions: BoxPosition2D[];
+    height: number
+};
+
+
+// Well, you need to define a stack as a list of layers, with a height,
+// Layers should have a height built in.
+export interface StackObject {
+
+
 };
 
 // And then finally, the stack will be a collection of layers incremented by box height. 
