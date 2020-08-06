@@ -1,6 +1,8 @@
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
 
+import { AxesDirections, TeachModeController } from "../../MachineMotion/MachineMotion";
+
 import Up from "../images/up.png";
 import Down from "../images/down.png";
 import Left from "../images/left.png";
