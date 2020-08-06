@@ -2,12 +2,32 @@
  //@import "../../css/TeachMode.scss";
 
 
+
+ @mixin jin-style($width, $fs) {
+     input {
+         border-radius: $border-radius;
+         color: $dark-blue;
+         border: $container-border;
+         font-size: $fs;
+         width: $width;
+         //padding: $margin;
+         // Testing this out.
+         text-align: center;
+     }
+ }
+
+
  .CornerGrid {
      height: 100%;
      width: 100%;
      display: grid;
      grid-template-rows: 10% 90%;
      grid-template-columns: 100%;
+
+     .PalletName {
+         @include flex-center();
+         @include jin-style(50%, 2em);
+     }
  }
 
 
@@ -29,9 +49,8 @@
          height: 100%;
          width: 100%;
          @include flex-center();
-	 svg {
-	     
-	 }
+
+         svg {}
 
          canvas {
              height: 100%;

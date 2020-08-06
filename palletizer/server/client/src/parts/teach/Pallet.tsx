@@ -182,9 +182,9 @@ interface PalletCornerProps {
 }
 
 
-function defaultPallet(): PalletGeometry {
+function defaultPallet(index: number): PalletGeometry {
     let p: PalletGeometry = {
-        name: "Default Pallet",
+        name: "Pallet " + String(index),
         corner1:
         {
             x: 0,
@@ -211,7 +211,7 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
 
     // Start with a default pallet for editing...
-    let [editingPallet, setEditingPallet] = useState<PalletGeometry>(defaultPallet());
+    let [editingPallet, setEditingPallet] = useState<PalletGeometry>(defaultPallet(allPallets.length + 1));
 
     let [editComplete, setEditComplete] = useState<boolean>(false);
 
@@ -248,28 +248,24 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
         }
     };
 
+    let setPalletName = (e: ChangeEvent) => {
+        let name = (e.target as any).value;
+        setEditingPallet({ ...editingPallet, name });
+    };
+
     let startEdit = (index: number) => () => {
         if (index >= 0) {
             setEditComplete(true);
             setEditingPallet(allPallets[index]);
         } else {
             setEditComplete(false);
-            setEditingPallet(defaultPallet());
+            setEditingPallet(defaultPallet(allPallets.length));
         }
         setCornerNumber(Corners.ONE);
         setSummaryScreen(false);
     };
 
     let title = "Select Corner " + String(cornerNumber as number + 1);
-
-    let selectAction = () => {
-        if (cornerNumber === Corners.THREE) {
-            console.log("Done");
-            setEditComplete(true);
-        } else {
-            setCornerNumber(cornerNumber as number + 1);
-        }
-    };
 
     let backAction = () => {
         if (cornerNumber !== Corners.ONE) {
@@ -278,9 +274,28 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
     };
 
     let addCorner = (c: Coordinate) => {
+        switch (cornerNumber) {
+            case (Corners.ONE): {
+                setEditingPallet({ ...editingPallet, corner1: c });
+                break;
+            };
+            case (Corners.TWO): {
+                setEditingPallet({ ...editingPallet, corner2: c });
+                break;
 
+            };
+            case (Corners.THREE): {
+                setEditingPallet({ ...editingPallet, corner3: c });
+                break;
+            };
+        };
+
+        if (cornerNumber === Corners.THREE) {
+            setEditComplete(true);
+        } else {
+            setCornerNumber(cornerNumber as number + 1);
+        }
     };
-
 
     let instruction: string;
 
@@ -295,17 +310,15 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
 
         let size = 650;
 
-        instruction = "Move to and select three pallet corners";
+        instruction = "Move to corner " + String(cornerNumber + 1) + " and click select. ";
         return (
             <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="CornerGrid">
-                    <div className="SubInstruction">
-                        <span>
-                            {title}
-                        </span>
+                    <div className="PalletName">
+                        <input type="text" placeholder={editingPallet.name} value={editingPallet.name} onChange={setPalletName} />
                     </div>
                     <div className="PickLocationGrid">
-                        <Jogger selectAction={selectAction} />
+                        <Jogger selectAction={addCorner} />
                         <div className="PalletContainer">
                             <div className="PalletMount">
                                 <PalletModel size={size} pallet={editingPallet} />

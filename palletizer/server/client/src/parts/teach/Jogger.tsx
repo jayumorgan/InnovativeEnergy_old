@@ -8,6 +8,7 @@ import Right from "../images/right.png";
 
 
 import "./css/Jogger.scss";
+import { Coordinate } from './structures/Data';
 
 enum Directions {
     UP = "Up",
@@ -117,10 +118,16 @@ function JoggerParameter({ title, value }: JoggerParameterProps) {
 }
 
 interface JoggerProps {
-    selectAction: () => void;
+    selectAction: (c: Coordinate) => void;
 }
 
 function Jogger({ selectAction }: JoggerProps) {
+
+    let [coordinate, setCoordinate] = useState<Coordinate>({ x: 0, y: 0, z: 0 } as Coordinate);
+
+    let handleSelect = () => {
+        selectAction(coordinate);
+    };
 
     let directions: Directions[] = [
         Directions.UP,
@@ -129,12 +136,6 @@ function Jogger({ selectAction }: JoggerProps) {
         Directions.RIGHT
     ];
 
-    let input_name = "PalletName";
-    let handle_input = (e: ChangeEvent) => {
-        // let value = Number((e.target as HTMLInputElement).value);
-        // set_start_box(value);
-    };
-
     return (
         <div className="JoggerCentering">
             <div className="JoggerContainerInner">
@@ -142,7 +143,7 @@ function Jogger({ selectAction }: JoggerProps) {
                 <div className="JoggerCircleContainer">
                     <div className="JoggerCircle">
                         <div className="SelectPointButton">
-                            <div className="SelectButton" onClick={selectAction}>
+                            <div className="SelectButton" onClick={handleSelect}>
                                 <span>
                                     SELECT
 				</span>
