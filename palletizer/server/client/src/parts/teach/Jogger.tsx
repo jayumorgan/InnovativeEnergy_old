@@ -24,8 +24,6 @@ interface ArrowImageProps {
     handleClick: () => void;
 };
 
-
-
 function ArrowImage({ direction, handleClick }: ArrowImageProps) {
     let image: string;
     switch (direction) {
@@ -150,9 +148,6 @@ function Jogger({ selectAction }: JoggerProps) {
         machineNetmask: "255.255.255.0",
         machineGateway: "192.168.0.1"
     } as NetworkConfiguration;
-
-
-
 
     let [speed, setSpeed] = useState<number>(100);
     let [distance, setDistance] = useState<number>(100);

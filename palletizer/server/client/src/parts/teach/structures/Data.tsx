@@ -25,7 +25,7 @@ function Area2D(c1: Coordinate, c2: Coordinate) {
     return Math.abs(x1 * y2 - x2 * y1);
 }
 
-interface Coordinate2D {
+export interface Coordinate2D {
     x: number;
     y: number;
 };
@@ -76,3 +76,16 @@ export function getPalletDimensions(pallet: PalletGeometry) {
     return planar_dimensions;
 }
 
+
+export interface BoxPosition2D {
+    position: Coordinate2D;
+    box: BoxObject
+};
+
+export interface LayerObject {
+    name: string;
+    pallet: PalletGeometry;
+    boxPositions: BoxPosition2D[];
+};
+
+// And then finally, the stack will be a collection of layers incremented by box height. 

@@ -8,7 +8,7 @@ import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject } from "./structures/Data";
+import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayerObject, BoxPosition2D } from "./structures/Data";
 
 import "./css/Layout.scss";
 
@@ -335,19 +335,23 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
 
 interface SummaryProps {
     startEdit: () => void;
+    allLayers: LayerObject[]
 }
 
-function LayoutSummary({ startEdit }: SummaryProps) {
+function LayoutSummary({ startEdit, allLayers }: SummaryProps) {
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
                     <NewLayoutCell startEdit={startEdit} />
-                    {/* {allBoxes.map((val: BoxDimensions, index: number) => {
+                    {allLayers.map((l: LayerObject, index: number) => {
                         return (
-                        <BoxCell {...val} />
-                        )
-			})} */}
+                            <div className="BoxCellContainer">
+                                <span> {l.name} </span>
+                            </div>
+                        );
+                    })}
+
                 </div>
             </div>
         </div>
@@ -398,11 +402,11 @@ function BoxCell({ box, index }: BoxCellProps) {
 interface LayoutProps {
     allBoxes: BoxObject[];
     allPallets: PalletGeometry[];
+    allLayers: LayerObject[];
+    setLayers: (layers: LayerObject[]) => void;
     handleNext: () => void;
     handleBack: () => void;
 };
-
-
 
 interface SVGPosition {
     x: number;
@@ -415,16 +419,7 @@ interface BoxPositionObject {
 };
 
 
-function Layout({ allBoxes, allPallets, handleNext, handleBack }: LayoutProps) {
-    let LeftButton: ButtonProps = {
-        name: "Back",
-        action: handleBack
-    };
-
-    let RightButton: ButtonProps = {
-        name: "Next",
-        action: handleNext
-    };
+function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handleBack }: LayoutProps) {
 
 
     let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
@@ -432,6 +427,32 @@ function Layout({ allBoxes, allPallets, handleNext, handleBack }: LayoutProps) {
     let DisplayElement = useRef<HTMLDivElement>(null);
 
     let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
+
+
+    let [editingLayer, setEditingLayer] = useState<LayerObject>({
+        name: "Layer " + String(allLayers.length + 1),
+        pallet: allPallets[0],
+        boxPositions: []
+    });
+
+
+    let LeftButton: ButtonProps = {
+        name: "Back",
+        action: handleBack
+    };
+
+    let RightButton: ButtonProps = {
+        name: "Next",
+        action: () => {
+            if (summaryScreen) {
+                handleNext()
+            } else {
+                setLayers([...allLayers, editingLayer]);
+                setSummaryScreen(true);
+            }
+        }
+    };
+
 
     let startEdit = () => {
         setSummaryScreen(false);
@@ -477,7 +498,7 @@ function Layout({ allBoxes, allPallets, handleNext, handleBack }: LayoutProps) {
         instruction = "Create and edit layers";
         return (
             <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
-                <LayoutSummary startEdit={startEdit} />
+                <LayoutSummary startEdit={startEdit} allLayers={allLayers} />
             </ContentItem>
         );
 
