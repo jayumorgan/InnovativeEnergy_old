@@ -1,14 +1,15 @@
 //-----Axios HTTP Requests------
 import axios, { AxiosResponse } from "axios";
 
+import { Coordinate } from "../parts/teach/structures/Data";
 
 
-enum NETWORK_MODE {
+export enum NETWORK_MODE {
     dhcp,
     static
 };
 
-interface NetworkConfiguration {
+export interface NetworkConfiguration {
     mode: NETWORK_MODE;
     machineIp: string;
     machineNetmask: string;
@@ -19,7 +20,7 @@ interface NetworkConfiguration {
 class MachineMotion {
     myConfiguration: NetworkConfiguration
 
-    // = {
+    // =
     //     mode: NETWORK_MODE.dhcp,
     //     machineIp: "192.169.7.2",
     //     machineNetmask: "",
@@ -33,7 +34,7 @@ class MachineMotion {
 
 
     HTTPSend(port: string, path: string, data: any | null, callback?: (res: AxiosResponse) => void) {
-        let url = this.myConfiguration.machineIp + ":" + port + "/" + path;
+        let url = "http://" + this.myConfiguration.machineIp + ":" + port + "/" + path;
 
         if (data) {
             axios.post(url, data).then((res: AxiosResponse) => {
@@ -85,8 +86,16 @@ class MachineMotion {
 
 
 
-    getCurrentPositions() {
-        console.log("Get Current Positions");
+    getCurrentPositions(callback: (positions: Coordinate) => void) {
+        let gcode = "M114";
+        this.emitGCode(gcode, (res: AxiosResponse) => {
+            console.log("Get positions callback -- transform into coordinate", res);
+            // positions[1] = float(reply[reply.find('X')+2:(reply.find('Y')-1)])
+            // positions[2] = float(reply[reply.find('Y')+2:(reply.find('Z')-1)])
+            // positions[3] = float(reply[reply.find('Z')+2:(reply.find('E')-1)])
+            // 
+            callback({ x: 100, y: 0, z: 100 } as Coordinate);
+        });
     };
 };
 
@@ -125,6 +134,9 @@ export class TeachModeController {
         } as Axes;
     }
 
+    getPosition(callback: (positions: Coordinate) => void) {
+        this.mm.getCurrentPositions(callback);
+    };
 
     Move(direction: AxesDirections, positive: boolean) {
         let axis: number;
@@ -146,8 +158,7 @@ export class TeachModeController {
                 axis = 10;
             };
         }
-
-
         this.mm.emitAbsoluteMove(axis, positive ? this.distance : -1 * this.distance);
     }
-}
+
+};

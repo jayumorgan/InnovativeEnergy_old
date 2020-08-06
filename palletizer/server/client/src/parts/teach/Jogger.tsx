@@ -1,7 +1,7 @@
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
 
-import { AxesDirections, TeachModeController } from "../../MachineMotion/MachineMotion";
+import { AxesDirections, TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
 
 import Up from "../images/up.png";
 import Down from "../images/down.png";
@@ -21,9 +21,12 @@ enum Directions {
 
 interface ArrowImageProps {
     direction: Directions;
+    handleClick: () => void;
 };
 
-function ArrowImage({ direction }: ArrowImageProps) {
+
+
+function ArrowImage({ direction, handleClick }: ArrowImageProps) {
     let image: string;
     switch (direction) {
         case (Directions.UP): {
@@ -44,7 +47,7 @@ function ArrowImage({ direction }: ArrowImageProps) {
         };
     };
     return (
-        <div className={direction}>
+        <div className={direction} onClick={handleClick}>
             <img src={image} />
         </div>
     );
@@ -70,10 +73,11 @@ function MakeTriangleCoordinates(up: boolean, height: number, width: number, sca
 
 interface AProps {
     dagger: boolean;
+    handleMove: (dagger: boolean) => void;
 };
 
 
-function A({ dagger }: AProps) {
+function A({ dagger, handleMove }: AProps) {
     let stroke_color = "rgb(22,35,56)";
     let stroke_width = 5;
     let frame_height = 50;
@@ -84,8 +88,13 @@ function A({ dagger }: AProps) {
     let text_x = frame_width / 2 - 30;
     let text_y = (dagger) ? frame_height - 10 : 0 + 15;
 
+    let move = () => {
+        handleMove(dagger);
+    };
+
+
     return (
-        <div className="JoggerRaiseLower">
+        <div className="JoggerRaiseLower" onClick={move}>
             <svg width={frame_width} height={frame_height}>
                 <polyline id="ArrowLine" points={MakeTriangleCoordinates(dagger, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" strokeWidth={stroke_width} />
                 <text id="ArrowText" x={text_x} y={text_y} fontSize="20"> {text} </text>
@@ -98,10 +107,11 @@ function A({ dagger }: AProps) {
 interface JoggerParameterProps {
     title: string;
     value: number;
+    handleUpdate: (e: ChangeEvent) => void;
 }
 
 
-function JoggerParameter({ title, value }: JoggerParameterProps) {
+function JoggerParameter({ title, value, handleUpdate }: JoggerParameterProps) {
 
     return (
         <div className="JoggerParameter">
@@ -112,7 +122,7 @@ function JoggerParameter({ title, value }: JoggerParameterProps) {
                     </span>
                 </div>
                 <div className="Input">
-                    <input type="number" value={value} />
+                    <input type="number" value={value} onChange={handleUpdate} />
                 </div>
             </div>
         </div>
@@ -125,11 +135,6 @@ interface JoggerProps {
 
 function Jogger({ selectAction }: JoggerProps) {
 
-    let [coordinate, setCoordinate] = useState<Coordinate>({ x: 0, y: 0, z: 0 } as Coordinate);
-
-    let handleSelect = () => {
-        selectAction(coordinate);
-    };
 
     let directions: Directions[] = [
         Directions.UP,
@@ -138,10 +143,68 @@ function Jogger({ selectAction }: JoggerProps) {
         Directions.RIGHT
     ];
 
+
+    let networkConfig = {
+        mode: NETWORK_MODE.static,
+        machineIp: "192.168.0.3",
+        machineNetmask: "255.255.255.0",
+        machineGateway: "192.168.0.1"
+    } as NetworkConfiguration;
+
+
+
+
+    let [speed, setSpeed] = useState<number>(100);
+    let [distance, setDistance] = useState<number>(100);
+
+    let Controller = new TeachModeController(networkConfig, speed, distance);
+
+    let handleSpeed = (e: ChangeEvent) => {
+        let val: number = (e.target as any).value;
+        setSpeed(+val);
+    };
+
+    let handleDistance = (e: ChangeEvent) => {
+        let val: number = (e.target as any).value;
+        setDistance(+val);
+    };
+
+    let handleMove = (d: Directions) => () => {
+        switch (d) {
+            case Directions.UP: {
+                Controller.Move(AxesDirections.Y, true);
+                break;
+            };
+            case Directions.DOWN: {
+                Controller.Move(AxesDirections.Y, false);
+                break;
+            }
+            case Directions.RIGHT: {
+                Controller.Move(AxesDirections.X, true);
+                break;
+            }
+            case Directions.LEFT: {
+                Controller.Move(AxesDirections.X, false);
+                break;
+            }
+        };
+    };
+
+    let handleAMove = (dagger: boolean) => {
+        Controller.Move(AxesDirections.Z, dagger);
+    };
+
+
+    let handleSelect = () => {
+        Controller.getPosition((positions: Coordinate) => {
+            selectAction(positions);
+        });
+    };
+
     return (
         <div className="JoggerCentering">
             <div className="JoggerContainerInner">
-                <A dagger={true} />
+                <A dagger={true} handleMove={handleAMove} />
                 <div className="JoggerCircleContainer">
                     <div className="JoggerCircle">
                         <div className="SelectPointButton">
@@ -153,16 +216,16 @@ function Jogger({ selectAction }: JoggerProps) {
                         </div>
                         {directions.map((d: Directions, index: number) => {
                             return (
-                                <ArrowImage direction={d} key={index} />
+                                <ArrowImage direction={d} handleClick={handleMove(d)} key={index} />
                             )
                         })}
                     </div>
                 </div>
-                <A dagger={false} />
+                <A dagger={false} handleMove={handleAMove} />
             </div>
             <div className="JoggerParameters">
-                <JoggerParameter title={"Distance (mm)"} value={110} />
-                <JoggerParameter title={"Speed (mm/s)"} value={120} />
+                <JoggerParameter title={"Distance (mm)"} value={distance} handleUpdate={handleDistance} />
+                <JoggerParameter title={"Speed (mm/s)"} value={speed} handleUpdate={handleSpeed} />
             </div>
         </div>
     );
