@@ -19,6 +19,14 @@ enum Directions {
     RIGHT = "Right"
 };
 
+let networkConfig = {
+    mode: NETWORK_MODE.static,
+    machineIp: "192.168.7.2",
+    machineNetmask: "255.255.255.0",
+    machineGateway: "192.168.0.1"
+} as NetworkConfiguration;
+
+
 interface ArrowImageProps {
     direction: Directions;
     handleClick: () => void;
@@ -142,12 +150,6 @@ function Jogger({ selectAction }: JoggerProps) {
     ];
 
 
-    let networkConfig = {
-        mode: NETWORK_MODE.static,
-        machineIp: "192.168.0.3",
-        machineNetmask: "255.255.255.0",
-        machineGateway: "192.168.0.1"
-    } as NetworkConfiguration;
 
     let [speed, setSpeed] = useState<number>(100);
     let [distance, setDistance] = useState<number>(100);

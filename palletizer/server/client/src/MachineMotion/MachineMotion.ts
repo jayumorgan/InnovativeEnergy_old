@@ -4,6 +4,14 @@ import axios, { AxiosResponse } from "axios";
 import { Coordinate } from "../parts/teach/structures/Data";
 
 
+
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+axios.defaults.headers.get['Content-Type'] = "application/x-www-form-urlencoded";
+
+
+
+
+
 export enum NETWORK_MODE {
     dhcp,
     static
@@ -60,10 +68,10 @@ class MachineMotion {
 
         console.log("Encoded path: ", encoded_path);
 
-        this.HTTPSend("8000", encoded_path, null, callback);
+        this.HTTPSend("8000", "gcode?" + encoded_path, null, callback);
     };
 
-    emitAbsoluteMove(axis: number, position: number) {
+    emitRelativeMove(axis: number, position: number) {
         let axes = {
             1: "X",
             2: "Y",
@@ -74,7 +82,7 @@ class MachineMotion {
         let a = axes[axis];
 
 
-        this.emitGCode("G90", (res: AxiosResponse) => {
+        this.emitGCode("G91", (res: AxiosResponse) => {
             this.emitGCode("G0 " + a + String(position));
         });
     };
@@ -90,11 +98,30 @@ class MachineMotion {
         let gcode = "M114";
         this.emitGCode(gcode, (res: AxiosResponse) => {
             console.log("Get positions callback -- transform into coordinate", res);
+            let response = res.data as string;
+            //echo:N1831 M114*28 ↵X:100.00 Y:100.00 Z:100.00 E:0.00 Count X: -1067 Y:1353 Z:-1067 ↵ok
             // positions[1] = float(reply[reply.find('X')+2:(reply.find('Y')-1)])
             // positions[2] = float(reply[reply.find('Y')+2:(reply.find('Z')-1)])
             // positions[3] = float(reply[reply.find('Z')+2:(reply.find('E')-1)])
-            // 
-            callback({ x: 100, y: 0, z: 100 } as Coordinate);
+            let Xreg: RegExp = /X:([\d\.]+)/;
+            let Yreg: RegExp = /Y:([\d\.]+)/;
+            let Zreg: RegExp = /Z:([\d\.]+)/;
+
+            let XMatch = Xreg.exec(response);
+            let YMatch = Yreg.exec(response);
+            let ZMatch = Zreg.exec(response);
+
+            if (XMatch && YMatch && ZMatch) {
+                let XVal: number = + XMatch[1];
+                let YVal: number = + YMatch[1];
+                let ZVal: number = + ZMatch[1];
+
+                console.log(XMatch, YMatch, ZMatch);
+
+                console.log(XVal, YVal, ZVal);
+
+                callback({ x: 100, y: 0, z: 100 } as Coordinate);
+            }
         });
     };
 };
@@ -134,11 +161,10 @@ export class TeachModeController {
         } as Axes;
     }
 
+
     getPosition(callback: (positions: Coordinate) => void) {
-	let pos = {x : 0 , y :  100 + Math.random() * 500 , z : 0};
-	console.log(pos);
-	callback(pos as Coordinate);
-        //this.mm.getCurrentPositions(callback);
+
+        this.mm.getCurrentPositions(callback);
     };
 
     Move(direction: AxesDirections, positive: boolean) {
@@ -161,7 +187,7 @@ export class TeachModeController {
                 axis = 10;
             };
         }
-        this.mm.emitAbsoluteMove(axis, positive ? this.distance : -1 * this.distance);
+        this.mm.emitRelativeMove(axis, positive ? this.distance : -1 * this.distance);
     }
 
 };
