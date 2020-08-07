@@ -83,7 +83,7 @@ function DraggableRect({ rect, updatePosition, index }: DraggableRectProps) {
             }
         });
         setActive(true);
-        document.addEventListener("keydown", rotate90, true);
+        //        document.addEventListener("keydown", rotate90, true);
     };
 
     let handleMove = (e: React.PointerEvent) => {
@@ -216,7 +216,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
 
     // How do we get the box positions after a drop? 
     let updateRectPosition = (index: number, nx: number, ny: number) => {
-        let [fractionX, fractionY] = calculatePositionFraction(nx, ny);
+
 
         if (boxes && updateLayoutBoxes) {
             // Loop through boxes in boxes
@@ -225,14 +225,21 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
             boxes.forEach(({ position, box }: BoxPositionObject, i: number) => {
                 let { x, y } = position;
 
+
                 if (index === i) {
                     x = nx;
                     y = ny;
+
                 }
+
+                let [fractionX, fractionY] = calculatePositionFraction(x, y);
+
+
                 let bp2d = {
                     box,
                     position: {
-                        x, y
+                        x: fractionX,
+                        y: fractionY
                     }
                 } as BoxPosition2D;
 
@@ -455,9 +462,11 @@ function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
                         if (p.Layers.length > 0) {
                             return (
                                 <>
-                                    {p.Layers.map((l: LayerObject, j: number) => {
-                                        return (<LayoutCell pallet={p} layer={l} />);
-                                    })}
+                                    {
+                                        p.Layers.map((l: LayerObject, j: number) => {
+                                            return (<LayoutCell pallet={p} layer={l} key={`${j}${index}`} />);
+                                        })
+                                    }
 
                                 </>
                             );
@@ -465,7 +474,7 @@ function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
                     })}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -586,6 +595,8 @@ function Layout({ allBoxes, allPallets, setPallets, handleNext, handleBack }: La
                             }
                         }
                     });
+
+                    console.log("Good Boxes", goodBoxes);
 
                     let newLayer = {
                         ...editingLayer,

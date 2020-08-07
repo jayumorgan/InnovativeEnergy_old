@@ -3,6 +3,8 @@ import React, { useReducer, useContext, useState, Fragment, ReactElement, Change
 import Modal from "./Modal";
 
 //import { PalletConfiguration } from "../services/TeachMode";
+import { SavePalletConfig } from "../requests/requests";
+
 
 import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
@@ -12,7 +14,7 @@ import BoxSize from "./teach/BoxSize";
 import Layout from "./teach/Layers";
 import Stack from "./teach/Stack";
 
-import { Coordinate, PalletGeometry, BoxObject, LayerObject, BoxPosition2D, Coordinate2D } from "./teach/structures/Data";
+import { Coordinate, PalletGeometry, BoxObject, LayerObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates } from "./teach/structures/Data";
 
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
@@ -76,6 +78,73 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
+
+function GenerateAndSaveConfig(config: PalletConfiguration) {
+
+    let { name, pallets } = config;
+    // We should also write the entire file.
+    let boxCoordinates: BoxCoordinates[] = [];
+
+    pallets.forEach((p: PalletGeometry) => {
+        let { width, length } = getPalletDimensions(p);
+        let { Layers, Stack } = p;
+
+        Stack.forEach((n: number, index: number) => {
+
+            let { boxPositions, height } = Layers[n];
+
+            boxPositions.forEach((b: BoxPosition2D) => {
+
+                let { box, position } = b;
+                let { pickLocation } = box;
+                let { x, y } = position; // These are fractions from the left of the pallet.
+                let { corner1, corner2, corner3 } = p;
+
+                let palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
+
+                //compute the middle of the box shift.
+                let boxXmid = box.dimensions.width / 2;
+                let boxYmid = box.dimensions.length / 2;
+                let boxHeight = height; // Assume Same Height;
+
+                // Move along the X axis defined by the pallet.
+                let Ydirection = Subtract3D(corner1, corner2);
+                let Xdirection = Subtract3D(corner3, corner2);
+                // form the two vectors that specify the position
+
+                let x_pos = MultiplyScalar(Xdirection, x);
+                let y_pos = MultiplyScalar(Ydirection, y);
+
+                let Xunit = MultiplyScalar(Xdirection, 1 / Norm(Xdirection));
+                let Yunit = MultiplyScalar(Ydirection, 1 / Norm(Ydirection));
+
+                x_pos = Add3D(x_pos, MultiplyScalar(Xunit, boxXmid));
+                y_pos = Add3D(y_pos, MultiplyScalar(Yunit, boxYmid));
+
+                let z_add = (1 + index) * boxHeight + palletHeight;
+
+                let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
+
+                boxCoordinates.push({
+                    pickLocation,
+                    dropLocation: box_position
+                } as BoxCoordinates);
+            });
+        });
+    });
+
+    let configuration = {
+        config,
+        boxCoordinates
+    } as any;
+
+    // Save the file...
+    SavePalletConfig(name, configuration);
+};
+
+
+
+
 //---------------Pallet Configurator Component---------------
 function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
@@ -101,8 +170,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let handleNext = () => {
-        let state = teachState;
-        setTeachState(++teachState);
+        if (teachState === PalletTeachState.STACK_SETUP) {
+            GenerateAndSaveConfig(configuration);
+            close();
+        } else {
+            setTeachState(++teachState);
+        }
     };
 
     let handleBack = () => {

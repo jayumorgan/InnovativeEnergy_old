@@ -12,6 +12,8 @@ import Right from "../images/right.png";
 import "./css/Jogger.scss";
 import { Coordinate } from './structures/Data';
 
+let TEMP_JOGGER_INDEX = 1;
+
 enum Directions {
     UP = "Up",
     DOWN = "Down",
@@ -141,15 +143,12 @@ interface JoggerProps {
 
 function Jogger({ selectAction }: JoggerProps) {
 
-
     let directions: Directions[] = [
         Directions.UP,
         Directions.DOWN,
         Directions.LEFT,
         Directions.RIGHT
     ];
-
-
 
     let [speed, setSpeed] = useState<number>(100);
     let [distance, setDistance] = useState<number>(100);
@@ -193,6 +192,29 @@ function Jogger({ selectAction }: JoggerProps) {
 
 
     let handleSelect = () => {
+
+        let p: Coordinate = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+
+        let tempindex = TEMP_JOGGER_INDEX % 3;
+
+        if (TEMP_JOGGER_INDEX == 1) {
+            p.y = 100;
+
+        } else if (TEMP_JOGGER_INDEX === 2) {
+
+
+        } else {
+            p.x = 100
+        }
+        TEMP_JOGGER_INDEX += 1;
+
+        selectAction(p);
+
+        console.log("Uncomment when in production ... get position on jogger");
         Controller.getPosition((positions: Coordinate) => {
             selectAction(positions);
         });

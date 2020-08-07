@@ -1,44 +1,44 @@
-import React, { useContext, ChangeEvent, useState, ReactElement} from 'react';
+import React, { useContext, ChangeEvent, useState, ReactElement } from 'react';
 
 // MQTT
-import {MQTTControl} from "../mqtt/MQTT";
+import { MQTTControl } from "../mqtt/MQTT";
 
 // Context
-import {PalletizerContext} from "../context/PalletizerContext";
-import {ConfigContext} from "../context/ConfigContext";
+import { PalletizerContext } from "../context/PalletizerContext";
+import { ConfigContext } from "../context/ConfigContext";
 
 // Requests
-import {set_config} from "../requests/requests";
+import { set_config } from "../requests/requests";
 
 // Types
-import {ConfigState, PalletizerState} from "../types/Types";
+import { ConfigState, PalletizerState } from "../types/Types";
 
 // Components
-import Visualizer from "./Visualizer";
+//import Visualizer from "./Visualizer";
 
 // Styles
 import "./css/General.scss";
 
 // Logo image
 import logo from "../images/vention_logo.png";
-import {ReactComponent as BellImage} from "./images/bell.svg";
-import {ReactComponent as DangerImage} from "./images/danger.svg";
-import {ReactComponent as ExclamationImage} from "./images/exclamation-circle.svg";
-import {ReactComponent as InfoImage} from "./images/info-circle.svg";
-import {ReactComponent as CircleImage} from "./images/circle.svg";
+import { ReactComponent as BellImage } from "./images/bell.svg";
+import { ReactComponent as DangerImage } from "./images/danger.svg";
+import { ReactComponent as ExclamationImage } from "./images/exclamation-circle.svg";
+import { ReactComponent as InfoImage } from "./images/info-circle.svg";
+import { ReactComponent as CircleImage } from "./images/circle.svg";
 
 
 var control = MQTTControl();
 
 
 // Support Functions:
-function make_time_string(hours:number, minute:number) : string {
+function make_time_string(hours: number, minute: number): string {
     let hour_string = String(hours);
     let minute_string = minute < 10 ? `0${minute}` : String(minute);
     return hour_string + ":" + minute_string;
 }
 
-function make_date_string(day: number, month: number, year: number){
+function make_date_string(day: number, month: number, year: number) {
     month += 1;
     let day_string = day < 10 ? `0${day}` : String(day);
     let month_string = month < 10 ? `0${month}` : String(month);
@@ -47,12 +47,12 @@ function make_date_string(day: number, month: number, year: number){
 }
 
 interface ExecuteProps {
-    current_box : number;
+    current_box: number;
     status: string;
 }
 
 
-function ConfigCell({title , children} : StackProps ) {
+function ConfigCell({ title, children }: StackProps) {
 
     return (
         <div className="ConfigCell">
@@ -66,17 +66,17 @@ function ConfigCell({title , children} : StackProps ) {
 
 
 
-function ExecutePane({current_box, status} : ExecuteProps) {
+function ExecutePane({ current_box, status }: ExecuteProps) {
     let config_context = useContext(ConfigContext);
 
 
-    let {machine_configs, pallet_configs, machine_index, pallet_index} = config_context as ConfigState;
-    
+    let { machine_configs, pallet_configs, machine_index, pallet_index } = config_context as ConfigState;
+
 
     let [start_box, set_start_box] = useState(current_box);
-    let [machine_current_config, set_machine_current_config] = useState<string|null>(null);
-    let [pallet_current_config, set_pallet_current_config] = useState<string|null>(null);
-    
+    let [machine_current_config, set_machine_current_config] = useState<string | null>(null);
+    let [pallet_current_config, set_pallet_current_config] = useState<string | null>(null);
+
 
     let handle_input = (e: ChangeEvent) => {
         let value = Number((e.target as HTMLInputElement).value);
@@ -89,22 +89,22 @@ function ExecutePane({current_box, status} : ExecuteProps) {
 
     let icons = ["icon-play", "icon-pause", "icon-stop"];
 
-    let stop_button = ()=>{
-        let {stop} = control;
+    let stop_button = () => {
+        let { stop } = control;
         stop();
     };
-    
-    let pause_button = ()=>{
-        let {pause} = control;
+
+    let pause_button = () => {
+        let { pause } = control;
         pause();
     };
-    
-    let start_button = ()=>{
-        let {start} = control;
+
+    let start_button = () => {
+        let { start } = control;
         start();
     };
 
-    let is_running : boolean = (status === "Running");
+    let is_running: boolean = (status === "Running");
 
     let start_icon = is_running ? icons[1] : icons[0];
 
@@ -112,18 +112,18 @@ function ExecutePane({current_box, status} : ExecuteProps) {
 
     let start_text = is_running ? "Pause" : "Start";
 
-    let handle_config_select = (machine : boolean) => (e : React.ChangeEvent) => {
+    let handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
         let file_name = (e.target as HTMLSelectElement).value;
         set_config(file_name, machine); // server request.
         set_machine_current_config(file_name);
     };
-    
+
     return (
         <div className="ExecuteGrid">
             <ConfigCell title={machine_config_title} >
                 <div className="ConfigItem">
                     <select onChange={handle_config_select(true)} value={machine_current_config ? machine_current_config : machine_configs[machine_index as number]}>
-                        {machine_configs.map((item : string, index : number)=>{
+                        {machine_configs.map((item: string, index: number) => {
                             return (<option value={item} key={index} > {item} </option>)
                         })}
                     </select>
@@ -132,7 +132,7 @@ function ExecutePane({current_box, status} : ExecuteProps) {
             <ConfigCell title={pallet_config_title}>
                 <div className="ConfigItem">
                     <select onChange={handle_config_select(false)} value={pallet_current_config ? pallet_current_config : pallet_configs[pallet_index as number]}>
-                        {pallet_configs.map((item : string, index : number)=>{
+                        {pallet_configs.map((item: string, index: number) => {
                             return (<option value={item} key={index} > {item} </option>)
                         })}
                     </select>
@@ -145,15 +145,15 @@ function ExecutePane({current_box, status} : ExecuteProps) {
             </ConfigCell>
             <div className="ButtonGrid">
                 <div className="StartButton">
-                <div className="ButtonContainer" onClick={start_fn}>
+                    <div className="ButtonContainer" onClick={start_fn}>
                         <span className={start_icon}> </span>
-                <span id="button-text">{start_text}</span>    
+                        <span id="button-text">{start_text}</span>
                     </div>
                 </div>
                 <div className="StopButton">
-                <div className="ButtonContainer" onClick={stop_button}>
+                    <div className="ButtonContainer" onClick={stop_button}>
                         <span className={icons[2]}> </span>
-                <span id="button-text">{"Stop"}</span>    
+                        <span id="button-text">{"Stop"}</span>
                     </div>
                 </div>
             </div>
@@ -166,42 +166,42 @@ interface StatusBarProps {
 }
 
 
-function circle_image_style(value: string) : any {
-    let color : string = "gray";     
+function circle_image_style(value: string): any {
+    let color: string = "gray";
     switch (value) {
 
-            case "Running" : {
-                color = "rgb(91,196,126)";
-                break;
-            }
-            case "Paused" : {
-                color = "rgb(250, 234, 47)"
-                break;
-            }
-            case "Stopped" : {
-                color = "red";
-                break;
-            }
-            default : {
-                color = "grey";
-                break;
-            }
-            
+        case "Running": {
+            color = "rgb(91,196,126)";
+            break;
+        }
+        case "Paused": {
+            color = "rgb(250, 234, 47)"
+            break;
+        }
+        case "Stopped": {
+            color = "red";
+            break;
+        }
+        default: {
+            color = "grey";
+            break;
+        }
+
     }
 
-    return {fill : color};
+    return { fill: color };
 }
 
-function StatusBar({items} : StatusBarProps) {
+function StatusBar({ items }: StatusBarProps) {
     return (
         <div className="StatusBar">
-            {items.map((item: StatusItem, index: number)=>{
+            {items.map((item: StatusItem, index: number) => {
                 return (
                     <div className="StatusItem" key={index}>
                         <span>{item.title.toUpperCase()}</span>
                         <div className="StatusValue">
-                        {item.title.toUpperCase() === "STATUS" && 
-                            <CircleImage style={circle_image_style(item.value)}/>}
+                            {item.title.toUpperCase() === "STATUS" &&
+                                <CircleImage style={circle_image_style(item.value)} />}
                             <span>
                                 {item.value}
                             </span>
@@ -221,7 +221,7 @@ interface InformationLogProps {
 }
 
 
-function InformationLog({DateString, Description, Type}: InformationLogProps) {
+function InformationLog({ DateString, Description, Type }: InformationLogProps) {
 
     let date = new Date(DateString);
     let hours = date.getHours();
@@ -229,40 +229,40 @@ function InformationLog({DateString, Description, Type}: InformationLogProps) {
     let day = date.getDate();
     let month = date.getMonth();
     let year = date.getFullYear();
-    let date_string =  make_date_string(day, month, year);
+    let date_string = make_date_string(day, month, year);
     let time_string = make_time_string(hours, minutes);
 
-    let image : ReactElement;
+    let image: ReactElement;
 
     switch (Type) {
-           case "Status" : {
-               image = (<InfoImage />);
-               break;
-           }
-            case "Error" : {
-                image = (<ExclamationImage id={"Error"} />);
-                break;
-            }
-            case "Warning" : {
-                image = (<BellImage id={"Warning"} />);
-                break;
-            }
-            default : {
-                image = (<InfoImage />);
-                break;
-            }
+        case "Status": {
+            image = (<InfoImage />);
+            break;
+        }
+        case "Error": {
+            image = (<ExclamationImage id={"Error"} />);
+            break;
+        }
+        case "Warning": {
+            image = (<BellImage id={"Warning"} />);
+            break;
+        }
+        default: {
+            image = (<InfoImage />);
+            break;
+        }
     }
-    
+
 
     return (
         <div className="InformationLog">
             <div className="InformationLogLeft">
                 <div className="InformationLogImage">
-                        {image}
+                    {image}
                 </div>
                 <div className="InformationLogDate">
                     <span>{time_string}</span>
-                <span id="DateString"> {date_string} </span>
+                    <span id="DateString"> {date_string} </span>
                 </div>
             </div>
             <span>
@@ -278,14 +278,14 @@ function InformationLog({DateString, Description, Type}: InformationLogProps) {
 }
 
 function InformationLogContainer() {
-    
+
     let palletizer_context = useContext(PalletizerContext);
 
-    let {information} = palletizer_context as PalletizerState;
+    let { information } = palletizer_context as PalletizerState;
 
     return (
         <div className="InformationLogContainer">
-            {information.map((err : InformationLogProps, index : number) => {
+            {information.map((err: InformationLogProps, index: number) => {
                 return (<InformationLog {...err} key={index} />)
             })}
         </div>
@@ -295,23 +295,23 @@ function InformationLogContainer() {
 
 
 interface StackProps {
-    title : string;
+    title: string;
     children: ReactElement;
 }
 
 
 interface LegendProps {
-    title : string;
-    image : ReactElement,
-    color : string;
+    title: string;
+    image: ReactElement,
+    color: string;
 }
 
-function LegendItem({title, image, color} : LegendProps ){
+function LegendItem({ title, image, color }: LegendProps) {
     let style = {
         backgroundColor: color
     };
 
-    
+
     return (
         <div className="InformationLegendItem" style={style}>
             {image} <span> {title} </span>
@@ -321,39 +321,39 @@ function LegendItem({title, image, color} : LegendProps ){
 
 
 
-function IStackContainer({title, children} : StackProps) {
+function IStackContainer({ title, children }: StackProps) {
 
     let info_item = {
-        title : "Info",
+        title: "Info",
         image: <InfoImage />,
         color: "rgb(22,35,56)"
     } as LegendProps;
 
     let warning_item = {
-        title : "Warning",
+        title: "Warning",
         image: <BellImage />,
         color: "rgb(105,122,151)"
     } as LegendProps;
 
     let error_item = {
-        title : "Error",
+        title: "Error",
         image: <ExclamationImage />,
         color: "red"
     } as LegendProps;
-    
-    let items : LegendProps[] = [info_item, warning_item, error_item];
+
+    let items: LegendProps[] = [info_item, warning_item, error_item];
 
 
-    
-    return ( 
+
+    return (
         <div className="StackContainer">
             <div className="StackTitle">
                 <span>
                     {title}
                 </span>
                 <div className="InformationLegend">
-                    {items.map((item: LegendProps, index: number)=>{
-                        return (<LegendItem {...item} key={index}/>)
+                    {items.map((item: LegendProps, index: number) => {
+                        return (<LegendItem {...item} key={index} />)
                     })}
                 </div>
             </div>
@@ -363,7 +363,7 @@ function IStackContainer({title, children} : StackProps) {
 }
 
 
-function StackContainer( {title, children} : StackProps) {
+function StackContainer({ title, children }: StackProps) {
     return (
         <div className="StackContainer">
             <div className="StackTitle">
@@ -374,19 +374,19 @@ function StackContainer( {title, children} : StackProps) {
             {children}
         </div>
     );
-} 
+}
 
 interface StatusItem {
     title: string;
     value: any;
 }
 
-function General () {
-    
+function General() {
+
     let palletizer_context = useContext(PalletizerContext);
 
-    let {status, cycle, total_box, current_box, time } = palletizer_context as PalletizerState;
-    
+    let { status, cycle, total_box, current_box, time } = palletizer_context as PalletizerState;
+
     let items = [] as StatusItem[];
 
     items.push({
@@ -420,10 +420,12 @@ function General () {
                 </StackContainer>
             </div>
             <div className="VisualizerContainer">
-                    <Visualizer />
-                    <div className="LogoContainer">
-                        <img src={logo} />
-                    </div>
+                {/* <Visualizer /> */}
+                <div className="Visualizer">
+                </div>
+                <div className="LogoContainer">
+                    <img src={logo} />
+                </div>
             </div>
             <div className="InformationContainer">
                 <IStackContainer title={"Information Console"}>

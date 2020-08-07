@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 
 import { PalletGeometry, LayerObject } from "./structures/Data";
 
@@ -16,20 +16,40 @@ interface StackProps {
 };
 
 function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
-
-    let haveStack = false;
-
-    allPallets.forEach((p: PalletGeometry) => {
-        if (!haveStack && p.Stack.length > 0) {
-            haveStack = true;
-        }
-    });
+    //    let haveStack = false;
+    let checkForStack = () => {
+        let haveStack = false
+        allPallets.forEach((p: PalletGeometry) => {
+            if (!haveStack && p.Stack.length > 0) {
+                haveStack = true;
+            }
+        });
+        return haveStack;
+    };
 
     let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(haveStack);
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(checkForStack());
 
     let [currentStack, setCurrentStack] = useState<number[]>(allPallets[currentPalletIndex].Stack);
+
+    let saveStack = () => {
+        let pallets: PalletGeometry[] = [];
+        allPallets.forEach((p: PalletGeometry, i: number) => {
+            let t = { ...p };
+            if (i === currentPalletIndex) {
+                t.Stack = [...currentStack];
+            }
+            pallets.push(t);
+        });
+        setPallets(pallets);
+    };
+
+    let changeCurrentPallet = (to: number) => {
+        saveStack();
+        setCurrentStack(allPallets[to].Stack);
+        setCurrentPalletIndex(to);
+    };
 
     let LeftButton: ButtonProps = {
         name: "Back",
@@ -38,16 +58,32 @@ function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
 
     let RightButton: ButtonProps = {
         name: summaryScreen ? "Save and Finish" : "Next",
-        action: handleNext
+        action: () => {
+
+            if (summaryScreen) {
+                handleNext();
+            } else {
+                saveStack();
+                if (currentStack.length > 0 || checkForStack()) {
+                    setSummaryScreen(true);
+                }
+            };
+        }
     };
 
     let addRow = () => {
-
+        setCurrentStack([...currentStack, 0]);
     }
 
+    let setStackValue = (index: number) => (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        let t = [...currentStack];
+        t[index] = val;
+        setCurrentStack(t);
+    };
+
+
     let instruction: string;
-
-
 
     if (summaryScreen) {
         instruction = "Create and Edit Pallet Stack Configurations";
@@ -63,7 +99,7 @@ function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
         instruction = "Define a pallet stack";
         let currentPallet = allPallets[currentPalletIndex];
 
-        let { name, Layers, Stack } = currentPallet;
+        let { name, Layers } = currentPallet;
 
         return (
             <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
@@ -83,22 +119,26 @@ function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
                     </div>
                     <div className="StackContainer">
                         {currentStack.map((s: number, index: number) => {
-                            <div className="StackRow">
-                                <div className="RowName">
-                                    {"Level 1"}
+                            return (
+                                <div className="StackRow" key={index}>
+                                    <div className="RowName">
+                                        <span>
+                                            {"Level " + String(index)}
+                                        </span>
+                                    </div>
+                                    <div className="LayerSelector">
+                                        <select value={s} onChange={setStackValue(index)}>
+                                            {Layers.map((l: LayerObject, j: number) => {
+                                                return (
+                                                    <option key={j} value={j}> {l.name} </option>
+                                                )
+                                            })}
+                                        </select>
+                                    </div>
                                 </div>
-                                <div className="LayerSelector">
-                                    <select value={s}>
-                                        {Layers.map((l: LayerObject, j: number) => {
-                                            return (
-                                                <option value={j}> l.name </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
-                            </div>
+                            )
                         })}
-                        <div className="AddStack">
+                        <div className="AddStack" onClick={addRow} >
                             <span>
                                 {"Add a new row"}
                             </span>

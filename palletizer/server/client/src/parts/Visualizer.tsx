@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useContext } from 'react';
 
-
 // 3D rendering
 import * as Three from "three";
 
@@ -23,8 +22,9 @@ import carboard from "./images/cardboard.jpg";
 import vcardboard from "./images/vcardboard.jpg";
 
 // Cleanup this file once it is functional!
+import { PalletGeometry, getPalletDimensions } from "./teach/structures/Data";
 
-interface PalletGeometry {
+interface PalletInterface {
     pallet_height: number;
     pallet_width: number;
     pallet_length: number;
@@ -41,10 +41,15 @@ interface PalletGeometry {
     x: string;
     y: string;
     z: string;
-}
+};
+
+function parseConfig(pallet: any, machine: any) {
+    let { pallets } = pallet;
+    let { width, length } = getPalletDimensions(pallets[0] as PalletGeometry);
+};
 
 
-function parse_config(pallet: any, machine: any): PalletGeometry {
+function parse_config(pallet: any, machine: any): PalletInterface {
     let box_size = pallet["BOX_SIZE"] as any;
     let pallet_rows = pallet["PALLET_ROWS"] as any;
     let pallet_cols = pallet["PALLET_COLUMNS"] as any;
@@ -90,7 +95,7 @@ function parse_config(pallet: any, machine: any): PalletGeometry {
         x,
         y,
         z
-    } as PalletGeometry;
+    } as PalletInterface;
 
     return geometry;
 }
@@ -185,11 +190,11 @@ interface VisualizerControls {
     add_box(): () => void;
     add_boxes(current_box: number): void;
     add_mesh(mesh: Three.Mesh): void;
-    set_cardboard_box(g: PalletGeometry): void;
+    set_cardboard_box(g: PalletInterface): void;
 }
 
 
-function translate_box_coordinates(c: Coordinate[], g: PalletGeometry): Coordinate[] {
+function translate_box_coordinates(c: Coordinate[], g: PalletInterface): Coordinate[] {
     let {
         norm,
         shift_x,
@@ -237,7 +242,7 @@ function Visualizer() {
 
     let controls = useRef<VisualizerControls | null>(null);
 
-    let geometry = useRef<PalletGeometry | null>(null);
+    let geometry = useRef<PalletInterface | null>(null);
     let box_positions = useRef<Coordinate[] | null>(null);
 
     useEffect(() => {
@@ -269,7 +274,7 @@ function Visualizer() {
         let cardboard_box: Three.Mesh;
         let green_box: Three.Mesh;
 
-        let set_cardboard_box = (g: PalletGeometry) => {
+        let set_cardboard_box = (g: PalletInterface) => {
             let { box_width, box_length, box_height } = g;
             cardboard_box = get_cardboard_box(box_width, box_height, box_length);
             green_box = get_green_cardboard_box(box_width, box_height, box_length);
@@ -357,7 +362,7 @@ function Visualizer() {
                 let res_data = await get_state_config({ machine_configs, pallet_configs, machine_index, pallet_index } as ConfigState);
                 let { pallet, machine } = res_data;
 
-                let g = parse_config(pallet, machine) as PalletGeometry;
+                let g = parse_config(pallet, machine) as PalletInterface;
 
                 geometry.current = g;
 

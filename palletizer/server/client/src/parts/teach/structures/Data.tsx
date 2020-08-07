@@ -28,6 +28,30 @@ export interface Coordinate2D {
     y: number;
 };
 
+export function Subtract3D(c1: Coordinate, c2: Coordinate) {
+    return {
+        x: c1.x - c2.x,
+        y: c1.y - c2.y,
+        z: c1.z - c2.z
+    } as Coordinate;
+}
+
+export function MultiplyScalar(c1: Coordinate, alpha: number) {
+    return {
+        x: c1.x * alpha,
+        y: c1.y * alpha,
+        z: c1.z * alpha
+    } as Coordinate;
+}
+
+export function Norm(c: Coordinate) {
+    return Math.sqrt(c.x ** 2 + c.y ** 2 + c.z ** 2);
+}
+
+export function Add3D(c1: Coordinate, c2: Coordinate) {
+    return Subtract3D(c1, MultiplyScalar(c2, -1));
+}
+
 function Subtract2D(c1: Coordinate, c2: Coordinate) {
 
     let x1 = c1.x;
@@ -86,5 +110,11 @@ export interface LayerObject {
     height: number
 };
 
+
+
+export interface BoxCoordinates {
+    pickLocation: Coordinate;
+    dropLocation: Coordinate;
+};
 
 // And then finally, the stack will be a collection of layers incremented by box height. 

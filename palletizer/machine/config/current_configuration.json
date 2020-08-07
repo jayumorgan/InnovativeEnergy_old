@@ -1,5 +1,1 @@
-{
-	"file_name": "config.json",
-	"machine" : "machine1.json",
-	"pallet" : "pallet2.json" 
-}
+"\"{\\n\\t\\\"file_name\\\": \\\"config.json\\\",\\n\\t\\\"machine\\\" : \\\"machine1.json\\\",\\n\\t\\\"pallet\\\" : \\\"pallet2.json\\\" \\n}\\n\""
