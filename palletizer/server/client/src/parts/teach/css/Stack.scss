@@ -1,0 +1,67 @@
+ @import "../../css/TeachMode.scss";
+
+
+
+ .StackGrid {
+     width: 100%;
+     height: 100%;
+     display: grid;
+     grid-template-rows: 10% 90%;
+     grid-template-columns: 100%;
+
+
+     .PalletName {
+         width: 100%;
+         height: 100%;
+         @include flex-center();
+
+         .PalletDropDown {
+             width: 100%;
+             @include flex-center();
+
+             select {
+                 padding: $margin;
+                 width: 50%;
+                 font-size: 2em;
+                 background-color: $light-grey;
+                 color: $dark-blue;
+             }
+         }
+     }
+
+     .StackContainer {
+         width: 100%;
+         height: 100%;
+         @include flex-center();
+         flex-direction: column;
+
+         .StackRow {
+             height: 20%;
+             width: 100% display: grid;
+             grid-template-columns: 30% 70%;
+             grid-template-rows: 100%;
+
+             .RowName {
+                 @include flex-center();
+
+                 span {
+                     font-size: $large-font;
+                 }
+             }
+
+             .LayerSelector {
+                 width: 100%;
+                 height: 100%;
+                 @include flex-center();
+
+                 select {
+                     padding: $margin;
+                     width: 50%;
+                     font-size: 2em;
+                     background-color: $light-grey;
+                     color: $dark-blue;
+                 }
+             }
+         }
+     }
+ }

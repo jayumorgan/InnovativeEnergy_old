@@ -56,6 +56,8 @@ export interface PalletGeometry {
     corner1: Coordinate;
     corner2: Coordinate;
     corner3: Coordinate;
+    Layers: LayerObject[];
+    Stack: number[];
 };
 
 export function getPalletDimensions(pallet: PalletGeometry) {
@@ -79,17 +81,10 @@ export interface BoxPosition2D {
 
 export interface LayerObject {
     name: string;
-    pallet: PalletGeometry;
+    // pallet: PalletGeometry;
     boxPositions: BoxPosition2D[];
     height: number
 };
 
-
-// Well, you need to define a stack as a list of layers, with a height,
-// Layers should have a height built in.
-export interface StackObject {
-
-
-};
 
 // And then finally, the stack will be a collection of layers incremented by box height. 

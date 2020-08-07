@@ -6,13 +6,11 @@ import Modal from "./Modal";
 
 import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
-
 import PalletCorners from "./teach/Pallet";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
-
 import Layout from "./teach/Layers";
-
+import Stack from "./teach/Stack";
 
 import { Coordinate, PalletGeometry, BoxObject, LayerObject, BoxPosition2D, Coordinate2D } from "./teach/structures/Data";
 
@@ -39,7 +37,6 @@ interface PalletConfiguration {
     name: string;
     boxes: BoxObject[];
     pallets: PalletGeometry[];
-    layers: LayerObject[];
 };
 
 function newPalletConfiguration(name: string) {
@@ -47,7 +44,6 @@ function newPalletConfiguration(name: string) {
         name,
         boxes: [],
         pallets: [],
-        layers: []
     } as PalletConfiguration;
 }
 
@@ -55,7 +51,6 @@ enum CONF_ACTION {
     SET_NAME,
     SET_BOXES,
     SET_PALLETS,
-    SET_LAYERS
 };
 
 type ConfigAction = {
@@ -75,9 +70,6 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
         case (CONF_ACTION.SET_PALLETS): {
             return { ...state, pallets: payload as PalletGeometry[] };
         };
-        case (CONF_ACTION.SET_LAYERS): {
-            return { ...state, layers: payload as LayerObject[] };
-        }
         default: {
             return state;
         };
@@ -108,10 +100,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         dispatchConfiguration({ type: CONF_ACTION.SET_PALLETS, payload: pallets as any });
     };
 
-    let setLayers = (layers: LayerObject[]) => {
-        dispatchConfiguration({ type: CONF_ACTION.SET_LAYERS, payload: layers as any });
-    };
-
     let handleNext = () => {
         let state = teachState;
         setTeachState(++teachState);
@@ -134,8 +122,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let allBoxes = configuration.boxes;
     let allPallets = configuration.pallets;
-    let allLayers = configuration.layers;
-
 
 
     switch (teachState) {
@@ -157,11 +143,12 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
-            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} allLayers={allLayers} setLayers={setLayers} {...controlProps} />);
+            ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
             completionFraction.n = 4;
             break;
         }
         case (PalletTeachState.STACK_SETUP): {
+            ChildElement = (<Stack allPallets={allPallets} setPallets={setPallets} {...controlProps} />)
             completionFraction.n = 5;
             break;
         }

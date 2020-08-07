@@ -1,4 +1,4 @@
-import React, { useRef, useState, DragEvent, ReactElement } from 'react';
+import React, { useRef, useState, DragEvent, ReactElement, ChangeEvent } from 'react';
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
@@ -18,12 +18,20 @@ interface NewLayoutCellProps {
 
 interface DropDownProps {
     allPallets: PalletGeometry[];
+    selectPallet: (index: number) => void;
+    value: number;
 };
 
-function LayoutDropDown({ allPallets }: DropDownProps) {
+function LayoutDropDown({ allPallets, value, selectPallet }: DropDownProps) {
+
+    let handleChange = (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        selectPallet(val);
+    }
+
     return (
         <div className="LayoutDropDown">
-            <select>
+            <select value={value} onChange={handleChange}>
                 {allPallets.map((pallet: PalletGeometry, index: number) => {
                     return (
                         <option value={index} key={index}> {pallet.name} </option>
@@ -389,9 +397,15 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
 }
 
 
+interface LayoutCellProps {
+    pallet: PalletGeometry;
+    layer: LayerObject;
+}
 
 
-function LayoutCell({ name, pallet, boxPositions }: LayerObject) {
+
+function LayoutCell({ layer, pallet }: LayoutCellProps) {
+    let { name, boxPositions } = layer;
     let { width, length } = getPalletDimensions(pallet)
 
     let iconSize = 30;
@@ -428,21 +442,27 @@ function LayoutCell({ name, pallet, boxPositions }: LayerObject) {
 
 interface SummaryProps {
     startEdit: () => void;
-    allLayers: LayerObject[]
+    allPallets: PalletGeometry[]
 }
 
-function LayoutSummary({ startEdit, allLayers }: SummaryProps) {
+function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
                     <NewLayoutCell startEdit={startEdit} />
-                    {allLayers.map((l: LayerObject, index: number) => {
-                        return (
-                            <LayoutCell {...l} />
-                        );
-                    })}
+                    {allPallets.map((p: PalletGeometry, index: number) => {
+                        if (p.Layers.length > 0) {
+                            return (
+                                <>
+                                    {p.Layers.map((l: LayerObject, j: number) => {
+                                        return (<LayoutCell pallet={p} layer={l} />);
+                                    })}
 
+                                </>
+                            );
+                        }
+                    })}
                 </div>
             </div>
         </div>
@@ -491,8 +511,7 @@ function BoxCell({ box, index }: BoxCellProps) {
 interface LayoutProps {
     allBoxes: BoxObject[];
     allPallets: PalletGeometry[];
-    allLayers: LayerObject[];
-    setLayers: (layers: LayerObject[]) => void;
+    setPallets: (pallets: PalletGeometry[]) => void;
     handleNext: () => void;
     handleBack: () => void;
 };
@@ -510,27 +529,34 @@ interface BoxPositionObject {
 function defaultLayer(index: number) {
     let l: LayerObject = {
         name: "Layer " + String(index),
-        pallet: allPallets[0],
         boxPositions: [],
-        height: 0
+        height: 0,
     };
-
     return l;
-
 };
 
 
-function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handleBack }: LayoutProps) {
+function Layout({ allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
 
     // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
+    let index = 0;
+    let haveLayer = false;
+    allPallets.forEach((p: PalletGeometry, i: number) => {
+        if (!haveLayer && p.Layers.length > 0) {
+            haveLayer = true;
+        }
+    });
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(false);
+
+    let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
+
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayer);
 
     let DisplayElement = useRef<HTMLDivElement>(null);
 
     let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
 
-    let [editingLayer, setEditingLayer] = useState<LayerObject>(defaultLayer(allLayers.length + 1));
+    let [editingLayer, setEditingLayer] = useState<LayerObject>(defaultLayer(1));
 
     let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
 
@@ -567,8 +593,20 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
                         height: h
                     } as LayerObject;
 
-                    setEditingLayer(defaultLayer(allLayers.length + 2));
-                    setLayers([...allLayers, newLayer]);
+
+                    let newPallets: PalletGeometry[] = [];
+
+                    allPallets.forEach((p: PalletGeometry, i: number) => {
+                        let t = { ...p };
+                        if (i === currentPalletIndex) {
+                            t.Layers.push(newLayer);
+                        }
+                        newPallets.push(t);
+
+                    });
+
+                    setEditingLayer(defaultLayer(1));
+                    setPallets(newPallets);
                     setSummaryScreen(true);
                 }
             }
@@ -612,7 +650,7 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
         instruction = "Create and edit layers";
         return (
             <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
-                <LayoutSummary startEdit={startEdit} allLayers={allLayers} />
+                <LayoutSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );
     } else {
@@ -643,9 +681,9 @@ function Layout({ allBoxes, allPallets, allLayers, setLayers, handleNext, handle
                         </div>
                     </div>
                     <div className="LayoutModel">
-                        <LayoutDropDown allPallets={allPallets} />
+                        <LayoutDropDown allPallets={allPallets} value={currentPalletIndex} selectPallet={setCurrentPalletIndex} />
                         <div className="LayoutDisplay" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                            <LayoutModel pallet={allPallets[0]} size={650} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
+                            <LayoutModel pallet={allPallets[currentPalletIndex]} size={650} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
                         </div>
                     </div>
                 </div>

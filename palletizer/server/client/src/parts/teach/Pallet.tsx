@@ -2,7 +2,7 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
 
-import { getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
+import { getPalletDimensions, Coordinate, PlaneDimensions, PalletGeometry } from "./structures/Data";
 
 //import { PalletGeometry, getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
 
@@ -26,14 +26,14 @@ enum Corners {
     THREE
 };
 
-
-interface PalletGeometry {
-    name: string;
-    corner1: Coordinate;
-    corner2: Coordinate;
-    corner3: Coordinate;
-
-}
+/* 
+ * interface PalletGeometry {
+ *     name: string;
+ *     corner1: Coordinate;
+ *     corner2: Coordinate;
+ *     corner3: Coordinate;
+ * 
+ * } */
 
 
 interface DimensionCellProps {
@@ -205,7 +205,9 @@ function defaultPallet(index: number): PalletGeometry {
             x: 500,
             y: 0,
             z: 0
-        }
+        },
+        Layers: [],
+        Stack: []
     };
     return p;
 }
@@ -244,8 +246,12 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
                 // if All corners are selected.
                 if (editComplete) {
                     console.log("Check that all corners are selected...");
+
+                    let temp: PalletGeometry = { ...editingPallet };
+                    temp.Layers = [];
+
                     // Save the data.
-                    let newPallets = [...allPallets, editingPallet];
+                    let newPallets = [...allPallets, temp];
 
                     setPallets(newPallets);
                     setSummaryScreen(true);
