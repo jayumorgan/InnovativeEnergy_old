@@ -20,6 +20,12 @@ class FakeMachineMotion:
     def emitSpeed(self, speed):
         pass
 
+    def emitHome(self, something):
+        pass
+
+    def emitHomeAll(self):
+        pass
+    
     def emitAcceleration(self, accel):
         pass
 

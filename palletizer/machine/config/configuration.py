@@ -20,9 +20,7 @@ def load_selected_config():
         machine_file = None
         pallet_file = None
         current_config = json.load(current_config)
-        print(current_config)
-
-        
+          
         try:
             machine_file = current_config["machine"]
             pallet_file = current_config["pallet"]
