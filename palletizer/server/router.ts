@@ -90,6 +90,12 @@ function get_configurations(callback: (c: ConfigData | null) => void) {
     });
 }
 
+
+interface Configs {
+    machine: string,
+    pallet: string
+};
+
 // On selected
 function set_selected_config(file_name: string, config_type: string, callback: (success: boolean) => void) {
     fs.readFile(CURRENT_CONFIG_PATH, { encoding: 'utf-8' }, (err: NodeJS.ErrnoException | null, data: string) => {
@@ -97,14 +103,17 @@ function set_selected_config(file_name: string, config_type: string, callback: (
             console.log("Error (set_selected_config) server.ts: ", err);
             callback(false);
         } else {
-
-            let cf = JSON.parse(JSON.parse(data)) as { [key: string]: any };
+            console.log(data);
+            let cf = JSON.parse(data) as Configs;
             if (config_type) {
-                cf[config_type as string] = file_name;
-                fs.writeFile(CURRENT_CONFIG_PATH, JSON.stringify(data, null, "\t"), () => {
+                if (config_type === "machine") {
+                    cf.machine = file_name;
+                } else {
+                    cf.pallet = file_name;
+                }
+                fs.writeFile(CURRENT_CONFIG_PATH, JSON.stringify(cf, null, "\t"), () => {
                     callback(true);
                 });
-
             } else {
                 callback(false);
             }

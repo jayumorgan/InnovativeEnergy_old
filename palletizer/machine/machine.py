@@ -131,6 +131,9 @@ class Machine:
 
         config = cf.load_selected_config()
         self.pallet_config = config["pallet"]
+        print(self.pallet_config)
+
+        
         self.machine_config = config["machine"]
         cf.output(config)
 
