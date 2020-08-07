@@ -1,0 +1,115 @@
+{
+	"config": {
+		"name": "DogHouse4",
+		"boxes": [
+			{
+				"name": "Box 1",
+				"dimensions": {
+					"length": 50,
+					"height": 50,
+					"width": 50
+				},
+				"pickLocation": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				}
+			}
+		],
+		"pallets": [
+			{
+				"name": "Pallet 1",
+				"corner1": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"corner2": {
+					"x": 100,
+					"y": 0,
+					"z": 0
+				},
+				"corner3": {
+					"x": 0,
+					"y": 100,
+					"z": 0
+				},
+				"Layers": [
+					{
+						"name": "Layer 1",
+						"boxPositions": [
+							{
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 0,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.23537888534826515,
+									"y": 0.23149038461538463
+								}
+							},
+							{
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 0,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.4988471941483425,
+									"y": 0.6516367662418246
+								}
+							}
+						],
+						"height": 50
+					}
+				],
+				"Stack": [
+					0
+				]
+			}
+		]
+	},
+	"boxCoordinates": [
+		{
+			"pickLocation": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": 4.01,
+				"y": 94.14,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": 72.37,
+				"y": 67.79,
+				"z": 50
+			}
+		}
+	]
+}

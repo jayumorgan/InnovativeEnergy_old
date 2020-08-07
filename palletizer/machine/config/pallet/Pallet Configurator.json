@@ -1,0 +1,282 @@
+{
+	"config": {
+		"name": "Pallet Configurator",
+		"boxes": [
+			{
+				"name": "Box 1",
+				"dimensions": {
+					"length": 50,
+					"height": 50,
+					"width": 50
+				},
+				"pickLocation": {
+					"x": 500,
+					"y": 0,
+					"z": 0
+				}
+			},
+			{
+				"name": "Box 2",
+				"dimensions": {
+					"length": 50,
+					"height": 50,
+					"width": 50
+				},
+				"pickLocation": {
+					"x": 400,
+					"y": 0,
+					"z": 0
+				}
+			}
+		],
+		"pallets": [
+			{
+				"name": "Pallet 1",
+				"corner1": {
+					"x": 300,
+					"y": 400,
+					"z": 0
+				},
+				"corner2": {
+					"x": 300,
+					"y": 100,
+					"z": 0
+				},
+				"corner3": {
+					"x": 0,
+					"y": 100,
+					"z": 0
+				},
+				"Layers": [
+					{
+						"name": "Layer 1",
+						"boxPositions": [
+							{
+								"box": {
+									"name": "Box 2",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 400,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.2575,
+									"y": 0.2745673076923077
+								}
+							},
+							{
+								"box": {
+									"name": "Box 2",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 400,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.017243589743589714,
+									"y": 0.8312340682592148
+								}
+							},
+							{
+								"box": {
+									"name": "Box 2",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 400,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.35903846153846153,
+									"y": 0.31764423076923076
+								}
+							},
+							{
+								"box": {
+									"name": "Box 2",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 400,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.9128846153846154,
+									"y": 0.9176442307692307
+								}
+							},
+							{
+								"box": {
+									"name": "Box 2",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 400,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.7159615384615384,
+									"y": 0.9330288461538462
+								}
+							}
+						],
+						"height": 50
+					}
+				],
+				"Stack": [
+					0,
+					0
+				]
+			}
+		]
+	},
+	"boxCoordinates": [
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -102.25,
+				"y": 107.37,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -30.17,
+				"y": 274.37,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -132.71,
+				"y": 120.29,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -298.87,
+				"y": 300.29,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -239.79,
+				"y": 304.91,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -102.25,
+				"y": 107.37,
+				"z": 100
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -30.17,
+				"y": 274.37,
+				"z": 100
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -132.71,
+				"y": 120.29,
+				"z": 100
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -298.87,
+				"y": 300.29,
+				"z": 100
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 400,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -239.79,
+				"y": 304.91,
+				"z": 100
+			}
+		}
+	]
+}

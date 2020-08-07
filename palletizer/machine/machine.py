@@ -27,13 +27,10 @@ NO_TURN = 0
     
     
 class Machine:
-
     def __init__(self):
-
         config = cf.load_selected_config()
         self.pallet_config = config["pallet"]
         print(self.pallet_config)
-
         
         self.machine_config = config["machine"]
         cf.output(config)
@@ -65,9 +62,11 @@ class Machine:
 
         deploy = read_env()
         print(deploy)
+        deploy = True
         if deploy:
             self.mm = mm.MachineMotion(network["IP_ADDRESS"])
-            self.rmm = mm.MachineMotion(rotation_network["IP_ADDRESS"])
+            self.rmm = fmm.FakeMachineMotion()
+           # self.rmm = mm.MachineMotion(rotation_network["IP_ADDRESS"])
         else:
             self.mm = fmm.FakeMachineMotion()
             self.rmm = fmm.FakeMachineMotion()
@@ -91,7 +90,7 @@ class Machine:
             self.mm.configAxis(axis_number,MICROSTEPS.ustep_8,gain)
 
         # specify in configuration file.
-        self.mm.configAxisDirection(self.x, mm.DIRECTION.NORMAL)
+        self.mm.configAxisDirection(self.x, mm.DIRECTION.REVERSE)
         self.mm.configAxisDirection(self.y, mm.DIRECTION.REVERSE)
         self.mm.configAxisDirection(self.z, mm.DIRECTION.REVERSE)
             

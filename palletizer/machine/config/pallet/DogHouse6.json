@@ -1,0 +1,84 @@
+{
+	"config": {
+		"name": "DogHouse6",
+		"boxes": [
+			{
+				"name": "Box 1",
+				"dimensions": {
+					"length": 50,
+					"height": 50,
+					"width": 50
+				},
+				"pickLocation": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				}
+			}
+		],
+		"pallets": [
+			{
+				"name": "Pallet 1",
+				"corner1": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"corner2": {
+					"x": 100,
+					"y": 0,
+					"z": 0
+				},
+				"corner3": {
+					"x": 0,
+					"y": 100,
+					"z": 0
+				},
+				"Layers": [
+					{
+						"name": "Layer 1",
+						"boxPositions": [
+							{
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 0,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.2658388697686087,
+									"y": 0.2745673076923077
+								}
+							}
+						],
+						"height": 50
+					}
+				],
+				"Stack": [
+					0
+				]
+			}
+		]
+	},
+	"boxCoordinates": [
+		{
+			"pickLocation": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": 11.36,
+				"y": 91.09,
+				"z": 50
+			}
+		}
+	]
+}

@@ -9,10 +9,10 @@ if (SERVER_IP === "localhost") {
 }
 console.log(SERVER_IP);
 
+SERVER_IP = "192.168.7.2";
 
 const MQTT_SERVER = "ws://" + SERVER_IP + ":" + PORT; 
 const TOPIC = "palletizer/";
-
 // MQTT example: https://www.cloudamqp.com/docs/nodejs_mqtt.html
 
 function MQTTSubscriber(handle_information: any, handle_state: any) : mqtt.MqttClient {

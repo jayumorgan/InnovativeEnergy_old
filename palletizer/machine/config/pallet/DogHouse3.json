@@ -1,0 +1,146 @@
+{
+	"config": {
+		"name": "DogHouse3",
+		"boxes": [
+			{
+				"name": "Box 1",
+				"dimensions": {
+					"length": 50,
+					"height": 50,
+					"width": 50
+				},
+				"pickLocation": {
+					"x": 300,
+					"y": 0,
+					"z": 0
+				}
+			}
+		],
+		"pallets": [
+			{
+				"name": "Pallet 1",
+				"corner1": {
+					"x": 200,
+					"y": 200,
+					"z": 0
+				},
+				"corner2": {
+					"x": 200,
+					"y": 0,
+					"z": 0
+				},
+				"corner3": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"Layers": [
+					{
+						"name": "Layer 1",
+						"boxPositions": [
+							{
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 300,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.24826923076923077,
+									"y": 0.366875
+								}
+							},
+							{
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 300,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.3836538461538462,
+									"y": 0.2684134615384615
+								}
+							},
+							{
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 50,
+										"height": 50,
+										"width": 50
+									},
+									"pickLocation": {
+										"x": 300,
+										"y": 0,
+										"z": 0
+									}
+								},
+								"position": {
+									"x": 0.009423076923076923,
+									"y": 0.2726442307692308
+								}
+							}
+						],
+						"height": 50
+					}
+				],
+				"Stack": [
+					0
+				]
+			}
+		]
+	},
+	"boxCoordinates": [
+		{
+			"pickLocation": {
+				"x": 300,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -74.65,
+				"y": 98.38,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 300,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -101.73,
+				"y": 78.68,
+				"z": 50
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 300,
+				"y": 0,
+				"z": 0
+			},
+			"dropLocation": {
+				"x": -26.88,
+				"y": 79.53,
+				"z": 50
+			}
+		}
+	]
+}
