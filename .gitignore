@@ -13,3 +13,4 @@ palletizer/machine/__pycache__/
 palletizer/backup/
 palletizer/deploy
 *.beam
+palletizer/machine/config/pallet/*.json
