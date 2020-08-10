@@ -147,6 +147,13 @@
             grid-template-rows: 10% 90%;
             grid-template-columns: 100%;
 
+            .Pallet {
+                @include flex-center();
+
+
+
+            }
+
             .PalletSelect {
                 display: grid;
                 grid-template-columns: 70% 40%;

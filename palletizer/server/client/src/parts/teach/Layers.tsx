@@ -791,8 +791,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         instruction = "Drag and drop boxes to create a layer";
 
         let modelDims = {
-            outerWidth: 1026,
-            outerHeight: 664
+            outerWidth: 835,
+            outerHeight: 627
         };
 
         let contentItemProps = {
@@ -844,8 +844,13 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                                     </select>
                                 </div>
                             </div>
+                            <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
+                                <LayoutModel pallet={allPallets[currentPalletIndex]} size={620} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
+                            </div>
 
                         </div>
+
+
                     </div>
                 </div>
             </ContentItem>
