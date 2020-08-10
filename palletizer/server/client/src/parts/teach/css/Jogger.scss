@@ -31,6 +31,7 @@
                  width: 70%;
                  font-size: $large-font;
                  padding: $margin;
+                 color: $dark-blue;
 
              }
 
@@ -45,7 +46,7 @@
          .Position {
              display: grid;
              grid-template-rows: 25%;
-             padding-left: $margin;
+             padding-left: $margin * 2;
 
              .PositionBox {
                  border: $container-border;
@@ -74,7 +75,6 @@
                  .Display {
                      width: $mover-size;
                      @include flex-center();
-
 
                      svg {
                          #ArrowLine {
@@ -178,8 +178,6 @@
              }
          }
      }
-
-
 
      .Parameters {
          display: grid;

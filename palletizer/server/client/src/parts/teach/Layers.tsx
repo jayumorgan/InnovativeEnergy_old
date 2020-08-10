@@ -120,6 +120,54 @@ function DraggableRect({ rect, updatePosition, index }: DraggableRectProps) {
     );
 };
 
+export enum PALLETCORNERS {
+    TOP_LEFT = "TOP_LEFT",
+    BOTTOM_LEFT = "BOTTOM_LEFT",
+    BOTTOM_RIGHT = "BOTTOM_RIGHT"
+};
+
+
+export function IncreaseCorner(c: PALLETCORNERS) {
+    if (c == PALLETCORNERS.TOP_LEFT) {
+        return PALLETCORNERS.BOTTOM_LEFT;
+    } else if (c === PALLETCORNERS.BOTTOM_LEFT) {
+        return PALLETCORNERS.BOTTOM_RIGHT;
+    } else {
+        return PALLETCORNERS.BOTTOM_RIGHT;
+    }
+}
+
+export function DecreaseCorner(c: PALLETCORNERS) {
+    if (c === PALLETCORNERS.BOTTOM_LEFT) {
+        return PALLETCORNERS.TOP_LEFT;
+    } else if (c === PALLETCORNERS.BOTTOM_RIGHT) {
+        return PALLETCORNERS.TOP_LEFT;
+    } else {
+        return PALLETCORNERS.TOP_LEFT;
+    }
+}
+
+export function CornerNumber(c: PALLETCORNERS) {
+    switch (c) {
+        case PALLETCORNERS.TOP_LEFT: {
+            return 0;
+        }
+        case PALLETCORNERS.BOTTOM_LEFT: {
+            return 1;
+        }
+        case PALLETCORNERS.BOTTOM_RIGHT: {
+            return 2;
+        }
+        default: {
+            return -1;
+        }
+    }
+}
+
+
+
+
+
 
 interface LayoutModelProps {
     pallet: PalletGeometry;
@@ -128,13 +176,15 @@ interface LayoutModelProps {
     outerWidth: number;
     updateLayoutBoxes?: (c: BoxPosition2D[]) => void;
     boxes?: BoxPositionObject[];
+    fullWidth?: number;
+    fullHeight?: number;
+    corner?: PALLETCORNERS;
 };
 
 // We will pass the palletizer coordinates into the thing.
 // We don't need anything else, as the boxes are there
 
-
-export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateLayoutBoxes }: LayoutModelProps) {
+export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateLayoutBoxes, fullWidth, fullHeight, corner }: LayoutModelProps) {
 
     let dimensions: PlaneDimensions = getPalletDimensions(pallet);
 
@@ -216,25 +266,16 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
 
     // How do we get the box positions after a drop? 
     let updateRectPosition = (index: number, nx: number, ny: number) => {
-
-
         if (boxes && updateLayoutBoxes) {
-            // Loop through boxes in boxes
             let temp: BoxPosition2D[] = [];
 
             boxes.forEach(({ position, box }: BoxPositionObject, i: number) => {
                 let { x, y } = position;
-
-
                 if (index === i) {
                     x = nx;
                     y = ny;
-
                 }
-
                 let [fractionX, fractionY] = calculatePositionFraction(x, y);
-
-
                 let bp2d = {
                     box,
                     position: {
@@ -251,12 +292,9 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
         }
     };
 
-
     if (boxes) {
-        console.log("Looping Again...", boxes);
-
         boxes.forEach(({ position, box }: BoxPositionObject) => {
-            //
+
             let { x, y } = position;
             let { width, length } = box.dimensions;
 
@@ -284,28 +322,76 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
         y: 0,
         width: outerWidth,
         height: outerHeight
-    };
+    } as any;
 
-    // We are going to need box position updates.
-    // Position is local -- we dont need to deal with that.
-    // How are box positions updated ? -- They are not. 
+    if (fullWidth && fullHeight) {
+        outerSVG.x = (fullWidth - outerWidth) / 2;
+        outerSVG.y = (fullHeight - outerHeight) / 2;
+    }
+    let cornerCircleProps = {} as any;
+    let cornerTextProps = {} as any;
+
+    if (corner) {
+        let green = "rgb(91,196,126)"
+        let grey = "rgb(135,135,135)"
+        cornerCircleProps.r = 30;
+        cornerCircleProps.fill = green;
+        //cornerCircleProps.stroke = grey;
+        //cornerCircleProps.strokeWidth = 2;
+        cornerTextProps.height = 60;
+        cornerTextProps.width = 60;
+        cornerTextProps.fontSize = 30;
+        cornerTextProps.stroke = "white";
+        cornerTextProps.fill = "white";
+
+        switch (corner) {
+            case PALLETCORNERS.TOP_LEFT: {
+                cornerCircleProps.cx = topLog.x;
+                cornerCircleProps.cy = topLog.y;
+                break;
+            };
+            case PALLETCORNERS.BOTTOM_LEFT: {
+                cornerCircleProps.cx = bottomLog.x;
+                cornerCircleProps.cy = (bottomLog.y as number) + (bottomLog.height as number);
+                break;
+            };
+            case PALLETCORNERS.BOTTOM_RIGHT: {
+                cornerCircleProps.cx = (bottomLog.x as number) + (bottomLog.width as number);
+                cornerCircleProps.cy = (bottomLog.y as number) + (bottomLog.height as number);
+                break;
+            }
+
+        };
+        cornerCircleProps.cx += outerSVG.x;
+        cornerCircleProps.cy += outerSVG.y;
+
+        cornerTextProps.x = cornerCircleProps.cx - 10;
+        cornerTextProps.y = cornerCircleProps.cy + 10;
+    }
+
     return (
-        <svg {...outerSVG} >
-            <svg {...svg_props} >
-                <rect {...bottomLog} />
-                <rect {...topLog} />
-                {planks.map((r: Rect, index: number) => {
+        <>
+            <svg {...outerSVG} >
+                <svg {...svg_props} >
+                    <rect {...bottomLog} />
+                    <rect {...topLog} />
+                    {planks.map((r: Rect, index: number) => {
+                        return (
+                            <rect {...r} key={index} />
+                        );
+                    })}
+                </svg>
+
+
+                {BoxSVGs.map((r: Rect, index: number) => {
                     return (
-                        <rect {...r} key={index} />
+                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} />
                     );
                 })}
             </svg>
-            {BoxSVGs.map((r: Rect, index: number) => {
-                return (
-                    <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} />
-                );
-            })}
-        </svg>
+            {corner && <circle {...cornerCircleProps} />}
+            {corner && <text {...cornerTextProps}> {String(CornerNumber(corner) + 1)} </text>}
+        </>
     );
 
 };
@@ -385,15 +471,12 @@ function NewLayoutCell({ startEdit }: NewLayoutCellProps) {
     );
 };
 
-
-
 interface DimensionCellProps {
     axis: string;
     value: number;
 }
 
 function DimensionCell({ axis, value }: DimensionCellProps) {
-
     return (
         <div className="DimensionCell">
             <span>
@@ -401,15 +484,12 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
             </span>
         </div>
     );
-}
-
+};
 
 interface LayoutCellProps {
     pallet: PalletGeometry;
     layer: LayerObject;
-}
-
-
+};
 
 function LayoutCell({ layer, pallet }: LayoutCellProps) {
     let { name, boxPositions } = layer;

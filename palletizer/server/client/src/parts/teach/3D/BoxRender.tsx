@@ -32,13 +32,13 @@ function Box({ length, height, width }: BoxDimensions) {
         let width = (MountElement.current as HTMLDivElement).clientWidth;
         let height = (MountElement.current as HTMLDivElement).clientHeight;
 
-        let renderer = new Three.WebGLRenderer({ antialias: true });
-        renderer.setClearColor('white');
+        let renderer = new Three.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setClearColor(0xf8f8f8, 0);
         renderer.setSize(width, height);
 
         let scene = new Three.Scene();
         scene = new Three.Scene();
-        scene.background = new Three.Color(0xfbfbfb);
+        scene.background = new Three.Color(0xf8f8f8);
         //        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
 
         let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
@@ -60,7 +60,7 @@ function Box({ length, height, width }: BoxDimensions) {
         var groundMesh = new Three.Mesh(
             new Three.PlaneBufferGeometry(40, 40),
             new Three.MeshBasicMaterial({
-                color: 0xfbfbfb,
+                color: 0xf8f8f8,
                 /* depthWrite: false */
             })
         );

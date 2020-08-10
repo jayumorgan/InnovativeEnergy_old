@@ -9,8 +9,6 @@ import Jogger from "./Jogger";
 import Box from "./3D/BoxRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-
-
 import { BoxObject, BoxDimensions, Coordinate } from "./structures/Data";
 
 import "./css/BoxSize.scss";
@@ -22,32 +20,24 @@ enum DimensionEnum {
     H
 };
 
-interface NewBoxCellProps {
+interface NewBoxProps {
     startEdit: () => void;
 };
 
-function NewBoxCell({ startEdit }: NewBoxCellProps) {
-    let iconSize = {
-        height: 50,
-        width: 50
-    } as IconProps;
+
+function NewBox({ startEdit }: NewBoxProps) {
 
     return (
-        <div className="BoxCellContainer">
-            <div className="NewBoxCell" onClick={startEdit}>
-                <div className="Icon">
-                    <PlusIcon {...iconSize} />
-                </div>
-                <div className="BoxName">
-                    <span>
-                        {"Add A New Box"}
-                    </span>
-                </div>
+        <div className="NewBox">
+            <div className="NewBoxButton" onClick={startEdit}>
+                <PlusIcon height={20} width={20} />
+                <span>
+                    {"Add new box"}
+                </span>
             </div>
         </div>
     );
-};
-
+}
 
 interface DimensionCellProps {
     axis: string;
@@ -74,10 +64,11 @@ function DimensionCell({ axis, value, update }: DimensionCellProps) {
 
 interface BoxProps {
     box: BoxObject;
+    startEdit: () => void;
 };
 
 
-function BoxCell({ box }: BoxProps) {
+function BoxCell({ box, startEdit }: BoxProps) {
     let placeholder = box.name;
 
     let { dimensions } = box;
@@ -102,7 +93,6 @@ function BoxCell({ box }: BoxProps) {
         }
     };
 
-
     let iconSize = 30;
 
     return (
@@ -111,69 +101,39 @@ function BoxCell({ box }: BoxProps) {
                 <div className="MiniRender">
                     <Box {...dimensions} />
                 </div>
-                <div className="BoxDetails">
-                    <div className="BoxName">
-                        <input type="text" placeholder="Box 1" value={box.name} />
-                    </div>
-                    <div className="BoxDimensions">
-                        <DimensionCell axis={"Width"} value={width} update={update_dim(DimensionEnum.W)} />
-                        <DimensionCell axis={"Length"} value={length} update={update_dim(DimensionEnum.L)} />
-                        <DimensionCell axis={"Height"} value={height} update={update_dim(DimensionEnum.H)} />
+                <div className="Name">
+                    <input type="text" placeholder={placeholder} />
+                </div>
+                <div className="Dimensions">
+                    <div className="DimensionsGrid">
+                        <div className="Dimension">
+                            <span>
+                                {`W: ${width}`}
+                            </span>
+                        </div>
+                        <div className="Dimension">
+                            <span>
+                                {`L: ${length}`}
+                            </span>
+                        </div>
+                        <div className="Dimension">
+                            <span>
+                                {`H: ${height}`}
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div className="Buttons">
-                    <div className="EditButton">
-                        <div className="ButtonContainer">
-                            <div className="Button">
-                                <span>
-                                    {"Select Pick Location"}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="PickLocation">
-                            <div className="Location">
-                                <span>
-                                    {"x: " + String(x)}
-                                </span>
-                            </div>
-                            <div className="Location">
-                                <span>
-                                    {"y: " + String(y)}
-                                </span>
-                            </div>
-                            <div className="Location">
-                                <span>
-                                    {"z: " + String(z)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="DeleteButton">
-                        <XIcon height={iconSize} width={iconSize} />
+                <div className="Edit">
+                    <div className="EditButton" onClick={startEdit} >
+                        <span>
+                            {"Edit"}
+                        </span>
                     </div>
                 </div>
             </div>
-        </div>
-    );
-};
-
-interface SummaryScreenProps {
-    allBoxes: BoxObject[];
-    startEdit: () => void;
-}
-
-function SummaryScreen({ allBoxes, startEdit }: SummaryScreenProps) {
-    return (
-        <div className="BoxSummary">
-            <div className="BoxScrollContainer">
-                <div className="BoxScroll">
-                    <NewBoxCell startEdit={startEdit} />
-                    {allBoxes.map((val: BoxObject, index: number) => {
-                        return (
-                            <BoxCell box={val} />
-                        )
-                    })}
-                </div>
+            <div className="Trash">
+                <span className="icon-delete">
+                </span>
             </div>
         </div>
     );
@@ -199,6 +159,9 @@ function CoordinateItem({ name, value, setter }: CoordinateItemProps) {
             <div className="CoordinateName">
                 <span>
                     {name}
+                </span>
+                <span className="Unit">
+                    {"(mm)"}
                 </span>
             </div>
             <div className="CoordinateInput">
@@ -247,9 +210,6 @@ function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateB
     return (
         <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
             <div className="NewBoxGrid">
-                {/* <div className="BoxName">
-                    <input type="text" value={box.name} onChange={handle_input} />
-                    </div> */}
                 <div className="BoxSetup">
                     <Jogger selectAction={selectAction} name={box.name} updateName={updateName} />
                     <div className="BoxConfigurator">
@@ -349,12 +309,13 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
-                            <NewBoxCell startEdit={startEdit(-1)} />
                             {allBoxes.map((val: BoxObject, index: number) => {
                                 return (
-                                    <BoxCell box={val} key={index} />
+                                    <BoxCell box={val} key={index} startEdit={startEdit(index)} />
                                 )
                             })}
+
+                            <NewBox startEdit={startEdit(-1)} />
                         </div>
                     </div>
                 </div>

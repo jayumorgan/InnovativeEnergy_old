@@ -21,266 +21,149 @@
             max-height: $container-height * 8/10;
             overflow: scroll;
 
-            .BoxCellContainer {
-                padding: 1%;
-                width: 98%;
-                height: $container-height / 8;
-
+            .NewBox {
+                padding-top: 1%;
+                //width: 99%;
+                padding-left: 1%;
+                padding-right: 5%;
                 @include flex-center();
+                height: $container-height / 14;
+                justify-content: flex-end;
 
-                .NewBoxCell {
+                .NewBoxButton {
+                    @include flex-center();
                     cursor: pointer;
-                    width: 96%;
-                    height: 100%;
-                    border: $container-border;
+                    flex-direction: row;
                     border-radius: $border-radius;
-                    @include shadow();
-                    display: grid;
-                    grid-template-columns: 20% 60% 30%;
+                    background-color: $medium-blue;
+                    color: white;
+                    font-size: $large-font;
+                    height: 80%;
+                    width: 15%;
 
-                    .BoxName {
-                        width: 100%;
-                        @include flex-center();
-                        justify-content: flex-start;
-
-                        span {
-                            color: $dark-blue;
-                            font-size: 2em;
+                    svg {
+                        line {
+                            stroke: white;
+                            stroke-width: 2;
                         }
                     }
-
-                    .Icon {
-                        padding: $margin;
-                        padding-left: 3%;
-                        @include flex-center();
-
-                        svg {
-                            line {
-                                stroke: $dark-blue;
-                                stroke-width: 4pt;
-                            }
-                        }
-                    }
-                }
-
-                .NewBoxCell:hover {
-                    @include size-shadow(15px);
 
                     span {
-                        color: $green;
-                    }
-
-                    .Icon {
-                        svg {
-                            line {
-                                stroke: $green;
-                            }
-                        }
+                        padding-left: $margin;
                     }
                 }
+
+                .NewBoxButton:hover {
+                    @include shadow();
+                    background-color: $green;
+                }
+            }
+
+            .BoxCellContainer {
+                padding-top: 1%;
+                padding-left: 1%;
+                width: 99%;
+                height: $container-height / 7;
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 96% 4%;
+
+                .Trash {
+                    @include flex-center();
+
+                    span {
+                        cursor: pointer;
+                        font-size: $large-font;
+                        color: $red;
+                    }
+
+                    span:hover {
+                        font-weight: $bold-font;
+                    }
+
+                }
+
 
                 .BoxCell {
                     cursor: pointer;
-                    width: 96%;
+                    width: 99%;
                     height: 100%;
                     border: $container-border;
                     border-radius: $border-radius;
-                    @include shadow();
-
+                    background-color: $desert-storm;
                     justify-content: flex-start;
 
                     display: grid;
                     grid-template-rows: 100%;
-                    grid-template-columns: 20% 42% 38%;
+                    grid-template-columns: 12% 30% 20% 38%;
 
                     .MiniRender {
                         @include flex-center();
-
-                        img {
-                            width: 50%;
-                            height: auto;
-                        }
+                        height: 100%;
+                        width: 100%;
 
                         .BoxMount {
                             height: 100%;
-                            width: 50%;
-                            background-color: white;
+                            width: 100%;
+                            @include flex-center();
 
                             canvas {
                                 height: 100%;
-                                // width: 100%;
+                                width: 100%;
                             }
                         }
                     }
 
-                    .BoxDetails {
-                        display: grid;
-                        grid-template-rows: 50% 50%;
-                        grid-template-columns: 100%;
+                    .Name {
+                        @include flex-center();
 
-                        .BoxName {
-                            @include flex-center();
-                            justify-content: flex-start;
-
-                            span {
-                                font-size: 2em;
-                            }
-
-                            @include jin-style(80%, 2em);
-
-                            input {
-                                text-align: left;
-                                padding-left: $margin;
-                            }
-
+                        input {
+                            padding: $margin;
+                            font-size: $large-font;
+                            color: $dark-blue;
+                            width: 80%;
                         }
+                    }
 
-                        .BoxDimensions {
+                    .Dimensions {
+                        @include flex-center();
+
+                        .DimensionsGrid {
+                            width: 80%;
+                            height: 40%;
                             display: grid;
                             grid-template-rows: 100%;
                             grid-template-columns: 33% 33% 33%;
+                            border-radius: $border-radius;
+                            border: $container-border;
 
-                            .DimensionCell {
+                            .Dimension {
                                 @include flex-center();
-                                justify-content: flex-start;
-                                color: $dark-blue;
-                                //                                justify-content: space-around;
-
-                                span {
-                                    font-size: $medium-font;
-                                    padding-right: $margin;
-                                }
-
-                                @include jin-style(50%, 1.5em);
-
-                                input {
-                                    text-align: left;
-                                    padding-left: $margin;
-                                }
+                                font-size: $medium-font;
                             }
                         }
                     }
 
-                    .Buttons {
-                        display: grid;
-                        grid-template-rows: 100%;
-                        grid-template-columns: 70% 30%;
-                        color: white;
-
-                        .SingleEditButton {
-                            @include flex-center();
-
-                            .Button {
-                                @include flex-center();
-
-                                span {
-                                    font-size: $large-font;
-                                }
-                            }
-
-                        }
-
-                        .SingleEditButton:hover {
-                            .Button {
-                                background-color: $green;
-                                @include shadow();
-                            }
-                        }
+                    .Edit {
+                        @include flex-center();
+                        justify-content: flex-end;
+                        padding-right: 10%;
 
                         .EditButton {
-                            display: grid;
-                            grid-template-rows: 50% 50%;
-                            grid-template-columns: 100%;
+                            width: 30%;
+                            height: 40%;
+                            @include flex-center();
 
-                            .ButtonContainer {
-                                padding-top: $margin;
-                                @include flex-center();
-                                flex-direction: column;
-                                justify-content: flex-start;
-
-                                .Button {
-                                    @include flex-center();
-
-                                    span {
-                                        font-size: $large-font;
-                                    }
-                                }
-
-                            }
-
-
-
-
-                            .PickLocation {
-                                color: $dark-blue;
-                                display: grid;
-                                grid-template-rows: 100%;
-                                grid-template-columns: 33% 33% 33%;
-
-                                .Location {
-                                    @include flex-center();
-
-                                    span {
-                                        font-size: 1.5em;
-
-                                    }
-                                }
-                            }
+                            border-radius: $border-radius;
+                            background-color: $medium-blue;
+                            color: white;
+                            font-size: $large-font;
+                            // font-weight: $bold-font;
                         }
 
                         .EditButton:hover {
-                            // color: $green;
-
-                            .Button {
-                                @include shadow();
-                                background-color: $green;
-                            }
+                            @include shadow();
                         }
-
-                        .DeleteButton {
-                            @include flex-center();
-
-                            span {
-                                font-size: $large-font;
-                            }
-
-                            svg {
-                                line {
-                                    stroke: red;
-                                    stroke-width: 4;
-                                }
-                            }
-
-                        }
-
-                        .DeleteButton:hover {
-                            color: red;
-
-                            .Button {
-                                @include shadow();
-                            }
-
-                            svg {
-                                line {
-                                    stroke: red;
-                                    stroke-width: 5;
-
-                                }
-                            }
-                        }
-
-
-                        .Button {
-                            //			    width: 50%;
-                            width: 70%;
-                            @include flex-center();
-                            padding: $margin;
-                            //height: 70%;
-                            background-color: $medium-blue;
-                            border-radius: $border-radius;
-                        }
-
-
                     }
                 }
             }
@@ -318,7 +201,7 @@
 
     .BoxSetup {
         height: 100%;
-        width: 100%;
+        width: 99%;
         display: grid;
         grid-template-rows: 100%;
         grid-template-columns: 50% 50%;
@@ -329,6 +212,10 @@
             display: grid;
             grid-template-rows: 80% 20%;
             grid-template-columns: 100%;
+            border: $container-border;
+            border-radius: $border-radius;
+            background-color: $desert-storm;
+
 
             .BoxDisplayRender {
                 margin-top: 1%;
@@ -340,7 +227,6 @@
 
                 height: 100%;
                 width: 100%;
-
                 display: grid;
                 grid-template-rows: 100%;
                 grid-template-columns: 33% 33% 33%;
@@ -349,17 +235,36 @@
                     width: 100%;
                     height: 100%;
                     display: grid;
-                    grid-template-rows: 100%;
-                    grid-template-columns: 50% 50%;
+                    grid-template-rows: 30% 70%;
+                    grid-template-columns: 100%;
                 }
 
                 .CoordinateName {
                     @include flex-center();
+                    font-size: $medium-font;
+
+                    span {
+                        font-weight: $bold-font;
+                    }
+
+                    .Unit {
+                        font-weight: $normal-font;
+                    }
                 }
 
                 .CoordinateInput {
                     @include flex-center();
-                    @include jin-style(50%, 1em);
+
+                    align-items: flex-start;
+                    padding-top: $margin;
+
+                    input {
+                        font-size: $medium-font;
+                        padding: $margin;
+                        text-align: center;
+                        width: 40%;
+                    }
+
                 }
 
             }

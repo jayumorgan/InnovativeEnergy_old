@@ -60,13 +60,17 @@ $scroll-height: 100% - $add-height;
 
                 .DeleteConfigButton {
                     @include flex-center();
-                    color: red;
+                    color: $red;
                     align-self: flex-end;
                     margin-left: auto;
                     cursor: pointer;
 
                     span {
                         font-weight: $normal-font;
+                    }
+
+                    span:hover {
+                        font-weight: $bold-font;
                     }
 
                     #button-text {

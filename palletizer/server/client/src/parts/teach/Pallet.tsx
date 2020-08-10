@@ -11,7 +11,7 @@ import Jogger from "./Jogger";
 import PalletRender from "./3D/PalletRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-import { Rect, LayoutModel } from "./Layers";
+import { Rect, LayoutModel, PALLETCORNERS, IncreaseCorner, DecreaseCorner, CornerNumber } from "./Layers";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
@@ -19,22 +19,6 @@ import "./css/BoxSize.scss";
 import "./css/Corners.scss";
 
 import PalletImage from "../images/Pallet.jpg";
-
-enum Corners {
-    ONE,
-    TWO,
-    THREE
-};
-
-/* 
- * interface PalletGeometry {
- *     name: string;
- *     corner1: Coordinate;
- *     corner2: Coordinate;
- *     corner3: Coordinate;
- * 
- * } */
-
 
 interface DimensionCellProps {
     axis: string;
@@ -49,23 +33,34 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
             </span>
         </div>
     );
-}
+};
 
 //---------------Pallet Model---------------
-
-
 interface PalletModelProps {
     pallet: PalletGeometry;
     size: number; // 650 for half content width;
+    corner: PALLETCORNERS;
 }
 
-function PalletModel({ pallet, size }: PalletModelProps) {
+
+function PalletModel({ pallet, size, corner }: PalletModelProps) {
 
     let s = size * 9 / 10;
 
+    let layoutProps: any = {
+        size: s,
+        pallet,
+        outerHeight: s,
+        outerWidth: s,
+        fullWidth: size,
+        fullHeight: size,
+        corner
+    };
+
+
     return (
         <svg width={size} height={size}>
-            <LayoutModel size={s} pallet={pallet} outerHeight={s} outerWidth={s} />
+            <LayoutModel {...layoutProps} />
         </svg>
     );
 };
@@ -74,9 +69,10 @@ function PalletModel({ pallet, size }: PalletModelProps) {
 
 interface PalletCellProps {
     pallet: PalletGeometry;
+    startEdit: () => void;
 }
 
-function PalletCell({ pallet }: PalletCellProps) {
+function PalletCell({ pallet, startEdit }: PalletCellProps) {
 
     let { width, length } = getPalletDimensions(pallet)
 
@@ -159,12 +155,11 @@ interface SummaryProps {
 
 function CornerSummary({ startEdit, allPallets }: SummaryProps) {
 
-
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
-                    <NewPalletCell startEdit={startEdit(-1)} />
+
                     {allPallets.map((pallet: PalletGeometry, index: number) => {
                         return (
                             <PalletCell key={index} pallet={pallet} />
@@ -174,6 +169,8 @@ function CornerSummary({ startEdit, allPallets }: SummaryProps) {
             </div>
         </div>
     );
+
+    //    <NewPalletCell startEdit={startEdit(-1)} />
 };
 
 
@@ -215,7 +212,7 @@ function defaultPallet(index: number): PalletGeometry {
 function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, setPallets }: PalletCornerProps) {
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allPallets.length > 0);
 
-    let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
+    let [cornerNumber, setCornerNumber] = useState<PALLETCORNERS>(PALLETCORNERS.TOP_LEFT); // ()
 
     // Start with a default pallet for editing...
     let [editingPallet, setEditingPallet] = useState<PalletGeometry>(defaultPallet(allPallets.length + 1));
@@ -238,7 +235,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
     };
 
     let RightButton: ButtonProps = {
-        name: summaryScreen ? "Next" : (editComplete ? "Add Pallet" : ""),
+        name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
                 handleNext();
@@ -273,39 +270,39 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
             setEditComplete(false);
             setEditingPallet(defaultPallet(allPallets.length));
         }
-        setCornerNumber(Corners.ONE);
+        setCornerNumber(PALLETCORNERS.TOP_LEFT);
         setSummaryScreen(false);
     };
 
-    let title = "Select Corner " + String(cornerNumber as number + 1);
+    let title = "Select Corner " + String(CornerNumber(cornerNumber) + 1);
 
     let backAction = () => {
-        if (cornerNumber !== Corners.ONE) {
-            setCornerNumber(cornerNumber as number - 1);
+        if (cornerNumber !== PALLETCORNERS.TOP_LEFT) {
+            setCornerNumber(DecreaseCorner(cornerNumber));
         }
     };
 
     let addCorner = (c: Coordinate) => {
         switch (cornerNumber) {
-            case (Corners.ONE): {
+            case (PALLETCORNERS.TOP_LEFT): {
                 setEditingPallet({ ...editingPallet, corner1: c });
                 break;
             };
-            case (Corners.TWO): {
+            case (PALLETCORNERS.BOTTOM_LEFT): {
                 setEditingPallet({ ...editingPallet, corner2: c });
                 break;
 
             };
-            case (Corners.THREE): {
+            case (PALLETCORNERS.BOTTOM_RIGHT): {
                 setEditingPallet({ ...editingPallet, corner3: c });
                 break;
             };
         };
 
-        if (cornerNumber === Corners.THREE) {
+        if (cornerNumber === PALLETCORNERS.BOTTOM_RIGHT) {
             setEditComplete(true);
         } else {
-            setCornerNumber(cornerNumber as number + 1);
+            setCornerNumber(IncreaseCorner(cornerNumber));
         }
     };
 
@@ -315,21 +312,34 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         instruction = "Create and edit pallets";
         return (
             <ContentItem instruction={instruction} instructionNumber={instructionNumber} LeftButton={LeftButton} RightButton={RightButton}>
-                <CornerSummary startEdit={startEdit} allPallets={allPallets} />
+                <div className="BoxSummary">
+                    <div className="BoxScrollContainer">
+                        <div className="BoxScroll">
+
+
+                        </div>
+                    </div>
+
+                </div>
             </ContentItem>
         );
+        // <NewBox startEdit={startEdit(-1)} />
+        //  <CornerSummary startEdit={startEdit} allPallets={allPallets} />
     } else {
         let size = 650;
         // Dont use the same pallet on the model, 
-        instruction = "Move to corner " + String(cornerNumber + 1) + " and click select. ";
+        instruction = "Move to corner " + String(CornerNumber(cornerNumber) + 1) + " and click select. ";
         return (
             <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="CornerGrid">
                     <div className="PickLocationGrid">
                         <Jogger selectAction={addCorner} name={editingPallet.name} updateName={setPalletName} />
                         <div className="PalletContainer">
+
                             <div className="PalletMount">
-                                <PalletModel size={size} pallet={defaultPallet(-2)} />
+
+                                <PalletModel size={size} pallet={defaultPallet(-2)} corner={cornerNumber} />
+
                             </div>
                         </div>
                     </div>
