@@ -37,7 +37,7 @@ function NewBox({ startEdit }: NewBoxProps) {
             </div>
         </div>
     );
-}
+};
 
 interface DimensionCellProps {
     axis: string;
