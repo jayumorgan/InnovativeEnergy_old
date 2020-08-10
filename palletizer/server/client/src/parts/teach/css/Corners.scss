@@ -40,13 +40,14 @@
  }
 
  .PalletContainer {
-     display: grid;
-     grid-template-rows: 100%;
-     grid-template-columns: 100%;
+     @include flex-center();
 
      .PalletMount {
-         height: 100%;
-         width: 100%;
+         height: 95%;
+         width: 95%;
+         border-radius: $border-radius;
+         background-color: $light-blue;
+         border: $container-border;
          @include flex-center();
      }
  }

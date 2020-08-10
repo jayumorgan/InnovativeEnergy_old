@@ -142,6 +142,21 @@
                                 font-size: $medium-font;
                             }
                         }
+
+                        .DimensionsGrid2 {
+                            width: 90%;
+                            height: 40%;
+                            display: grid;
+                            grid-template-rows: 100%;
+                            grid-template-columns: 50% 50%;
+                            border-radius: $border-radius;
+                            border: $container-border;
+
+                            .Dimension {
+                                @include flex-center();
+                                font-size: $medium-font;
+                            }
+                        }
                     }
 
                     .Edit {

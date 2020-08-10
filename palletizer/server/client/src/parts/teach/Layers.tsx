@@ -413,9 +413,6 @@ export interface Rect {
     offset?: any
 };
 
-/* <rect x="50" y="20" width="150" height="150"
- * style="fill:blue;stroke:pink;stroke-width:5;fill-opacity:0.1;stroke-opacity:0.9" /> */
-
 function BoxImage({ width, length }: BoxImageProps) {
     let norm = Math.sqrt(width ** 2 + length ** 2);
 
@@ -565,7 +562,6 @@ interface BoxCellProps {
 
 function BoxCell({ box, index }: BoxCellProps) {
 
-
     let [isDragging, setIsDragging] = useState<boolean>(false);
 
     let dragStart = (ev: DragEvent) => {
@@ -576,6 +572,46 @@ function BoxCell({ box, index }: BoxCellProps) {
     let dragEnd = () => {
         setIsDragging(false);
     };
+
+    let { width, height, length } = box.dimensions;
+
+    return (
+        <div className="BoxContainer">
+            <div className="Box" draggable onDragStart={dragStart} onDragEnd={dragEnd}>
+                <div className="MiniRender">
+                    <Box {...box.dimensions} />
+                </div>
+                <div className="BoxInfo">
+                    <div className="Name">
+                        <span>
+                            {box.name}
+                        </span>
+                    </div>
+                    <div className="Dimensions">
+                        <div className="DimensionsGrid">
+                            <div className="Dimension">
+                                <span>
+                                    {`W: ${width}`}
+                                </span>
+                            </div>
+                            <div className="Dimension">
+                                <span>
+                                    {`L: ${length}`}
+                                </span>
+                            </div>
+                            <div className="Dimension">
+                                <span>
+                                    {`H: ${height}`}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+
 
     return (
         <div className="BoxCell" onDragStart={dragStart} onDragEnd={dragEnd} draggable>
@@ -737,6 +773,12 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         }
     };
 
+
+    let handlePalletSelect = (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        setCurrentPalletIndex(val);
+    };
+
     //---------------Display---------------
     if (summaryScreen) {
         instruction = "Create and edit layers";
@@ -753,35 +795,92 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             outerHeight: 664
         };
 
+        let contentItemProps = {
+            instructionNumber,
+            instruction,
+            LeftButton,
+            RightButton
+        } as any;
 
         return (
-            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
-                <div className="LayoutContainer">
-                    <div className="LayoutName">
-                        <div className="NameHolder">
-                            <input type="text" placeholder={placeholder} />
+            <ContentItem {...contentItemProps} >
+                <div className="Layout">
+                    <div className="Boxes">
+                        <div className="Name">
+                            <div className="Title">
+                                <span>
+                                    {"Name:"}
+                                </span>
+                            </div>
+                            <div className="Input">
+                                <input type="text" placeholder="Pallet Layout 1" />
+                            </div>
+                        </div>
+                        <div className="BoxContainer">
+                            <div className="Scroll">
+                                {allBoxes.map((b: BoxObject, i: number) => {
+                                    return (
+                                        <BoxCell box={b} index={i} />
+                                    )
+                                })}
+                            </div>
                         </div>
                     </div>
-                    <div className="BoxScrollContainer">
-                        <div className="BoxScroll">
-                            {allBoxes.map((box: BoxObject, key: number) => {
-                                return (
-                                    <div className="BoxCellContainer" key={key}>
-                                        <BoxCell box={box} key={key} index={key} />
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                    <div className="LayoutModel">
-                        <LayoutDropDown allPallets={allPallets} value={currentPalletIndex} selectPallet={setCurrentPalletIndex} />
-                        <div className="LayoutDisplay" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                            <LayoutModel pallet={allPallets[currentPalletIndex]} size={650} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
+                    <div className="LayoutView">
+                        <div className="LayoutContainer">
+                            <div className="PalletSelect">
+                                <div className="Title">
+                                    <span>
+                                        {"On to pallet:"}
+                                    </span>
+                                </div>
+                                <div className="Drop">
+                                    <select value={currentPalletIndex} onChange={handlePalletSelect}>
+                                        {allPallets.map((pallet: PalletGeometry, index: number) => {
+                                            return (
+                                                <option value={index} key={index}> {pallet.name} </option>
+                                            );
+                                        })}
+                                    </select>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </ContentItem>
         );
+
+
+
+        /* return (
+	 *     <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
+	 *         <div className="LayoutContainer">
+	 *             <div className="LayoutName">
+	 *                 <div className="NameHolder">
+	 *                     <input type="text" placeholder={placeholder} />
+	 *                 </div>
+	 *             </div>
+	 *             <div className="BoxScrollContainer">
+	 *                 <div className="BoxScroll">
+	 *                     {allBoxes.map((box: BoxObject, key: number) => {
+	 *                         return (
+	 *                             <div className="BoxCellContainer" key={key}>
+	 *                                 <BoxCell box={box} key={key} index={key} />
+	 *                             </div>
+	 *                         )
+	 *                     })}
+	 *                 </div>
+	 *             </div>
+	 *             <div className="LayoutModel">
+	 *                 <LayoutDropDown allPallets={allPallets} value={currentPalletIndex} selectPallet={setCurrentPalletIndex} />
+	 *                 <div className="LayoutDisplay" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
+	 *                     <LayoutModel pallet={allPallets[currentPalletIndex]} size={650} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
+	 *                 </div>
+	 *             </div>
+	 *         </div>
+	 *     </ContentItem>
+	 * ); */
     }
 };
 
