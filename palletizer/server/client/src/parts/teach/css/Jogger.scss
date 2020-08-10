@@ -1,189 +1,223 @@
  @import "../../css/TeachMode.scss";
 
 
- .JoggerCentering {
+
+
+ .Jogger {
      height: 100%;
      width: 100%;
      display: grid;
-     grid-template-rows: auto auto;
+     grid-template-rows: 10% 70% 20%;
      grid-template-columns: 100%;
 
-     //        @include flex-center();
-     .JoggerContainerInner {
-         width: 100%;
+
+     .Name {
          display: grid;
-         grid-template-rows: auto auto auto;
-         grid-template-columns: 100%;
+         grid-template-columns: 30% 70%;
 
-         // Raising and lower operators.
-         .JoggerRaiseLower {
-             cursor: pointer;
+         .NamePrompt {
              @include flex-center();
-
-             svg {
-                 #ArrowLine {
-                     stroke: $light-grey;
-                 }
-
-                 #ArrowText {
-                     fill: none;
-                 }
-             }
+             font-size: $large-font;
+             font-weight: $bold-font;
+             justify-content: flex-end;
+             padding-right: $margin;
          }
 
-         .JoggerRaiseLower:hover {
-             svg {
-                 transform: scale(1.1);
-
-                 #ArrowLine {
-                     stroke: $dark-blue;
-                 }
-
-                 #ArrowText {
-                     fill: $dark-blue;
-                 }
-             }
-         }
-
-         .JoggerCircleContainer {
+         .NameInput {
              @include flex-center();
+             justify-content: flex-start;
 
-             .JoggerCircle {
-                 height: $jogger-diameter;
-                 width: $jogger-diameter;
-                 border-radius: $jogger-diameter/2;
-                 background-color: $light-blue;
+             input {
+                 width: 70%;
+                 font-size: $large-font;
+                 padding: $margin;
+
+             }
+
+         }
+     }
+
+     .Controls {
+         display: grid;
+         grid-template-columns: 12% 76% 12%;
+         grid-template-rows: 100%;
+
+         .Position {
+             display: grid;
+             grid-template-rows: 25%;
+             padding-left: $margin;
+
+             .PositionBox {
+                 border: $container-border;
+                 border-radius: $border-radius;
                  display: grid;
-                 grid-template-rows: 33.3% 33.3% 33.3%;
-                 grid-template-columns: 33.3% 33.3% 33.3%;
+                 grid-template-rows: 33% 33% 33%;
+                 padding-left: $margin;
 
-                 @include shadow();
-
-                 @mixin arrow-image() {
-                     cursor: pointer;
-
-                     :hover {
-                         transform: scale(1.1);
-                     }
-
-                     img {}
+                 .PositionValue {
+                     @include flex-center();
+                     justify-content: flex-start;
+                     color: $dark-blue;
                  }
+             }
+         }
 
-                 .JogIncrement {
-                     @include grid-coordinate(2, 2);
+         .Move {
+             display: grid;
+             grid-template-rows: 15% 70% 15%;
+             $mover-size: 300pt;
+
+             .A {
+                 cursor: pointer;
+                 @include flex-center();
+
+                 .Display {
+                     width: $mover-size;
                      @include flex-center();
 
-                     input {
-                         font-size: 1em;
-                         width: 60pt;
-                         -webkit-appearance: none;
-                         -moz-appearance: none;
-                         margin: 0;
-                     }
 
-                     span {
-                         padding-left: $margin;
-                         font-size: 1em;
+                     svg {
+                         #ArrowLine {
+                             stroke: $dark-blue;
+                         }
+
+                         #ArrowText {
+                             fill: none;
+                         }
                      }
                  }
+             }
 
-                 .SelectPointButton {
-                     @include flex-center();
-                     @include grid-coordinate(2, 2);
-                     $select-diameter: 80pt;
+             .A:hover {
+                 .Display {
+                     svg {
+                         #ArrowLine {
+                             stroke: $green;
+                         }
 
-                     .SelectButton {
+                         #ArrowText {
+                             fill: $green;
+                         }
+                     }
+                 }
+             }
+
+             .Mover {
+                 @include flex-center();
+
+                 .MoverGrid {
+                     width: $mover-size;
+                     height: $mover-size;
+                     display: grid;
+                     grid-template-rows: 33% 33% 33%;
+                     grid-template-columns: 33% 33% 33%;
+
+                     @mixin polygon() {
                          cursor: pointer;
+
+                         svg {
+                             polygon {
+                                 fill: $dark-blue;
+                             }
+                         }
+
+                         svg:hover {
+                             polygon {
+                                 fill: $green;
+                             }
+                         }
+                     }
+
+                     .Select {
                          @include flex-center();
-                         height: $select-diameter;
-                         width: $select-diameter;
-                         border-radius: $select-diameter/2;
-                         background-color: $green;
-                         color: $dark-blue;
+                         @include grid-coordinate(2, 2);
+
+                         .SelectButton {
+                             cursor: pointer;
+                             $s-height: $mover-size * 1/3 * 6/10;
+                             width: $mover-size * 1/3 * 9/10;
+                             height: $s-height;
+                             background-color: $dark-blue;
+                             color: white;
+                             @include flex-center();
+                             border-radius: $s-height / 2;
+                             font-size: $large-font;
+                             font-weight: $bold-font;
+                         }
+
+                         .SelectButton:hover {
+                             background-color: $green;
+                         }
                      }
 
-                     .SelectButton:hover {
-                         color: white;
-                         @include shadow();
-
+                     .Up {
+                         @include flex-center();
+                         @include grid-coordinate(1, 2);
+                         @include polygon();
                      }
-                 }
 
-                 .Up {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(1, 2);
-                 }
+                     .Down {
+                         @include flex-center();
+                         @include grid-coordinate(3, 2);
+                         @include polygon();
+                     }
 
-                 .Down {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(3, 2);
-                 }
+                     .Left {
+                         @include flex-center();
+                         @include grid-coordinate(2, 1);
+                         @include polygon();
+                     }
 
-                 .Left {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(2, 1);
-                 }
+                     .Right {
+                         @include flex-center();
+                         @include grid-coordinate(2, 3);
+                         @include polygon();
+                     }
 
-                 .Right {
-                     @include arrow-image();
-                     @include flex-center();
-                     @include grid-coordinate(2, 3);
                  }
              }
          }
      }
 
-     .JoggerParameters {
 
-         height: 100%;
+
+     .Parameters {
          display: grid;
          grid-template-rows: 100%;
          grid-template-columns: 50% 50%;
-         //margin: $margin;
 
+         .Parameter {
+             display: grid;
+             grid-template-columns: 100%;
+             grid-template-rows: 30% 70%;
 
-         .JoggerParameter {
-             @include flex-center();
-             // width: 90%;
+             .Name {
+                 @include flex-center();
+                 align-items: flex-end;
 
-             .ParameterContainer {
-                 width: 60%;
-                 display: grid;
-                 grid-template-rows: 50% 50%;
-
-
-                 //border: $blue-border;
-                 border-radius: $border-radius;
-                 background-color: $light-blue;
-                 color: $dark-blue;
-                 padding: $margin;
-                 @include shadow();
-
-                 .Title {
-                     @include flex-center();
-                     font-size: 1.2em;
-                     padding-bottom: $margin;
+                 span {
+                     font-size: $medium-font;
+                     font-weight: $bold-font;
                  }
 
-                 .Input {
-
-                     @include flex-center();
-                     @include jin-style(30%, 1.2em);
-                     padding-bottom: $margin;
-
-                     input {
-                         text-align: center;
-                         padding: none;
-                         padding-left: $margin;
-                         @include shadow();
-
-                     }
+                 .Units {
+                     //  padding-left: $margin;
+                     font-weight: $normal-font;
                  }
              }
+         }
 
+         .ParameterInput {
+             @include flex-center();
+             padding-top: $margin;
+             align-items: flex-start;
+
+             input {
+                 width: 30%;
+                 font-size: $medium-font;
+                 padding: $margin;
+                 text-align: center;
+             }
          }
      }
  }

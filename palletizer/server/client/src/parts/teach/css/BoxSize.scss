@@ -301,7 +301,7 @@
     height: 100%;
     width: 100%;
     display: grid;
-    grid-template-rows: 10% 90%;
+    grid-template-rows: 100%;
     grid-template-columns: 100%;
 
     .BoxName {
@@ -341,26 +341,27 @@
                 height: 100%;
                 width: 100%;
 
-		display: grid;
-		grid-template-rows: 100%;
-		grid-template-columns: 33% 33% 33%;
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 33% 33% 33%;
 
-		.CoordinateItem {
-		    width: 100%;
-		    height: 100%;
-		    display: grid;
-		    grid-template-rows: 100%;
-		    grid-template-columns: 50% 50%;
-		}
+                .CoordinateItem {
+                    width: 100%;
+                    height: 100%;
+                    display: grid;
+                    grid-template-rows: 100%;
+                    grid-template-columns: 50% 50%;
+                }
 
-		.CoordinateName {
-		    @include flex-center();
-		}
-		.CoordinateInput {
-		    @include flex-center();
-		    @include jin-style(50%, 1em);
-		}	
-		
+                .CoordinateName {
+                    @include flex-center();
+                }
+
+                .CoordinateInput {
+                    @include flex-center();
+                    @include jin-style(50%, 1em);
+                }
+
             }
         }
     }

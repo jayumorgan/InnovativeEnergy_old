@@ -7,17 +7,19 @@ $scroll-height: 100% - $add-height;
     height: 100%;
     padding: $double-margin;
     display: grid;
-    grid-template-rows:auto;
+    grid-template-rows: auto;
     grid-template-columns: auto auto;
     grid-column-gap: $double-margin;
+
     .ConfigGrid {
         width: 100%;
         height: 100%;
         display: grid;
-        grid-template-rows:  $scroll-height $add-height;
+        grid-template-rows: $scroll-height $add-height;
         grid-template-columns: 100%;
+
         .ConfigScroll {
-            @include grid-coordinate(1,1);
+            @include grid-coordinate(1, 1);
             display: flex;
             min-height: 50vh;
             align-items: center;
@@ -29,6 +31,7 @@ $scroll-height: 100% - $add-height;
             margin-top: $double-margin;
             padding-bottom: $margin;
             overflow-y: auto;
+
             .ConfigCell {
                 width: 95%;
                 border: $container-border;
@@ -39,27 +42,33 @@ $scroll-height: 100% - $add-height;
                 display: flex;
                 justify-content: flex-start;
                 align-items: center;
+
                 span {
                     font-weight: $bold-font;
                 }
+
                 .EditConfigButton {
                     @include flex-center();
                     padding-left: $margin;
                     text-decoration: underline;
                     cursor: pointer;
+
                     span {
                         font-weight: $normal-font;
                     }
                 }
+
                 .DeleteConfigButton {
                     @include flex-center();
-                    color:red;
+                    color: red;
                     align-self: flex-end;
                     margin-left: auto;
                     cursor: pointer;
+
                     span {
                         font-weight: $normal-font;
                     }
+
                     #button-text {
                         text-decoration: underline;
                         padding-left: $margin;
@@ -67,21 +76,27 @@ $scroll-height: 100% - $add-height;
                 }
             }
         }
+
         .ConfigAdd {
-            @include grid-coordinate(2,1);
+            @include grid-coordinate(2, 1);
             @include flex-center();
+
             .AddConfigButton {
                 background-color: $medium-blue;
-                color:white;
+                color: white;
                 border-radius: $border-radius;
-                padding: $double-margin;
+                @include flex-center();
+                //padding: $double-margin;
+                width: 50%;
+                height: 50%;
                 cursor: pointer;
+                font-size: $large-font;
+                font-weight: 600;
             }
+
             .AddConfigButton:hover {
                 @include shadow();
             }
         }
     }
 }
-
-

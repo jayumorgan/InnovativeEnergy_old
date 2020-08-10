@@ -523,6 +523,7 @@ interface LayoutProps {
     setPallets: (pallets: PalletGeometry[]) => void;
     handleNext: () => void;
     handleBack: () => void;
+    instructionNumber: number;
 };
 
 interface SVGPosition {
@@ -545,7 +546,7 @@ function defaultLayer(index: number) {
 };
 
 
-function Layout({ allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
+function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
 
     // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
     let index = 0;
@@ -660,7 +661,7 @@ function Layout({ allBoxes, allPallets, setPallets, handleNext, handleBack }: La
     if (summaryScreen) {
         instruction = "Create and edit layers";
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
+            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
                 <LayoutSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );
@@ -672,8 +673,9 @@ function Layout({ allBoxes, allPallets, setPallets, handleNext, handleBack }: La
             outerHeight: 664
         };
 
+
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
+            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
                 <div className="LayoutContainer">
                     <div className="LayoutName">
                         <div className="NameHolder">

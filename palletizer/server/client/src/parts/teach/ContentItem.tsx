@@ -9,16 +9,28 @@ export interface ButtonProps {
 export interface ContentItemProps {
     children: ReactElement;
     instruction: string;
+    instructionNumber: number;
     LeftButton: ButtonProps;
     RightButton: ButtonProps;
 }
 
-export default function ContentItem({ children, instruction, LeftButton, RightButton }: ContentItemProps) {
+let capitalize = (s: string) => {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+};
+
+
+
+export default function ContentItem({ children, instruction, LeftButton, RightButton, instructionNumber }: ContentItemProps) {
     return (
         <Fragment>
             <div className="TeachModeInstruction">
                 <span>
-                    {instruction.toLowerCase()}
+                    {"Step " + String(instructionNumber) + ":"}
+                </span>
+
+
+                <span className="Instruction">
+                    {capitalize(instruction)}
                 </span>
             </div>
             <div className="TeachModeContent">

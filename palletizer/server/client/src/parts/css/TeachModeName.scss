@@ -1,0 +1,13 @@
+@import "../../master.scss";
+
+
+$name-height: 300pt;
+
+.TeachModeNameStart {
+    height: 250pt;
+    width: 500pt;
+
+    margin-top: $quad-margin;
+    background-color: red;
+    @include flex-center();
+}

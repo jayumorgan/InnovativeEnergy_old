@@ -13,7 +13,7 @@
      height: $container-height;
      width: $content-width;
      background-color: $off-white;
-     margin-top: $quad-margin;
+     margin-top: $margin * 8;
      border-radius: $border-radius;
      @include shadow();
      display: grid;
@@ -22,65 +22,69 @@
      grid-template-rows: $ch/10 $ch/12 auto $ch/12;
 
      .TeachModeHeader {
-	 
-	 
          display: grid;
          grid-template-rows: 100%;
          grid-template-columns: 50% 50%;
-         background: $blue-gradient;
+         background-color: $light-blue;
+         border-radius: $border-radius $border-radius 0 0;
 
-         .TeachButton {
-             cursor: pointer;
+         .TeachModeTitle {
+             width: 100%;
+             height: 100%;
+             color: $dark-blue;
              @include flex-center();
-             color: $light-grey;
-             font-size: $medium-font;
-	     cursor: pointer;
+             justify-content: flex-start;
+             padding-left: $margin * 2;
+
+             span {
+                 font-size: $huge-font;
+                 font-weight: $bold-font;
+             }
          }
 
-         .TeachButton:hover {
-             color: $green;
-         }
-
-         .StatusBar {
+         .TeachModeCompletion {
+             width: 100%;
+             height: 100%;
              display: grid;
              grid-template-rows: 50% 50%;
              grid-template-columns: 100%;
-             border-radius: $border-radius $border-radius 0 0;
-             color: white;
-             height: 100%;
-	     width: 100%;
 
-             .StatusBarTitle {
+
+             .CompletionLabel {
                  @include flex-center();
-                 flex-direction: column;
                  justify-content: flex-end;
-
-                 span {
-                     font-size: $medium-font;
-                     font-weight: $bold-font;
-                 }
+                 align-items: flex-end;
+                 padding-right: $margin * 2;
+                 font-size: $medium-font;
              }
 
-             .StatusBarCompletion {
+             .CompletionDisplay {
+                 width: 100%;
+                 height: 100%;
+
                  @include flex-center();
 
-                 .CompletionContainer {
-                     @include flex-center();
-                     width: 20%;
-                     justify-content: space-between;
+                 justify-content: flex-end;
+                 align-items: flex-start;
 
-                     svg {
-                         circle {
-                             stroke: none;
-                         }
+                 $bar-height: 10pt;
 
-                         #complete {
-                             fill: $green;
-                         }
+                 $bar-radius: $bar-height/2;
 
-                         #incomplete {
-                             fill: $light-grey;
-                         }
+                 .CompletionBar {
+                     margin-top: $margin;
+                     margin-right: $margin * 2;
+                     width: 50%;
+                     height: $bar-height;
+                     border-radius: $bar-radius;
+                     background-color: $light-grey;
+
+                     .CompletionFilled {
+                         height: $bar-height;
+                         border-radius: $bar-radius;
+                         background-color: $green;
+
+
                      }
                  }
              }
@@ -89,58 +93,86 @@
 
      .TeachModeInstruction {
          @include flex-center();
+         justify-content: flex-start;
+         flex-direction: row;
+         padding-left: $margin * 2;
 
          span {
-             font-size: 2.5em;
-             letter-spacing: 5pt;
-             font-variant: small-caps;
+             font-size: $huge-font;
+             // font-variant: small-caps;
+             font-weight: $bold-font;
+         }
 
+         .Instruction {
+             font-weight: $normal-font;
+             font-size: $large-font;
+             padding-left: $margin;
          }
      }
 
      .TechModeContent {
          height: 100%;
          width: 100%;
-
      }
 
      .TeachModeBottom {
-	 color : $dark-blue;
-	 height: 100%;
-	 width: 100%;
-	 display: grid;
-	 grid-template-columns: 50% 50%;
-	 grid-template-rows: 100%;
+         color: $dark-blue;
+         height: 100%;
+         width: 100%;
+         display: grid;
+         grid-template-columns: 50% 50%;
+         grid-template-rows: 100%;
 
-	 .Left {
-	     width: 100%;
-	     @include flex-center();
-	     justify-content: flex-start;
-	 }
+         .Left {
+             width: 100%;
+             @include flex-center();
+             justify-content: flex-start;
 
-	 .Right {
-	     width: 100%;
-	     @include flex-center();
-	     justify-content: flex-end;
-	 }
 
-	 .Button {
-	     width: 20%;
-	     @include flex-center();
-	     font-size: $medium-font;
-	     cursor: pointer;
-	     
-	     
-	 }
-	 .Button:hover {
-	     color: $green;
-	 }
+             .Button {
+                 width: 20%;
+                 height: 60%;
+                 margin-left: $margin * 2;
+                 border-radius: $border-radius;
+                 border: 1pt solid $dark-blue;
+             }
+         }
 
-	
+         .Right {
+             width: 100%;
+             @include flex-center();
+             justify-content: flex-end;
+
+
+             .Button {
+                 width: 20%;
+                 height: 60%;
+                 border-radius: $border-radius;
+                 color: white;
+                 background-color: $dull-button;
+                 margin-right: $margin * 2;
+             }
+
+         }
+
+         .Button {
+             width: 20%;
+             @include flex-center();
+             font-size: $medium-font;
+             cursor: pointer;
+
+
+         }
+
+         .Button:hover {
+             color: $green;
+         }
+
+
      }
 
 
-     
+
 
 
      .TeachModeFooter {

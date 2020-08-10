@@ -9,7 +9,6 @@ import Jogger from "./Jogger";
 import Box from "./3D/BoxRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-import PickLocation from "./PickLocation";
 
 
 import { BoxObject, BoxDimensions, Coordinate } from "./structures/Data";
@@ -215,15 +214,15 @@ interface CreateNewBoxProps {
     LeftButton: ButtonProps;
     RightButton: ButtonProps;
     updateBox: (b: BoxObject) => void;
+    instructionNumber: number;
 };
 
-function CreateNewBox({ box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
+function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
 
     let pallet_seq_name = "Pallet Sequence 1";
     let input_name = "PalletSequenceTitle";
 
-    let handle_input = (e: ChangeEvent) => {
-        let name = (e.target as any).value;
+    let updateName = (name: string) => {
         updateBox({ ...box, name });
     };
 
@@ -246,13 +245,13 @@ function CreateNewBox({ box, LeftButton, RightButton, updateBox }: CreateNewBoxP
     let instruction = "Move and select box pick location";
 
     return (
-        <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton}>
+        <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
             <div className="NewBoxGrid">
-                <div className="BoxName">
+                {/* <div className="BoxName">
                     <input type="text" value={box.name} onChange={handle_input} />
-                </div>
+                    </div> */}
                 <div className="BoxSetup">
-                    <Jogger selectAction={selectAction} />
+                    <Jogger selectAction={selectAction} name={box.name} updateName={updateName} />
                     <div className="BoxConfigurator">
                         <Box {...box.dimensions} />
                         <div className="CoordinateDisplay">
@@ -271,6 +270,7 @@ function CreateNewBox({ box, LeftButton, RightButton, updateBox }: CreateNewBoxP
 interface BoxSizeProps {
     allBoxes: BoxObject[];
     setBoxes: (boxes: BoxObject[]) => void;
+    instructionNumber: number,
     handleBack: () => void;
     handleNext: () => void;
 
@@ -278,7 +278,7 @@ interface BoxSizeProps {
 
 // How will we update this? 
 
-function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
+function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext }: BoxSizeProps) {
     // Must have fixed width.
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
 
@@ -340,10 +340,12 @@ function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
         }
     };
 
+
+
     if (summaryScreen) {
         instruction = "Create and edit boxes";
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
+            <ContentItem instruction={instruction} instructionNumber={instructionNumber} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
@@ -360,7 +362,7 @@ function BoxSize({ allBoxes, setBoxes, handleBack, handleNext }: BoxSizeProps) {
         );
     } else {
         return (
-            <CreateNewBox box={editingBox} LeftButton={LeftButton} RightButton={RightButton} updateBox={setEditingBox} />
+            <CreateNewBox box={editingBox} LeftButton={LeftButton} RightButton={RightButton} updateBox={setEditingBox} instructionNumber={instructionNumber} />
         );
     }
 };

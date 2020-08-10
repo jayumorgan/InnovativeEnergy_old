@@ -15,6 +15,8 @@ $dark-blue: rgb(22, 35, 56);
 
 $light-grey: rgb(212, 217, 226);
 
+$dull-button: rgb(167, 176, 187);
+
 $green: rgb(91, 196, 126);
 
 $light-blue: rgb(239, 242, 247);
@@ -22,6 +24,10 @@ $light-blue: rgb(239, 242, 247);
 $dark-grey: rgb(135, 135, 135);
 
 $off-white: rgb(251, 251, 251);
+
+$red: rgb(243, 15, 15);
+
+$border-grey: rgb(207, 207, 207);
 
 $blue-gradient:radial-gradient(circle, $medium-blue 40%, $dark-blue 100%);
 $left-gradient: liner-gradient(90deg, $medium-blue 10%, $dark-blue 100%);
@@ -41,7 +47,7 @@ $octa-margin: #{$margin * 8};
 
 // Border:
 $border: 1pt solid white;
-$container-border: 1pt solid $light-grey;
+$container-border: 1pt solid $border-grey;
 $blue-border: 1pt solid $container-blue;
 
 // Font weights.
@@ -63,7 +69,7 @@ $normal-font-size: 1em;
 }
 
 @mixin size-shadow($size) {
-   -moz-box-shadow: 0 0 $size $dark-grey;
+    -moz-box-shadow: 0 0 $size $dark-grey;
     -webkit-box-shadow: 0 0 $size $dark-grey;
     box-shadow: 0 0 $size $dark-grey;
 }
@@ -122,10 +128,8 @@ $normal-font-size: 1em;
     border: $container-border;
 }
 
-
-$stack-top-row: 40pt;
+$stack-top-row: 50pt;
 // $stack-bottom-row: ;
-
 
 .StackContainer {
     width: 100%;
@@ -139,15 +143,16 @@ $stack-top-row: 40pt;
     .StackTitle {
         @include grid-coordinate(1, 1);
         border-radius: $border-radius $border-radius 0 0;
-        border-bottom: $container-border;
-        background-color: $container-blue;
+        //        border-bottom: $container-border;
+        background-color: $light-blue;
         padding-left: $double-margin;
-        color: white;
+        color: $dark-blue;
         @include flex-center();
         justify-content: flex-start;
         letter-spacing: 1pt;
-        font-size: $medium-font;
+        font-size: $large-font;
         height: $stack-top-row;
+        font-weight: $bold-font;
     }
 }
 

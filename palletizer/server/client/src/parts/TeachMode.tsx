@@ -5,16 +5,20 @@ import Modal from "./Modal";
 //import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
-
-import ConfigurationName from "./teach/ConfigurationName";
+//import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
 import PalletCorners from "./teach/Pallet";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
 import Layout from "./teach/Layers";
 import Stack from "./teach/Stack";
+import Name from "./teach/Name";
+
+
 
 import { Coordinate, PalletGeometry, BoxObject, LayerObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates } from "./teach/structures/Data";
+
+
 
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
@@ -199,10 +203,14 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
     };
 
+    completionFraction.n = teachState as number;
+
     let controlProps: any = {
         handleNext,
-        handleBack
+        handleBack,
+        instructionNumber: completionFraction.n
     };
+    console.log(teachState as number, completionFraction);
 
     let allBoxes = configuration.boxes;
     let allPallets = configuration.pallets;
@@ -210,34 +218,27 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
-            ChildElement = (<ConfigurationName handleUpdate={setName} name={configuration.name} {...controlProps} />);
-
-            completionFraction.n = 1;
+            ChildElement = (<></>);
             break;
         }
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} {...controlProps} />);
 
-            completionFraction.n = 2;
             break;
         }
         case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
-            completionFraction.n = 3;
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
             ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
-            completionFraction.n = 4;
             break;
         }
         case (PalletTeachState.STACK_SETUP): {
             ChildElement = (<Stack allPallets={allPallets} setPallets={setPallets} {...controlProps} />)
-            completionFraction.n = 5;
             break;
         }
         case (PalletTeachState.SUMMARY): {
-            completionFraction.n = 6;
             break;
         }
         default: {
@@ -246,23 +247,54 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         }
     };
 
-    return (
-        <Modal close={close}>
-            <div className="TeachContainer">
-                <div className="TeachModeHeader">
-                    <div className="StatusBar">
-                        <div className="StatusBarTitle">
+
+
+
+    if (teachState === PalletTeachState.CONFIG_NAME) {
+        return (
+            <Modal close={close}>
+                <Name name={configuration.name} close={close} changeName={setName} handleStart={handleNext} />
+            </Modal>
+        );
+    } else {
+        let { n, d } = completionFraction;
+        let completionString = `Step ${n}/${d}`;
+        let widthPercentage = Math.round(n / d * 100);
+        let widthString = `${widthPercentage}%`;
+        let barStyle = {
+            minWidth: widthString,
+            width: widthString
+        } as any;
+        console.log(barStyle);
+
+        return (
+            <Modal close={close}>
+                <div className="TeachContainer">
+                    <div className="TeachModeHeader">
+                        <div className="TeachModeTitle">
                             <span>
-                                {configuration.name}
+                                {"Pallet configurator"}
                             </span>
                         </div>
-                        <CompletionDots fraction={completionFraction} />
+                        <div className="TeachModeCompletion">
+                            <div className="CompletionLabel">
+                                <span>
+                                    {completionString}
+                                </span>
+                            </div>
+                            <div className="CompletionDisplay">
+                                <div className="CompletionBar">
+                                    <div className="CompletionFilled" style={barStyle}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    {ChildElement}
                 </div>
-                {ChildElement}
-            </div>
-        </Modal>
-    );
+            </Modal >
+        );
+    }
 };
 
 export default PalletConfigurator;

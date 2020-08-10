@@ -16,12 +16,11 @@
      }
  }
 
-
  .CornerGrid {
      height: 100%;
      width: 100%;
      display: grid;
-     grid-template-rows: 10% 90%;
+     grid-template-rows: 100%;
      grid-template-columns: 100%;
 
      .PalletName {

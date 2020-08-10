@@ -7,9 +7,9 @@ import logo from "../images/white-logo.png";
 import "./css/Header.scss";
 
 //Estop
-import {MQTTEstop} from "../mqtt/MQTT";
+import { MQTTEstop } from "../mqtt/MQTT";
 
-import {ReactComponent as StopIcon} from "./images/danger.svg";
+import { ReactComponent as StopIcon } from "./images/danger.svg";
 
 
 function Header() {
@@ -39,13 +39,13 @@ function Header() {
             </div>
             <div className="HeaderItem">
                 <div className="StopButton" onClick={handle_stop}>
-            <StopIcon />
+                    <StopIcon />
                     <span> {"Stop"} </span>
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default Header;
 

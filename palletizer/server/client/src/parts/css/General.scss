@@ -24,48 +24,57 @@ $col-3 : 100% - $col-1 - $col-2;
     grid-row-gap: $double-margin;
     grid-column-gap: $double-margin;
     height: 75vh;
+
     .ExecuteContainer {
         // @include grid-coordinate(1,1);
         height: 100%;
+
         .ExecuteGrid {
             padding-top: $margin;
             display: grid;
             grid-template-columns: 100%;
             grid-template-rows: 17% 17% 17% 49%;
+
             @mixin input-stizz() {
                 padding-left: $margin;
                 padding-right: $margin;
                 @include flex-center();
                 justify-content: space-around;
             }
-            @mixin title-style(){
+
+            @mixin title-style() {
                 @include flex-center();
+
                 span {
                     // font-size: $medium-font;
                     overflow: hidden;
                     text-align: center;
                 }
             }
+
             .ConfigCell {
                 display: grid;
                 grid-template-rows: 100%;
                 grid-template-columns: 30% 70%;
+
                 .ConfigTitle {
-                    @include grid-coordinate(1,1);
+                    @include grid-coordinate(1, 1);
                     padding: 0;
                     padding-left: $margin;
                     padding-right: $margin;
                     @include title-style();
                     height: 100%;
                 }
+
                 .BoxStartTitle {
-                    @include grid-coordinate(1,1);
+                    @include grid-coordinate(1, 1);
                     @include title-style();
                     height: 100%;
                     padding: 0;
                 }
+
                 .ConfigItem {
-                    @include grid-coordinate(1,2);
+                    @include grid-coordinate(1, 2);
                     @include flex-center;
                     height: 100%;
                     padding: 0;
@@ -74,13 +83,14 @@ $col-3 : 100% - $col-1 - $col-2;
                 }
 
                 .BoxStartItem {
-                    @include grid-coordinate(1,2);
+                    @include grid-coordinate(1, 2);
                     @include flex-center;
                     height: 100%;
                     padding: 0;
                     padding-right: $double-margin;
                     padding-left: $double-margin;
                 }
+
                 input {
                     border-radius: $border-radius;
                     color: $dark-blue;
@@ -89,10 +99,11 @@ $col-3 : 100% - $col-1 - $col-2;
                     width: 100%;
                     padding: $margin;
                 }
+
                 select {
                     -webkit-appearance: none;
                     -moz-appearance: none;
-                    appearance: none; 
+                    appearance: none;
                     border-radius: $border;
                     border: $container-border;
                     color: $dark-blue;
@@ -101,8 +112,10 @@ $col-3 : 100% - $col-1 - $col-2;
                     padding: $margin;
                 }
             }
+
             @mixin button-stizz() {
                 @include flex-center();
+
                 .ButtonContainer {
                     @include flex-center();
                     flex-direction: column;
@@ -111,37 +124,44 @@ $col-3 : 100% - $col-1 - $col-2;
                     height: 80%;
                     cursor: pointer;
                     color: white;
+
                     span {
                         font-size: $huge-font;
                     }
+
                     #button-text {
                         padding-top: $margin;
                         font-size: $normal-font-size;
                         font-size: $large-font;
                     }
                 }
+
                 .ButtonContainer:hover {
                     @include shadow();
                 }
             }
 
             .ButtonGrid {
-                @include grid-coordinate(4,1);
+                @include grid-coordinate(4, 1);
                 display: grid;
-                grid-template-rows:100%;
+                grid-template-rows: 100%;
                 grid-template-columns: 50% 50%;
+
                 .StartButton {
-                    @include grid-coordinate(1,1);
+                    @include grid-coordinate(1, 1);
                     @include button-stizz();
                     height: 100%;
+
                     .ButtonContainer {
                         background-color: $green;
                     }
                 }
+
                 .StopButton {
-                    @include grid-coordinate(1,2);
+                    @include grid-coordinate(1, 2);
                     @include button-stizz();
                     height: 100%;
+
                     .ButtonContainer {
                         background-color: $medium-blue;
                     }
@@ -151,23 +171,27 @@ $col-3 : 100% - $col-1 - $col-2;
     }
 
     .StatusContainer {
-        @include grid-coordinate(1,2);
+        @include grid-coordinate(1, 2);
+
         .StatusBar {
             // @include grid-coordinate(1,1); 
             display: grid;
             grid-template-rows: 50% 50%;
             grid-template-columns: 50% 50%;
+
             .StatusItem {
                 height: 100%;
                 width: 100%;
                 @include flex-center();
                 flex-direction: column;
+
                 span {
                     font-size: $medium-font;
                     letter-spacing: 1.0pt;
                     overflow: hidden;
                     white-space: nowrap;
                 }
+
                 .StatusValue {
                     display: flex;
                     align-items: center;
@@ -175,6 +199,7 @@ $col-3 : 100% - $col-1 - $col-2;
                     font-weight: $bold-font;
                     font-size: $large-font;
                     padding-top: $margin;
+
                     svg {
                         height: 20pt;
                         width: 20pt;
@@ -190,49 +215,52 @@ $col-3 : 100% - $col-1 - $col-2;
     .VisualizerContainer {
         border: $container-border();
         border-radius: $border-radius;
-        @include stretch-grid(1,2,3,3);
+        @include stretch-grid(1, 2, 3, 3);
         display: grid;
         grid-template-rows: 80% 20%;
         grid-template-columns: 100%;
         padding-bottom: $double-margin;
+
         .LogoContainer {
             @include flex-center();
-            @include grid-coordinate(2,1);
+            @include grid-coordinate(2, 1);
+
             img {
                 width: 80%;
                 height: auto;
             }
         }
     }
-    
+
     .InformationContainer {
-        @include stretch-grid-col(2,1,2);
+        @include stretch-grid-col(2, 1, 2);
         // max-height: 35vh;
         // height: auto;
         height: 100%;
 
         .StackTitle {
-            @include grid-coordinate(1,1);
+            @include grid-coordinate(1, 1);
             border-radius: $border-radius $border-radius 0 0;
             border-bottom: $container-border;
-            background-color: $container-blue;
+            background-color: $light-blue;
             padding-left: $double-margin;
-            color:white;
-            // @include flex-center();
-            // justify-content: flex-start;
+            color: $dark-blue;
             display: grid;
             grid-template-rows: 100%;
             grid-template-columns: 50% 50%;
             letter-spacing: 1pt;
-            font-size: $medium-font;
+            font-size: $large-font;
+            font-weight: $bold-font;
             height: $stack-top-row;
 
             .InformationLegend {
                 padding-right: $double-margin;
                 display: grid;
-                grid-template-rows:auto;
+                grid-template-rows: auto;
                 grid-template-columns: 33% 33% 34%;
                 grid-column-gap: $margin;
+                color: white;
+
                 .InformationLegendItem {
                     width: 96%;
                     padding-top: $margin/2;
@@ -240,10 +268,12 @@ $col-3 : 100% - $col-1 - $col-2;
                     @include flex-center();
                     $svg-size: 20pt;
                     border-radius: $svg-size;
+
                     // @include shadow();
                     span {
                         padding-left: $margin;
                     }
+
                     svg {
                         height: $svg-size;
                         width: $svg-size;
@@ -251,7 +281,7 @@ $col-3 : 100% - $col-1 - $col-2;
                     }
                 }
             }
-            
+
         }
 
         .InformationLogContainer {
@@ -260,57 +290,68 @@ $col-3 : 100% - $col-1 - $col-2;
             overflow-y: auto;
             // height: 40vh;
             max-height: 40vh;
+
             // min-height: 100%;
             .InformationLog {
-                display: flex; 
+                display: flex;
                 display: grid;
                 grid-template-rows: 100%;
                 grid-template-columns: 20% 60% 20%;
                 // justify-content: space-between;
                 border-bottom: $container-border;
                 padding: $double-margin;
+
                 // align-items: center;
                 .InformationLogLeft {
                     display: grid;
                     grid-template-columns: 30% 70%;
                     grid-column-rows: 100%;
                     grid-column-gap: $margin;
+
                     .InformationLogImage {
                         @include flex-center();
                         justify-content: flex-start;
+
                         svg {
                             width: 20pt;
                             height: auto;
                             fill: $dark-blue;
                         }
+
                         g {
                             fill: $dark-blue;
                         }
+
                         #Error {
                             fill: red;
                         }
+
                         #Warning {
-                            fill: rgb(105,122,151);
-                            g{
-                                fill: rgb(105,122,151);
+                            fill: rgb(105, 122, 151);
+
+                            g {
+                                fill: rgb(105, 122, 151);
                             }
                         }
                     }
+
                     .InformationLogDate {
                         display: flex;
                         flex-direction: column;
                         align-content: center;
                         justify-content: center;
+
                         span {
                             text-align: left;
                             padding-bottom: $margin;
                         }
+
                         #DateString {
                             font-weight: $bold-font;
                             padding-bottom: 0;
                         }
                     }
-                    
+
                 }
 
                 .ErrorDismiss {
@@ -322,6 +363,3 @@ $col-3 : 100% - $col-1 - $col-2;
         }
     }
 }
-
-
-

@@ -13,9 +13,10 @@ interface StackProps {
     handleNext: () => void;
     handleBack: () => void;
     setPallets: (p: PalletGeometry[]) => void;
+    instructionNumber: number;
 };
 
-function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
+function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNext }: StackProps) {
     //    let haveStack = false;
     let checkForStack = () => {
         let haveStack = false
@@ -88,7 +89,7 @@ function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
     if (summaryScreen) {
         instruction = "Create and Edit Pallet Stack Configurations";
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
+            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <span>
                     Stack Summary
 		</span>
@@ -102,7 +103,7 @@ function Stack({ allPallets, setPallets, handleBack, handleNext }: StackProps) {
         let { name, Layers } = currentPallet;
 
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
+            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="StackGrid">
                     <div className="PalletName">
                         <div className="PalletDropDown">

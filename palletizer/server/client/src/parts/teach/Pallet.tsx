@@ -183,6 +183,7 @@ interface PalletCornerProps {
     handleNext: () => void;
     handleBack: () => void;
     setPallets: (pallets: PalletGeometry[]) => void;
+    instructionNumber: number;
 }
 
 
@@ -211,7 +212,7 @@ function defaultPallet(index: number): PalletGeometry {
     return p;
 }
 
-function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: PalletCornerProps) {
+function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, setPallets }: PalletCornerProps) {
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allPallets.length > 0);
 
     let [cornerNumber, setCornerNumber] = useState<Corners>(Corners.ONE); // ()
@@ -260,8 +261,7 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
         }
     };
 
-    let setPalletName = (e: ChangeEvent) => {
-        let name = (e.target as any).value;
+    let setPalletName = (name: string) => {
         setEditingPallet({ ...editingPallet, name });
     };
 
@@ -314,7 +314,7 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
     if (summaryScreen) {
         instruction = "Create and edit pallets";
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
+            <ContentItem instruction={instruction} instructionNumber={instructionNumber} LeftButton={LeftButton} RightButton={RightButton}>
                 <CornerSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );
@@ -323,13 +323,10 @@ function PalletCorners({ allPallets, handleNext, handleBack, setPallets }: Palle
         // Dont use the same pallet on the model, 
         instruction = "Move to corner " + String(cornerNumber + 1) + " and click select. ";
         return (
-            <ContentItem instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
+            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="CornerGrid">
-                    <div className="PalletName">
-                        <input type="text" placeholder={editingPallet.name} value={editingPallet.name} onChange={setPalletName} />
-                    </div>
                     <div className="PickLocationGrid">
-                        <Jogger selectAction={addCorner} />
+                        <Jogger selectAction={addCorner} name={editingPallet.name} updateName={setPalletName} />
                         <div className="PalletContainer">
                             <div className="PalletMount">
                                 <PalletModel size={size} pallet={defaultPallet(-2)} />
