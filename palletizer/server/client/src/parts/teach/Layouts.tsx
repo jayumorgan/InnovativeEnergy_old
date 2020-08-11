@@ -677,7 +677,6 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         outerHeight: 627
     };
 
-    // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
     let index = 0;
     let haveLayout = false;
     let layoutCount = 0;
@@ -690,6 +689,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     });
 
     let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
+
+    let [currentLayoutIndex, setCurrentLayoutIndex] = useState<number>(0);
 
     let [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayout);
 
@@ -751,7 +752,21 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                     allPallets.forEach((p: PalletGeometry, i: number) => {
                         let t = { ...p };
                         if (i === currentPalletIndex) {
-                            t.Layouts.push(newLayout);
+                            let { Layouts } = p;
+
+                            if (currentLayoutIndex < Layouts.length) {
+                                let newLayouts = [] as LayoutObject[];
+                                Layouts.forEach((l: LayoutObject, j: number) => {
+                                    if (j === currentLayoutIndex) {
+                                        newLayouts.push(newLayout);
+                                    } else {
+                                        newLayouts.push(l);
+                                    }
+                                    t = { ...p, Layouts: newLayouts };
+                                });
+                            } else {
+                                t.Layouts.push(newLayout);
+                            }
                         }
                         newPallets.push(t);
                     });
@@ -767,6 +782,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     let startEdit = (palletIndex: number, layoutIndex: number) => () => {
         // Handle Setting Up the Boxes here.
         setCurrentPalletIndex(palletIndex);
+        setCurrentLayoutIndex(layoutIndex);
         setModelBoxes(allPallets[palletIndex].Layouts[layoutIndex].boxPositions);
         setSummaryScreen(false);
     };
