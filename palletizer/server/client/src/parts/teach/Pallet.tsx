@@ -20,21 +20,6 @@ import "./css/Pallet.scss";
 
 import PalletImage from "../images/Pallet.jpg";
 
-interface DimensionCellProps {
-    axis: string;
-    value: number;
-}
-
-function DimensionCell({ axis, value }: DimensionCellProps) {
-    return (
-        <div className="DimensionCell">
-            <span>
-                {axis + ": " + String(value) + "mm"}
-            </span>
-        </div>
-    );
-};
-
 //---------------Pallet Model---------------
 interface PalletModelProps {
     pallet: PalletGeometry;
@@ -241,7 +226,6 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
             } else {
                 // if All corners are selected.
                 if (editComplete) {
-                    console.log("Check that all corners are selected...");
 
                     let temp: PalletGeometry = { ...editingPallet };
                     temp.Layouts = [];

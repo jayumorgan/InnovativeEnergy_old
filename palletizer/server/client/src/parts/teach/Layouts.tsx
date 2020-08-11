@@ -166,20 +166,29 @@ interface LayoutModelProps {
     size: number; // 650 for half content width;
     outerHeight: number;
     outerWidth: number;
-    updateLayoutBoxes?: (c: BoxPosition2D[]) => void;
+    updateModelBox?: (bpo: BoxPositionObject, index: number) => void;
     boxes?: BoxPositionObject[];
     fullWidth?: number;
     fullHeight?: number;
     corner?: PALLETCORNERS;
-    existingBoxes?: BoxPosition2D[];
 };
 
-export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateLayoutBoxes, fullWidth, fullHeight, corner, existingBoxes }: LayoutModelProps) {
+interface ModelData {
+    w: number;
+    l: number;
+    scale: number;
+    norm: number;
+    cx: number;
+    topX: number;
+    topY: number;
+    size: number;
+};
+
+
+function getModelData(pallet: PalletGeometry, size: number): ModelData {
 
     let dimensions: PlaneDimensions = getPalletDimensions(pallet);
-
     let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
-
     let w = dimensions.width / norm * size;
     let l = dimensions.length / norm * size;
     // Scale up the coordinates to take maximum size.
@@ -187,6 +196,41 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
     w *= scale;
     l *= scale;
     let cx = size / 2;
+    let topX = cx - w / 2;
+    let topY = (size - l) / 2;
+
+    return {
+        w,
+        l,
+        norm,
+        scale,
+        cx,
+        topX,
+        topY,
+        size
+    } as ModelData
+};
+
+
+function getFractionalCoordinates(modelData: ModelData, outerWidth: number, outerHeight: number, x: number, y: number): [number, number] {
+    let { topX, topY, size, w, l } = modelData;
+    let palletX = (outerWidth - size) / 2 + topX;
+    let palletY = topY;
+    let fractionX = (x - palletX) / w;
+    let fractionY = (y - palletY) / l;
+
+    return [fractionX, fractionY];
+};
+
+
+
+
+
+export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateModelBox, fullWidth, fullHeight, corner }: LayoutModelProps) {
+    let modelData = getModelData(pallet, size);
+
+    let { w, l, norm, scale, cx, topX, topY } = modelData;
+
     let logColor: string = String(COLORS.LOG);
 
     let bottomLog: Rect = {
@@ -200,8 +244,8 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
     };
 
     let topLog: Rect = {
-        x: cx - w / 2,
-        y: (size - l) / 2,
+        x: topX,
+        y: topY,
         width: w,
         height: size / 10,
         fill: logColor,
@@ -238,34 +282,38 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
         y: (outerHeight - size) / 2
     } as any;
 
-    let BoxSVGs: Rect[] = [];
 
-    let calculatePositionFraction = (x: number, y: number) => {
-        let palletX = svg_props.x + topLog.x;
-        let palletY = topLog.y;
-        let fractionX = (x - palletX) / w;
-        let fractionY = (y - palletY) / l;
 
-        return [fractionX, fractionY];
+
+    let updateRectPosition = (index: number, nx: number, ny: number) => {
+        if (boxes && updateModelBox) {
+            let [fractionX, fractionY] = getFractionalCoordinates(modelData, outerWidth, outerHeight, nx, ny);
+            let box = boxes[index];
+            let newBox = {
+                ...box,
+                position: {
+                    x: fractionX,
+                    y: fractionY
+                }
+            } as BoxPositionObject;
+
+            updateModelBox(newBox, index);
+        }
     };
 
-    let ExistingBoxSVGs: Rect[] = [];
+    //    let [goodBoxes, setGoodBoxes] = useState<BoxPosition2D[]>([]);
+    let BoxSVGs: Rect[] = [];
+    if (boxes) {
+        boxes.forEach((b: BoxPositionObject) => {
+            let { position, box } = b;
 
-    if (existingBoxes) {
-        console.log("Existing Boxes", existingBoxes);
-        existingBoxes.forEach((b: BoxPosition2D) => {
+            let x = w * position.x + topX;
+            let y = l * position.y + topY;
 
-            let palletX = svg_props.x + topLog.x;
-            let palletY = topLog.y;
-            let x = w * b.position.x + palletX;
-            let y = l * b.position.y + palletY;
-            console.log("Pallet X ", palletX);
-            console.log("Pallet Y", palletY);
-            console.log("b.poisition", b.position);
-            console.log(`w = ${w} l = ${l}`);
-            console.log(`x = ${x} y = ${y} `);
+            let scaleSize = b.size;
+            let scaleRatio = size / scaleSize;
 
-            let { width, length } = b.box.dimensions;
+            let { width, length } = box.dimensions;
 
             width *= size * scale / norm;
             length *= size * scale / norm;
@@ -275,67 +323,6 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
             let boxprops: Rect = {
                 x,
                 y,
-                width,
-                height: length,
-                fill: boxColor,
-                stroke: boxColor,
-                strokeWidth: 0
-            };
-
-            ExistingBoxSVGs.push(boxprops);
-        });
-    };
-
-    let [goodBoxes, setGoodBoxes] = useState<BoxPosition2D[]>([]);
-
-    let updateRectPosition = (index: number, nx: number, ny: number) => {
-        if (boxes && updateLayoutBoxes) {
-            let temp: BoxPosition2D[] = [];
-
-            boxes.forEach((b: BoxPositionObject, i: number) => {
-                let { position, box } = b;
-                //let scaleSize = b.size;
-                //let scaleRatio = size / scaleSize;
-
-                let { x, y } = position;
-                if (index === i) {
-                    x = nx;
-                    y = ny;
-                }
-                let [fractionX, fractionY] = calculatePositionFraction(x, y);
-                let bp2d = {
-                    box,
-                    position: {
-                        x: fractionX,
-                        y: fractionY
-                    }
-                } as BoxPosition2D;
-
-                temp.push(bp2d);
-            });
-            updateLayoutBoxes(temp);
-        }
-    };
-
-
-
-    if (boxes) {
-        boxes.forEach((b: BoxPositionObject) => {
-            let { position, box } = b;
-            let scaleSize = b.size;
-            let scaleRatio = size / scaleSize;
-
-            let { x, y } = position;
-            let { width, length } = box.dimensions;
-
-            width *= size * scale / norm;
-            length *= size * scale / norm;
-
-            let boxColor = String(COLORS.CLEAR_BOX);
-
-            let boxprops: Rect = {
-                x: x * scaleRatio - width / 2,
-                y: y * scaleRatio - length / 2,
                 width,
                 height: length,
                 fill: boxColor,
@@ -410,11 +397,6 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
                         );
                     })}
                 </svg>
-                {ExistingBoxSVGs.map((r: Rect, index: number) => {
-                    return (
-                        <rect {...r} key={index} />
-                    );
-                })}
                 {BoxSVGs.map((r: Rect, index: number) => {
                     return (
                         <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} />
@@ -500,9 +482,13 @@ function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
         size,
         outerWidth: size,
         outerHeight: size,
-        existingBoxes: layout.boxPositions
+        boxes: layout.boxPositions
     } as LayoutModelProps;
-    let boxCount = ` (${boxPositions.length} boxes)`;
+
+
+    let handleName = (e: ChangeEvent) => {
+        let newName = (e.target as any).value;
+    };
 
     return (
         <div className="BoxCellContainer">
@@ -511,7 +497,7 @@ function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
                     <LayoutModel {...model_props} />
                 </div>
                 <div className="Name">
-                    <input type="text" value={name} />
+                    <input type="text" value={name} onChange={handleName} />
                 </div>
                 <div className="Dimensions">
                     <div className="DimensionsGrid2">
@@ -551,8 +537,6 @@ interface SummaryProps {
 
 // <NewLayoutCell startEdit={startEdit} />
 function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
-
-
 
 
     return (
@@ -677,9 +661,12 @@ function defaultLayout(index: number) {
 
 function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
 
-
     let modelSize = 620;
 
+    let modelDims = {
+        outerWidth: 835,
+        outerHeight: 627
+    };
 
     // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
     let index = 0;
@@ -703,12 +690,23 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
     let [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
 
-    let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
-
+    // let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
 
     let LeftButton: ButtonProps = {
         name: "Back",
         action: handleBack
+    };
+
+    let updateModelBox = (bpo: BoxPositionObject, index: number) => {
+        let newModels: BoxPositionObject[] = [];
+        modelBoxes.forEach((b: BoxPositionObject, i: number) => {
+            if (i === index) {
+                newModels.push(bpo)
+            } else {
+                newModels.push(b);
+            }
+        });
+        setModelBoxes(newModels);
     };
 
     let handleName = (e: ChangeEvent) => {
@@ -722,20 +720,14 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             if (summaryScreen) {
                 handleNext()
             } else {
-                if (tempBoxes.length > 0) {
+                if (modelBoxes.length > 0) {
 
                     let h = 0;
-                    let goodBoxes: BoxPosition2D[] = [];
-
-                    tempBoxes.forEach((b: BoxPosition2D) => {
-                        let { x, y } = b.position;
-                        console.log("Check that this is valid relative to the pallet");
-
-                        if (x >= 0 && y >= 0) {
-                            goodBoxes.push(b);
-                            if (b.box.dimensions.height > h) {
-                                h = b.box.dimensions.height;
-                            }
+                    let goodBoxes: BoxPositionObject[] = [];
+                    modelBoxes.forEach((bpo: BoxPositionObject, i: number) => {
+                        goodBoxes.push(bpo);
+                        if (bpo.box.dimensions.height > h) {
+                            h = bpo.box.dimensions.height;
                         }
                     });
 
@@ -744,8 +736,6 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                         boxPositions: goodBoxes,
                         height: h
                     } as LayoutObject;
-
-                    console.log("Good Boxes", goodBoxes);
 
                     let newPallets: PalletGeometry[] = [];
 
@@ -780,19 +770,24 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     };
 
     let onDrop = (e: DragEvent<HTMLDivElement>) => {
-
         if (DisplayElement.current) {
+            let modelData = getModelData(allPallets[currentPalletIndex], modelSize);
             let { clientX, clientY } = e;
             let { x, y } = DisplayElement.current.getBoundingClientRect();
             let prX = clientX - x;
             let prY = clientY - y;
             let index = parseInt(e.dataTransfer.getData("BoxIndex"));
-            let position: SVGPosition = {
-                x: clientX - x,
-                y: clientY - y
-            };
+
+            let px = clientX - x;
+            let py = clientY - y;
+
+            let [fracX, fracY] = getFractionalCoordinates(modelData, modelDims.outerWidth, modelDims.outerHeight, px, py);
+
             let bpo: BoxPositionObject = {
-                position,
+                position: {
+                    x: fracX,
+                    y: fracY
+                },
                 box: allBoxes[index],
                 size: modelSize
             };
@@ -816,11 +811,6 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         );
     } else {
         instruction = "Drag and drop boxes to create a layout";
-
-        let modelDims = {
-            outerWidth: 835,
-            outerHeight: 627
-        };
 
         let contentItemProps = {
             instructionNumber,
@@ -847,7 +837,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                             <div className="Scroll">
                                 {allBoxes.map((b: BoxObject, i: number) => {
                                     return (
-                                        <BoxCell box={b} index={i} />
+                                        <BoxCell box={b} index={i} key={i} />
                                     )
                                 })}
                             </div>
@@ -872,7 +862,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                                 </div>
                             </div>
                             <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                                <LayoutModel pallet={allPallets[currentPalletIndex]} size={modelSize} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
+                                <LayoutModel pallet={allPallets[currentPalletIndex]} size={modelSize} {...modelDims} boxes={modelBoxes} updateModelBox={updateModelBox} />
                             </div>
                         </div>
                     </div>

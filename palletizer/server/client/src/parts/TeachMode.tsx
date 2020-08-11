@@ -144,7 +144,8 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
             });
         });
     });
-    console.log(boxCoordinates);
+
+    console.log("Final Box Coordinates ", boxCoordinates);
 
     let configuration = {
         config,
@@ -174,7 +175,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let setBoxes = (boxes: BoxObject[]) => {
-        console.log("Setting the boxes");
         dispatchConfiguration({ type: CONF_ACTION.SET_BOXES, payload: boxes as any });
     };
 
@@ -192,7 +192,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let handleBack = () => {
-        console.log(teachState, "teach state");
         if (teachState > 0) {
             let state = teachState;
             setTeachState(--teachState);
@@ -208,7 +207,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
         handleBack,
         instructionNumber: completionFraction.n
     };
-    console.log(teachState as number, completionFraction);
 
     let allBoxes = configuration.boxes;
     let allPallets = configuration.pallets;
@@ -263,7 +261,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             minWidth: widthString,
             width: widthString
         } as any;
-        console.log(barStyle);
 
         return (
             <Modal close={close}>

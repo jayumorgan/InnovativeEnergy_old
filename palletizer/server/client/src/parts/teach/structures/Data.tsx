@@ -118,7 +118,7 @@ export interface BoxPositionObject {
 export interface LayoutObject {
     name: string;
     // pallet: PalletGeometry;
-    boxPositions: BoxPosition2D[];
+    boxPositions: BoxPositionObject[];
     height: number
 };
 
