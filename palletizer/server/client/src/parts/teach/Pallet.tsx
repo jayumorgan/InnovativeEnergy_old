@@ -11,12 +11,12 @@ import Jogger from "./Jogger";
 import PalletRender from "./3D/PalletRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-import { Rect, LayoutModel, PALLETCORNERS, IncreaseCorner, DecreaseCorner, CornerNumber } from "./Layers";
+import { Rect, LayoutModel, PALLETCORNERS, IncreaseCorner, DecreaseCorner, CornerNumber } from "./Layouts";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
 //import "../css/TeachMode.scss";
-import "./css/Corners.scss";
+import "./css/Pallet.scss";
 
 import PalletImage from "../images/Pallet.jpg";
 
@@ -200,7 +200,7 @@ function defaultPallet(index: number): PalletGeometry {
             y: 0,
             z: 0
         },
-        Layers: [],
+        Layouts: [],
         Stack: []
     };
     return p;
@@ -245,7 +245,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                     console.log("Check that all corners are selected...");
 
                     let temp: PalletGeometry = { ...editingPallet };
-                    temp.Layers = [];
+                    temp.Layouts = [];
 
                     // Save the data.
                     let newPallets = [...allPallets, temp];

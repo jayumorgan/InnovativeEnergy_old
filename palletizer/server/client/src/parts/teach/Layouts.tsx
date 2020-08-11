@@ -8,9 +8,9 @@ import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayerObject, BoxPosition2D, Coordinate2D } from "./structures/Data";
+import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D } from "./structures/Data";
 
-import "./css/Layout.scss";
+import "./css/Layouts.scss";
 
 interface NewLayoutCellProps {
     startEdit: () => void;
@@ -460,7 +460,7 @@ function NewLayoutCell({ startEdit }: NewLayoutCellProps) {
                 </div>
                 <div className="BoxName">
                     <span>
-                        {"Create A New Layer"}
+                        {"Create A New Layout"}
                     </span>
                 </div>
             </div>
@@ -485,7 +485,7 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
 
 interface LayoutCellProps {
     pallet: PalletGeometry;
-    layer: LayerObject;
+    layer: LayoutObject;
 };
 
 function LayoutCell({ layer, pallet }: LayoutCellProps) {
@@ -536,11 +536,11 @@ function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
                 <div className="BoxScroll">
                     <NewLayoutCell startEdit={startEdit} />
                     {allPallets.map((p: PalletGeometry, index: number) => {
-                        if (p.Layers.length > 0) {
+                        if (p.Layouts.length > 0) {
                             return (
                                 <>
                                     {
-                                        p.Layers.map((l: LayerObject, j: number) => {
+                                        p.Layouts.map((l: LayoutObject, j: number) => {
                                             return (<LayoutCell pallet={p} layer={l} key={`${j}${index}`} />);
                                         })
                                     }
@@ -652,9 +652,9 @@ interface BoxPositionObject {
     box: BoxObject;
 };
 
-function defaultLayer(index: number) {
-    let l: LayerObject = {
-        name: "Layer " + String(index),
+function defaultLayout(index: number) {
+    let l: LayoutObject = {
+        name: "Layout " + String(index),
         boxPositions: [],
         height: 0,
     };
@@ -666,23 +666,23 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
     // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
     let index = 0;
-    let haveLayer = false;
+    let haveLayout = false;
     allPallets.forEach((p: PalletGeometry, i: number) => {
-        if (!haveLayer && p.Layers.length > 0) {
-            haveLayer = true;
+        if (!haveLayout && p.Layouts.length > 0) {
+            haveLayout = true;
         }
     });
 
 
     let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayer);
+    let [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayout);
 
     let DisplayElement = useRef<HTMLDivElement>(null);
 
     let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
 
-    let [editingLayer, setEditingLayer] = useState<LayerObject>(defaultLayer(1));
+    let [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(1));
 
     let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
 
@@ -715,11 +715,11 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
                     console.log("Good Boxes", goodBoxes);
 
-                    let newLayer = {
-                        ...editingLayer,
+                    let newLayout = {
+                        ...editingLayout,
                         boxPositions: goodBoxes,
                         height: h
-                    } as LayerObject;
+                    } as LayoutObject;
 
 
                     let newPallets: PalletGeometry[] = [];
@@ -727,13 +727,13 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                     allPallets.forEach((p: PalletGeometry, i: number) => {
                         let t = { ...p };
                         if (i === currentPalletIndex) {
-                            t.Layers.push(newLayer);
+                            t.Layouts.push(newLayout);
                         }
                         newPallets.push(t);
 
                     });
 
-                    setEditingLayer(defaultLayer(1));
+                    setEditingLayout(defaultLayout(1));
                     setPallets(newPallets);
                     setSummaryScreen(true);
                 }
@@ -746,7 +746,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     };
 
     let instruction: string;
-    let placeholder = "Pallet Layer " + String(1);
+    let placeholder = "Pallet Layout " + String(1);
 
     let dragOver = (e: DragEvent<HTMLDivElement>) => {
         e.stopPropagation();

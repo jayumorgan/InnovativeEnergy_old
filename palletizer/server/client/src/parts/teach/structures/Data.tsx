@@ -80,7 +80,7 @@ export interface PalletGeometry {
     corner1: Coordinate;
     corner2: Coordinate;
     corner3: Coordinate;
-    Layers: LayerObject[];
+    Layouts: LayoutObject[];
     Stack: number[];
 };
 
@@ -103,7 +103,7 @@ export interface BoxPosition2D {
     box: BoxObject
 };
 
-export interface LayerObject {
+export interface LayoutObject {
     name: string;
     // pallet: PalletGeometry;
     boxPositions: BoxPosition2D[];

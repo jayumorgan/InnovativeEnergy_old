@@ -5,18 +5,17 @@ import Modal from "./Modal";
 //import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
+import { Coordinate, PalletGeometry, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates } from "./teach/structures/Data";
+
 //import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
 import PalletCorners from "./teach/Pallet";
 import CompletionDots, { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
-import Layout from "./teach/Layers";
+import Layout from "./teach/Layouts";
 import Stack from "./teach/Stack";
 import Name from "./teach/Name";
 
-
-
-import { Coordinate, PalletGeometry, BoxObject, LayerObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates } from "./teach/structures/Data";
 
 
 
@@ -82,7 +81,6 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
-
 function GenerateAndSaveConfig(config: PalletConfiguration) {
 
     let { name, pallets } = config;
@@ -91,11 +89,11 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
 
     pallets.forEach((p: PalletGeometry) => {
         let { width, length } = getPalletDimensions(p);
-        let { Layers, Stack } = p;
+        let { Layouts, Stack } = p;
 
         Stack.forEach((n: number, index: number) => {
 
-            let { boxPositions, height } = Layers[n];
+            let { boxPositions, height } = Layouts[n];
 
             boxPositions.forEach((b: BoxPosition2D) => {
 

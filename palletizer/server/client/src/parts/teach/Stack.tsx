@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from "react";
 
-import { PalletGeometry, LayerObject } from "./structures/Data";
+import { PalletGeometry, LayoutObject } from "./structures/Data";
 
 import ContentItem, { ButtonProps, ContentItemProps } from "./ContentItem";
 
@@ -100,7 +100,7 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
         instruction = "Define a pallet stack";
         let currentPallet = allPallets[currentPalletIndex];
 
-        let { name, Layers } = currentPallet;
+        let { name, Layouts } = currentPallet;
 
         return (
             <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
@@ -109,7 +109,7 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
                         <div className="PalletDropDown">
                             <select value={currentPalletIndex}>
                                 {allPallets.map((p: PalletGeometry, i: number) => {
-                                    if (p.Layers.length > 0) {
+                                    if (p.Layouts.length > 0) {
                                         return (
                                             <option value={i} key={i}> {p.name} </option>
                                         );
@@ -127,9 +127,9 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
                                             {"Level " + String(index)}
                                         </span>
                                     </div>
-                                    <div className="LayerSelector">
+                                    <div className="LayoutSelector">
                                         <select value={s} onChange={setStackValue(index)}>
-                                            {Layers.map((l: LayerObject, j: number) => {
+                                            {Layouts.map((l: LayoutObject, j: number) => {
                                                 return (
                                                     <option key={j} value={j}> {l.name} </option>
                                                 )
