@@ -8,13 +8,10 @@ import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D } from "./structures/Data";
+import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, BoxPositionObject, SVGPosition, Rect } from "./structures/Data";
 
 import "./css/Layouts.scss";
 
-interface NewLayoutCellProps {
-    startEdit: () => void;
-};
 
 interface DropDownProps {
     allPallets: PalletGeometry[];
@@ -164,11 +161,6 @@ export function CornerNumber(c: PALLETCORNERS) {
     }
 }
 
-
-
-
-
-
 interface LayoutModelProps {
     pallet: PalletGeometry;
     size: number; // 650 for half content width;
@@ -179,12 +171,10 @@ interface LayoutModelProps {
     fullWidth?: number;
     fullHeight?: number;
     corner?: PALLETCORNERS;
+    existingBoxes?: BoxPosition2D[];
 };
 
-// We will pass the palletizer coordinates into the thing.
-// We don't need anything else, as the boxes are there
-
-export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateLayoutBoxes, fullWidth, fullHeight, corner }: LayoutModelProps) {
+export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateLayoutBoxes, fullWidth, fullHeight, corner, existingBoxes }: LayoutModelProps) {
 
     let dimensions: PlaneDimensions = getPalletDimensions(pallet);
 
@@ -197,7 +187,6 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
     w *= scale;
     l *= scale;
     let cx = size / 2;
-    //  let cy = size / 2;
     let logColor: string = String(COLORS.LOG);
 
     let bottomLog: Rect = {
@@ -219,9 +208,8 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
         stroke: logColor,
         strokeWidth: 0
     };
-    // Horizontal planks....
-    let plankColor: string = String(COLORS.PLANK);
 
+    let plankColor: string = String(COLORS.PLANK);
     let planks = [] as Rect[];
     let plankNumber = 6;
     let spaceFraction = 2 / 3;
@@ -255,21 +243,60 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
     let calculatePositionFraction = (x: number, y: number) => {
         let palletX = svg_props.x + topLog.x;
         let palletY = topLog.y;
-        //Fractions are relative to pallet.
         let fractionX = (x - palletX) / w;
         let fractionY = (y - palletY) / l;
 
         return [fractionX, fractionY];
     };
 
+    let ExistingBoxSVGs: Rect[] = [];
+
+    if (existingBoxes) {
+        console.log("Existing Boxes", existingBoxes);
+        existingBoxes.forEach((b: BoxPosition2D) => {
+
+            let palletX = svg_props.x + topLog.x;
+            let palletY = topLog.y;
+            let x = w * b.position.x + palletX;
+            let y = l * b.position.y + palletY;
+            console.log("Pallet X ", palletX);
+            console.log("Pallet Y", palletY);
+            console.log("b.poisition", b.position);
+            console.log(`w = ${w} l = ${l}`);
+            console.log(`x = ${x} y = ${y} `);
+
+            let { width, length } = b.box.dimensions;
+
+            width *= size * scale / norm;
+            length *= size * scale / norm;
+
+            let boxColor = String(COLORS.CLEAR_BOX);
+
+            let boxprops: Rect = {
+                x,
+                y,
+                width,
+                height: length,
+                fill: boxColor,
+                stroke: boxColor,
+                strokeWidth: 0
+            };
+
+            ExistingBoxSVGs.push(boxprops);
+        });
+    };
+
     let [goodBoxes, setGoodBoxes] = useState<BoxPosition2D[]>([]);
 
-    // How do we get the box positions after a drop? 
     let updateRectPosition = (index: number, nx: number, ny: number) => {
         if (boxes && updateLayoutBoxes) {
             let temp: BoxPosition2D[] = [];
 
-            boxes.forEach(({ position, box }: BoxPositionObject, i: number) => {
+            boxes.forEach((b: BoxPositionObject, i: number) => {
+                let { position, box } = b;
+                //let scaleSize = b.size;
+                //let scaleRatio = size / scaleSize;
+
                 let { x, y } = position;
                 if (index === i) {
                     x = nx;
@@ -286,14 +313,17 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
 
                 temp.push(bp2d);
             });
-            // Loop through the boxes -- local copy of box coordinates? 
-            console.log(temp);
             updateLayoutBoxes(temp);
         }
     };
 
+
+
     if (boxes) {
-        boxes.forEach(({ position, box }: BoxPositionObject) => {
+        boxes.forEach((b: BoxPositionObject) => {
+            let { position, box } = b;
+            let scaleSize = b.size;
+            let scaleRatio = size / scaleSize;
 
             let { x, y } = position;
             let { width, length } = box.dimensions;
@@ -304,8 +334,8 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
             let boxColor = String(COLORS.CLEAR_BOX);
 
             let boxprops: Rect = {
-                x: x - width / 2,
-                y: y - length / 2,
+                x: x * scaleRatio - width / 2,
+                y: y * scaleRatio - length / 2,
                 width,
                 height: length,
                 fill: boxColor,
@@ -367,8 +397,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
 
         cornerTextProps.x = cornerCircleProps.cx - 10;
         cornerTextProps.y = cornerCircleProps.cy + 10;
-    }
-
+    };
     return (
         <>
             <svg {...outerSVG} >
@@ -381,8 +410,11 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
                         );
                     })}
                 </svg>
-
-
+                {ExistingBoxSVGs.map((r: Rect, index: number) => {
+                    return (
+                        <rect {...r} key={index} />
+                    );
+                })}
                 {BoxSVGs.map((r: Rect, index: number) => {
                     return (
                         <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} />
@@ -401,17 +433,6 @@ interface BoxImageProps {
     length: number;
 }
 
-
-export interface Rect {
-    x: number;
-    y: number;
-    width: string | number;
-    height: string | number;
-    fill: string;
-    stroke: string;
-    strokeWidth: number | string;
-    offset?: any
-};
 
 function BoxImage({ width, length }: BoxImageProps) {
     let norm = Math.sqrt(width ** 2 + length ** 2);
@@ -446,28 +467,6 @@ function BoxImage({ width, length }: BoxImageProps) {
 }
 
 
-function NewLayoutCell({ startEdit }: NewLayoutCellProps) {
-    let iconSize = {
-        height: 50,
-        width: 50
-    } as IconProps;
-
-    return (
-        <div className="BoxCellContainer">
-            <div className="NewBoxCell" onClick={startEdit}>
-                <div className="Icon">
-                    <PlusIcon {...iconSize} />
-                </div>
-                <div className="BoxName">
-                    <span>
-                        {"Create A New Layout"}
-                    </span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 interface DimensionCellProps {
     axis: string;
     value: number;
@@ -485,11 +484,12 @@ function DimensionCell({ axis, value }: DimensionCellProps) {
 
 interface LayoutCellProps {
     pallet: PalletGeometry;
-    layer: LayoutObject;
+    layout: LayoutObject;
+    startEdit: () => void;
 };
 
-function LayoutCell({ layer, pallet }: LayoutCellProps) {
-    let { name, boxPositions } = layer;
+function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
+    let { name, boxPositions } = layout;
     let { width, length } = getPalletDimensions(pallet)
 
     let iconSize = 30;
@@ -500,7 +500,8 @@ function LayoutCell({ layer, pallet }: LayoutCellProps) {
         size,
         outerWidth: size,
         outerHeight: size,
-    };
+        existingBoxes: layout.boxPositions
+    } as LayoutModelProps;
     let boxCount = ` (${boxPositions.length} boxes)`;
 
     return (
@@ -509,39 +510,62 @@ function LayoutCell({ layer, pallet }: LayoutCellProps) {
                 <div className="MiniRender" >
                     <LayoutModel {...model_props} />
                 </div>
-                <div className="BoxDetails">
-                    <div className="BoxName">
+                <div className="Name">
+                    <input type="text" value={name} />
+                </div>
+                <div className="Dimensions">
+                    <div className="DimensionsGrid2">
+                        <div className="Dimension">
+                            <span>
+                                {"Width: " + String(width)}
+                            </span>
+                        </div>
+                        <div className="Dimension">
+                            <span>
+                                {"Length: " + String(length)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className="Edit">
+                    <div className="EditButton" onClick={startEdit}>
                         <span>
-                            {name + boxCount}
+                            {"Edit"}
                         </span>
                     </div>
                 </div>
-                <div className="Buttons">
-                </div>
             </div>
-        </div >
+            <div className="Trash">
+                <span className="icon-delete">
+                </span>
+            </div>
+        </div>
     );
 
 }
 
 interface SummaryProps {
-    startEdit: () => void;
+    startEdit: (index: number) => () => void;
     allPallets: PalletGeometry[]
 }
 
+// <NewLayoutCell startEdit={startEdit} />
 function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
+
+
+
+
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
                 <div className="BoxScroll">
-                    <NewLayoutCell startEdit={startEdit} />
                     {allPallets.map((p: PalletGeometry, index: number) => {
                         if (p.Layouts.length > 0) {
                             return (
                                 <>
                                     {
                                         p.Layouts.map((l: LayoutObject, j: number) => {
-                                            return (<LayoutCell pallet={p} layer={l} key={`${j}${index}`} />);
+                                            return (<LayoutCell pallet={p} layout={l} key={`${j}${index}`} startEdit={startEdit(index)} />);
                                         })
                                     }
 
@@ -642,16 +666,6 @@ interface LayoutProps {
     instructionNumber: number;
 };
 
-interface SVGPosition {
-    x: number;
-    y: number;
-}
-
-interface BoxPositionObject {
-    position: SVGPosition;
-    box: BoxObject;
-};
-
 function defaultLayout(index: number) {
     let l: LayoutObject = {
         name: "Layout " + String(index),
@@ -661,18 +675,23 @@ function defaultLayout(index: number) {
     return l;
 };
 
-
 function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
+
+
+    let modelSize = 620;
+
 
     // Get Rid Of Model Boxes, just use layout -- pretty annoying of course.
     let index = 0;
     let haveLayout = false;
+    let layoutCount = 0;
+
     allPallets.forEach((p: PalletGeometry, i: number) => {
-        if (!haveLayout && p.Layouts.length > 0) {
+        if (p.Layouts.length > 0) {
+            layoutCount += 1;
             haveLayout = true;
         }
     });
-
 
     let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
 
@@ -682,13 +701,19 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
     let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
 
-    let [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(1));
+    let [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
 
     let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
+
 
     let LeftButton: ButtonProps = {
         name: "Back",
         action: handleBack
+    };
+
+    let handleName = (e: ChangeEvent) => {
+        let name = (e.target as any).value;
+        setEditingLayout({ ...editingLayout, name });
     };
 
     let RightButton: ButtonProps = {
@@ -704,7 +729,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
                     tempBoxes.forEach((b: BoxPosition2D) => {
                         let { x, y } = b.position;
-                        console.log("Also check that it is less that the size of the pallet <1 (and box relative to pallet size)")
+                        console.log("Check that this is valid relative to the pallet");
+
                         if (x >= 0 && y >= 0) {
                             goodBoxes.push(b);
                             if (b.box.dimensions.height > h) {
@@ -713,14 +739,13 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                         }
                     });
 
-                    console.log("Good Boxes", goodBoxes);
-
                     let newLayout = {
                         ...editingLayout,
                         boxPositions: goodBoxes,
                         height: h
                     } as LayoutObject;
 
+                    console.log("Good Boxes", goodBoxes);
 
                     let newPallets: PalletGeometry[] = [];
 
@@ -730,10 +755,9 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                             t.Layouts.push(newLayout);
                         }
                         newPallets.push(t);
-
                     });
 
-                    setEditingLayout(defaultLayout(1));
+                    setEditingLayout(defaultLayout(layoutCount + 2));
                     setPallets(newPallets);
                     setSummaryScreen(true);
                 }
@@ -741,7 +765,9 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         }
     };
 
-    let startEdit = () => {
+    let startEdit = (index: number) => () => {
+        // Handle Setting Up the Boxes here.
+        setCurrentPalletIndex(index);
         setSummaryScreen(false);
     };
 
@@ -767,7 +793,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             };
             let bpo: BoxPositionObject = {
                 position,
-                box: allBoxes[index]
+                box: allBoxes[index],
+                size: modelSize
             };
             setModelBoxes([...modelBoxes, bpo]);
         }
@@ -781,14 +808,14 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
     //---------------Display---------------
     if (summaryScreen) {
-        instruction = "Create and edit layers";
+        instruction = "Create and edit layouts";
         return (
             <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
                 <LayoutSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );
     } else {
-        instruction = "Drag and drop boxes to create a layer";
+        instruction = "Drag and drop boxes to create a layout";
 
         let modelDims = {
             outerWidth: 835,
@@ -813,7 +840,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                                 </span>
                             </div>
                             <div className="Input">
-                                <input type="text" placeholder="Pallet Layout 1" />
+                                <input type="text" value={editingLayout.name} onChange={handleName} />
                             </div>
                         </div>
                         <div className="BoxContainer">
@@ -845,53 +872,15 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                                 </div>
                             </div>
                             <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                                <LayoutModel pallet={allPallets[currentPalletIndex]} size={620} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
+                                <LayoutModel pallet={allPallets[currentPalletIndex]} size={modelSize} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
                             </div>
-
                         </div>
-
-
                     </div>
                 </div>
             </ContentItem>
         );
-
-
-
-        /* return (
-	 *     <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
-	 *         <div className="LayoutContainer">
-	 *             <div className="LayoutName">
-	 *                 <div className="NameHolder">
-	 *                     <input type="text" placeholder={placeholder} />
-	 *                 </div>
-	 *             </div>
-	 *             <div className="BoxScrollContainer">
-	 *                 <div className="BoxScroll">
-	 *                     {allBoxes.map((box: BoxObject, key: number) => {
-	 *                         return (
-	 *                             <div className="BoxCellContainer" key={key}>
-	 *                                 <BoxCell box={box} key={key} index={key} />
-	 *                             </div>
-	 *                         )
-	 *                     })}
-	 *                 </div>
-	 *             </div>
-	 *             <div className="LayoutModel">
-	 *                 <LayoutDropDown allPallets={allPallets} value={currentPalletIndex} selectPallet={setCurrentPalletIndex} />
-	 *                 <div className="LayoutDisplay" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-	 *                     <LayoutModel pallet={allPallets[currentPalletIndex]} size={650} {...modelDims} boxes={modelBoxes} updateLayoutBoxes={setTempBoxes} />
-	 *                 </div>
-	 *             </div>
-	 *         </div>
-	 *     </ContentItem>
-	 * ); */
     }
 };
-
-
-
-
 
 
 export default Layout;

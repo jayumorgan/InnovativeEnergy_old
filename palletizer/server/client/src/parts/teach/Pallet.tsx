@@ -2,7 +2,7 @@ import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from
 
 import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
 
-import { getPalletDimensions, Coordinate, PlaneDimensions, PalletGeometry } from "./structures/Data";
+import { getPalletDimensions, Coordinate, PlaneDimensions, PalletGeometry, Rect } from "./structures/Data";
 
 //import { PalletGeometry, getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
 
@@ -11,7 +11,7 @@ import Jogger from "./Jogger";
 import PalletRender from "./3D/PalletRender";
 import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-import { Rect, LayoutModel, PALLETCORNERS, IncreaseCorner, DecreaseCorner, CornerNumber } from "./Layouts";
+import { LayoutModel, PALLETCORNERS, IncreaseCorner, DecreaseCorner, CornerNumber } from "./Layouts";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
@@ -216,6 +216,8 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
 
     let [editComplete, setEditComplete] = useState<boolean>(false);
 
+    let [editingIndex, setEditingIndex] = useState<number>(allPallets.length);
+
     let LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
@@ -231,9 +233,6 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         }
     };
 
-
-
-
     let RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
         action: () => {
@@ -248,12 +247,22 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                     temp.Layouts = [];
 
                     // Save the data.
-                    let newPallets = [...allPallets, temp];
+                    let newPallets: PalletGeometry[] = [];
 
+                    if (editingIndex > allPallets.length || allPallets.length === 0) {
+                        newPallets = [...allPallets, temp];
+                    } else {
+                        allPallets.forEach((p: PalletGeometry, i: number) => {
+                            if (i === editingIndex) {
+                                newPallets.push(editingPallet);
+                            } else {
+                                newPallets.push(p)
+                            }
+                        });
+                    }
                     setPallets(newPallets);
                     setSummaryScreen(true);
                 }
-
             }
         }
     };
@@ -266,9 +275,11 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         if (index >= 0) {
             setEditComplete(true);
             setEditingPallet(allPallets[index]);
+            setEditingIndex(index);
         } else {
             setEditComplete(false);
-            setEditingPallet(defaultPallet(allPallets.length));
+            setEditingIndex(allPallets.length + 1);
+            setEditingPallet(defaultPallet(allPallets.length + 1));
         }
         setCornerNumber(PALLETCORNERS.TOP_LEFT);
         setSummaryScreen(false);
@@ -326,11 +337,10 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                 </div>
             </ContentItem>
         );
-        // <NewBox startEdit={startEdit(-1)} />
-        //  <CornerSummary startEdit={startEdit} allPallets={allPallets} />
+
     } else {
         let size = 650;
-        // Dont use the same pallet on the model, 
+
         instruction = "Move to corner " + String(CornerNumber(cornerNumber) + 1) + " and click select. ";
 
         return (

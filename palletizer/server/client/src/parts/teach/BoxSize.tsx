@@ -314,7 +314,6 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
                                     <BoxCell box={val} key={index} startEdit={startEdit(index)} />
                                 )
                             })}
-
                             <NewBox startEdit={startEdit(-1)} />
                         </div>
                     </div>

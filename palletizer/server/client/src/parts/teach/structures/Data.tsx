@@ -103,6 +103,18 @@ export interface BoxPosition2D {
     box: BoxObject
 };
 
+
+export interface SVGPosition {
+    x: number;
+    y: number;
+}
+
+export interface BoxPositionObject {
+    position: SVGPosition;
+    box: BoxObject;
+    size: number;
+};
+
 export interface LayoutObject {
     name: string;
     // pallet: PalletGeometry;
@@ -111,10 +123,23 @@ export interface LayoutObject {
 };
 
 
-
 export interface BoxCoordinates {
     pickLocation: Coordinate;
     dropLocation: Coordinate;
 };
+
+
+
+export interface Rect {
+    x: number;
+    y: number;
+    width: string | number;
+    height: string | number;
+    fill: string;
+    stroke: string;
+    strokeWidth: number | string;
+    offset?: any
+};
+
 
 // And then finally, the stack will be a collection of layers incremented by box height. 
