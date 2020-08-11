@@ -1,4 +1,4 @@
-import React, { useRef, useState, DragEvent, ReactElement, ChangeEvent } from 'react';
+import React, { useRef, useState, DragEvent, ReactElement, ChangeEvent, Fragment } from 'react';
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
@@ -44,9 +44,10 @@ interface DraggableRectProps {
     rect: Rect;
     updatePosition: (index: number, x: number, y: number) => void;
     index: number;
+    enabled: boolean;
 }
 
-function DraggableRect({ rect, updatePosition, index }: DraggableRectProps) {
+function DraggableRect({ rect, updatePosition, index, enabled }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
 
@@ -67,19 +68,22 @@ function DraggableRect({ rect, updatePosition, index }: DraggableRectProps) {
     };
 
     let handleDown = (e: React.PointerEvent) => {
-        let el = e.target;
-        let bb = (e.target as any).getBoundingClientRect();
-        let x = e.clientX - bb.left;
-        let y = e.clientY - bb.top;
 
-        setRectangle({
-            ...rectangle,
-            offset: {
-                x,
-                y
-            }
-        });
-        setActive(true);
+        if (enabled) {
+            let el = e.target;
+            let bb = (e.target as any).getBoundingClientRect();
+            let x = e.clientX - bb.left;
+            let y = e.clientY - bb.top;
+
+            setRectangle({
+                ...rectangle,
+                offset: {
+                    x,
+                    y
+                }
+            });
+            setActive(true);
+        }
         //        document.addEventListener("keydown", rotate90, true);
     };
 
@@ -98,8 +102,13 @@ function DraggableRect({ rect, updatePosition, index }: DraggableRectProps) {
     };
 
     let handleUp = (e: React.PointerEvent) => {
-        setRectPosition(rectangle);
-        setActive(false);
+        if (enabled) {
+            let { offset } = rectangle;
+
+            console.log(offset, "OFFSET");
+            setRectPosition(rectangle);
+            setActive(false);
+        }
     };
 
     let actions = {
@@ -171,6 +180,7 @@ interface LayoutModelProps {
     fullWidth?: number;
     fullHeight?: number;
     corner?: PALLETCORNERS;
+    enableDrag?: boolean;
 };
 
 interface ModelData {
@@ -214,6 +224,7 @@ function getModelData(pallet: PalletGeometry, size: number): ModelData {
 
 function getFractionalCoordinates(modelData: ModelData, outerWidth: number, outerHeight: number, x: number, y: number): [number, number] {
     let { topX, topY, size, w, l } = modelData;
+
     let palletX = (outerWidth - size) / 2 + topX;
     let palletY = topY;
     let fractionX = (x - palletX) / w;
@@ -223,10 +234,10 @@ function getFractionalCoordinates(modelData: ModelData, outerWidth: number, oute
 };
 
 
+export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth, boxes, updateModelBox, fullWidth, fullHeight, corner }: LayoutModelProps) {
 
+    let isDragEnabled = enableDrag ? enableDrag : false;
 
-
-export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, updateModelBox, fullWidth, fullHeight, corner }: LayoutModelProps) {
     let modelData = getModelData(pallet, size);
 
     let { w, l, norm, scale, cx, topX, topY } = modelData;
@@ -234,7 +245,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
     let logColor: string = String(COLORS.LOG);
 
     let bottomLog: Rect = {
-        x: cx - w / 2,
+        x: topX,
         y: size - (size - l) / 2 - size / 10,
         width: w,
         height: size / 10,
@@ -282,9 +293,6 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
         y: (outerHeight - size) / 2
     } as any;
 
-
-
-
     let updateRectPosition = (index: number, nx: number, ny: number) => {
         if (boxes && updateModelBox) {
             let [fractionX, fractionY] = getFractionalCoordinates(modelData, outerWidth, outerHeight, nx, ny);
@@ -306,8 +314,10 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
     if (boxes) {
         boxes.forEach((b: BoxPositionObject) => {
             let { position, box } = b;
+            console.log("Top X", topX);
 
-            let x = w * position.x + topX;
+            let x = w * position.x + topX + svg_props.x;
+            console.log("x ", x);
             let y = l * position.y + topY;
 
             let scaleSize = b.size;
@@ -399,7 +409,7 @@ export function LayoutModel({ pallet, size, outerHeight, outerWidth, boxes, upda
                 </svg>
                 {BoxSVGs.map((r: Rect, index: number) => {
                     return (
-                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} />
+                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} enabled={isDragEnabled} />
                     );
                 })}
             </svg>
@@ -531,14 +541,14 @@ function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
 }
 
 interface SummaryProps {
-    startEdit: (index: number) => () => void;
+    startEdit: (palletIndex: number, layoutIndex: number) => () => void;
     allPallets: PalletGeometry[]
 }
 
 // <NewLayoutCell startEdit={startEdit} />
 function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
 
-
+    let key = 0;
     return (
         <div className="BoxSummary">
             <div className="BoxScrollContainer">
@@ -546,14 +556,13 @@ function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
                     {allPallets.map((p: PalletGeometry, index: number) => {
                         if (p.Layouts.length > 0) {
                             return (
-                                <>
+                                <Fragment key={index}>
                                     {
                                         p.Layouts.map((l: LayoutObject, j: number) => {
-                                            return (<LayoutCell pallet={p} layout={l} key={`${j}${index}`} startEdit={startEdit(index)} />);
+                                            return (<LayoutCell pallet={p} layout={l} key={key++} startEdit={startEdit(index, j)} />);
                                         })
                                     }
-
-                                </>
+                                </Fragment>
                             );
                         }
                     })}
@@ -755,9 +764,10 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         }
     };
 
-    let startEdit = (index: number) => () => {
+    let startEdit = (palletIndex: number, layoutIndex: number) => () => {
         // Handle Setting Up the Boxes here.
-        setCurrentPalletIndex(index);
+        setCurrentPalletIndex(palletIndex);
+        setModelBoxes(allPallets[palletIndex].Layouts[layoutIndex].boxPositions);
         setSummaryScreen(false);
     };
 
@@ -819,6 +829,16 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             RightButton
         } as any;
 
+        let layoutModelProps = {
+            outerWidth: modelDims.outerWidth,
+            outerHeight: modelDims.outerHeight,
+            boxes: modelBoxes,
+            updateModelBox: updateModelBox,
+            pallet: allPallets[currentPalletIndex],
+            size: modelSize,
+            enableDrag: true
+        } as any;
+
         return (
             <ContentItem {...contentItemProps} >
                 <div className="Layout">
@@ -862,7 +882,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                                 </div>
                             </div>
                             <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                                <LayoutModel pallet={allPallets[currentPalletIndex]} size={modelSize} {...modelDims} boxes={modelBoxes} updateModelBox={updateModelBox} />
+                                <LayoutModel {...layoutModelProps} />
                             </div>
                         </div>
                     </div>
