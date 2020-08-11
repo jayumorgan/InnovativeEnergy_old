@@ -297,10 +297,9 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
                 }
                 setSummaryScreen(true);
             }
-        }
+        },
+        enabled: true
     };
-
-
 
     if (summaryScreen) {
         instruction = "Create and edit boxes";

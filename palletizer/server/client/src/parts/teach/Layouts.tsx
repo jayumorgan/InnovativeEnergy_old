@@ -731,7 +731,6 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                 handleNext()
             } else {
                 if (modelBoxes.length > 0) {
-
                     let h = 0;
                     let goodBoxes: BoxPositionObject[] = [];
                     modelBoxes.forEach((bpo: BoxPositionObject, i: number) => {
@@ -740,20 +739,16 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                             h = bpo.box.dimensions.height;
                         }
                     });
-
                     let newLayout = {
                         ...editingLayout,
                         boxPositions: goodBoxes,
                         height: h
                     } as LayoutObject;
-
                     let newPallets: PalletGeometry[] = [];
-
                     allPallets.forEach((p: PalletGeometry, i: number) => {
                         let t = { ...p };
                         if (i === currentPalletIndex) {
                             let { Layouts } = p;
-
                             if (currentLayoutIndex < Layouts.length) {
                                 let newLayouts = [] as LayoutObject[];
                                 Layouts.forEach((l: LayoutObject, j: number) => {
@@ -776,7 +771,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                     setSummaryScreen(true);
                 }
             }
-        }
+        },
+        enabled: modelBoxes.length > 0 || summaryScreen
     };
 
     let startEdit = (palletIndex: number, layoutIndex: number) => () => {

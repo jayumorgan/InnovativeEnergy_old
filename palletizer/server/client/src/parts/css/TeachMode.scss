@@ -128,13 +128,17 @@
              @include flex-center();
              justify-content: flex-start;
 
-
              .Button {
                  width: 20%;
                  height: 60%;
                  margin-left: $margin * 2;
                  border-radius: $border-radius;
-                 border: 1pt solid $dark-blue;
+                 border: 1pt solid $medium-blue;
+             }
+
+             .Button:hover {
+                 background-color: $medium-blue;
+                 color: white;
              }
          }
 
@@ -142,7 +146,6 @@
              width: 100%;
              @include flex-center();
              justify-content: flex-end;
-
 
              .Button {
                  width: 20%;
@@ -153,6 +156,15 @@
                  margin-right: $margin * 2;
              }
 
+             .ButtonEnabled {
+                 width: 20%;
+                 height: 60%;
+                 border-radius: $border-radius;
+                 color: white;
+                 background-color: $medium-blue;
+                 margin-right: $margin * 2;
+
+             }
          }
 
          .Button {
@@ -160,19 +172,22 @@
              @include flex-center();
              font-size: $medium-font;
              cursor: pointer;
-
-
          }
 
-         .Button:hover {
-             color: $green;
+         .ButtonEnabled {
+             width: 20%;
+             @include flex-center();
+             font-size: $medium-font;
+             cursor: pointer;
+         }
+
+         .ButtonEnabled:hover {
+             background-color: $green;
+
          }
 
 
      }
-
-
-
 
 
      .TeachModeFooter {

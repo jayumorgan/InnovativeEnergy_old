@@ -29,9 +29,7 @@ interface PalletModelProps {
 
 
 function PalletModel({ pallet, size, corner }: PalletModelProps) {
-
     let s = size * 9 / 10;
-
     let layoutProps: any = {
         size: s,
         pallet,
@@ -42,7 +40,6 @@ function PalletModel({ pallet, size, corner }: PalletModelProps) {
         corner
     };
 
-
     return (
         <svg width={size} height={size}>
             <LayoutModel {...layoutProps} />
@@ -50,13 +47,9 @@ function PalletModel({ pallet, size, corner }: PalletModelProps) {
     );
 };
 
-
-
-
 interface NewPalletProps {
     startEdit: () => void;
 };
-
 
 function NewPallet({ startEdit }: NewPalletProps) {
     return (
@@ -226,13 +219,10 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
             } else {
                 // if All corners are selected.
                 if (editComplete) {
-
                     let temp: PalletGeometry = { ...editingPallet };
                     temp.Layouts = [];
-
                     // Save the data.
                     let newPallets: PalletGeometry[] = [];
-
                     if (editingIndex > allPallets.length || allPallets.length === 0) {
                         newPallets = [...allPallets, temp];
                     } else {
@@ -248,7 +238,8 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                     setSummaryScreen(true);
                 }
             }
-        }
+        },
+        enabled: summaryScreen || editComplete
     };
 
     let setPalletName = (name: string) => {
