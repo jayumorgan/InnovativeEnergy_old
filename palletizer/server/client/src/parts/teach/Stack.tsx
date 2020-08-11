@@ -29,9 +29,7 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
     };
 
     let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
-
     let [summaryScreen, setSummaryScreen] = useState<boolean>(checkForStack());
-
     let [currentStack, setCurrentStack] = useState<number[]>(allPallets[currentPalletIndex].Stack);
 
     let saveStack = () => {
@@ -60,7 +58,6 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
     let RightButton: ButtonProps = {
         name: summaryScreen ? "Save and Finish" : "Next",
         action: () => {
-
             if (summaryScreen) {
                 handleNext();
             } else {
@@ -69,12 +66,13 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
                     setSummaryScreen(true);
                 }
             };
-        }
+        },
+        enabled: currentStack.length > 0 || checkForStack()
     };
 
     let addRow = () => {
         setCurrentStack([...currentStack, 0]);
-    }
+    };
 
     let setStackValue = (index: number) => (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
@@ -82,7 +80,6 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
         t[index] = val;
         setCurrentStack(t);
     };
-
 
     let instruction: string;
 
@@ -95,59 +92,83 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
 		</span>
             </ContentItem>
         );
-
     } else {
         instruction = "Define a pallet stack";
         let currentPallet = allPallets[currentPalletIndex];
-
         let { name, Layouts } = currentPallet;
 
+        let contentItemProps = {
+            instructionNumber,
+            instruction,
+            LeftButton,
+            RightButton
+        } as any;
+
+
         return (
-            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
-                <div className="StackGrid">
-                    <div className="PalletName">
-                        <div className="PalletDropDown">
-                            <select value={currentPalletIndex}>
-                                {allPallets.map((p: PalletGeometry, i: number) => {
-                                    if (p.Layouts.length > 0) {
-                                        return (
-                                            <option value={i} key={i}> {p.name} </option>
-                                        );
-                                    }
-                                })}
-                            </select>
-                        </div>
+            <ContentItem {...contentItemProps} >
+                <div className="Stack">
+                    <div className="StackSide">
                     </div>
-                    <div className="StackContainer">
-                        {currentStack.map((s: number, index: number) => {
-                            return (
-                                <div className="StackRow" key={index}>
-                                    <div className="RowName">
-                                        <span>
-                                            {"Level " + String(index)}
-                                        </span>
-                                    </div>
-                                    <div className="LayoutSelector">
-                                        <select value={s} onChange={setStackValue(index)}>
-                                            {Layouts.map((l: LayoutObject, j: number) => {
-                                                return (
-                                                    <option key={j} value={j}> {l.name} </option>
-                                                )
-                                            })}
-                                        </select>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                        <div className="AddStack" onClick={addRow} >
-                            <span>
-                                {"Add a new row"}
-                            </span>
+
+                    <div className="DisplaySide">
+                        <div className="Image">
+                            <img />
+
                         </div>
                     </div>
                 </div>
             </ContentItem>
         );
+
+
+
+        /* return (
+	 *     <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
+	 *         <div className="StackGrid">
+	 *             <div className="PalletName">
+	 *                 <div className="PalletDropDown">
+	 *                     <select value={currentPalletIndex}>
+	 *                         {allPallets.map((p: PalletGeometry, i: number) => {
+	 *                             if (p.Layouts.length > 0) {
+	 *                                 return (
+	 *                                     <option value={i} key={i}> {p.name} </option>
+	 *                                 );
+	 *                             }
+	 *                         })}
+	 *                     </select>
+	 *                 </div>
+	 *             </div>
+	 *             <div className="StackContainer">
+	 *                 {currentStack.map((s: number, index: number) => {
+	 *                     return (
+	 *                         <div className="StackRow" key={index}>
+	 *                             <div className="RowName">
+	 *                                 <span>
+	 *                                     {"Level " + String(index)}
+	 *                                 </span>
+	 *                             </div>
+	 *                             <div className="LayoutSelector">
+	 *                                 <select value={s} onChange={setStackValue(index)}>
+	 *                                     {Layouts.map((l: LayoutObject, j: number) => {
+	 *                                         return (
+	 *                                             <option key={j} value={j}> {l.name} </option>
+	 *                                         )
+	 *                                     })}
+	 *                                 </select>
+	 *                             </div>
+	 *                         </div>
+	 *                     )
+	 *                 })}
+	 *                 <div className="AddStack" onClick={addRow} >
+	 *                     <span>
+	 *                         {"Add a new row"}
+	 *                     </span>
+	 *                 </div>
+	 *             </div>
+	 *         </div>
+	 *     </ContentItem>
+	 * ); */
     }
 };
 
