@@ -87,6 +87,7 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
+
 function GenerateAndSaveConfig(config: PalletConfiguration) {
 
     let { name, pallets } = config;

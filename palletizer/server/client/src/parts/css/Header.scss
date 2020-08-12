@@ -11,8 +11,10 @@ $right-width: 30%;
     width: 50%;
     height: 60%;
     border-radius: $border-radius;
-    border: $border;
-    font-size: $medium-font;
+    //border: $container-border;
+    font-size: $large-font;
+    font-weight: $bold-font;
+    border: $container-border;
     cursor: pointer;
 
 }
@@ -36,6 +38,9 @@ $right-width: 30%;
         .BackButton {
             @include button-style();
             align-self: flex-start;
+            background-color: $medium-blue;
+
+            width: 60%;
 
             #button-text {
                 padding-left: $margin;
@@ -44,6 +49,7 @@ $right-width: 30%;
 
         .BackButton:hover {
             @include shadow();
+            background-color: $green;
         }
 
         .HeaderLogo {
@@ -67,6 +73,8 @@ $right-width: 30%;
             @include button-style();
             @include flex-center();
             align-self: flex-end;
+            // font-size: $huge-font;
+            width: 30%;
 
             svg {
                 padding-right: $margin;

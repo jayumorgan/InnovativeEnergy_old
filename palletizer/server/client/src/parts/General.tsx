@@ -407,6 +407,14 @@ function General() {
     });
 
 
+    let { palletConfig } = palletizer_context;
+
+
+    let visualizerProps: any = {
+        currentBoxNumber: current_box,
+        palletConfig
+    }
+
     return (
         <div className="GeneralGrid">
             <div className="ExecuteContainer">
@@ -420,8 +428,10 @@ function General() {
                 </StackContainer>
             </div>
             <div className="VisualizerContainer">
-                <Visualizer />
+
                 <div className="Visualizer">
+                    {palletConfig &&
+                        <Visualizer {...visualizerProps} />}
                 </div>
                 <div className="LogoContainer">
                     <img src={logo} />

@@ -150,7 +150,8 @@ export interface Rect {
     fill: string;
     stroke: string;
     strokeWidth: number | string;
-    offset?: any
+    offset?: any;
+    transform?: string;
 };
 
 

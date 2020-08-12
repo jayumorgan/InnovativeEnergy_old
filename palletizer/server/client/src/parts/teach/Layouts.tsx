@@ -64,11 +64,9 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     };
 
     let rotate90 = (k: any) => {
-        if (k.key == "r") {
-            let r = { ...rectangle };
-            r.width = rectangle.height;
-            r.height = rectangle.width;
-            setRectangle(r);
+        if (k.key === "r") {
+            console.log("Rotation .. ");
+            // setRectangle(r);
         }
     };
 
@@ -128,11 +126,10 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     let handleUp = (e: React.PointerEvent) => {
         if (enabled) {
             let { offset } = rectangle;
-
-
             setRectPosition(rectangle);
             setActive(false);
         }
+        //     document.removeEventListener("keydown", rotate90, false);
     };
 
     let actions = {
@@ -150,7 +147,8 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         textAnchor: "middle",
         fontSize: "1.5em",
         fill: "white",
-        pointerEvents: "none"
+        pointerEvents: "none",
+        //    transform: "rotate(90)"
     };
 
     return (

@@ -80,8 +80,6 @@ class Machine:
             self.dropCoodinates.append(boxData["dropLocation"])
             self.pickCoordinates.append(boxData["pickLocation"])
             
-            
-        
         self.mm.emitSpeed(speed)
         self.mm.emitAcceleration(acceleration)
 
@@ -135,7 +133,6 @@ class Machine:
         coordinate = self.pickCoordinates[count]
         self.move_all(coordinate)
         
-        
     def move_to_drop(self, index):
         coordinate = self.dropCoodinates[index]
         self.move_planar(coordinate)
@@ -156,8 +153,6 @@ class Machine:
         pin_value = self.__read_io(network_id, pin)
         return pin_value == 1
     
-        
-
     def __write_pressure(self, on):
         pin = self.pressure_ouput["PIN"]
         network_id = self.pressure_ouput["NETWORK_ID"]
@@ -189,7 +184,8 @@ class Palletizer(pc.PalletizerControl):
         self.update({
             "status": "Waiting",
             "total_box": self.total_box_count,
-            "palletConfig" : self.machine.pallet_config
+            "palletConfig" : self.machine.pallet_config,
+            "time": 0
         })
 
         self.control_checks(interrupted=True)
@@ -201,8 +197,10 @@ class Palletizer(pc.PalletizerControl):
 
     def move_to_pick(self,count):
         self.control_checks()
-        self.update({"current_box": count})
-        
+        self.update({
+            "current_box": count,
+            "time" : round((self.total_box_count - count) * 1/3)
+        })
         # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
             self.machine.move_to_pick(count)
@@ -220,7 +218,10 @@ class Palletizer(pc.PalletizerControl):
         else:
             print("Motion completed, wait on restart..")
             self.machine.home()
-            self.update({"status": "Complete"})
+            self.update({
+                "status": "Complete",
+                "time": 0
+            })
             self.update_information("Status", "Cycle has completed. Awaiting pallet change.")
             self.start(0)
 

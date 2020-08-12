@@ -28,7 +28,7 @@ class PalletizerControl:
             "cycle" : 0,
             "current_box" : 0,
             "total_box": 0,
-            "time": 9,
+            "time": 0,
             "palletConfig": None
         }
 

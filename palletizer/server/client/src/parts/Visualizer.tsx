@@ -27,24 +27,6 @@ import { COLORS } from "./teach/shared/Colors";
 import { PalletGeometry, getPalletDimensions, BoxObject, BoxCoordinates, getCenterOfPallet } from "./teach/structures/Data";
 import { SavedPalletConfiguration } from "./TeachMode";
 
-interface PalletInterface {
-    pallet_height: number;
-    pallet_width: number;
-    pallet_length: number;
-    box_height: number;
-    box_width: number;
-    box_length: number;
-    width_count: number;
-    length_count: number;
-    height_count: number;
-    norm: number;
-    shift_x: number;
-    shift_y: number;
-    shift_z: number;
-    x: string;
-    y: string;
-    z: string;
-};
 
 interface FrameDimensions {
     xl: number;
@@ -234,6 +216,7 @@ interface Coordinate { // To allow for angle.
 
 interface VisualizerControls {
     add_mesh(mesh: Three.Mesh): void;
+    removeBox: (n: string) => void;
 }
 
 function get_box_name(box_number: number): string {
@@ -256,19 +239,20 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
 }
 
 
+interface VisualizerProps {
+    palletConfig: SavedPalletConfiguration;
+    currentBoxNumber: number;
+}
+
 
 // Set the scene.
-function Visualizer() {
+function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
     let mount = useRef<HTMLDivElement>(null);
 
-    let palletizer_context = useContext(PalletizerContext);
-    let { palletConfig } = palletizer_context;
-    console.log(palletizer_context);
-
-
     let controls = useRef<VisualizerControls | null>(null);
-    let geometry = useRef<PalletInterface | null>(null);
     let box_positions = useRef<Coordinate[] | null>(null);
+
+    let [boxNames, setBoxNames] = useState<string[]>([]);
 
     useEffect(() => {
         let width = (mount.current as HTMLDivElement).clientWidth;
@@ -326,71 +310,13 @@ function Visualizer() {
             render_scene();
         };
 
-        // let axes_helper = new Three.AxesHelper(1);
-        // scene.add(axes_helper);
-	/* 
-	 *         let current_box_count = 0;
-	 *         let cardboard_box: Three.Mesh;
-	 *         let green_box: Three.Mesh;
-	 * 
-	 *         let set_cardboard_box = (g: PalletInterface) => {
-	 *             let { box_width, box_length, box_height } = g;
-	 *             cardboard_box = get_cardboard_box(box_width, box_height, box_length);
-	 *             green_box = get_green_cardboard_box(box_width, box_height, box_length);
-	 *         };
-	 * 
-	 *         let add_box = ({ x, y, z }: Coordinate, box_number: number) => {
-	 *             let new_box: Three.Mesh;
-	 *             if (box_number === current_box_count + 1) {
-	 *                 new_box = green_box.clone();
-	 *             } else {
-	 *                 new_box = cardboard_box.clone();
-	 *             }
-	 *             let box_name = get_box_name(current_box_count);
-	 *             new_box.name = box_name;
-	 *             new_box.position.set(x, z, y); // swap around coordinates.
-	 *             add_mesh(new_box);
-	 *             current_box_count++;
-	 *         };
-	 * 
-	 *         let remove_box = (box_number: number) => {
-	 *             let box_name = get_box_name(box_number);
-	 *             let box = scene.getObjectByName(box_name);
-	 *             if (box) {
-	 *                 scene.remove(box);
-	 *                 current_box_count--;
-	 *             }
-	 *         };
-	 * 
-	 *         let decolor_box = (box_number: number) => {
-	 *             let box_name = get_box_name(box_number - 1);
-	 *             let box = scene.getObjectByName(box_name);
-	 *             if (box) {
-	 *                 let position = box.position;
-	 *                 let new_box = cardboard_box.clone();
-	 *                 new_box.name = box_name;
-	 *                 new_box.position.set(position.x, position.y, position.z);
-	 *                 scene.remove(box);
-	 *                 scene.add(new_box);
-	 *             }
-	 *         } */
-	/* 
-	 *         let add_boxes = (box_number: number) => {
-	 *             if (box_positions.current) {
-	 *                 let positions = box_positions.current as Coordinate[];
-	 *                 while (current_box_count > box_number) {
-	 *                     remove_box(current_box_count - 1);
-	 *                     render_scene();
-	 *                 }
-	 *                 if (current_box_count < box_number) {
-	 *                     while (current_box_count < box_number) {
-	 *                         add_box(positions[current_box_count], box_number);
-	 *                     }
-	 *                     decolor_box(current_box_count - 1);
-	 *                     render_scene();
-	 *                 }
-	 *             }
-	 *         }; */
+        let removeBox = (n: string) => {
+            let box = scene.getObjectByName(n);
+            if (box) {
+                scene.remove(box);
+            }
+        };
+
 
         let handleResize = () => {
             if (mount.current) {
@@ -408,19 +334,14 @@ function Visualizer() {
 
         render_scene();
         controls.current = {
-            add_mesh
+            add_mesh,
+            removeBox
         } as VisualizerControls;
-        /* controls.current = {
-	 *     add_box,
-	 *     add_boxes,
-	 *     add_mesh,
-	 *     set_cardboard_box,
-	 * } as VisualizerControls; */
     }, []);
 
     useEffect(() => {
-
         if (palletConfig && controls.current) {
+
             let frameDims = parseConfig(palletConfig);
 
             let frameNorm = FrameNorm(frameDims);
@@ -428,7 +349,6 @@ function Visualizer() {
             // Loop through the things and get them all
             palletConfig.config.pallets.forEach((p: PalletGeometry) => {
                 let { width, length } = getPalletDimensions(p);
-
 
                 let height = 5;
 
@@ -438,13 +358,10 @@ function Visualizer() {
 
                 let { x, y, z } = getCenterOfPallet(p);
 
-                console.log("Center of pallet ", x, y, z);
-
-
                 x /= frameNorm;
                 y /= frameNorm;
                 z /= frameNorm;
-                z = -height / 2;
+                z = - height / 2;
 
                 GetPalletMesh(width, height, length, (palletMesh: Three.Mesh) => {
 
@@ -453,69 +370,37 @@ function Visualizer() {
                 });
             });
 
+            palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
+                if (i < currentBoxNumber) {
+                    let BoxName = "BOXNAME-" + String(i);
 
-            palletConfig.boxCoordinates.forEach((b: BoxCoordinates) => {
-                let { dropLocation, dimensions } = b;
-                let { width, height, length } = dimensions;
+                    let { dropLocation, dimensions } = b;
+                    let { width, height, length } = dimensions;
 
-                width /= frameNorm;
-                height /= frameNorm;
-                length /= frameNorm;
+                    width /= frameNorm;
+                    height /= frameNorm;
+                    length /= frameNorm;
 
+                    let box = getCardboardBox(width, height, length);
+                    box.name = BoxName;
 
-                let box = getCardboardBox(width, height, length);
+                    let { x, y, z } = dropLocation;
 
-                let { x, y, z } = dropLocation;
+                    x /= frameNorm;
+                    y /= frameNorm;
+                    z /= frameNorm;
 
-                x /= frameNorm;
-                y /= frameNorm;
-                z /= frameNorm;
+                    z -= height / 2;
 
-                z -= height / 2;
-
-                box.position.set(x, z, y);
-                controls.current?.add_mesh(box);
+                    box.position.set(x, z, y);
+                    controls.current?.add_mesh(box);
+                }
             });
-            // We are going to need a 1-1 map between boxes and box coordinates -- for width and lenght
+
 
         }
     }, [palletConfig]);
 
-
-    // current index is configuration file index.
-    /* useEffect(() => {
-       
-     *     if (machine_index !== null && pallet_index !== null) {
-     *         let consume_config = async () => {
-     *             let res_data = await get_state_config({ machine_configs, pallet_configs, machine_index, pallet_index } as ConfigState);
-     *             let { pallet, machine } = res_data;
-
-     *             let g = parse_config(pallet, machine) as PalletInterface;
-
-     *             geometry.current = g;
-
-     *             controls.current?.set_cardboard_box(g);
-
-     *             let { pallet_length, pallet_width, pallet_height } = g;
-
-     *         consume_config();
-
-     *     }
-     * }, [machine_index, pallet_index]);
-
-     * useEffect(() => {
-     *     if (coordinates && geometry.current && coordinates.length > 0) {
-     *         box_positions.current = translate_box_coordinates(coordinates as Coordinate[], geometry.current);
-     *     }
-     * }, [coordinates]);
-
-     * useEffect(() => {
-     *     if (coordinates != null && current_box != null) {
-     *         controls.current?.add_boxes(current_box as number);
-     *     }
-
-     * }, [current_box]);
-     */
     return (<div className="Visualizer" ref={mount} />);
 }
 export default Visualizer;
