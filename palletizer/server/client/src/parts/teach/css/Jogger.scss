@@ -143,6 +143,10 @@
                              border-radius: $s-height / 2;
                              font-size: $large-font;
                              font-weight: $bold-font;
+
+                             span {
+                                 @include unselectable();
+                             }
                          }
 
                          .SelectButton:hover {
