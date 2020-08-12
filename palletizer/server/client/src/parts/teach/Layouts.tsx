@@ -45,9 +45,11 @@ interface DraggableRectProps {
     updatePosition: (index: number, x: number, y: number) => void;
     index: number;
     enabled: boolean;
+    name: string;
+    showName?: boolean
 }
 
-function DraggableRect({ rect, updatePosition, index, enabled }: DraggableRectProps) {
+function DraggableRect({ rect, updatePosition, index, enabled, name, showName }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
 
@@ -118,10 +120,24 @@ function DraggableRect({ rect, updatePosition, index, enabled }: DraggableRectPr
 
     let fill = active ? String(COLORS.MOVE_BOX) : String(COLORS.CLEAR_BOX);
 
+
+    let textProps = {
+        x: (rectangle.x as number) + (rectangle.width as number) / 2,
+        y: (rectangle.y as number) + (rectangle.height as number) / 2,
+        textAnchor: "middle",
+        fontSize: "1.5em",
+        fill: "white",
+        pointerEvents: "none"
+    };
+
     return (
-        <rect
-            {...rectangle} fill={fill} {...actions}
-        />
+        <Fragment>
+            <rect
+                {...rectangle} fill={fill} {...actions}
+            />
+            {showName &&
+                <text {...textProps}> {name} </text>}
+        </Fragment>
     );
 };
 
@@ -180,6 +196,7 @@ interface LayoutModelProps {
     fullHeight?: number;
     corner?: PALLETCORNERS;
     enableDrag?: boolean;
+    showName?: boolean;
 };
 
 interface ModelData {
@@ -233,7 +250,7 @@ function getFractionalCoordinates(modelData: ModelData, outerWidth: number, oute
 };
 
 
-export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth, boxes, updateModelBox, fullWidth, fullHeight, corner }: LayoutModelProps) {
+export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth, boxes, updateModelBox, fullWidth, fullHeight, corner, showName }: LayoutModelProps) {
 
     let isDragEnabled = enableDrag ? enableDrag : false;
 
@@ -406,7 +423,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 </svg>
                 {BoxSVGs.map((r: Rect, index: number) => {
                     return (
-                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} enabled={isDragEnabled} />
+                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} enabled={isDragEnabled} name={boxes![index].box.name} showName={showName} />
                     );
                 })}
             </svg>
@@ -864,7 +881,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             updateModelBox: updateModelBox,
             pallet: allPallets[currentPalletIndex],
             size: modelSize,
-            enableDrag: true
+            enableDrag: true,
+            showName: true
         } as any;
 
         return (
