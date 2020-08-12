@@ -200,6 +200,7 @@
                  span {
                      font-size: $medium-font;
                      font-weight: $bold-font;
+                     @include unselectable();
                  }
 
                  .Units {

@@ -73,6 +73,10 @@ $name-height: 300pt;
                 font-size: $large-font;
                 font-weight: $bold-font;
                 color: white;
+
+                span {
+                    @include unselectable();
+                }
             }
 
             .StartButton:hover {

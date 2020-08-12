@@ -1,12 +1,10 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { ChangeEvent } from "react";
 
 import { PalletGeometry, LayoutObject } from "./structures/Data";
 
-import ContentItem, { ButtonProps, ContentItemProps } from "./ContentItem";
+import ContentItem, { ButtonProps } from "./ContentItem";
 
 import LayerImage from "./images/pallet-layers.png";
-
-import PlusIcon from "./PlusIcon";
 
 import plus_icon from "./images/plus.svg";
 
@@ -23,7 +21,6 @@ interface PalletLayoutProps {
 function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps) {
     let { name, Layouts, Stack } = pallet;
 
-    let iconSize = 15;
 
     let handleChange = (stackIndex: number) => (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;

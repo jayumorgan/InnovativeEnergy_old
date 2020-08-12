@@ -154,6 +154,10 @@ router.post("/configs/savepallet", (req: express.Request, res: express.Response)
 
     let { name, config } = req.body;
 
+    if (!fs.existsSync(PALLET_PATH)) {
+        fs.mkdirSync(PALLET_PATH);
+    }
+
     let file_path = path.join(PALLET_PATH.toString(), name + ".json");
 
     fs.writeFile(file_path, JSON.stringify(config, null, "\t"), () => {

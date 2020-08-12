@@ -18,9 +18,6 @@ import Name from "./teach/Name";
 
 import ConfigurationSummary from "./teach/ConfigurationSummary";
 
-
-
-
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";
@@ -40,10 +37,17 @@ interface PalletConfiguratorProps {
 };
 
 //---------------Pallet Configuration Class---------------
-interface PalletConfiguration {
+export interface PalletConfiguration {
     name: string;
     boxes: BoxObject[];
     pallets: PalletGeometry[];
+};
+
+
+export interface SavedPalletConfiguration {
+    config: PalletConfiguration;
+    boxCoordinates: BoxCoordinates;
+
 };
 
 function newPalletConfiguration(name: string) {

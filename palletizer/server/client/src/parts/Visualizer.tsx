@@ -21,8 +21,16 @@ import wood from "./images/wood.jpg";
 import carboard from "./images/cardboard.jpg";
 import vcardboard from "./images/vcardboard.jpg";
 
-// Cleanup this file once it is functional!
-import { PalletGeometry, getPalletDimensions } from "./teach/structures/Data";
+
+// Interfaces / Functions For Pallet Configuration.
+import { PalletGeometry, getPalletDimensions, BoxObject, BoxCoordinates } from "./teach/structures/Data";
+import { SavedPalletConfiguration } from "./TeachMode";
+
+
+// Now, we need to define the grid and work from there.
+// Christ this is hard...
+
+
 
 interface PalletInterface {
     pallet_height: number;

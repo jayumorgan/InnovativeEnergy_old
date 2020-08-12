@@ -109,7 +109,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             };
 
             //---------------Locking/Snap Mechanism---------------
-
             let threshold = 20;
 
             if (newR.x - xl < threshold) {
@@ -123,6 +122,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             } else if (yh - (newR.height as number) - newR.y < threshold) {
                 newR.y = yh - (newR.height as number);
             }
+
             setRectangle(newR);
         }
     };
