@@ -106,14 +106,9 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
     };
 
     let setLayoutOnLayer = (palletIndex: number) => (stackIndex: number, value: number) => {
-        let newPallets = [] as PalletGeometry[];
-        allPallets.forEach((p: PalletGeometry, i: number) => {
-            let t = { ...p };
-            if (i === palletIndex) {
-                t.Stack[stackIndex] = value;
-            }
-            newPallets.push(t);
-        });
+        let newPallets = [...allPallets];
+        newPallets[palletIndex].Stack[stackIndex] = value;
+        setPallets(newPallets);
     };
 
     let LeftButton: ButtonProps = {
