@@ -9,7 +9,7 @@ if (SERVER_IP === "localhost") {
 }
 console.log(SERVER_IP);
 
-SERVER_IP = "192.168.7.2";
+//SERVER_IP = "192.168.7.2";
 
 const MQTT_SERVER = "ws://" + SERVER_IP + ":" + PORT; 
 const TOPIC = "palletizer/";

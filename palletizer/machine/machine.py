@@ -62,7 +62,7 @@ class Machine:
 
         deploy = read_env()
         print(deploy)
-        deploy = True
+      #  deploy = True
         if deploy:
             self.mm = mm.MachineMotion(network["IP_ADDRESS"])
             self.rmm = fmm.FakeMachineMotion()
@@ -189,7 +189,7 @@ class Palletizer(pc.PalletizerControl):
         self.update({
             "status": "Waiting",
             "total_box": self.total_box_count,
-            "coordinates" : self.machine.dropCoodinates
+            "palletConfig" : self.machine.pallet_config
         })
 
         self.control_checks(interrupted=True)
@@ -211,7 +211,6 @@ class Palletizer(pc.PalletizerControl):
             # self.warning_loop(self.machine.detect_box, warn_string, fail_string)
 
             self.machine.start_pressure()
-
             warn_string = "Box pick failed. Trying again."
             fail_string = "Unable to pick box. Operator assistance required."
 

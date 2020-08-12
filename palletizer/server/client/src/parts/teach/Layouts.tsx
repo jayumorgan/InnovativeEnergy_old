@@ -98,8 +98,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         let y = e.clientY - bb.top;
 
         // check distances -- with tolerance
-
-
         if (active) {
             let { offset } = rectangle;
             let newR = {
@@ -172,7 +170,6 @@ export enum PALLETCORNERS {
     BOTTOM_RIGHT = "BOTTOM_RIGHT"
 };
 
-
 export function IncreaseCorner(c: PALLETCORNERS) {
     if (c == PALLETCORNERS.TOP_LEFT) {
         return PALLETCORNERS.BOTTOM_LEFT;
@@ -208,7 +205,7 @@ export function CornerNumber(c: PALLETCORNERS) {
             return -1;
         }
     }
-}
+};
 
 interface LayoutModelProps {
     pallet: PalletGeometry;
@@ -796,6 +793,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         setCurrentPalletIndex(palletIndex);
         setCurrentLayoutIndex(layoutIndex);
         setModelBoxes(allPallets[palletIndex].Layouts[layoutIndex].boxPositions);
+        setEditingLayout(allPallets[palletIndex].Layouts[layoutIndex]);
         setSummaryScreen(false);
     };
 

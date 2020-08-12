@@ -46,7 +46,7 @@ export interface PalletConfiguration {
 
 export interface SavedPalletConfiguration {
     config: PalletConfiguration;
-    boxCoordinates: BoxCoordinates;
+    boxCoordinates: BoxCoordinates[];
 
 };
 
@@ -143,7 +143,8 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
 
                 boxCoordinates.push({
                     pickLocation,
-                    dropLocation: box_position
+                    dropLocation: box_position,
+                    dimensions: box.dimensions
                 } as BoxCoordinates);
             });
         });
@@ -154,7 +155,7 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
     let configuration = {
         config,
         boxCoordinates
-    } as any;
+    } as SavedPalletConfiguration;
 
     // Save the file...
     SavePalletConfig(name, configuration);

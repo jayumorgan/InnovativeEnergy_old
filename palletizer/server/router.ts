@@ -55,8 +55,8 @@ function get_configurations(callback: (c: ConfigData | null) => void) {
 
             let m_configs = [] as string[];
             let p_configs = [] as string[];
-            let m_selected = 0;
-            let p_selected = 0;
+            let m_selected = -1;
+            let p_selected = -1;
 
             machine_configs.forEach((item: any, index: number) => {
                 item = item as Dirent;
@@ -68,6 +68,13 @@ function get_configurations(callback: (c: ConfigData | null) => void) {
                 }
             });
 
+            if (m_selected === -1) {
+                m_selected = 0;
+                if (machine_configs.length > 0) {
+                    set_selected_config(m_configs[0] as string, "machine", () => { console.log("Set Machine Config") });
+                }
+            }
+
             pallet_configs.forEach((item: any, index: number) => {
                 item = item as Dirent;
                 if (item.isFile() && path.extname(item.name) === ".json") {
@@ -77,6 +84,14 @@ function get_configurations(callback: (c: ConfigData | null) => void) {
                     }
                 }
             });
+
+            if (p_selected === -1) {
+                p_selected = 0;
+                if (pallet_configs.length > 0) {
+                    set_selected_config(p_configs[0] as string, "pallet", () => { console.log("Set Pallet Config") });
+                }
+            };
+
 
             let config_data: ConfigData = {
                 machine_configs: m_configs,
@@ -117,11 +132,9 @@ function set_selected_config(file_name: string, config_type: string, callback: (
             } else {
                 callback(false);
             }
-
         }
     });
-
-}
+};
 
 
 let router: express.Router = express.Router();

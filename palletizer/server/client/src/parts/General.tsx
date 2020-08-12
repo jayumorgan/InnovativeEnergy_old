@@ -14,7 +14,7 @@ import { set_config } from "../requests/requests";
 import { ConfigState, PalletizerState } from "../types/Types";
 
 // Components
-//import Visualizer from "./Visualizer";
+import Visualizer from "./Visualizer";
 
 // Styles
 import "./css/General.scss";
@@ -420,7 +420,7 @@ function General() {
                 </StackContainer>
             </div>
             <div className="VisualizerContainer">
-                {/* <Visualizer /> */}
+                <Visualizer />
                 <div className="Visualizer">
                 </div>
                 <div className="LogoContainer">

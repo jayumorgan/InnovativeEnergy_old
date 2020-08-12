@@ -5,7 +5,7 @@ import * as Three from "three";
 import { BoxDimensions } from "../structures/Data";
 import { COLORS } from "../shared/Colors";
 
-import { get_cardboard_box } from "../../Visualizer";
+
 import { MeshDepthMaterial, MeshBasicMaterialParameters } from "three";
 
 

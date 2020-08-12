@@ -220,10 +220,12 @@ $col-3 : 100% - $col-1 - $col-2;
         grid-template-rows: 80% 20%;
         grid-template-columns: 100%;
         padding-bottom: $double-margin;
+        // background-color: $desert-storm;
 
         .LogoContainer {
             @include flex-center();
             @include grid-coordinate(2, 1);
+            //   background-color: $desert-storm;
 
             img {
                 width: 80%;

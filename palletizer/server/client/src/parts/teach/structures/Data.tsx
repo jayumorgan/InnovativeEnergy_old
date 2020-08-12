@@ -98,6 +98,17 @@ export function getPalletDimensions(pallet: PalletGeometry) {
 };
 
 
+export function getCenterOfPallet(p: PalletGeometry) {
+    let { corner1, corner2, corner3 } = p;
+
+    let v1 = Subtract3D(corner1, corner2);
+    let v2 = Subtract3D(corner3, corner2);
+
+    return Add3D(MultiplyScalar(v1, 0.5), MultiplyScalar(v2, 0.5));
+}
+
+
+
 export interface BoxPosition2D {
     position: Coordinate2D;
     box: BoxObject
@@ -126,6 +137,7 @@ export interface LayoutObject {
 export interface BoxCoordinates {
     pickLocation: Coordinate;
     dropLocation: Coordinate;
+    dimensions: BoxDimensions;
 };
 
 

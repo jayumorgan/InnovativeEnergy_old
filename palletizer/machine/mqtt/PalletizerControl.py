@@ -8,7 +8,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG,format='(%(threadName)-9s) %(message)s',)
 
 PALLETIZER_TOPIC = "palletizer/"
-MQTT_IP = "192.168.7.2"
+MQTT_IP = "127.0.0.1"
 MQTT_PORT = 1883
 MQTT_TIMEOUT = 60
 
@@ -29,7 +29,7 @@ class PalletizerControl:
             "current_box" : 0,
             "total_box": 0,
             "time": 9,
-            "coordinates": []
+            "palletConfig": None
         }
 
         self.information = []
