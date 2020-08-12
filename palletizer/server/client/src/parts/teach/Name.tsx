@@ -23,9 +23,10 @@ export default function TeachModeName({ name, close, changeName, handleStart }: 
         changeName(newName);
     };
 
+
     return (
         <div className="TeachModeNameStart">
-            <div className="ClosePartition">
+            <div className="ClosePartition" onClick={close}>
                 <XIcon height={icon_size} width={icon_size} />
             </div>
             <div className="ContentPartition">

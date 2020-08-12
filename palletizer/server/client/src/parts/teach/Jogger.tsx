@@ -125,8 +125,6 @@ interface JoggerParameterProps {
 
 function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterProps) {
 
-
-
     return (
         <div className="Parameter">
             <div className="Name">
@@ -270,13 +268,13 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                 <div className="Position">
                     <div className="PositionBox">
                         <div className="PositionValue">
-                            <span> {"x : 20"} </span>
+                            <span> {"x : 0"} </span>
                         </div>
                         <div className="PositionValue">
-                            <span> {"y : 40"} </span>
+                            <span> {"y : 0"} </span>
                         </div>
                         <div className="PositionValue">
-                            <span> {"z : 70"} </span>
+                            <span> {"z : 0"} </span>
                         </div>
                     </div>
                 </div>

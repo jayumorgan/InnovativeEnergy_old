@@ -242,7 +242,7 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
 interface VisualizerProps {
     palletConfig: SavedPalletConfiguration;
     currentBoxNumber: number;
-}
+};
 
 
 // Set the scene.
@@ -297,7 +297,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         scene.add(groundMesh);
 
         let camera = get_camera(width, height);
-        let distance = 1.5
+        let distance = 1.2
         camera.position.set(distance, distance, distance);
         camera.lookAt(0, 0, 0);
 

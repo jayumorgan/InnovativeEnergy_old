@@ -9,11 +9,11 @@ $right-width: 30%;
 @mixin button-style() {
     @include flex-center();
     width: 50%;
-    height: 60%;
+    height: 50%;
     border-radius: $border-radius;
     //border: $container-border;
     font-size: $large-font;
-    font-weight: $bold-font;
+    // font-weight: $bold-font;
     border: $container-border;
     cursor: pointer;
 

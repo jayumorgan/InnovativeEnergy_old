@@ -34,6 +34,7 @@ enum PalletTeachState {
 
 interface PalletConfiguratorProps {
     close: () => void;
+    index: number;
 };
 
 //---------------Pallet Configuration Class---------------
@@ -87,9 +88,7 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
-
 function GenerateAndSaveConfig(config: PalletConfiguration) {
-
     let { name, pallets } = config;
     // We should also write the entire file.
     let boxCoordinates: BoxCoordinates[] = [];
@@ -166,9 +165,9 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
 
 
 //---------------Pallet Configurator Component---------------
-function PalletConfigurator({ close }: PalletConfiguratorProps) {
+function PalletConfigurator({ close, index }: PalletConfiguratorProps) {
 
-    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, newPalletConfiguration("Pallet Configurator"));
+    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, newPalletConfiguration("Pallet Configuration " + String(index + 1)));
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 

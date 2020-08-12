@@ -10,7 +10,7 @@ $name-height: 300pt;
     background-color: $off-white;
     border-radius: $border-radius;
     display: grid;
-    grid-template-rows: 10% 90%;
+    grid-template-rows: 15% 85%;
     grid-template-columns: 100%;
 
     .ClosePartition {
@@ -51,12 +51,13 @@ $name-height: 300pt;
 
         .NameInput {
             @include flex-center();
-            align-items: flex-start;
+            //  align-items: flex-start;
 
             input {
                 padding: $margin;
                 width: 70%;
                 font-size: $large-font;
+                text-align: center;
             }
         }
 

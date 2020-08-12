@@ -5,10 +5,11 @@ $scroll-height: 100% - $add-height;
 
 .ConfigContainer {
     height: 100%;
-    padding: $double-margin;
+    padding: 1%;
+    //  padding: $double-margin;
     display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: auto auto;
+    grid-template-rows: 100%;
+    grid-template-columns: 49.5% 49.5%;
     grid-column-gap: $double-margin;
 
     .ConfigGrid {
@@ -38,24 +39,30 @@ $scroll-height: 100% - $add-height;
                 border-radius: $border-radius;
                 padding: $double-margin;
                 margin-bottom: $margin;
-                background-color: $off-white;
+                background-color: $desert-storm;
                 display: flex;
                 justify-content: flex-start;
                 align-items: center;
 
                 span {
-                    font-weight: $bold-font;
+                    //font-weight: $bold-font;
+                    font-size: $medium-font;
                 }
 
                 .EditConfigButton {
                     @include flex-center();
                     padding-left: $margin;
-                    text-decoration: underline;
+
                     cursor: pointer;
 
                     span {
-                        font-weight: $normal-font;
+                        font-weight: $bold-font;
                     }
+                }
+
+                .EditConfigButton:hover {
+                    text-decoration: underline;
+
                 }
 
                 .DeleteConfigButton {
@@ -70,13 +77,14 @@ $scroll-height: 100% - $add-height;
                     }
 
                     span:hover {
-                        font-weight: $bold-font;
+                        text-decoration: underline;
                     }
 
                     #button-text {
-                        text-decoration: underline;
+
                         padding-left: $margin;
                     }
+
                 }
             }
         }
@@ -91,15 +99,17 @@ $scroll-height: 100% - $add-height;
                 border-radius: $border-radius;
                 @include flex-center();
                 //padding: $double-margin;
-                width: 50%;
-                height: 50%;
+                width: 35%;
+                height: 40%;
                 cursor: pointer;
                 font-size: $large-font;
-                font-weight: 600;
+                color: white;
+                //font-weight: 600;
             }
 
             .AddConfigButton:hover {
                 @include shadow();
+                background-color: $green;
             }
         }
     }

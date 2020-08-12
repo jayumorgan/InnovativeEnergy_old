@@ -1,15 +1,16 @@
 @import "../../master.scss";
 
-$modal-background : rgba(22,35,56,0.8);
+$modal-background : rgba(22, 35, 56, 0.8);
 // $modal-background: rgba(255,255,255,0.8);
 
-@mixin editor-button(){
+@mixin editor-button() {
     @include flex-center();
     width: 50%;
     background-color: $container-blue;
     cursor: pointer;
 }
 
+$name-height: 300pt;
 
 .Modal {
     position: fixed;
@@ -26,35 +27,39 @@ $modal-background : rgba(22,35,56,0.8);
 
     .Unlock {
         @include shadow();
-        margin-top: $quad-margin;
+        margin-top: $name-height;
         margin-bottom: auto;
         background-color: $off-white;
         color: $dark-blue;
         border-radius: $border-radius;
+        // border-radius: $border-radius;
         display: grid;
-        width: 220pt;
-        height: 141pt;
-        grid-template-columns:  100%;
+        width: 20%;
+        height: 17%;
+        grid-template-columns: 100%;
         grid-template-rows: 30% 30% 30%;
+
         // grid-row-gap: $double-margin;
         .UnlockItem {
             @include flex-center();
             height: 100%;
             width: 100%;
         }
+
         #UnlockTitle {
-            font-size: 1.2em ;
+            font-size: $large-font;
+            font-weight: $bold-font;
         }
 
-
         @mixin button-style() {
-            
+
             border-radius: $border-radius;
             font-size: 1em;
             width: 74%;
             height: 74%;
             cursor: pointer;
             @include flex-center();
+
             span {
                 color: $off-white;
             }
@@ -62,36 +67,55 @@ $modal-background : rgba(22,35,56,0.8);
 
         .UnlockButton {
             @include button-style();
-            background-color: $green;
+            background-color: $medium-blue;
+            //            background-color: $green;
+
             span {
+                font-size: $large-font;
+                // font-weight: $bold-font;
                 color: $dark-blue;
+                color: white;
             }
+
             // padding: $margin;
             // padding: $double-margin;
         }
 
         .UnlockButton:hover {
             @include shadow();
+            background-color: $green;
         }
 
         .UnlockButtonLocked {
             @include button-style();
             background-color: $light-grey;
+
+            span {
+                font-size: $large-font;
+                // font-weight: $bold-font;
+                color: $dark-blue;
+                color: white;
+            }
         }
 
-        
+
         input {
             border-radius: $border-radius;
             color: $dark-blue;
             border: $container-border;
-            font-size: 1em;
-            
+            font-size: $large-font;
+            width: 73.5%;
+            padding-top: $margin;
+            padding-bottom: $margin;
+            text-align: center;
+            //  background-color: $off-white;
+
             // width: 100%;
-            padding: $margin;
+            //padding: $margin;
         }
-            
+
     }
-    
+
 
     .ModalContent {
         @include shadow();
@@ -113,23 +137,25 @@ $modal-background : rgba(22,35,56,0.8);
             border: $container-border;
         }
 
-        .ace_editor, .ace_editor div{
-            font-family:monospace;
+        .ace_editor,
+        .ace_editor div {
+            font-family: monospace;
         }
 
         #AceEditor {
-            font-family : monospace !important;
+            font-family: monospace !important;
             font-size: 16px !important;
-            direction:ltr !important;
-            text-align:left !important;
+            direction: ltr !important;
+            text-align: left !important;
             border-left: $container-border;
             border-right: $container-border;
+
             span {
-                
-                font-family : monospace !important;
+
+                font-family: monospace !important;
                 font-size: 16px !important;
-                direction:ltr !important;
-                text-align:left !important;
+                direction: ltr !important;
+                text-align: left !important;
             }
         }
 
@@ -139,31 +165,39 @@ $modal-background : rgba(22,35,56,0.8);
             justify-content: space-around;
             border: $container-border;
             border-radius: 0 0 $border-radius $border-radius;
+
             .SaveEditor {
                 @include editor-button();
                 border-radius: 0 0 $border-radius 0;
+
                 span {
                     padding: $margin;
-                    color:white;
+                    color: white;
                 }
-                
+
             }
+
             .CloseEditor {
                 @include editor-button();
                 border-radius: 0 0 0 $border-radius;
+
                 span {
                     padding: $margin;
-                    color:white;
+                    color: white;
                 }
             }
+
             .SaveEditor:hover {
                 background-color: $off-white;
+
                 span {
                     color: $green;
                 }
             }
+
             .CloseEditor:hover {
                 background-color: $off-white;
+
                 span {
                     color: red;
                 }
@@ -172,4 +206,3 @@ $modal-background : rgba(22,35,56,0.8);
 
     }
 }
-

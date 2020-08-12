@@ -99,10 +99,10 @@ function Configuration() {
     });
 
     console.log("Unlock for development");
-    let [locked, set_locked] = useState<boolean>(false);
+    let [locked, set_locked] = useState<boolean>(true);
 
     // True for development
-    let [add_pallet_config, set_add_pallet_config] = useState<boolean>(true);
+    let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
 
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
@@ -133,6 +133,8 @@ function Configuration() {
         console.log("Add Machine Config");
     };
 
+    let configCount = pallet_configs.length;
+
     return (
         <Fragment>
             <div className="ConfigContainer">
@@ -140,7 +142,7 @@ function Configuration() {
                 <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_editor(pallet_title)} start_add_config={new_pallet(true)} />
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}
-            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} />}
+            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} index={configCount} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );
