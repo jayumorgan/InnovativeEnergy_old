@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <g id="MachineApps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-564.000000, -10444.000000)" fill="#1C344F" fill-rule="nonzero">
+            <path d="M573,10462 C568.029786,10462 564,10457.9712 564,10453 C564,10448.0288 568.028741,10444 573,10444 C577.970214,10444 582,10448.0288 582,10453 C582,10457.9712 577.971259,10462 573,10462 L573,10462 Z M577,10453.7201 L577,10452.2634 L573.81629,10452.2634 L573.81629,10449 L572.166767,10449 L572.166767,10452.2634 L569,10452.2634 L569,10453.7201 L572.166767,10453.7201 L572.166767,10457 L573.81629,10457 L573.81629,10453.7201 L577,10453.7201 Z" id="Shape"></path>
+        </g>
+    </g>
+</svg>

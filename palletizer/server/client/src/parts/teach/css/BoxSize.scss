@@ -178,6 +178,7 @@
 
                         .EditButton:hover {
                             @include shadow();
+                            background-color: $green;
                         }
                     }
                 }

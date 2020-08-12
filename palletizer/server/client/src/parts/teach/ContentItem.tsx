@@ -1,6 +1,8 @@
 import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
 
 
+import PlusIcon from "./PlusIcon";
+
 export interface ButtonProps {
     name: string;
     action: () => void;
@@ -13,26 +15,36 @@ export interface ContentItemProps {
     instructionNumber: number;
     LeftButton: ButtonProps;
     RightButton: ButtonProps;
+    AddButton?: ButtonProps;
 }
 
 let capitalize = (s: string) => {
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 };
 
-export default function ContentItem({ children, instruction, LeftButton, RightButton, instructionNumber }: ContentItemProps) {
+export default function ContentItem({ children, instruction, LeftButton, RightButton, instructionNumber, AddButton }: ContentItemProps) {
     let { enabled } = RightButton;
 
     return (
         <Fragment>
             <div className="TeachModeInstruction">
-                <span>
-                    {"Step " + String(instructionNumber) + ":"}
-                </span>
-
-
-                <span className="Instruction">
-                    {capitalize(instruction)}
-                </span>
+                <div className="Left">
+                    <span>
+                        {"Step " + String(instructionNumber) + ":"}
+                    </span>
+                    <span className="Instruction">
+                        {capitalize(instruction)}
+                    </span>
+                </div>
+                <div className="Right">
+                    {AddButton &&
+                        <div className="AddButton" onClick={AddButton.action}>
+                            <PlusIcon height={20} width={20} />
+                            <span>
+                                {AddButton.name}
+                            </span>
+                        </div>}
+                </div>
             </div>
             <div className="TeachModeContent">
                 {children}

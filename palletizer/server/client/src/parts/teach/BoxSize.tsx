@@ -20,25 +20,6 @@ enum DimensionEnum {
     H
 };
 
-interface NewBoxProps {
-    startEdit: () => void;
-};
-
-
-function NewBox({ startEdit }: NewBoxProps) {
-
-    return (
-        <div className="NewBox">
-            <div className="NewBoxButton" onClick={startEdit}>
-                <PlusIcon height={20} width={20} />
-                <span>
-                    {"Add new box"}
-                </span>
-            </div>
-        </div>
-    );
-};
-
 interface DimensionCellProps {
     axis: string;
     value: number;
@@ -303,8 +284,22 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
 
     if (summaryScreen) {
         instruction = "Create and edit boxes";
+
+        let AddButton: ButtonProps = {
+            name: "Add new box",
+            action: startEdit(-1)
+        };
+
+        let contentItemProps = {
+            instruction,
+            instructionNumber,
+            LeftButton,
+            RightButton,
+            AddButton
+        };
+
         return (
-            <ContentItem instruction={instruction} instructionNumber={instructionNumber} LeftButton={LeftButton} RightButton={RightButton} >
+            <ContentItem {...contentItemProps} >
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
@@ -313,7 +308,6 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
                                     <BoxCell box={val} key={index} startEdit={startEdit(index)} />
                                 )
                             })}
-                            <NewBox startEdit={startEdit(-1)} />
                         </div>
                     </div>
                 </div>

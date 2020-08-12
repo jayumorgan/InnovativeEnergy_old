@@ -4,9 +4,72 @@ import { PalletGeometry, LayoutObject } from "./structures/Data";
 
 import ContentItem, { ButtonProps, ContentItemProps } from "./ContentItem";
 
+import LayerImage from "./images/pallet-layers.png";
+
+import PlusIcon from "./PlusIcon";
+
+import plus_icon from "./images/plus.svg";
+
 import "./css/Stack.scss";
 
 
+
+interface PalletLayoutProps {
+    pallet: PalletGeometry;
+    addLayer: () => void;
+    setLayoutOnLayer: (stackIndex: number, layoutIndex: number) => void;
+}
+
+function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps) {
+    let { name, Layouts, Stack } = pallet;
+
+    let iconSize = 15;
+
+    let handleChange = (stackIndex: number) => (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        setLayoutOnLayer(stackIndex, val);
+    };
+
+
+    return (
+        <div className="PalletLayout">
+            <div className="Name">
+                <span>
+                    {name}
+                </span>
+            </div>
+            {Stack.map((s: number, i: number) => {
+                return (
+                    <div className="Layer" key={i}>
+                        <div className="LayerName">
+                            <span>
+                                {"Layer " + String(i + 1) + ":"}
+                            </span>
+                        </div>
+                        <div className="Layout">
+                            <select value={s} onChange={handleChange(i)}>
+                                {Layouts.map((l: LayoutObject, j: number) => {
+                                    return (
+                                        <option value={j} key={j}> {l.name} </option>
+                                    )
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                )
+            })
+            }
+            <div className="Add">
+                <div className="AddButton" onClick={addLayer} >
+                    <img src={plus_icon} />
+                    <span>
+                        {"Add layer"}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 interface StackProps {
     allPallets: PalletGeometry[];
@@ -16,38 +79,33 @@ interface StackProps {
     instructionNumber: number;
 };
 
+
 function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNext }: StackProps) {
     //    let haveStack = false;
-    let checkForStack = () => {
-        let haveStack = false
-        allPallets.forEach((p: PalletGeometry) => {
-            if (!haveStack && p.Stack.length > 0) {
-                haveStack = true;
-            }
-        });
-        return haveStack;
-    };
 
-    let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(checkForStack());
-    let [currentStack, setCurrentStack] = useState<number[]>(allPallets[currentPalletIndex].Stack);
+    let checkForStack = () => true;
 
-    let saveStack = () => {
-        let pallets: PalletGeometry[] = [];
+    let addLayer = (palletIndex: number) => () => {
+        let newPallets = [] as PalletGeometry[];
         allPallets.forEach((p: PalletGeometry, i: number) => {
             let t = { ...p };
-            if (i === currentPalletIndex) {
-                t.Stack = [...currentStack];
+            if (i === palletIndex) {
+                t.Stack.push(0);
             }
-            pallets.push(t);
+            newPallets.push(t);
         });
-        setPallets(pallets);
+        setPallets(newPallets);
     };
 
-    let changeCurrentPallet = (to: number) => {
-        saveStack();
-        setCurrentStack(allPallets[to].Stack);
-        setCurrentPalletIndex(to);
+    let setLayoutOnLayer = (palletIndex: number) => (stackIndex: number, value: number) => {
+        let newPallets = [] as PalletGeometry[];
+        allPallets.forEach((p: PalletGeometry, i: number) => {
+            let t = { ...p };
+            if (i === palletIndex) {
+                t.Stack[stackIndex] = value;
+            }
+            newPallets.push(t);
+        });
     };
 
     let LeftButton: ButtonProps = {
@@ -56,120 +114,53 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
     };
 
     let RightButton: ButtonProps = {
-        name: summaryScreen ? "Save and Finish" : "Next",
+        name: "Next",
         action: () => {
-            if (summaryScreen) {
-                handleNext();
-            } else {
-                saveStack();
-                if (currentStack.length > 0 || checkForStack()) {
-                    setSummaryScreen(true);
-                }
-            };
+            console.log("Save And Finish")
         },
-        enabled: currentStack.length > 0 || checkForStack()
-    };
-
-    let addRow = () => {
-        setCurrentStack([...currentStack, 0]);
-    };
-
-    let setStackValue = (index: number) => (e: ChangeEvent) => {
-        let val: number = +(e.target as any).value;
-        let t = [...currentStack];
-        t[index] = val;
-        setCurrentStack(t);
+        enabled: checkForStack()
     };
 
     let instruction: string;
 
-    if (summaryScreen) {
-        instruction = "Create and Edit Pallet Stack Configurations";
-        return (
-            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
-                <span>
-                    Stack Summary
-		</span>
-            </ContentItem>
-        );
-    } else {
-        instruction = "Define a pallet stack";
-        let currentPallet = allPallets[currentPalletIndex];
-        let { name, Layouts } = currentPallet;
 
-        let contentItemProps = {
-            instructionNumber,
-            instruction,
-            LeftButton,
-            RightButton
-        } as any;
+    instruction = "Assign custom layouts to your pallet layers";
 
+    let contentItemProps = {
+        instructionNumber,
+        instruction,
+        LeftButton,
+        RightButton
+    } as any;
 
-        return (
-            <ContentItem {...contentItemProps} >
-                <div className="Stack">
-                    <div className="StackSide">
-                    </div>
-
-                    <div className="DisplaySide">
-                        <div className="Image">
-                            <img />
+    return (
+        <ContentItem {...contentItemProps} >
+            <div className="Stack">
+                <div className="StackSide">
+                    <div className="StackConfigurator">
+                        <div className="StackScroll">
+                            {allPallets.map((p: PalletGeometry, i: number) => {
+                                if (p.Layouts.length > 0) {
+                                    return (
+                                        <PalletLayout key={i} pallet={p} addLayer={addLayer(i)} setLayoutOnLayer={setLayoutOnLayer(i)} />
+                                    );
+                                }
+                            })}
 
                         </div>
+
                     </div>
                 </div>
-            </ContentItem>
-        );
 
+                <div className="DisplaySide">
+                    <div className="Image">
+                        <img src={LayerImage} />
+                    </div>
+                </div>
+            </div>
+        </ContentItem>
+    );
 
-
-        /* return (
-	 *     <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
-	 *         <div className="StackGrid">
-	 *             <div className="PalletName">
-	 *                 <div className="PalletDropDown">
-	 *                     <select value={currentPalletIndex}>
-	 *                         {allPallets.map((p: PalletGeometry, i: number) => {
-	 *                             if (p.Layouts.length > 0) {
-	 *                                 return (
-	 *                                     <option value={i} key={i}> {p.name} </option>
-	 *                                 );
-	 *                             }
-	 *                         })}
-	 *                     </select>
-	 *                 </div>
-	 *             </div>
-	 *             <div className="StackContainer">
-	 *                 {currentStack.map((s: number, index: number) => {
-	 *                     return (
-	 *                         <div className="StackRow" key={index}>
-	 *                             <div className="RowName">
-	 *                                 <span>
-	 *                                     {"Level " + String(index)}
-	 *                                 </span>
-	 *                             </div>
-	 *                             <div className="LayoutSelector">
-	 *                                 <select value={s} onChange={setStackValue(index)}>
-	 *                                     {Layouts.map((l: LayoutObject, j: number) => {
-	 *                                         return (
-	 *                                             <option key={j} value={j}> {l.name} </option>
-	 *                                         )
-	 *                                     })}
-	 *                                 </select>
-	 *                             </div>
-	 *                         </div>
-	 *                     )
-	 *                 })}
-	 *                 <div className="AddStack" onClick={addRow} >
-	 *                     <span>
-	 *                         {"Add a new row"}
-	 *                     </span>
-	 *                 </div>
-	 *             </div>
-	 *         </div>
-	 *     </ContentItem>
-	 * ); */
-    }
 };
 
 

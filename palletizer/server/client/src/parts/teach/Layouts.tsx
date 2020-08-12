@@ -725,7 +725,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     };
 
     let RightButton: ButtonProps = {
-        name: "Next",
+        name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
                 handleNext()
@@ -761,6 +761,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                                 });
                             } else {
                                 t.Layouts.push(newLayout);
+                                t.Stack.push(0);
                             }
                         }
                         newPallets.push(t);
@@ -782,6 +783,15 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         setModelBoxes(allPallets[palletIndex].Layouts[layoutIndex].boxPositions);
         setSummaryScreen(false);
     };
+
+    let newLayout = () => {
+        setCurrentLayoutIndex(0);
+        setCurrentLayoutIndex(0);
+        setModelBoxes([]);
+        setEditingLayout(defaultLayout(layoutCount + 1));
+        setSummaryScreen(false);
+    };
+
 
     let instruction: string;
     let placeholder = "Pallet Layout " + String(1);
@@ -826,8 +836,21 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     //---------------Display---------------
     if (summaryScreen) {
         instruction = "Create and edit layouts";
+        let AddButton: ButtonProps = {
+            name: "Add new layout",
+            action: newLayout
+        };
+
+        let contentItemProps = {
+            instruction,
+            instructionNumber,
+            LeftButton,
+            RightButton,
+            AddButton
+        };
+
         return (
-            <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton}>
+            <ContentItem {...contentItemProps}>
                 <LayoutSummary startEdit={startEdit} allPallets={allPallets} />
             </ContentItem>
         );

@@ -1,11 +1,118 @@
  @import "../../css/TeachMode.scss";
 
  .Stack {
+     height: 100%;
+     width: 100%;
      display: grid;
      grid-template-rows: 100%;
-     grid-template-columns: 40% 60%;
+     grid-template-columns: 50% 50%;
 
-     .StackSide {}
+     .StackSide {
+         height: 100%;
+         width: 100%;
+         @include flex-center();
+
+         .StackConfigurator {
+             width: 95%;
+             height: 100%;
+             border-radius: $border-radius;
+             border: $container-border;
+             background-color: $desert-storm;
+             @include flex-center();
+
+             .StackScroll {
+                 margin: 2%;
+                 height: 96%;
+                 width: 96%;
+                 @include flex-center();
+                 flex-direction: column;
+                 justify-content: flex-start;
+                 overflow-y: hidden;
+                 overflow-x: hidden;
+
+                 .PalletLayout {
+                     width: 100%;
+                     // height: 20%;
+                     @include flex-center();
+                     flex-direction: column;
+                     justify-content: flex-start;
+
+                     .Name {
+                         // width: 100%;
+                         width: 95%;
+                         padding-top: 5%;
+
+                         padding-left: 5%;
+                         font-size: 1.7em;
+                         font-weight: $bold-font;
+                         color: $dark-blue;
+                     }
+
+                     .Add {
+                         @include flex-center();
+                         align-self: flex-start;
+                         width: 89%;
+                         padding-top: 2%;
+                         justify-content: flex-end;
+
+                         .AddButton {
+                             cursor: pointer;
+                             width: 30%;
+                             @include flex-center();
+
+                             span {
+                                 font-size: $large-font;
+                                 padding-left: $margin;
+                             }
+
+                             img {
+                                 height: 100%;
+                                 widht: auto;
+                             }
+                         }
+
+                         .AddButton:hover {
+                             span {
+                                 text-decoration: underline;
+                             }
+
+                         }
+
+
+                     }
+
+                     .Layer {
+                         padding-left: 10%;
+                         width: 90%;
+                         padding-top: 3%;
+                         font-size: $large-font;
+                         color: $dark-blue;
+                         display: grid;
+                         grid-template-rows: 100%;
+                         grid-template-columns: 15% 85%;
+
+                         .LayerName {
+                             @include flex-center();
+                             justify-content: flex-end;
+                             color: $dark-blue;
+                         }
+
+                         .Layout {
+                             @include flex-center();
+                             justify-content: flex-start;
+                             padding-left: 5%;
+                             width: auto;
+
+                             select {
+                                 @include select-style();
+                                 width: 80%;
+                             }
+                         }
+                     }
+                 }
+             }
+         }
+     }
 
      .DisplaySide {
          @include flex-center();
@@ -13,18 +120,19 @@
          height: 100%;
 
          .Image {
-             width: 80%;
-             height: 80%;
+             width: 95%;
+             height: 100%;
              @include flex-center();
              border-radius: $border-radius;
              border: $container-border;
              background-color: $desert-storm;
 
-
+             img {
+                 height: auto;
+                 width: 90%;
+             }
          }
      }
-
-
  }
 
 

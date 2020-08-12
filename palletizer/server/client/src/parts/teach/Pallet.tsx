@@ -47,23 +47,6 @@ function PalletModel({ pallet, size, corner }: PalletModelProps) {
     );
 };
 
-interface NewPalletProps {
-    startEdit: () => void;
-};
-
-function NewPallet({ startEdit }: NewPalletProps) {
-    return (
-        <div className="NewBox">
-            <div className="NewBoxButton" onClick={startEdit}>
-                <PlusIcon height={20} width={20} />
-                <span>
-                    {"Add new pallet"}
-                </span>
-            </div>
-        </div>
-    );
-};
-
 interface PalletCellProps {
     pallet: PalletGeometry;
     startEdit: () => void;
@@ -296,8 +279,22 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
 
     if (summaryScreen) {
         instruction = "Create and edit pallets";
+
+        let AddButton: ButtonProps = {
+            name: "Add new pallet",
+            action: startEdit(-1)
+        };
+
+        let contentItemProps = {
+            instruction,
+            instructionNumber,
+            LeftButton,
+            RightButton,
+            AddButton
+        };
+
         return (
-            <ContentItem instruction={instruction} instructionNumber={instructionNumber} LeftButton={LeftButton} RightButton={RightButton}>
+            <ContentItem {...contentItemProps} >
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
@@ -306,7 +303,6 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                                     <PalletCell pallet={p} key={i} startEdit={startEdit(i)} />
                                 )
                             })}
-                            <NewPallet startEdit={startEdit(-1)} />
                         </div>
                     </div>
                 </div>

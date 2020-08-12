@@ -149,9 +149,6 @@
 
             .Pallet {
                 @include flex-center();
-
-
-
             }
 
             .PalletSelect {
@@ -175,8 +172,9 @@
                         padding: $margin;
                         width: 70%;
                         font-size: $large-font;
-                        background-color: $light-grey;
                         color: $dark-blue;
+                        @include select-style();
+                        font-size: $large-font;
                     }
                 }
 
