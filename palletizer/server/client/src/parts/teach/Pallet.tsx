@@ -50,9 +50,10 @@ function PalletModel({ pallet, size, corner }: PalletModelProps) {
 interface PalletCellProps {
     pallet: PalletGeometry;
     startEdit: () => void;
+    editName: (e: ChangeEvent) => void;
 }
 
-function PalletCell({ pallet, startEdit }: PalletCellProps) {
+function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
 
     let { width, length } = getPalletDimensions(pallet)
 
@@ -74,7 +75,7 @@ function PalletCell({ pallet, startEdit }: PalletCellProps) {
                     {/* <img src={PalletImage} /> */}
                 </div>
                 <div className="Name">
-                    <input type="text" placeholder={pallet.name} />
+                    <input type="text" value={pallet.name} onChange={editName} />
                 </div>
                 <div className="Dimensions">
                     <div className="DimensionsGrid2">
@@ -229,6 +230,13 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         setEditingPallet({ ...editingPallet, name });
     };
 
+    let editName = (palletIndex: number) => (e: ChangeEvent) => {
+        let newName = (e.target as any).value;
+        let newPallets = [...allPallets];
+        newPallets[palletIndex].name = newName;
+        setPallets(newPallets);
+    };
+
     let startEdit = (index: number) => () => {
         if (index >= 0) {
             setEditComplete(true);
@@ -300,7 +308,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                         <div className="BoxScroll">
                             {allPallets.map((p: PalletGeometry, i: number) => {
                                 return (
-                                    <PalletCell pallet={p} key={i} startEdit={startEdit(i)} />
+                                    <PalletCell pallet={p} key={i} startEdit={startEdit(i)} editName={editName(i)} />
                                 )
                             })}
                         </div>

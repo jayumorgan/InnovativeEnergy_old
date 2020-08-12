@@ -86,9 +86,7 @@ export default function ConfigurationSummary({ allPallets, allBoxes, handleNext,
         let stackCount = 0;
         allPallets.forEach((p: PalletGeometry) => {
             layoutCount += p.Layouts.length;
-            if (p.Stack.length > 0) {
-                stackCount += 1;
-            }
+            stackCount += p.Stack.length;
         });
         return [layoutCount, stackCount]
     })();

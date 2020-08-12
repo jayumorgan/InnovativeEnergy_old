@@ -64,7 +64,6 @@ function DraggableRect({ rect, updatePosition, index, enabled }: DraggableRectPr
             r.height = rectangle.width;
             setRectangle(r);
         }
-        console.log(k.key);
     };
 
     let handleDown = (e: React.PointerEvent) => {
@@ -105,7 +104,7 @@ function DraggableRect({ rect, updatePosition, index, enabled }: DraggableRectPr
         if (enabled) {
             let { offset } = rectangle;
 
-            console.log(offset, "OFFSET");
+
             setRectPosition(rectangle);
             setActive(false);
         }
@@ -314,10 +313,8 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
     if (boxes) {
         boxes.forEach((b: BoxPositionObject) => {
             let { position, box } = b;
-            console.log("Top X", topX);
 
             let x = w * position.x + topX + svg_props.x;
-            console.log("x ", x);
             let y = l * position.y + topY;
 
             let scaleSize = b.size;
@@ -478,9 +475,10 @@ interface LayoutCellProps {
     pallet: PalletGeometry;
     layout: LayoutObject;
     startEdit: () => void;
+    editName: (e: ChangeEvent) => void;
 };
 
-function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
+function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
     let { name, boxPositions } = layout;
     let { width, length } = getPalletDimensions(pallet)
 
@@ -496,10 +494,6 @@ function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
     } as LayoutModelProps;
 
 
-    let handleName = (e: ChangeEvent) => {
-        let newName = (e.target as any).value;
-    };
-
     return (
         <div className="BoxCellContainer">
             <div className="BoxCell">
@@ -507,7 +501,7 @@ function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
                     <LayoutModel {...model_props} />
                 </div>
                 <div className="Name">
-                    <input type="text" value={name} onChange={handleName} />
+                    <input type="text" value={name} onChange={editName} />
                 </div>
                 <div className="Dimensions">
                     <div className="DimensionsGrid2">
@@ -538,38 +532,6 @@ function LayoutCell({ layout, pallet, startEdit }: LayoutCellProps) {
         </div>
     );
 
-}
-
-interface SummaryProps {
-    startEdit: (palletIndex: number, layoutIndex: number) => () => void;
-    allPallets: PalletGeometry[]
-}
-
-// <NewLayoutCell startEdit={startEdit} />
-function LayoutSummary({ startEdit, allPallets }: SummaryProps) {
-
-    let key = 0;
-    return (
-        <div className="BoxSummary">
-            <div className="BoxScrollContainer">
-                <div className="BoxScroll">
-                    {allPallets.map((p: PalletGeometry, index: number) => {
-                        if (p.Layouts.length > 0) {
-                            return (
-                                <Fragment key={index}>
-                                    {
-                                        p.Layouts.map((l: LayoutObject, j: number) => {
-                                            return (<LayoutCell pallet={p} layout={l} key={key++} startEdit={startEdit(index, j)} />);
-                                        })
-                                    }
-                                </Fragment>
-                            );
-                        }
-                    })}
-                </div>
-            </div>
-        </div >
-    );
 }
 
 interface BoxCellProps {
@@ -724,6 +686,17 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         setEditingLayout({ ...editingLayout, name });
     };
 
+
+    let editName = (palletIndex: number, layoutIndex: number) => (e: ChangeEvent) => {
+        let newName = (e.target as any).value;
+        let newPallets = [...allPallets];
+        let newLayouts = [...allPallets[palletIndex].Layouts];
+        newLayouts[layoutIndex].name = newName;
+        newPallets[palletIndex].Layouts = newLayouts;
+        setPallets(newPallets);
+    };
+
+
     let RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
         action: () => {
@@ -731,20 +704,26 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                 handleNext()
             } else {
                 if (modelBoxes.length > 0) {
+
                     let h = 0;
+
                     let goodBoxes: BoxPositionObject[] = [];
+
                     modelBoxes.forEach((bpo: BoxPositionObject, i: number) => {
                         goodBoxes.push(bpo);
                         if (bpo.box.dimensions.height > h) {
                             h = bpo.box.dimensions.height;
                         }
                     });
+
                     let newLayout = {
                         ...editingLayout,
                         boxPositions: goodBoxes,
                         height: h
                     } as LayoutObject;
+
                     let newPallets: PalletGeometry[] = [];
+
                     allPallets.forEach((p: PalletGeometry, i: number) => {
                         let t = { ...p };
                         if (i === currentPalletIndex) {
@@ -848,10 +827,29 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             RightButton,
             AddButton
         };
+        let uniqueKey = 0;
 
         return (
             <ContentItem {...contentItemProps}>
-                <LayoutSummary startEdit={startEdit} allPallets={allPallets} />
+                <div className="BoxSummary">
+                    <div className="BoxScrollContainer">
+                        <div className="BoxScroll">
+                            {allPallets.map((p: PalletGeometry, index: number) => {
+                                if (p.Layouts.length > 0) {
+                                    return (
+                                        <Fragment key={index}>
+                                            {
+                                                p.Layouts.map((l: LayoutObject, j: number) => {
+                                                    return (<LayoutCell pallet={p} layout={l} key={uniqueKey++} editName={editName(index, j)} startEdit={startEdit(index, j)} />);
+                                                })
+                                            }
+                                        </Fragment>
+                                    );
+                                }
+                            })}
+                        </div>
+                    </div>
+                </div >
             </ContentItem>
         );
     } else {

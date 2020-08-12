@@ -41,20 +41,26 @@ function DimensionCell({ axis, value, update }: DimensionCellProps) {
             <input type="number" value={value} onChange={handle_update} />
         </div>
     );
-}
+};
 
 interface BoxProps {
     box: BoxObject;
     startEdit: () => void;
+    editName: (newName: string) => void;
 };
 
-
-function BoxCell({ box, startEdit }: BoxProps) {
+function BoxCell({ box, startEdit, editName }: BoxProps) {
     let placeholder = box.name;
 
     let { dimensions } = box;
     let { width, length, height } = dimensions;
     let { x, y, z } = box.pickLocation;
+
+    let handleName = (e: ChangeEvent) => {
+        let newName = (e.target as any).value;
+        editName(newName);
+    }
+
 
     let update_dim = (dimension: DimensionEnum) => (val: number) => {
         let newDim = { ...dimensions } as BoxDimensions;
@@ -83,7 +89,7 @@ function BoxCell({ box, startEdit }: BoxProps) {
                     <Box {...dimensions} />
                 </div>
                 <div className="Name">
-                    <input type="text" placeholder={placeholder} />
+                    <input type="text" value={box.name} onChange={handleName} />
                 </div>
                 <div className="Dimensions">
                     <div className="DimensionsGrid">
@@ -121,7 +127,6 @@ function BoxCell({ box, startEdit }: BoxProps) {
 };
 
 //---------------Box Setup Screen---------------
-
 interface CoordinateItemProps {
     name: string;
     value: number;
@@ -178,7 +183,6 @@ function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateB
             height: dimensions.height
         } as any;
         dims[dim] = val;
-
         updateBox({ ...box, dimensions: dims as BoxDimensions });
     };
 
@@ -244,6 +248,11 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
         setSummaryScreen(false);
     };
 
+    let editName = (boxIndex: number) => (newName: string) => {
+        let newBoxes = [...allBoxes];
+        newBoxes[boxIndex].name = newName;
+        setBoxes(newBoxes);
+    };
 
     let instruction: string;
 
@@ -305,7 +314,7 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
                         <div className="BoxScroll">
                             {allBoxes.map((val: BoxObject, index: number) => {
                                 return (
-                                    <BoxCell box={val} key={index} startEdit={startEdit(index)} />
+                                    <BoxCell box={val} key={index} startEdit={startEdit(index)} editName={editName(index)} />
                                 )
                             })}
                         </div>
