@@ -16,6 +16,8 @@ import Layout from "./teach/Layouts";
 import Stack from "./teach/Stack";
 import Name from "./teach/Name";
 
+import ConfigurationSummary from "./teach/ConfigurationSummary";
+
 
 
 
@@ -113,7 +115,6 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
                 let Ydirection = Subtract3D(corner1, corner2);
                 let Xdirection = Subtract3D(corner3, corner2);
                 // form the two vectors that specify the position
-
                 let x_pos = MultiplyScalar(Xdirection, x);
                 let y_pos = MultiplyScalar(Ydirection, 1 - y); // Due to top left -> bottom left coordinate shift on y-axis.
 
@@ -125,7 +126,6 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
 
                 x_pos = Add3D(x_pos, corner2);
                 y_pos = Add3D(y_pos, corner2);
-
 
                 let z_add = (1 + index) * boxHeight + palletHeight;
 
@@ -166,7 +166,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
-    let completionFraction = { n: 0, d: 6 } as Fraction;
+    let completionFraction = { n: 0, d: 5 } as Fraction;
 
     let ChildElement: ReactElement = (<></>);
 
@@ -183,7 +183,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
     };
 
     let handleNext = () => {
-        if (teachState === PalletTeachState.STACK_SETUP) {
+        if (teachState === PalletTeachState.SUMMARY) {
             GenerateAndSaveConfig(configuration);
             close();
         } else {
@@ -235,6 +235,7 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
             break;
         }
         case (PalletTeachState.SUMMARY): {
+            ChildElement = (<ConfigurationSummary allPallets={allPallets} allBoxes={allBoxes} {...controlProps} />)
             break;
         }
         default: {
@@ -242,9 +243,6 @@ function PalletConfigurator({ close }: PalletConfiguratorProps) {
 
         }
     };
-
-
-
 
     if (teachState === PalletTeachState.CONFIG_NAME) {
         return (

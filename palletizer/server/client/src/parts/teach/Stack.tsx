@@ -83,7 +83,15 @@ interface StackProps {
 function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNext }: StackProps) {
     //    let haveStack = false;
 
-    let checkForStack = () => true;
+    let checkForStack = () => {
+        let haveStack = false;
+        allPallets.forEach((p: PalletGeometry) => {
+            if (!haveStack && p.Stack.length > 0) {
+                haveStack = true;
+            }
+        });
+        return haveStack;
+    };
 
     let addLayer = (palletIndex: number) => () => {
         let newPallets = [] as PalletGeometry[];
@@ -116,7 +124,7 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
     let RightButton: ButtonProps = {
         name: "Next",
         action: () => {
-            console.log("Save And Finish")
+            handleNext()
         },
         enabled: checkForStack()
     };
@@ -160,7 +168,6 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
             </div>
         </ContentItem>
     );
-
 };
 
 
