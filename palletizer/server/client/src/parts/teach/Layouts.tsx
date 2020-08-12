@@ -46,10 +46,14 @@ interface DraggableRectProps {
     index: number;
     enabled: boolean;
     name: string;
-    showName?: boolean
+    showName?: boolean;
+    xl: number;
+    xh: number;
+    yl: number;
+    yh: number;
 }
 
-function DraggableRect({ rect, updatePosition, index, enabled, name, showName }: DraggableRectProps) {
+function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
 
@@ -92,13 +96,34 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName }:
         let bb = (e.target as any).getBoundingClientRect();
         let x = e.clientX - bb.left;
         let y = e.clientY - bb.top;
+
+        // check distances -- with tolerance
+
+
         if (active) {
             let { offset } = rectangle;
-            setRectangle({
+            let newR = {
                 ...rectangle,
                 x: rectangle.x - (offset.x - x),
                 y: rectangle.y - (offset.y - y)
-            });
+            };
+
+            //---------------Locking/Snap Mechanism---------------
+
+            let threshold = 20;
+
+            if (newR.x - xl < threshold) {
+                newR.x = xl;
+            } else if (xh - (newR.width as number) - newR.x < threshold) {
+                newR.x = xh - (newR.width as number);
+            }
+
+            if (newR.y - yl < threshold) {
+                newR.y = yl;
+            } else if (yh - (newR.height as number) - newR.y < threshold) {
+                newR.y = yh - (newR.height as number);
+            }
+            setRectangle(newR);
         }
     };
 
@@ -280,6 +305,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         strokeWidth: 0
     };
 
+
     let plankColor: string = String(COLORS.PLANK);
     let planks = [] as Rect[];
     let plankNumber = 6;
@@ -332,7 +358,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             let { position, box } = b;
 
             let x = w * position.x + topX + svg_props.x;
-            let y = l * position.y + topY;
+            let y = l * position.y + topY + svg_props.y;
 
             let scaleSize = b.size;
             let scaleRatio = size / scaleSize;
@@ -409,6 +435,16 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         cornerTextProps.x = cornerCircleProps.cx - 10;
         cornerTextProps.y = cornerCircleProps.cy + 10;
     };
+
+
+
+    let snapParams = {
+        xl: topX + svg_props.x,
+        xh: topX + w + svg_props.x,
+        yl: topY + svg_props.y,
+        yh: topY + l + svg_props.y
+    }
+
     return (
         <>
             <svg {...outerSVG} >
@@ -423,7 +459,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 </svg>
                 {BoxSVGs.map((r: Rect, index: number) => {
                     return (
-                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} enabled={isDragEnabled} name={boxes![index].box.name} showName={showName} />
+                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} enabled={isDragEnabled} name={boxes![index].box.name} showName={showName} {...snapParams} />
                     );
                 })}
             </svg>
