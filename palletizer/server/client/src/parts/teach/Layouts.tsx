@@ -704,48 +704,31 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                 handleNext()
             } else {
                 if (modelBoxes.length > 0) {
-
                     let h = 0;
-
                     let goodBoxes: BoxPositionObject[] = [];
-
                     modelBoxes.forEach((bpo: BoxPositionObject, i: number) => {
                         goodBoxes.push(bpo);
                         if (bpo.box.dimensions.height > h) {
                             h = bpo.box.dimensions.height;
                         }
                     });
-
                     let newLayout = {
                         ...editingLayout,
                         boxPositions: goodBoxes,
                         height: h
                     } as LayoutObject;
 
-                    let newPallets: PalletGeometry[] = [];
+                    let newPallets: PalletGeometry[] = [...allPallets];
 
-                    allPallets.forEach((p: PalletGeometry, i: number) => {
-                        let t = { ...p };
-                        if (i === currentPalletIndex) {
-                            let { Layouts } = p;
-                            if (currentLayoutIndex < Layouts.length) {
-                                let newLayouts = [] as LayoutObject[];
-                                Layouts.forEach((l: LayoutObject, j: number) => {
-                                    if (j === currentLayoutIndex) {
-                                        newLayouts.push(newLayout);
-                                    } else {
-                                        newLayouts.push(l);
-                                    }
-                                    t = { ...p, Layouts: newLayouts };
-                                });
-                            } else {
-                                t.Layouts.push(newLayout);
-                                t.Stack.push(0);
-                            }
-                        }
-                        newPallets.push(t);
-                    });
+                    if (allPallets[currentPalletIndex].Layouts.length > currentLayoutIndex) {
+                        newPallets[currentPalletIndex].Layouts[currentLayoutIndex] = newLayout;
+                    } else {
+                        newPallets[currentPalletIndex].Layouts.push(newLayout);
+                    }
 
+                    if (newPallets[currentPalletIndex].Stack.length === 0) {
+                        newPallets[currentPalletIndex].Stack.push(0);
+                    }
                     setEditingLayout(defaultLayout(layoutCount + 2));
                     setPallets(newPallets);
                     setSummaryScreen(true);
@@ -763,12 +746,24 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         setSummaryScreen(false);
     };
 
+    let getTotalLayouts = () => {
+        let count = 0;
+        allPallets.forEach((p: PalletGeometry) => {
+            count += p.Layouts.length;
+        })
+        return count;
+    };
+
     let newLayout = () => {
-        setCurrentLayoutIndex(0);
-        setCurrentLayoutIndex(0);
+
+        let lc = getTotalLayouts();
+
+        setCurrentLayoutIndex(lc + 1);
+        setCurrentPalletIndex(0);
         setModelBoxes([]);
-        setEditingLayout(defaultLayout(layoutCount + 1));
+        setEditingLayout(defaultLayout(lc + 1));
         setSummaryScreen(false);
+
     };
 
 

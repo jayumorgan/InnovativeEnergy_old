@@ -123,7 +123,7 @@ export default function ConfigurationSummary({ allPallets, allBoxes, handleNext,
                 <div className="LeftSide">
                     {cells.map((c: SummaryCellProps, i: number) => {
                         return (
-                            <SummaryCell {...c} />
+                            <SummaryCell {...c} key={i} />
                         )
                     })}
                 </div>
