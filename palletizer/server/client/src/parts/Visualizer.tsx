@@ -238,12 +238,10 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     });
 }
 
-
 interface VisualizerProps {
     palletConfig: SavedPalletConfiguration;
     currentBoxNumber: number;
 };
-
 
 // Set the scene.
 function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
@@ -297,8 +295,8 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         scene.add(groundMesh);
 
         let camera = get_camera(width, height);
-        let distance = 1.2
-        camera.position.set(distance, distance, distance);
+        let distance = 1.4
+        camera.position.set(distance, distance - 0.2, distance);
         camera.lookAt(0, 0, 0);
 
         let render_scene = () => {
@@ -389,8 +387,9 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                     x /= frameNorm;
                     y /= frameNorm;
                     z /= frameNorm;
-
                     z -= height / 2;
+
+                    console.log(x, y, z, "Box positions", height, "height");
 
                     box.position.set(x, z, y);
                     controls.current?.add_mesh(box);

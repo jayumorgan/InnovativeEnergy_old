@@ -88,7 +88,7 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
-function GenerateAndSaveConfig(config: PalletConfiguration) {
+export function GenerateFinalConfig(config: PalletConfiguration) {
     let { name, pallets } = config;
     // We should also write the entire file.
     let boxCoordinates: BoxCoordinates[] = [];
@@ -97,18 +97,22 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
         let { width, length } = getPalletDimensions(p);
         let { Layouts, Stack } = p;
 
+        let { corner1, corner2, corner3 } = p;
+        let palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
+
+        let currentHeightIncrement = palletHeight;
+
         Stack.forEach((n: number, index: number) => {
 
             let { boxPositions, height } = Layouts[n];
+
+            currentHeightIncrement += height;
 
             boxPositions.forEach((b: BoxPosition2D) => {
 
                 let { box, position } = b;
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
-                let { corner1, corner2, corner3 } = p;
-
-                let palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
 
                 //compute the middle of the box shift.
                 let boxXmid = box.dimensions.width / 2;
@@ -131,15 +135,16 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
                 x_pos = Add3D(x_pos, corner2);
                 y_pos = Add3D(y_pos, corner2);
 
-                let z_add = (1 + index) * boxHeight + palletHeight;
+                let z_add = currentHeightIncrement;
+
 
                 let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
-
-                box_position = {
-                    x: Math.round(box_position.x * 100) / 100,
-                    y: Math.round(box_position.y * 100) / 100,
-                    z: Math.round(box_position.z * 100) / 100
-                } as Coordinate;
+		/* 
+		 *                 box_position = {
+		 *                     x: b,
+		 *                     y: Math.round(box_position.y * 100) / 100,
+		 *                     z: Math.round(box_position.z * 100) / 100
+		 *                 } as Coordinate; */
 
                 boxCoordinates.push({
                     pickLocation,
@@ -157,10 +162,13 @@ function GenerateAndSaveConfig(config: PalletConfiguration) {
         boxCoordinates
     } as SavedPalletConfiguration;
 
+    return configuration;
     // Save the file...
-    SavePalletConfig(name, configuration);
 };
 
+function SaveFinalConfig(name: string, configuration: SavedPalletConfiguration) {
+    SavePalletConfig(name, configuration);
+}
 
 
 
@@ -189,7 +197,9 @@ function PalletConfigurator({ close, index }: PalletConfiguratorProps) {
 
     let handleNext = () => {
         if (teachState === PalletTeachState.SUMMARY) {
-            GenerateAndSaveConfig(configuration);
+            let finalConfig = GenerateFinalConfig(configuration);
+            let { name } = configuration;
+            SaveFinalConfig(name, finalConfig);
             close();
         } else {
             setTeachState(++teachState);
@@ -240,7 +250,7 @@ function PalletConfigurator({ close, index }: PalletConfiguratorProps) {
             break;
         }
         case (PalletTeachState.SUMMARY): {
-            ChildElement = (<ConfigurationSummary allPallets={allPallets} allBoxes={allBoxes} {...controlProps} />)
+            ChildElement = (<ConfigurationSummary allPallets={allPallets} finalConfig={GenerateFinalConfig(configuration)} allBoxes={allBoxes} {...controlProps} />)
             break;
         }
         default: {

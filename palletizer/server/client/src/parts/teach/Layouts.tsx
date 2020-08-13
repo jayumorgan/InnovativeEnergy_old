@@ -53,6 +53,27 @@ interface DraggableRectProps {
     yh: number;
 }
 
+let getLockCoordinate = (x: number, lx: number, width: number, thresholdX: number) => {
+
+    if (Math.abs(x - lx) < thresholdX) {
+        return lx;
+    } else if (Math.abs(lx - width - x) < thresholdX) {
+        return lx - width;
+    } else {
+        return x;
+    }
+}
+
+let getLockCoordinateCenter = (x: number, lx: number, width: number, thresholdX: number) => {
+    if (Math.abs(x + width / 2 - lx) < thresholdX) {
+        return lx - width / 2;
+    } else {
+        return x;
+    }
+};
+
+
+
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
@@ -90,6 +111,9 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         //        document.addEventListener("keydown", rotate90, true);
     };
 
+
+
+
     let handleMove = (e: React.PointerEvent) => {
         let bb = (e.target as any).getBoundingClientRect();
         let x = e.clientX - bb.left;
@@ -105,19 +129,26 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             };
 
             //---------------Locking/Snap Mechanism---------------
-            let threshold = 20;
+            let thresholdX = (newR.width as number) / 7;
+            let thresholdY = (newR.height as number) / 7;
 
-            if (newR.x - xl < threshold) {
-                newR.x = xl;
-            } else if (xh - (newR.width as number) - newR.x < threshold) {
-                newR.x = xh - (newR.width as number);
-            }
 
-            if (newR.y - yl < threshold) {
-                newR.y = yl;
-            } else if (yh - (newR.height as number) - newR.y < threshold) {
-                newR.y = yh - (newR.height as number);
-            }
+            let cx = xl + (xh - xl) / 2;
+            let cy = yl + (yh - yl) / 2;
+
+
+            newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
+            newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
+            newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
+            newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
+
+
+            newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
+            newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
+            newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
+            newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY);
+
+
 
             setRectangle(newR);
         }
@@ -541,6 +572,11 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
         boxes: layout.boxPositions
     } as LayoutModelProps;
 
+    let round = (n: number) => {
+        return Math.round(n * 10) / 10;
+
+    };
+
 
     return (
         <div className="BoxCellContainer">
@@ -555,12 +591,12 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
                     <div className="DimensionsGrid2">
                         <div className="Dimension">
                             <span>
-                                {"Width: " + String(width)}
+                                {"Width: " + String(round(width))}
                             </span>
                         </div>
                         <div className="Dimension">
                             <span>
-                                {"Length: " + String(length)}
+                                {"Length: " + String(round(length))}
                             </span>
                         </div>
                     </div>

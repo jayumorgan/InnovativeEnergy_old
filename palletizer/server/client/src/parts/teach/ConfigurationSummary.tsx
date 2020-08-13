@@ -6,6 +6,10 @@ import ContentItem, { ButtonProps } from "./ContentItem";
 
 import RightImage from "./images/Boxes.png";
 
+import { SavedPalletConfiguration } from "../TeachMode";
+
+import Visualizer from "../Visualizer";
+
 import "./css/ConfigurationSummary.scss";
 import { Pallet } from "../../services/TeachMode";
 
@@ -49,12 +53,13 @@ interface StackProps {
     allPallets: PalletGeometry[];
     allBoxes: BoxObject[];
     instructionNumber: number;
+    finalConfig: SavedPalletConfiguration;
     handleNext: () => void;
     handleBack: () => void;
 };
 
 
-export default function ConfigurationSummary({ allPallets, allBoxes, handleNext, handleBack, instructionNumber }: StackProps) {
+export default function ConfigurationSummary({ allPallets, allBoxes, handleNext, handleBack, instructionNumber, finalConfig }: StackProps) {
     let LeftButton: ButtonProps = {
         name: "Back",
         action: handleBack
@@ -128,7 +133,8 @@ export default function ConfigurationSummary({ allPallets, allBoxes, handleNext,
                     })}
                 </div>
                 <div className="RightSide">
-                    <img src={RightImage} />
+                    <Visualizer palletConfig={finalConfig} currentBoxNumber={Infinity} />
+                    {/* <img src={RightImage} /> */}
                 </div>
             </div>
         </ContentItem>

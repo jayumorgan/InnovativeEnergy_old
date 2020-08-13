@@ -224,12 +224,13 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
         } as Coordinate;
         let tmp = TEMP_JOGGER_INDEX % 3;
         if (tmp === 0) {
-            pos.y = 100
+            pos.y = 1003;
         } else if (tmp === 1) {
 
         } else {
-            pos.x = 100
+            pos.x = 1003;
         }
+
         TEMP_JOGGER_INDEX++;
         selectAction(pos);
         Controller.getPosition((positions: Coordinate) => {

@@ -68,11 +68,11 @@ $name-height: 300pt;
                 @include flex-center();
                 cursor: pointer;
                 border-radius: $border-radius;
-                background-color: $green;
+                background-color: $medium-blue;
                 width: 40%;
                 height: 60%;
                 font-size: $large-font;
-                font-weight: $bold-font;
+                //font-weight: $bold-font;
                 color: white;
 
                 span {
@@ -82,6 +82,7 @@ $name-height: 300pt;
 
             .StartButton:hover {
                 @include shadow();
+                background-color: $green;
             }
         }
 

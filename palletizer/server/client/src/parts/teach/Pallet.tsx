@@ -186,11 +186,16 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
             if (summaryScreen) {
                 handleBack()
             } else {
-                if (allPallets.length > 0) {
-                    setSummaryScreen(true);
-                } else {
+                if (PALLETCORNERS.TOP_LEFT === cornerNumber) {
                     handleBack();
+                } else {
+                    if (cornerNumber === PALLETCORNERS.BOTTOM_LEFT) {
+                        setCornerNumber(PALLETCORNERS.TOP_LEFT)
+                    } else {
+                        setCornerNumber(PALLETCORNERS.BOTTOM_LEFT);
+                    }
                 }
+
             }
         }
     };
