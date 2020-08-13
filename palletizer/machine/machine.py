@@ -178,6 +178,9 @@ class Palletizer(pc.PalletizerControl):
 
     def start(self,count):
         # Setup the machine. (load configuration)
+       
+            
+            
         self.machine = Machine()
         
         self.total_box_count = self.machine.box_count
@@ -191,6 +194,12 @@ class Palletizer(pc.PalletizerControl):
         self.control_checks(interrupted=True)
         self.increment_cycle()
         self.update({"status": "Running"})
+
+         
+        self.update_information("Status", "Machine starting")
+        self.update_information("Status", "Air pressure detected.")
+        self.update_information("Status", "System is homing.")
+  
         self.machine.home()
         self.control_checks()
         self.move_to_pick(count)
