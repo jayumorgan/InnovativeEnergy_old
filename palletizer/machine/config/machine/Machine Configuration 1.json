@@ -1,8 +1,26 @@
 {
+    "TOP_Z" : 1696.8,
 	"AXES": {
-		"x": 2,
-		"y": 3,
-		"z": 1
+	    "x": {
+		"DRIVE" : 1,
+		"REVERSE" : true,
+		"MACHINE" : 1
+		 },
+	    "y": {
+		"DRIVE" : 3,
+		"REVERSE" : true,
+		"MACHINE" : 0
+	    },
+	    "z": {
+		"DRIVE" : 1,
+		"REVERSE" : true,
+		"MACHINE" : 0
+	    },
+	    "i" : {
+		"DRIVE" : 3,
+		"REVERSE" : false,
+		"MACHINE": 1	
+	    }
 	},
 	"GAIN": {
 		"x": 150,
@@ -10,27 +28,32 @@
 		"z": 150
 	},
 	"SPEED": 500,
-	"ACCELERATION": 500,
-	"NETWORK": {
-		"IP_ADDRESS": "192.168.7.2",
-		"GATEWAY": "192.168.0.1",
-		"NETMASK": "255.255.255.0"
-	},
-	"ROTATION_NETWORK" : {
-		"IP_ADDRESS": "192.168.0.2",
-		"GATEWAY" : "192.168.0.1",
-		"NETMASK" : "255.255.255.0"
-	},
+	"ACCELERATION": 500,   
+	"MACHINES" : [
+	    {
+		    "IP_ADDRESS": "192.168.0.3",
+		    "GATEWAY": "192.168.0.1",
+		    "NETMASK": "255.255.255.0"   
+	    },
+	    {
+		    "IP_ADDRESS": "192.168.0.2",
+		    "GATEWAY" : "192.168.0.1",
+		    "NETMASK" : "255.255.255.0"
+	    }
+	],
 	"PRESSURE_INPUT" : {
 		"PIN" : 0,
-		"NETWORK_ID" : 1
+	    "NETWORK_ID" : 1,
+	    "MACHINE": 0
 	},
 	"PRESSURE_OUTPUT": {
 		"PIN": 3,
-		"NETWORK_ID" : 1
+	    "NETWORK_ID" : 1,
+	    "MACHINE": 0
 	},
 	"BOX_DETECTION" : {
 		"PIN" : 2,
-		"NETWORK_ID" : 1
+	    "NETWORK_ID" : 1,
+	    "MACHINE" : 0
 	}
 }
