@@ -240,6 +240,8 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                 break;
             }
         };
+
+        getPositions();
     };
 
     let handleAMove = (dagger: boolean) => {
@@ -248,6 +250,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
         let reverse_bool = MotionConfig["Z"]["REVERSE"];
         let Controller = Controllers[controller_index];
         Controller.Move(drive_index, dagger);
+        getPositions();
     };
 
     let handleName = (e: ChangeEvent) => {
@@ -257,22 +260,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
     let [currentPosition, setCurrentPosition] = useState<Coordinate>({ x: 0, y: 0, z: 0 });
 
-    let handleSelect = async () => {
-        let pos = {
-            x: 0, y: 0, z: 0
-        } as Coordinate;
-        let tmp = TEMP_JOGGER_INDEX % 3;
-        if (tmp === 0) {
-            pos.y = 1003;
-        } else if (tmp === 1) {
-
-        } else {
-            pos.x = 1003;
-        }
-
-        TEMP_JOGGER_INDEX++;
-        //  selectAction(pos);
-
+    let getPositions = async () => {
         let position1 = await Controllers[0].getPosition();
         let position2 = await Controllers[1].getPosition();
         let positions = [position1, position2];
@@ -300,8 +288,31 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
             z: z_value
         };
 
-        selectAction(position);
         setCurrentPosition(position);
+        return position;
+    };
+
+
+    let handleSelect = async () => {
+        let pos = {
+            x: 0, y: 0, z: 0
+        } as Coordinate;
+        let tmp = TEMP_JOGGER_INDEX % 3;
+        if (tmp === 0) {
+            pos.y = 1003;
+        } else if (tmp === 1) {
+
+        } else {
+            pos.x = 1003;
+        }
+
+        TEMP_JOGGER_INDEX++;
+        //  selectAction(pos);
+
+        let position = await getPositions();
+
+        selectAction(position);
+
 
     };
 
