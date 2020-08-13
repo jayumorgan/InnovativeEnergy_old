@@ -3,14 +3,8 @@ import axios, { AxiosResponse } from "axios";
 
 import { Coordinate } from "../parts/teach/structures/Data";
 
-
-
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 axios.defaults.headers.get['Content-Type'] = "application/x-www-form-urlencoded";
-
-
-
-
 
 export enum NETWORK_MODE {
     dhcp,
@@ -33,26 +27,23 @@ class MachineMotion {
         3: "Z"
     } as { [key: number]: string };
 
-
-
     constructor(networkConfig: NetworkConfiguration) {
         this.myConfiguration = networkConfig as NetworkConfiguration;
     };
-
 
     HTTPSend(port: string, path: string, data: any | null, callback?: (res: AxiosResponse) => void) {
         let url = "http://" + this.myConfiguration.machineIp + ":" + port + "/" + path;
 
         if (data) {
             axios.post(url, data).then((res: AxiosResponse) => {
-                console.log(`POST Response (${url}): `, res);
+                //  console.log(`POST Response (${url}): `, res);
                 callback && callback(res);
             }).catch((e: any) => {
                 console.log(`POST Error (${url})`, e);
             });
         } else {
             axios.get(url).then((res: AxiosResponse) => {
-                console.log(`GET Response (${url}): `, res);
+                //   console.log(`GET Response (${url}): `, res);
                 callback && callback(res);
             }).catch((e: any) => {
                 console.log(`GET Error (${url})`, e);
@@ -65,13 +56,31 @@ class MachineMotion {
 
         let encoded_path = Object.keys(data).map(key => key + '=' + data[key]).join('&');
 
-        console.log("Encoded path: ", encoded_path);
+        // console.log("Encoded path: ", encoded_path);
 
         this.HTTPSend("8000", "gcode?" + encoded_path, null, callback);
     };
 
+    async emitGCodeSync(gCode: string) {
+
+        let data = { "gcode": gCode } as any;
+
+        let encoded_path = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+        encoded_path = "gcode?" + encoded_path;
+
+        //   console.log("Encoded path: ", encoded_path);
+
+        let url = "http://" + this.myConfiguration.machineIp + ":8000" + "/" + encoded_path;
+
+        let res = await axios.get(url);
+        return res.data;
+    }
+
     emitRelativeMove(axis: number, position: number) {
+
         let a = this.axes[axis];
+
+        //  console.log(`Emit relative axis= ${axis}, a = ${a}`);
         this.emitGCode("G91", (res: AxiosResponse) => {
             this.emitGCode("G0 " + a + String(position));
         });
@@ -82,41 +91,31 @@ class MachineMotion {
         this.emitGCode(gcode);
     };
 
-
-
-    getCurrentPositions(axes: Axes, callback: (positions: Coordinate) => void) {
+    async getCurrentPositions() {
         let gcode = "M114";
-        this.emitGCode(gcode, (res: AxiosResponse) => {
-            let response = res.data as string;
+        let response: string = await this.emitGCodeSync(gcode);
 
-            let Xreg: RegExp = /X:([\d\.\-]+)/;
-            let Yreg: RegExp = /Y:([\d\.\-]+)/;
-            let Zreg: RegExp = /Z:([\d\.\-]+)/;
+        let Xreg: RegExp = /X:([\d\.\-]+)/;
+        let Yreg: RegExp = /Y:([\d\.\-]+)/;
+        let Zreg: RegExp = /Z:([\d\.\-]+)/;
 
-            let XMatch = Xreg.exec(response);
-            let YMatch = Yreg.exec(response);
-            let ZMatch = Zreg.exec(response);
+        let XMatch = Xreg.exec(response);
+        let YMatch = Yreg.exec(response);
+        let ZMatch = Zreg.exec(response);
 
-            if (XMatch && YMatch && ZMatch) {
-                let XVal: number = + XMatch[1];
-                let YVal: number = + YMatch[1];
-                let ZVal: number = + ZMatch[1];
+        if (XMatch && YMatch && ZMatch) {
 
-                let vals = [XVal, YVal, ZVal] as number[];
+            let XVal: number = + XMatch[1];
+            let YVal: number = + YMatch[1];
+            let ZVal: number = + ZMatch[1];
+            let vals = [XVal, YVal, ZVal] as number[];
+            return vals;
 
-                let coord: Coordinate = {
-                    x: vals[axes.x - 1],
-                    y: vals[axes.y - 1],
-                    z: vals[axes.z - 1]
-                };
+        } else {
+            console.log("Regex Error", response);
+            return [0, 0, 0];
+        }
 
-                console.log(coord);
-
-                callback(coord);
-            } else {
-                console.log("Regex Error", response);
-            }
-        });
     };
 };
 
@@ -130,9 +129,9 @@ interface Axes {
 };
 
 export enum AxesDirections {
-    X,
-    Y,
-    Z
+    X = "X",
+    Y = "Y",
+    Z = "Z"
 };
 
 
@@ -155,32 +154,22 @@ export class TeachModeController {
         } as Axes;
     }
 
-
-    getPosition(callback: (positions: Coordinate) => void) {
-
-        this.mm.getCurrentPositions(this.axes, callback);
+    setSpeed(newSpeed: number) {
+        this.speed = newSpeed;
+        this.mm.emitSpeed(this.speed);
     };
 
-    Move(direction: AxesDirections, positive: boolean) {
-        let axis: number;
-        switch (direction) {
-            case AxesDirections.X: {
-                axis = this.axes.x
-                break;
-            };
-            case AxesDirections.Y: {
-                axis = this.axes.y
-                break;
-            };
-            case AxesDirections.Z: {
-                axis = this.axes.z;
-                break;
-            };
-            default: {
-                console.log("Move Error", direction);
-                axis = 10;
-            };
-        }
-        this.mm.emitRelativeMove(axis, positive ? this.distance : -1 * this.distance);
+    setDistance(newDistance: number) {
+        this.distance = newDistance;
+        this.mm.emitSpeed(this.distance);
+    }
+
+
+    async getPosition() {
+        return await this.mm.getCurrentPositions();
+    };
+
+    Move(drive: number, positive: boolean) {
+        this.mm.emitRelativeMove(drive, positive ? this.distance : -1 * this.distance);
     };
 };
