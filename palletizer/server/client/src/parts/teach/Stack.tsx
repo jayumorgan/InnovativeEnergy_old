@@ -124,7 +124,7 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
     let instruction: string;
 
 
-    instruction = "Assign custom layouts to your pallet layers";
+    instruction = "Create a pallet layout using your configured pallet layers";
 
     let contentItemProps = {
         instructionNumber,

@@ -707,12 +707,15 @@ interface LayoutProps {
 
 function defaultLayout(index: number) {
     let l: LayoutObject = {
-        name: "Layout " + String(index),
+        name: "Custom Layer " + String(index),
         boxPositions: [],
         height: 0,
     };
     return l;
 };
+
+
+
 
 function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
 
@@ -853,7 +856,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
 
     let instruction: string;
-    let placeholder = "Pallet Layout " + String(1);
+    let placeholder = "Custom Layer " + String(1);
 
     let dragOver = (e: DragEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -894,7 +897,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
     //---------------Display---------------
     if (summaryScreen) {
-        instruction = "Create and edit layouts";
+        instruction = "Create and edit layers";
         let AddButton: ButtonProps = {
             name: "Add new layout",
             action: newLayout
@@ -933,7 +936,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             </ContentItem>
         );
     } else {
-        instruction = "Drag and drop boxes to create a layout";
+        instruction = "Drag and drop boxes to create a layer";
 
         let contentItemProps = {
             instructionNumber,

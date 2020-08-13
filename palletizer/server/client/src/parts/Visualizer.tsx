@@ -295,9 +295,9 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         scene.add(groundMesh);
 
         let camera = get_camera(width, height);
-        let distance = 1.4
-        camera.position.set(distance, distance - 0.2, distance);
-        camera.lookAt(0, 0, 0);
+        let distance = 1.2
+        camera.position.set(distance, 0.75, distance);
+        camera.lookAt(0, -0.1, 0);
 
         let render_scene = () => {
             renderer.render(scene, camera);

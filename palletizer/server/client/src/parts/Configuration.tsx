@@ -117,6 +117,13 @@ function Configuration() {
         set_editor(edit);
     };
 
+    let startPalletEditor = (filename: string) => () => {
+
+	console.log("STarting Pallet Editor");
+
+
+    }
+
     let close_editor = () => {
         set_editor({ ...editor, edit: false });
     };
