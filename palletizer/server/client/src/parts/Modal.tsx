@@ -1,53 +1,53 @@
 import React, { ReactNode, useEffect, useState, useRef, ReactEventHandler } from 'react';
- 
+
 // Ace Editor
 import AceEditor, { IAceEditorProps } from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-xcode";
 
-import {get_config, post_config} from "../requests/requests";
+import { get_config, post_config } from "../requests/requests";
 
 // Styles
 import "./css/Modal.scss";
 
 interface ModalProps {
     children: ReactNode;
-    close():any;
+    close(): any;
 }
 
 
-function Modal({children, close}: ModalProps) {
+function Modal({ children, close }: ModalProps) {
 
-    let modal_class : string = "Modal";
-    
+    let modal_class: string = "Modal";
+
     let close_modal = (e: React.MouseEvent<HTMLElement>) => {
         let target = e.target as HTMLElement;
-        if (target.className === modal_class) {        
+        if (target.className === modal_class) {
             close();
         }
     };
-    
+
     return (
         <div className={modal_class} onClick={close_modal}>
-                {children}
+            {children}
         </div>
     );
 }
 
 interface EditorProps {
-    file_name : string;
-    title : string;
+    file_name: string;
+    title: string;
     machine: boolean;
     close(): any;
 }
 
-function Editor({file_name, title, machine, close} : EditorProps) {
-    
-    let handle_edit = (value:string) => {
+function Editor({ file_name, title, machine, close }: EditorProps) {
+
+    let handle_edit = (value: string) => {
     }
 
     let modal_title = "Edit " + title.toLowerCase() + ": " + file_name;
-    
+
     var [data, set_data] = useState("");
 
     let editor_settings = {
@@ -61,18 +61,18 @@ function Editor({file_name, title, machine, close} : EditorProps) {
             height: "500px"
         }
     } as IAceEditorProps;
-    
-    useEffect(()=>{
-        let fetch_data = async ()=>{
+
+    useEffect(() => {
+        let fetch_data = async () => {
             let res_data = await get_config(file_name, machine) as any;
             set_data(JSON.stringify(res_data, null, "\t"));
         }
         fetch_data();
-    },[]);
+    }, []);
 
     const config_ref = useRef<AceEditor | null>(null);
 
-    let save_config = ()=>{
+    let save_config = () => {
         let element = config_ref.current as AceEditor;
         if (element) {
             let json = JSON.parse(element.editor.getValue() as string);
@@ -81,26 +81,26 @@ function Editor({file_name, title, machine, close} : EditorProps) {
         }
     };
 
-    
+
     return (
         <Modal close={close}>
             <div className="ModalContent">
-            <span id="EditorTitle">
-                {modal_title}
-            </span>
-            <AceEditor ref={config_ref} {...editor_settings} value={data as string} /> 
-            <div className="EditorFooter">
-                <div className="CloseEditor" onClick={close}>
-                    <span>
-                        {"Close"}
-                    </span>
-                </div>
-                <div className="SaveEditor" onClick={save_config}>
+                <span id="EditorTitle">
+                    {modal_title}
+                </span>
+                <AceEditor ref={config_ref} {...editor_settings} value={data as string} />
+                <div className="EditorFooter">
+                    <div className="CloseEditor" onClick={close}>
+                        <span>
+                            {"Close"}
+                        </span>
+                    </div>
+                    <div className="SaveEditor" onClick={save_config}>
                         <span>
                             {"Save"}
                         </span>
+                    </div>
                 </div>
-            </div>
             </div>
         </Modal>
     );
@@ -108,11 +108,11 @@ function Editor({file_name, title, machine, close} : EditorProps) {
 
 
 interface UnlockProps {
-    close() : void;
+    close(): void;
 }
 
 
-function UnlockItem(props : any) {
+function UnlockItem(props: any) {
 
 
     return (
@@ -122,29 +122,29 @@ function UnlockItem(props : any) {
     )
 }
 
-function Unlock({close} : UnlockProps) {
+function Unlock({ close }: UnlockProps) {
     let [valid, set_valid] = useState<boolean>(false);
 
     let password = "123123";
-    
+
     let handle_input = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.value === password) {
             set_valid(true);
-        }else{
+        } else {
             set_valid(false);
         }
     };
 
-    let handle_close = ()=>{
+    let handle_close = () => {
         valid && close();
     };
-    
-    return(
+
+    return (
         <Modal close={handle_close} >
             <div className="Unlock">
                 <UnlockItem>
                     <span id="UnlockTitle">
-                    {"Enter password to unlock"}
+                        {"Enter password to unlock"}
                     </span>
                 </UnlockItem>
                 <UnlockItem>
@@ -153,7 +153,7 @@ function Unlock({close} : UnlockProps) {
                 <UnlockItem>
                     <div className={"UnlockButton" + (valid ? "" : "Locked")} onClick={handle_close}>
                         <span>
-                        Unlock
+                            Unlock
                         </span>
                     </div>
                 </UnlockItem>
@@ -163,7 +163,7 @@ function Unlock({close} : UnlockProps) {
 }
 
 
-export {Editor, Unlock};
+export { Editor, Unlock };
 
 
 export default Modal;
