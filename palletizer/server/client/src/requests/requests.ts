@@ -18,8 +18,9 @@ function get_configs(callback: any) {
 }
 
 async function get_config(filename: string, machine: boolean) {
-    let url = get_url((machine ? "/machine/" : "/pallet/") + filename);
-    let res = await axios.get(url);
+    let url = get_url(machine ? "/machine" : "/pallet");
+    let res = await axios.post(url, { filename });
+    console.log(res.data);
     return res.data;
 }
 

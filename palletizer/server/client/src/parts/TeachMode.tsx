@@ -35,6 +35,7 @@ enum PalletTeachState {
 interface PalletConfiguratorProps {
     close: () => void;
     index: number;
+    palletConfig: SavedPalletConfiguration | null;
 };
 
 //---------------Pallet Configuration Class---------------
@@ -170,12 +171,10 @@ function SaveFinalConfig(name: string, configuration: SavedPalletConfiguration) 
     SavePalletConfig(name, configuration);
 }
 
-
-
 //---------------Pallet Configurator Component---------------
-function PalletConfigurator({ close, index }: PalletConfiguratorProps) {
+function PalletConfigurator({ close, index, palletConfig }: PalletConfiguratorProps) {
 
-    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, newPalletConfiguration("Pallet Configuration " + String(index + 1)));
+    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1)));
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
@@ -262,7 +261,7 @@ function PalletConfigurator({ close, index }: PalletConfiguratorProps) {
     if (teachState === PalletTeachState.CONFIG_NAME) {
         return (
             <Modal close={close}>
-                <Name name={configuration.name} close={close} changeName={setName} handleStart={handleNext} />
+                <Name name={configuration.name} close={close} changeName={setName} handleStart={handleNext} existing={palletConfig !== null} />
             </Modal>
         );
     } else {

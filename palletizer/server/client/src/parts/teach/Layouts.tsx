@@ -753,7 +753,15 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
     let LeftButton: ButtonProps = {
         name: "Back",
-        action: handleBack
+        action: () => {
+            if (summaryScreen) {
+                handleBack()
+            } else if (haveLayout) {
+                setSummaryScreen(true);
+            } else {
+                handleBack();
+            }
+        }
     };
 
     let updateModelBox = (bpo: BoxPositionObject, index: number) => {

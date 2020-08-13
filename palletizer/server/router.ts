@@ -183,6 +183,49 @@ router.post("/configs/savepallet", (req: express.Request, res: express.Response)
 router.use("/machine", express.static(MACHINE_PATH));
 router.use("/pallet", express.static(PALLET_PATH));
 
+
+router.post("/machine", (req: express.Request, res: express.Response) => {
+
+    let { filename } = req.body;
+    let p = path.join(MACHINE_PATH.toString(), filename);
+
+    if (fs.existsSync(p)) {
+        fs.readFile(p, { encoding: 'utf-8' }, (err: NodeJS.ErrnoException | null, data: string) => {
+            if (err) {
+                console.log("Read file error " + p.toString(), err);
+                res.sendStatus(500);
+            } else {
+                res.send(JSON.parse(data));
+            }
+        });
+
+    } else {
+        console.log("Machine configuration: " + filename + " not found.");
+        res.sendStatus(404);
+    }
+});
+
+
+router.post("/pallet", (req: express.Request, res: express.Response) => {
+    let { filename } = req.body;
+    let p = path.join(PALLET_PATH.toString(), filename);
+
+    if (fs.existsSync(p)) {
+        fs.readFile(p, { encoding: 'utf-8' }, (err: NodeJS.ErrnoException | null, data: string) => {
+            if (err) {
+                console.log("Read file error " + p.toString(), err);
+                res.sendStatus(500);
+            } else {
+                res.send(JSON.parse(data));
+            }
+        });
+
+    } else {
+        console.log("Pallet configuration: " + filename + " not found.");
+        res.sendStatus(404);
+    }
+});
+
 // List current configurations.
 router.get("/configs", (req: express.Request, res: express.Response) => {
     get_configurations((c: ConfigData | null) => {

@@ -13,15 +13,18 @@ interface NameProps {
     close: () => void;
     changeName: (s: string) => void;
     handleStart: () => void;
+    existing: boolean;
 }
 
-export default function TeachModeName({ name, close, changeName, handleStart }: NameProps) {
+export default function TeachModeName({ name, close, changeName, handleStart, existing }: NameProps) {
 
     let icon_size = 25;
     let onChange = (e: ChangeEvent) => {
         let newName: string = (e.target as any).value;
         changeName(newName);
     };
+
+    let title = existing ? "Edit the name of your pallet configuration" : "Enter a name for your new pallet configuration";
 
 
     return (
@@ -32,7 +35,7 @@ export default function TeachModeName({ name, close, changeName, handleStart }: 
             <div className="ContentPartition">
                 <div className="Instruction">
                     <span>
-                        {"Enter a name for your new pallet configuration"}
+                        {title}
                     </span>
                 </div>
                 <div className="NameInput">

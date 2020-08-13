@@ -8,6 +8,10 @@ import { ConfigContext } from "../context/ConfigContext";
 
 import { ConfigState } from "../types/Types";
 
+import { SavedPalletConfiguration } from "./TeachMode";
+
+import { get_config } from "../requests/requests";
+
 // Styles
 import "./css/Configuration.scss";
 import "./css/Login.scss";
@@ -107,6 +111,8 @@ function Configuration() {
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
 
+    let [editPalletConfig, setEditPalletConfig] = useState<SavedPalletConfiguration | null>(null);
+
     let start_editor = (title: string) => (fn: string) => {
         let edit = {
             filename: fn,
@@ -117,11 +123,15 @@ function Configuration() {
         set_editor(edit);
     };
 
-    let startPalletEditor = (filename: string) => () => {
+    let startPalletEditor = (filename: string) => {
 
-	console.log("STarting Pallet Editor");
-
-
+        let fetch_data = async () => {
+            let res_data = await get_config(filename, false) as SavedPalletConfiguration;
+            setEditPalletConfig(res_data);
+            set_add_pallet_config(true);
+            //set_data(JSON.stringify(res_data, null, "\t"));
+        }
+        fetch_data();
     }
 
     let close_editor = () => {
@@ -134,7 +144,11 @@ function Configuration() {
 
     let new_pallet = (val: boolean) => () => {
         set_add_pallet_config(val);
+        setEditPalletConfig(null);
     };
+
+
+
 
     let add_new_machine = () => {
         console.log("Add Machine Config");
@@ -146,10 +160,10 @@ function Configuration() {
         <Fragment>
             <div className="ConfigContainer">
                 <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_editor(machine_title)} start_add_config={add_new_machine} />
-                <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={start_editor(pallet_title)} start_add_config={new_pallet(true)} />
+                <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={startPalletEditor} start_add_config={new_pallet(true)} />
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}
-            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} index={configCount} />}
+            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} palletConfig={editPalletConfig} index={configCount} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );

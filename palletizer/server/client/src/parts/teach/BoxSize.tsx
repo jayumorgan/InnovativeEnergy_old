@@ -239,6 +239,7 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
 
     let startEdit = (index: number) => () => {
         if (index >= 0) {
+            console.log(index, "Setting editing index");
             setEditingBox(allBoxes[index]);
             setEditingIndex(index);
         } else {
@@ -273,12 +274,13 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
 
     // Only allow the box to be increment
     let RightButton: ButtonProps = {
-        name: summaryScreen ? "Next" : "Add Box",
+        name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
                 handleNext();
             } else {
-                if (editingIndex) {
+                if (editingIndex !== null) {
+                    console.log("Editing index");
                     let b = [...allBoxes];
                     b[editingIndex] = editingBox;
                     setBoxes(b);

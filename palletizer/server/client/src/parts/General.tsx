@@ -229,7 +229,7 @@ function InformationLog({ DateString, Description, Type }: InformationLogProps) 
     let day = date.getDate();
     let month = date.getMonth();
     let year = date.getFullYear();
-    let date_string = make_date_string(day, month, year);
+    let date_string = make_date_string(10, 8, year);
     let time_string = make_time_string(hours, minutes);
 
     let image: ReactElement;
