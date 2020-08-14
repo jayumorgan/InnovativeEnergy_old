@@ -16,11 +16,12 @@ import traceback
 
 import urllib
 # Import if python 2
-if sys.version_info[0] < 3 :
+if sys.version_info[0] < 3:
     import httplib
 # Import if python 3
-else :
+else:
     import http.client
+
 
 class CONTROL_DEVICE_SIGNALS:
     SIGNAL0 = "SIGNAL0"
@@ -31,14 +32,17 @@ class CONTROL_DEVICE_SIGNALS:
     SIGNAL5 = "SIGNAL5"
     SIGNAL6 = "SIGNAL6"
 
+
 class CONTROL_DEVICE_TYPE:
     IO_EXPANDER_GENERIC = "IO_EXPANDER_GENERIC"
-    ENCODER             = "ENCODER"
+    ENCODER = "ENCODER"
+
 
 class CONTROL_DEVICE_PORTS:
     SENSOR4 = "SENSOR4"
     SENSOR5 = "SENSOR5"
     SENSOR6 = "SENSOR6"
+
 
 class DIRECTION:
     POSITIVE = "positive"
@@ -48,65 +52,78 @@ class DIRECTION:
     CLOCKWISE = POSITIVE
     COUNTERCLOCKWISE = NEGATIVE
 
+
 class AXIS_NUMBER:
     DRIVE1 = 1
     DRIVE2 = 2
     DRIVE3 = 3
 
+
 class UNITS_SPEED:
     mm_per_min = "mm per minute"
-    mm_per_sec =  "mm per second"
+    mm_per_sec = "mm per second"
+
 
 class UNITS_ACCEL:
     mm_per_min_sqr = "mm per minute"
-    mm_per_sec_sqr =  "mm per second"
+    mm_per_sec_sqr = "mm per second"
+
 
 DEFAULT_IP = "192.168.7.2"
 
+
 class DEFAULT_IP_ADDRESS:
-    usb_windows     = "192.168.7.2"
-    usb_mac_linux   = "192.168.7.2"
-    ethernet        = "192.168.0.2"
+    usb_windows = "192.168.7.2"
+    usb_mac_linux = "192.168.7.2"
+    ethernet = "192.168.0.2"
+
 
 class NETWORK_MODE:
-    static  = "static"
-    dhcp    = "dhcp"
+    static = "static"
+    dhcp = "dhcp"
+
 
 class MICRO_STEPS:
-    ustep_full  = 1
-    ustep_2     = 2
-    ustep_4     = 4
-    ustep_8     = 8
-    ustep_16    = 16
+    ustep_full = 1
+    ustep_2 = 2
+    ustep_4 = 4
+    ustep_8 = 8
+    ustep_16 = 16
+
 
 class MECH_GAIN:
-    timing_belt_150mm_turn          = 150
-    legacy_timing_belt_200_mm_turn  = 200
-    ballscrew_10mm_turn             = 10
-    legacy_ballscrew_5_mm_turn      = 5
-    indexer_deg_turn                = 85
+    timing_belt_150mm_turn = 150
+    legacy_timing_belt_200_mm_turn = 200
+    ballscrew_10mm_turn = 10
+    legacy_ballscrew_5_mm_turn = 5
+    indexer_deg_turn = 85
     #indexer_deg_turn                = 36
-    roller_conveyor_mm_turn         = 157
-    belt_conveyor_mm_turn           = 69.12
-    rack_pinion_mm_turn             = 157.08
+    roller_conveyor_mm_turn = 157
+    belt_conveyor_mm_turn = 69.12
+    rack_pinion_mm_turn = 157.08
+
 
 class STEPPER_MOTOR:
-    steps_per_turn      = 200
+    steps_per_turn = 200
+
 
 class AUX_PORTS:
     aux_1 = 0
     aux_2 = 1
     aux_3 = 2
 
+
 class ENCODER_TYPE:
     real_time = "realtime-position"
     stable = "stable-position"
 
-HARDWARE_MIN_HOMING_FEEDRATE =251
-HARDWARE_MAX_HOMING_FEEDRATE= 15999
 
-class MQTT :
-    class PATH :
+HARDWARE_MIN_HOMING_FEEDRATE = 251
+HARDWARE_MAX_HOMING_FEEDRATE = 15999
+
+
+class MQTT:
+    class PATH:
         ESTOP = "estop"
         ESTOP_STATUS = ESTOP + "/status"
         ESTOP_TRIGGER_REQUEST = ESTOP + "/trigger/request"
@@ -116,42 +133,49 @@ class MQTT :
         ESTOP_SYSTEMRESET_REQUEST = ESTOP + "/systemreset/request"
         ESTOP_SYSTEMRESET_RESPONSE = ESTOP + "/systemreset/response"
 
-    TIMEOUT = 10.0 # Number of seconds while we wait for MQTT response
+    TIMEOUT = 10.0  # Number of seconds while we wait for MQTT response
 
-def HTTPSend(host, path, data=None) :
+
+def HTTPSend(host, path, data=None):
     # Note:
     #   The intent of retrying upon failure here is primarily to reconnect to a dead or unreachable server.
     #   The assumption is that an exception at this level reflects a server failure not to be expected by the client.
     #   This behavior could be made optional.
-    while True :
+    while True:
         lConn = None
-        try :
+        try:
             # Review: use keep-alive
 
             # If python 2
-            if sys.version_info[0] < 3 :
+            if sys.version_info[0] < 3:
                 lConn = httplib.HTTPConnection(host)
             # Else python 3
-            else :
+            else:
                 lConn = http.client.HTTPConnection(host)
 
             if None == data:
+
                 lConn.request("GET", path)
             else:
-                lConn.request("POST", path, data, {"Content-type": "application/octet-stream"});
+                lConn.request("POST", path, data,
+                              {"Content-type": "application/octet-stream"})
             lResponse = lConn.getresponse()
             lResponse = lResponse.read()
             lConn.close()
-            return str(lResponse) # Casting as a string is necessary for python3
-        except Exception :
-            logging.warning("Could not GET %s: %s" % (path, traceback.format_exc()), self.IP)
-            if lConn :
+            return str(
+                lResponse)  # Casting as a string is necessary for python3
+        except Exception:
+            logging.warning(
+                "Could not GET %s: %s" % (path, traceback.format_exc()),
+                self.IP)
+            if lConn:
                 lConn.close()
                 lConn = None
             # time.sleep(1)
             break
-            
+
     return ""
+
 
 #
 # Class that handles all gCode related communications
@@ -171,13 +195,14 @@ class GCode:
         self.ackReceived = False
         self.lineNumber = 1
         self.lastPacket = {"data": "null", "lineNumber": "null"}
-        self.gCodeErrors = {"checksum": "Error:checksum mismatch, Last Line: ", "lineNumber": "Error:Line Number is not Last Line Number+1, Last Line: "}
-        self.userCallback = None
-        self.steps_per_mm = {
-            1 : None,
-            2 : None,
-            3 : None
+        self.gCodeErrors = {
+            "checksum":
+            "Error:checksum mismatch, Last Line: ",
+            "lineNumber":
+            "Error:Line Number is not Last Line Number+1, Last Line: "
         }
+        self.userCallback = None
+        self.steps_per_mm = {1: None, 2: None, 3: None}
 
         return
 
@@ -197,7 +222,7 @@ class GCode:
     # Function that packages the data in a JSON object and sends to the MachineMotion server over a socket connection.
     # PRIVATE
     #
-    def __send__(self, cmd, data=None) :
+    def __send__(self, cmd, data=None):
 
         return HTTPSend(self.myIp + self.libPort, cmd, data)
 
@@ -206,24 +231,28 @@ class GCode:
     # @param gCode --- Description: gCode is string representing the G-Code command to send to the controller. Type: string.
     # @status
     #
-    def __emit__(self, gCode) :
+    def __emit__(self, gCode):
 
         # If python 2
-        if sys.version_info[0] < 3 :
-            rep = self.__send__("/gcode?%s" % urllib.urlencode({"gcode": "%s" % gCode}))
+        if sys.version_info[0] < 3:
+            rep = self.__send__("/gcode?%s" %
+                                urllib.urlencode({"gcode": "%s" % gCode}))
         # Else python 3
-        else :
-            rep = self.__send__("/gcode?%s" % urllib.parse.urlencode({"gcode": "%s" % gCode}))
+        else:
+
+            rep = self.__send__(
+                "/gcode?%s" % urllib.parse.urlencode({"gcode": "%s" % gCode}))
 
         # Call user callback only if relevant
-        if self.__userCallback__ is None : pass
-        else :
+        if self.__userCallback__ is None: pass
+        else:
             self.__userCallback__(rep)
 
         return rep
 
     @staticmethod
-    def __userCallback__(data): return
+    def __userCallback__(data):
+        return
 
     #
     # Function that executes upon reception of messages from the motion controller. The user configured callback in ran after this function.
@@ -231,34 +260,42 @@ class GCode:
     # @param data --- Description: The data sent by the motion controller. Type: string.
     # @status
     #
-    def __rxCallback__(self, data) :
+    def __rxCallback__(self, data):
 
         # Look if the echo of the last command was found in the incoming data
-        if (data.find(self.lastPacket['data'])) != -1: pass
+        if (data.find(self.lastPacket['data'])) != -1:
+            pass
             # The last command was acknowledged
 
-        # Special ack for homing
-        elif data.find('X:0.00') != -1 and self.lastPacket['data'].find('G28') != -1: pass
+            # Special ack for homing
+        elif data.find('X:0.00') != -1 and self.lastPacket['data'].find(
+                'G28') != -1:
+            pass
             # The last command was acknowledged
 
-        # Special ack for homing
-        elif data.find('DEBUG') != -1 and self.lastPacket['data'].find('M111') != -1: pass
+            # Special ack for homing
+        elif data.find('DEBUG') != -1 and self.lastPacket['data'].find(
+                'M111') != -1:
+            pass
             # The last command was acknowledged
 
-        # Look if errors were received
-        elif (data.find('Error:') != -1) : pass
+            # Look if errors were received
+        elif (data.find('Error:') != -1):
+            pass
 
-        elif (data.find('Resend:') != -1) : pass
+        elif (data.find('Resend:') != -1):
+            pass
 
         #Calling specific user defined callback
         self.__userCallback__(data)
 
         return
 
-    def __keepSocketAlive__(self) : pass
+    def __keepSocketAlive__(self):
+        pass
 
     # Private function
-    def __setUserCallback__(self, userCallback) :
+    def __setUserCallback__(self, userCallback):
 
         # Save the user function to call on incoming messages locally
         self.__userCallback__ = userCallback
@@ -268,14 +305,15 @@ class GCode:
 
         return
 
+
 #
 # Class used to encapsulate the MachineMotion controller
 # @status
 #
-class MachineMotion :
+class MachineMotion:
     # Class variables
 
-    validPorts   = ["AUX1", "AUX2", "AUX3"]
+    validPorts = ["AUX1", "AUX2", "AUX3"]
     valid_u_step = [1, 2, 4, 8, 16]
 
     class HomingSpeedOutOfBounds(Exception):
@@ -285,18 +323,24 @@ class MachineMotion :
         self.myMqttClient.loop_stop()
 
     # Class constructor
-    def __init__(self, machineIp, gCodeCallback=None) :
+    def __init__(self, machineIp, gCodeCallback=None):
 
-        self.myConfiguration = {"machineIp": "notInitialized", "machineGateway": "notInitialized", "machineNetmask": "notInitialized"}
+        self.myConfiguration = {
+            "machineIp": "notInitialized",
+            "machineGateway": "notInitialized",
+            "machineNetmask": "notInitialized"
+        }
         self.myGCode = "notInitialized"
 
-        self.myIoExpanderAvailabilityState = [ False, False, False, False ]
-        self.myEncoderRealtimePositions    = [ 0, 0, 0 ]
-        self.myEncoderStablePositions    = [ 0, 0, 0 ]
+        self.myIoExpanderAvailabilityState = [False, False, False, False]
+        self.myEncoderRealtimePositions = [0, 0, 0]
+        self.myEncoderStablePositions = [0, 0, 0]
         self.digitalInputs = {}
 
         self.myConfiguration['machineIp'] = machineIp
         self.IP = machineIp
+
+        print("Set the IP address: ", self.IP)
 
         # MQTT
         self.myMqttClient = None
@@ -308,18 +352,31 @@ class MachineMotion :
         self.myMqttClient.loop_start()
 
         # Default callback
-        def emptyCallBack(data) : pass
+        def emptyCallBack(data):
+            pass
 
         #Set callback to default until user initialize it
         self.eStopCallback = emptyCallBack
 
         # Initializing axis parameters
-        self.steps_mm = ["Axis 0 does not exist", "notInitialized", "notInitialized", "notInitialized"]
-        self.u_step = ["Axis 0 does not exist", "notInitialized", "notInitialized", "notInitialized"]
-        self.mech_gain = ["Axis 0 does not exist", "notInitialized", "notInitialized", "notInitialized"]
-        self.direction = ["Axis 0 does not exist", "notInitialized", "notInitialized", "notInitialized"]
+        self.steps_mm = [
+            "Axis 0 does not exist", "notInitialized", "notInitialized",
+            "notInitialized"
+        ]
+        self.u_step = [
+            "Axis 0 does not exist", "notInitialized", "notInitialized",
+            "notInitialized"
+        ]
+        self.mech_gain = [
+            "Axis 0 does not exist", "notInitialized", "notInitialized",
+            "notInitialized"
+        ]
+        self.direction = [
+            "Axis 0 does not exist", "notInitialized", "notInitialized",
+            "notInitialized"
+        ]
 
-        if(gCodeCallback):
+        if (gCodeCallback):
             self.__establishConnection(False, gCodeCallback)
         else:
             self.__establishConnection(False, emptyCallBack)
@@ -336,17 +393,20 @@ class MachineMotion :
         if argValue in validValues:
             pass
         else:
+
             class InvalidInput(Exception):
                 pass
-            errorMessage = "An invalid selection was made. Given parameter '" + str(argName) + "' must be one of the following values:"
+
+            errorMessage = "An invalid selection was made. Given parameter '" + str(
+                argName) + "' must be one of the following values:"
             for param in validParams:
-                errorMessage = errorMessage + "\n" + argClass.__name__ + "." + param + " (" + str(argClass.__dict__[param]) +")"
+                errorMessage = errorMessage + "\n" + argClass.__name__ + "." + param + " (" + str(
+                    argClass.__dict__[param]) + ")"
             raise InvalidInput(errorMessage)
 
         return
 
-    def setContinuousMove(self, axis, speed, accel = None) :
-
+    def setContinuousMove(self, axis, speed, accel=None):
         '''
         desc: Starts an axis using speed mode.
         params:
@@ -365,32 +425,42 @@ class MachineMotion :
         # set motor to speed mode
         reply = self.myGCode.__emit__("V5 " + self.getAxisName(axis) + "2")
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else :
+        if ("echo" in reply and "ok" in reply): pass
+        else:
             raise Exception('Error in gCode execution')
             return False
 
-        if accel is not None :
+        if accel is not None:
             # Send speed command with accel
-            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " A" + str(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
+            reply = self.myGCode.__emit__(
+                "V4 S" +
+                str(speed / self.mech_gain[axis] *
+                    STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " A" +
+                str(accel / self.mech_gain[axis] *
+                    STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " +
+                self.getAxisName(axis))
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else :
+            if ("echo" in reply and "ok" in reply): pass
+            else:
                 raise Exception('Error in gCode execution')
                 return False
 
-        else :
+        else:
             # Send speed command
-            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
+            reply = self.myGCode.__emit__("V4 S" +
+                                          str(speed / self.mech_gain[axis] *
+                                              STEPPER_MOTOR.steps_per_turn *
+                                              self.u_step[axis]) + " " +
+                                          self.getAxisName(axis))
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else :
+            if ("echo" in reply and "ok" in reply): pass
+            else:
                 raise Exception('Error in gCode execution')
                 return False
 
         return
 
-    def stopContinuousMove(self, axis, accel = None) :
+    def stopContinuousMove(self, axis, accel=None):
         '''
         desc: Starts an axis using speed mode.
         params:
@@ -404,21 +474,25 @@ class MachineMotion :
         exampleCodePath: emitConveyorMove.py
         '''
 
-        if accel is not None :
+        if accel is not None:
             # Send speed command with accel
-            reply = self.myGCode.__emit__("V4 S0" + " A" + str(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
+            reply = self.myGCode.__emit__("V4 S0" + " A" +
+                                          str(accel / self.mech_gain[axis] *
+                                              STEPPER_MOTOR.steps_per_turn *
+                                              self.u_step[axis]) + " " +
+                                          self.getAxisName(axis))
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else :
+            if ("echo" in reply and "ok" in reply): pass
+            else:
                 raise Exception('Error in gCode execution')
                 return False
 
-        else :
+        else:
             # Send speed command
             reply = self.myGCode.__emit__("V4 S0 " + self.getAxisName(axis))
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else :
+            if ("echo" in reply and "ok" in reply): pass
+            else:
                 raise Exception('Error in gCode execution')
                 return False
 
@@ -435,112 +509,137 @@ class MachineMotion :
     # @param {string} type - "synchronous" (default) or "asychronous"
     # @return {bool} - True if command completed properly
 
-    def move(self, motor, rotation = None, speed = None, accel = None, reference = "absolute", type = "synchronous") :
+    def move(self,
+             motor,
+             rotation=None,
+             speed=None,
+             accel=None,
+             reference="absolute",
+             type="synchronous"):
 
-        if rotation is not None :
+        if rotation is not None:
             # set motor to position mode
-            reply = self.myGCode.__emit__("V5 " + self.getAxisName(motor) + "1")
+            reply = self.myGCode.__emit__("V5 " + self.getAxisName(motor) +
+                                          "1")
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else :
+            if ("echo" in reply and "ok" in reply): pass
+            else:
                 raise Exception('Error in gCode execution')
                 return False
 
-            if speed is not None :
+            if speed is not None:
                 # send speed command (need to convert rotation/s to mm/min )
-                reply = self.myGCode.__emit__("G0 F" + str(speed * 60 * self.mech_gain[motor]))
+                reply = self.myGCode.__emit__("G0 F" +
+                                              str(speed * 60 *
+                                                  self.mech_gain[motor]))
 
-                if ( "echo" in reply and "ok" in reply ) : pass
-                else :
+                if ("echo" in reply and "ok" in reply): pass
+                else:
                     raise Exception('Error in gCode execution')
                     return False
 
-
-            if accel is not None :
+            if accel is not None:
                 # send accel command (need to convert rotation/s^2 to mm/s^2)
-                reply = self.myGCode.__emit__("M204 T" + str(accel * self.mech_gain[motor]))
+                reply = self.myGCode.__emit__("M204 T" +
+                                              str(accel *
+                                                  self.mech_gain[motor]))
 
-                if ( "echo" in reply and "ok" in reply ) : pass
-                else :
+                if ("echo" in reply and "ok" in reply): pass
+                else:
                     raise Exception('Error in gCode execution')
                     return False
 
-            if reference is "absolute" :
+            if reference is "absolute":
                 # send absolute move command
 
                 # Set to absolute motion mode
                 reply = self.myGCode.__emit__("G90")
 
-                if ( "echo" in reply and "ok" in reply ) :
+                if ("echo" in reply and "ok" in reply):
 
                     # Transmit move command
-                    reply = self.myGCode.__emit__("G0 " + self.getAxisName(motor) + str(rotation * self.mech_gain[motor]))
+                    reply = self.myGCode.__emit__("G0 " +
+                                                  self.getAxisName(motor) +
+                                                  str(rotation *
+                                                      self.mech_gain[motor]))
 
-                    if ( "echo" in reply and "ok" in reply ) : pass
-                    else :
+                    if ("echo" in reply and "ok" in reply): pass
+                    else:
                         raise Exception('Error in gCode execution')
                         return False
 
-                else :
+                else:
                     raise Exception('Error in gCode execution')
                     return False
 
-            elif reference is "relative" :
+            elif reference is "relative":
                 # send relative move command
                 # Set to relative motion mode
                 reply = self.myGCode.__emit__("G91")
 
-                if ( "echo" in reply and "ok" in reply ) :
+                if ("echo" in reply and "ok" in reply):
                     # Transmit move command
-                    reply = self.myGCode.__emit__("G0 " + self.getAxisName(motor) + str(rotation * self.mech_gain[motor]))
+                    reply = self.myGCode.__emit__("G0 " +
+                                                  self.getAxisName(motor) +
+                                                  str(rotation *
+                                                      self.mech_gain[motor]))
 
-                    if ( "echo" in reply and "ok" in reply ) : pass
-                    else :
+                    if ("echo" in reply and "ok" in reply): pass
+                    else:
                         raise Exception('Error in gCode execution')
                         return False
 
-                else :
+                else:
                     raise Exception('Error in gCode execution')
                     return False
 
-            else :
+            else:
                 return False
 
-            if type is "synchronous" :
+            if type is "synchronous":
                 self.waitForMotionCompletion()
                 return True
 
-            elif type is "asynchronous" :
+            elif type is "asynchronous":
                 return True
-        else :
-            if speed is not None :
+        else:
+            if speed is not None:
                 # set motor to speed mode
-                reply = self.myGCode.__emit__("V5 " + self.getAxisName(motor) + "2")
+                reply = self.myGCode.__emit__("V5 " + self.getAxisName(motor) +
+                                              "2")
 
-                if ( "echo" in reply and "ok" in reply ) : pass
-                else :
+                if ("echo" in reply and "ok" in reply): pass
+                else:
                     raise Exception('Error in gCode execution')
                     return False
 
-                if accel is not None :
+                if accel is not None:
                     # Send speed command
-                    reply = self.myGCode.__emit__("V4 S" + str(speed * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " A" + str(accel * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " " + self.getAxisName(motor))
+                    reply = self.myGCode.__emit__(
+                        "V4 S" + str(speed * STEPPER_MOTOR.steps_per_turn *
+                                     self.u_step[motor]) + " A" +
+                        str(accel * STEPPER_MOTOR.steps_per_turn *
+                            self.u_step[motor]) + " " +
+                        self.getAxisName(motor))
 
-                    if ( "echo" in reply and "ok" in reply ) : pass
-                    else :
+                    if ("echo" in reply and "ok" in reply): pass
+                    else:
                         raise Exception('Error in gCode execution')
                         return False
 
-                else :
+                else:
                     # Send speed command
-                    reply = self.myGCode.__emit__("V4 S" + str(speed * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " " + self.getAxisName(motor))
+                    reply = self.myGCode.__emit__(
+                        "V4 S" + str(speed * STEPPER_MOTOR.steps_per_turn *
+                                     self.u_step[motor]) + " " +
+                        self.getAxisName(motor))
 
-                    if ( "echo" in reply and "ok" in reply ) : pass
-                    else :
+                    if ("echo" in reply and "ok" in reply): pass
+                    else:
                         raise Exception('Error in gCode execution')
                         return False
 
-            else :
+            else:
                 return False
 
         return False
@@ -557,13 +656,12 @@ class MachineMotion :
         elif drive == 3: return "Z"
         else: return "Axis Error"
 
-
     # ------------------------------------------------------------------------
     # Determines if the given id is valid for an IO Exapnder.
     #
     # @param {int} id - Device identifier
     # @return {Bool}  - True if valid; False otherwise
-    def isIoExpanderIdValid(self, id) :
+    def isIoExpanderIdValid(self, id):
         if (id < 1 or id > 3):
             return False
         return True
@@ -574,8 +672,8 @@ class MachineMotion :
     # @param {int} deviceId - Device identifier
     # @param {int} pinId    - Pin identifier
     # @return {Bool}        - True if valid; False otherwise
-    def isIoExpanderInputIdValid(self, deviceId, pinId) :
-        if ( not self.isIoExpanderIdValid( deviceId ) ):
+    def isIoExpanderInputIdValid(self, deviceId, pinId):
+        if (not self.isIoExpanderIdValid(deviceId)):
             return False
         if (pinId < 0 or pinId > 3):
             return False
@@ -587,8 +685,8 @@ class MachineMotion :
     # @param {int} deviceId - Device identifier
     # @param {int} pinId    - Pin identifier
     # @return {Bool}        - True if valid; False otherwise
-    def isIoExpanderOutputIdValid(self, deviceId, pinId) :
-        if ( not self.isIoExpanderIdValid( deviceId ) ):
+    def isIoExpanderOutputIdValid(self, deviceId, pinId):
+        if (not self.isIoExpanderIdValid(deviceId)):
             return False
         if (pinId < 0 or pinId > 3):
             return False
@@ -598,7 +696,7 @@ class MachineMotion :
     # Determines if the given id is valid for an encoder.
     #
     # @return {Bool} - True if valid; False otherwise
-    def isEncoderIdValid(self, id) :
+    def isEncoderIdValid(self, id):
         if id >= 0 and id <= 3:
             return True
         return False
@@ -612,21 +710,21 @@ class MachineMotion :
         exampleCodePath: getCurrentPositions.py
         '''
 
-        positions = {
-            1 : None,
-            2 : None,
-            3 : None
-        }
+        positions = {1: None, 2: None, 3: None}
 
         reply = self.myGCode.__emit__("M114")
 
-        if ( "echo" in reply and "ok" in reply ) :
+        if ("echo" in reply and "ok" in reply):
 
-            positions[1] = float(reply[reply.find('X')+2:(reply.find('Y')-1)])
-            positions[2] = float(reply[reply.find('Y')+2:(reply.find('Z')-1)])
-            positions[3] = float(reply[reply.find('Z')+2:(reply.find('E')-1)])
+            positions[1] = float(reply[reply.find('X') + 2:(reply.find('Y') -
+                                                            1)])
+            positions[2] = float(reply[reply.find('Y') + 2:(reply.find('Z') -
+                                                            1)])
+            positions[3] = float(reply[reply.find('Z') + 2:(reply.find('E') -
+                                                            1)])
 
-        else : raise Exception('Error in gCode execution')
+        else:
+            raise Exception('Error in gCode execution')
 
         return positions
 
@@ -639,84 +737,97 @@ class MachineMotion :
         '''
 
         states = {
-            'x_min' : None,
-            'x_max' : None,
-            'y_min' : None,
-            'y_max' : None,
-            'z_min' : None,
-            'z_max' : None,
+            'x_min': None,
+            'x_max': None,
+            'y_min': None,
+            'y_max': None,
+            'z_min': None,
+            'z_max': None,
         }
 
-        def trimUntil(S, key) :
-            return S[S.find(key) + len(key) :]
+        def trimUntil(S, key):
+            return S[S.find(key) + len(key):]
 
         reply = self.myGCode.__emit__("M119")
 
-        if ( "echo" in reply and "ok" in reply ) :
+        if ("echo" in reply and "ok" in reply):
             #Remove first line (echo line)
             reply = trimUntil(reply, "\n")
 
-            if "x_min" in reply :
+            if "x_min" in reply:
                 keyB = "x_min: "
                 keyE = " \n"
-                states['x_min'] = reply[(reply.find(keyB) + len(keyB)) : (reply.find(keyE))]
+                states['x_min'] = reply[(reply.find(keyB) +
+                                         len(keyB)):(reply.find(keyE))]
 
                 #Remove x_min line
                 reply = trimUntil(reply, "\n")
 
-            else : raise Exception('Error in gCode')
+            else:
+                raise Exception('Error in gCode')
 
-            if "x_max" in reply :
+            if "x_max" in reply:
                 keyB = "x_max: "
                 keyE = " \n"
-                states['x_max'] = reply[(reply.find(keyB) + len(keyB)) : (reply.find(keyE))]
+                states['x_max'] = reply[(reply.find(keyB) +
+                                         len(keyB)):(reply.find(keyE))]
 
                 #Remove x_max line
                 reply = trimUntil(reply, "\n")
 
-            else : raise Exception('Error in gCode')
+            else:
+                raise Exception('Error in gCode')
 
-            if "y_min" in reply :
+            if "y_min" in reply:
                 keyB = "y_min: "
                 keyE = " \n"
-                states['y_min'] = reply[(reply.find(keyB) + len(keyB)) : (reply.find(keyE))]
+                states['y_min'] = reply[(reply.find(keyB) +
+                                         len(keyB)):(reply.find(keyE))]
 
                 #Remove y_min line
                 reply = trimUntil(reply, "\n")
 
-            else : raise Exception('Error in gCode')
+            else:
+                raise Exception('Error in gCode')
 
-            if "y_max" in reply :
+            if "y_max" in reply:
                 keyB = "y_max: "
                 keyE = " \n"
-                states['y_max'] = reply[(reply.find(keyB) + len(keyB)) : (reply.find(keyE))]
+                states['y_max'] = reply[(reply.find(keyB) +
+                                         len(keyB)):(reply.find(keyE))]
 
                 #Remove y_max line
                 reply = trimUntil(reply, "\n")
 
-            else : raise Exception('Error in gCode')
+            else:
+                raise Exception('Error in gCode')
 
-            if "z_min" in reply :
+            if "z_min" in reply:
                 keyB = "z_min: "
                 keyE = " \n"
-                states['z_min'] = reply[(reply.find(keyB) + len(keyB)) : (reply.find(keyE))]
+                states['z_min'] = reply[(reply.find(keyB) +
+                                         len(keyB)):(reply.find(keyE))]
 
                 #Remove z_min line
                 reply = trimUntil(reply, "\n")
 
-            else : raise Exception('Error in gCode')
+            else:
+                raise Exception('Error in gCode')
 
-            if "z_max" in reply :
+            if "z_max" in reply:
                 keyB = "z_max: "
                 keyE = " \n"
-                states['z_max'] = reply[(reply.find(keyB) + len(keyB)) : (reply.find(keyE))]
+                states['z_max'] = reply[(reply.find(keyB) +
+                                         len(keyB)):(reply.find(keyE))]
 
                 #Remove z_max line
                 reply = trimUntil(reply, "\n")
 
-            else : raise Exception('Error in gCode')
+            else:
+                raise Exception('Error in gCode')
 
-        else : raise Exception('Error in gCode execution')
+        else:
+            raise Exception('Error in gCode execution')
 
         return states
 
@@ -729,11 +840,11 @@ class MachineMotion :
 
         reply = self.myGCode.__emit__("M410")
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         # Wait to insure that other commands after the emit stop are not flushed.
-        time.sleep(0.800) # 300 ms is the minimum allowable command
+        time.sleep(0.800)  # 300 ms is the minimum allowable command
 
         return
 
@@ -745,8 +856,8 @@ class MachineMotion :
 
         reply = self.myGCode.__emit__("G28")
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -762,14 +873,15 @@ class MachineMotion :
         '''
         self._restrictInputValue("axis", axis, AXIS_NUMBER)
 
-        reply = self.myGCode.__emit__("G28 " + self.myGCode.__getTrueAxis__(axis))
+        reply = self.myGCode.__emit__("G28 " +
+                                      self.myGCode.__getTrueAxis__(axis))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
-    def emitSpeed(self, speed, units = UNITS_SPEED.mm_per_sec):
+    def emitSpeed(self, speed, units=UNITS_SPEED.mm_per_sec):
         '''
         desc: Sets the global speed for all movement commands on all axes.
         params:
@@ -788,12 +900,12 @@ class MachineMotion :
         if units == UNITS_SPEED.mm_per_min:
             speed_mm_per_min = speed
         elif units == UNITS_SPEED.mm_per_sec:
-            speed_mm_per_min = 60*speed
+            speed_mm_per_min = 60 * speed
 
-        reply = self.myGCode.__emit__("G0 F" +str(speed_mm_per_min))
+        reply = self.myGCode.__emit__("G0 F" + str(speed_mm_per_min))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -817,12 +929,12 @@ class MachineMotion :
         if units == UNITS_ACCEL.mm_per_sec_sqr:
             accel_mm_per_sec_sqr = acceleration
         elif units == UNITS_ACCEL.mm_per_min_sqr:
-            accel_mm_per_sec_sqr = acceleration/3600
+            accel_mm_per_sec_sqr = acceleration / 3600
 
         reply = self.myGCode.__emit__("M204 T" + str(accel_mm_per_sec_sqr))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -844,16 +956,18 @@ class MachineMotion :
         # Set to absolute motion mode
         reply = self.myGCode.__emit__("G90")
 
-        if ( "echo" in reply and "ok" in reply ) :
+        if ("echo" in reply and "ok" in reply):
 
             # Transmit move command
-            reply = self.myGCode.__emit__("G0 " + self.myGCode.__getTrueAxis__(axis) + str(position))
+            reply = self.myGCode.__emit__("G0 " +
+                                          self.myGCode.__getTrueAxis__(axis) +
+                                          str(position))
 
-            if ( "echo" in reply and "ok" in reply ) : pass
+            if ("echo" in reply and "ok" in reply): pass
 
-            else : raise Exception('Error in gCode execution')
+            else: raise Exception('Error in gCode execution')
 
-        else : raise Exception('Error in gCode execution')
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -880,18 +994,19 @@ class MachineMotion :
         # Set to absolute motion mode
         reply = self.myGCode.__emit__("G90")
 
-        if ( "echo" in reply and "ok" in reply ) :
+        if ("echo" in reply and "ok" in reply):
             # Transmit move command
             command = "G0 "
             for axis, position in zip(axes, positions):
-                command += self.myGCode.__getTrueAxis__(axis) + str(position) + " "
+                command += self.myGCode.__getTrueAxis__(axis) + str(
+                    position) + " "
 
             reply = self.myGCode.__emit__(command)
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else : raise Exception('Error in gCode execution')
+            if ("echo" in reply and "ok" in reply): pass
+            else: raise Exception('Error in gCode execution')
 
-        else : raise Exception('Error in gCode execution')
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -911,26 +1026,28 @@ class MachineMotion :
         exampleCodePath: emitRelativeMove.py
         '''
 
-        self._restrictInputValue("axis",axis, AXIS_NUMBER)
+        self._restrictInputValue("axis", axis, AXIS_NUMBER)
         self._restrictInputValue("direction", direction, DIRECTION)
 
         # Set to relative motion mode
         reply = self.myGCode.__emit__("G91")
 
-        if ( "echo" in reply and "ok" in reply ) :
+        if ("echo" in reply and "ok" in reply):
 
-            if direction == DIRECTION.POSITIVE :
+            if direction == DIRECTION.POSITIVE:
                 distance = "" + str(distance)
-            elif direction  == DIRECTION.NEGATIVE :
+            elif direction == DIRECTION.NEGATIVE:
                 distance = "-" + str(distance)
 
             # Transmit move command
-            reply = self.myGCode.__emit__("G0 " + self.myGCode.__getTrueAxis__(axis) + str(distance))
+            reply = self.myGCode.__emit__("G0 " +
+                                          self.myGCode.__getTrueAxis__(axis) +
+                                          str(distance))
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else : raise Exception('Error in gCode execution')
+            if ("echo" in reply and "ok" in reply): pass
+            else: raise Exception('Error in gCode execution')
 
-        else : raise Exception('Error in gCode execution')
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -951,28 +1068,30 @@ class MachineMotion :
         note: The current speed and acceleration settings are applied to the combined motion of the axes.
         '''
 
-        if (not isinstance(axes, list) or not isinstance(directions, list) or not isinstance(distances, list)):
+        if (not isinstance(axes, list) or not isinstance(directions, list)
+                or not isinstance(distances, list)):
             raise TypeError("Axes, Postions and Distances must be lists")
 
         # Set to relative motion mode
         reply = self.myGCode.__emit__("G91")
 
-        if ( "echo" in reply and "ok" in reply ) :
+        if ("echo" in reply and "ok" in reply):
             # Transmit move command
             command = "G0 "
             for axis, direction, distance in zip(axes, directions, distances):
-                if direction == DIRECTION.POSITIVE :
+                if direction == DIRECTION.POSITIVE:
                     distance = "" + str(distance)
-                elif direction  == DIRECTION.NEGATIVE :
+                elif direction == DIRECTION.NEGATIVE:
                     distance = "-" + str(distance)
-                command += self.myGCode.__getTrueAxis__(axis) + str(distance) + " "
+                command += self.myGCode.__getTrueAxis__(axis) + str(
+                    distance) + " "
 
             reply = self.myGCode.__emit__(command)
 
-            if ( "echo" in reply and "ok" in reply ) : pass
-            else : raise Exception('Error in gCode execution')
+            if ("echo" in reply and "ok" in reply): pass
+            else: raise Exception('Error in gCode execution')
 
-        else : raise Exception('Error in gCode execution')
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -991,10 +1110,12 @@ class MachineMotion :
         self._restrictInputValue("axis", axis, AXIS_NUMBER)
 
         # Transmit move command
-        reply = self.myGCode.__emit__("G92 " + self.myGCode.__getTrueAxis__(axis) + str(position))
+        reply = self.myGCode.__emit__("G92 " +
+                                      self.myGCode.__getTrueAxis__(axis) +
+                                      str(position))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
     def emitgCode(self, gCode):
         '''
@@ -1010,8 +1131,8 @@ class MachineMotion :
 
         reply = self.myGCode.__emit__(gCode)
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution (reply: %s)' % reply)
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution (reply: %s)' % reply)
 
         return
 
@@ -1035,13 +1156,17 @@ class MachineMotion :
 
         self.direction[axis] = direction
 
-        if(direction == DIRECTION.NORMAL):
-            reply = self.myGCode.__emit__("M92 " + self.myGCode.__getTrueAxis__(axis) + str(self.steps_mm[axis]))
+        if (direction == DIRECTION.NORMAL):
+            reply = self.myGCode.__emit__("M92 " +
+                                          self.myGCode.__getTrueAxis__(axis) +
+                                          str(self.steps_mm[axis]))
         elif (direction == DIRECTION.REVERSE):
-            reply = self.myGCode.__emit__("M92 " + self.myGCode.__getTrueAxis__(axis) + "-"+ str(self.steps_mm[axis]))
+            reply = self.myGCode.__emit__("M92 " +
+                                          self.myGCode.__getTrueAxis__(axis) +
+                                          "-" + str(self.steps_mm[axis]))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -1064,10 +1189,10 @@ class MachineMotion :
         reply = self.myGCode.__emit__("V0")
 
         #Check if not error message
-        if ( "echo" in reply and "ok" in reply ) :
-            if ("COMPLETED" in reply) : return True
-            else : return False
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply):
+            if ("COMPLETED" in reply): return True
+            else: return False
+        else: raise Exception('Error in gCode execution')
 
         return
 
@@ -1080,26 +1205,31 @@ class MachineMotion :
         #Sending gCode V0 command to
         try:
             reply = self.myGCode.__emit__("V0")
-        except: 
-            print("Error emitting gcode dude.")
+        except:
+
             reply = ["echo", "ok", "COMPLETED"]
 
         #Check if not error message
-        print("Wait for motion completion reply", reply, self.IP)
-        if ( "echo" in reply or "ok" in reply ) :
+
+        if ("echo" in reply or "ok" in reply):
 
             #Recursively calls the function until motion is completed
-            if ("COMPLETED" in reply) : return
-            else :
+            if ("COMPLETED" in reply): return
+            else:
                 #print( "Motion not completed : " + str(self.IP))
                 time.sleep(0.5)
                 return self.waitForMotionCompletion()
 
-        else : raise Exception('Error in gCode execution')
+        else:
+            raise Exception('Error in gCode execution')
 
         return
 
-    def configMachineMotionIp(self, mode = None, machineIp = None, machineNetmask = None, machineGateway = None):
+    def configMachineMotionIp(self,
+                              mode=None,
+                              machineIp=None,
+                              machineNetmask=None,
+                              machineGateway=None):
         '''
         desc: Set up the required network information for the Machine Motion controller. The router can be configured in either DHCP mode or static mode.
         params:
@@ -1120,26 +1250,32 @@ class MachineMotion :
 
         '''
 
-        if(mode == NETWORK_MODE.static):
-            if (machineIp is None) or (machineNetmask is None) or (machineGateway is None) :
-               print("NETWORK ERROR: machineIp, machineNetmask and machineGateway cannot be left blank in static mode")
+        if (mode == NETWORK_MODE.static):
+            if (machineIp is None) or (machineNetmask is
+                                       None) or (machineGateway is None):
+                print(
+                    "NETWORK ERROR: machineIp, machineNetmask and machineGateway cannot be left blank in static mode"
+                )
 
-               return False
+                return False
 
         # Create a new object and augment it with the key value.
 
-        if mode is not None : self.myConfiguration["mode"] = mode
-        if machineIp is not None : self.myConfiguration["machineIp"] = machineIp
-        if machineNetmask is not None : self.myConfiguration["machineNetmask"] = machineNetmask
-        if machineGateway is not None : self.myConfiguration["machineGateway"] = machineGateway
+        if mode is not None: self.myConfiguration["mode"] = mode
+        if machineIp is not None: self.myConfiguration["machineIp"] = machineIp
+        if machineNetmask is not None:
+            self.myConfiguration["machineNetmask"] = machineNetmask
+        if machineGateway is not None:
+            self.myConfiguration["machineGateway"] = machineGateway
 
-        HTTPSend(self.IP + ":8000", "/configIp", json.dumps(self.myConfiguration))
+        HTTPSend(self.IP + ":8000", "/configIp",
+                 json.dumps(self.myConfiguration))
 
         time.sleep(1)
 
         return
 
-    def configHomingSpeed(self, axes, speeds, units = UNITS_SPEED.mm_per_sec):
+    def configHomingSpeed(self, axes, speeds, units=UNITS_SPEED.mm_per_sec):
         '''
         desc: Sets homing speed for all 3 axes.
         params:
@@ -1165,8 +1301,10 @@ class MachineMotion :
             speeds = [speeds]
 
         if len(axes) != len(speeds):
+
             class InputsError(Exception):
                 pass
+
             raise InputsError("axes and speeds must be of same length")
 
         gCodeCommand = "V2"
@@ -1178,20 +1316,33 @@ class MachineMotion :
                 speed_mm_per_min = speeds[idx]
 
             if speed_mm_per_min < HARDWARE_MIN_HOMING_FEEDRATE:
-                raise self.HomingSpeedOutOfBounds("Your desired homing speed of " + str(speed_mm_per_min) + "mm/min can not be less than " + str(HARDWARE_MIN_HOMING_FEEDRATE) + "mm/min (" + str(HARDWARE_MIN_HOMING_FEEDRATE/60) + "mm/sec).")
+                raise self.HomingSpeedOutOfBounds(
+                    "Your desired homing speed of " + str(speed_mm_per_min) +
+                    "mm/min can not be less than " +
+                    str(HARDWARE_MIN_HOMING_FEEDRATE) + "mm/min (" +
+                    str(HARDWARE_MIN_HOMING_FEEDRATE / 60) + "mm/sec).")
             if speed_mm_per_min > HARDWARE_MAX_HOMING_FEEDRATE:
-                raise self.HomingSpeedOutOfBounds("Your desired homing speed of " + str(speed_mm_per_min) + "mm/min can not be greater than " + str(HARDWARE_MAX_HOMING_FEEDRATE) + "mm/min (" + str(HARDWARE_MAX_HOMING_FEEDRATE/60) + "mm/sec)")
+                raise self.HomingSpeedOutOfBounds(
+                    "Your desired homing speed of " + str(speed_mm_per_min) +
+                    "mm/min can not be greater than " +
+                    str(HARDWARE_MAX_HOMING_FEEDRATE) + "mm/min (" +
+                    str(HARDWARE_MAX_HOMING_FEEDRATE / 60) + "mm/sec)")
 
-            gCodeCommand = gCodeCommand + " " + self.myGCode.__getTrueAxis__(axis) + str(speed_mm_per_min)
+            gCodeCommand = gCodeCommand + " " + self.myGCode.__getTrueAxis__(
+                axis) + str(speed_mm_per_min)
 
         reply = self.myGCode.__emit__(gCodeCommand)
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
-    def configMinMaxHomingSpeed(self, axes, minspeeds, maxspeeds, units = UNITS_SPEED.mm_per_sec):
+    def configMinMaxHomingSpeed(self,
+                                axes,
+                                minspeeds,
+                                maxspeeds,
+                                units=UNITS_SPEED.mm_per_sec):
         '''
         desc: Sets the minimum and maximum homing speeds for each axis.
         params:
@@ -1218,21 +1369,32 @@ class MachineMotion :
                 max_speed_mm_per_min = maxspeeds[idx]
 
             if min_speed_mm_per_min < HARDWARE_MIN_HOMING_FEEDRATE:
-                raise self.HomingSpeedOutOfBounds("Your desired homing speed of " + str(min_speed_mm_per_min) + "mm/min can not be less than " + str(HARDWARE_MIN_HOMING_FEEDRATE) + "mm/min (" + str(HARDWARE_MIN_HOMING_FEEDRATE/60) + "mm/sec).")
+                raise self.HomingSpeedOutOfBounds(
+                    "Your desired homing speed of " +
+                    str(min_speed_mm_per_min) +
+                    "mm/min can not be less than " +
+                    str(HARDWARE_MIN_HOMING_FEEDRATE) + "mm/min (" +
+                    str(HARDWARE_MIN_HOMING_FEEDRATE / 60) + "mm/sec).")
             if max_speed_mm_per_min > HARDWARE_MAX_HOMING_FEEDRATE:
-                raise self.HomingSpeedOutOfBounds("Your desired homing speed of " + str(max_speed_mm_per_min) + "mm/min can not be greater than " + str(HARDWARE_MAX_HOMING_FEEDRATE) + "mm/min (" + str(HARDWARE_MAX_HOMING_FEEDRATE/60) + "mm/sec)")
+                raise self.HomingSpeedOutOfBounds(
+                    "Your desired homing speed of " +
+                    str(max_speed_mm_per_min) +
+                    "mm/min can not be greater than " +
+                    str(HARDWARE_MAX_HOMING_FEEDRATE) + "mm/min (" +
+                    str(HARDWARE_MAX_HOMING_FEEDRATE / 60) + "mm/sec)")
 
-            gCodeCommand = gCodeCommand + " " + self.myGCode.__getTrueAxis__(axis) + str(min_speed_mm_per_min) + ":" + str(max_speed_mm_per_min)
-
+            gCodeCommand = gCodeCommand + " " + self.myGCode.__getTrueAxis__(
+                axis) + str(min_speed_mm_per_min) + ":" + str(
+                    max_speed_mm_per_min)
 
         reply = self.myGCode.__emit__(gCodeCommand)
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
-    def configAxis(self, axis, uStep, mechGain) :
+    def configAxis(self, axis, uStep, mechGain):
         '''
         desc: Configures motion parameters for a single axis.
         params:
@@ -1250,21 +1412,24 @@ class MachineMotion :
 
         '''
 
-        self._restrictInputValue("axis", axis,  AXIS_NUMBER)
+        self._restrictInputValue("axis", axis, AXIS_NUMBER)
         self._restrictInputValue("uStep", uStep, MICRO_STEPS)
 
         self.u_step[axis] = float(uStep)
         self.mech_gain[axis] = float(mechGain)
 
-        self.steps_mm[axis] = STEPPER_MOTOR.steps_per_turn * self.u_step[axis] / self.mech_gain[axis]
-        reply = self.myGCode.__emit__("M92 " + self.myGCode.__getTrueAxis__(axis) + str(self.steps_mm[axis]))
+        self.steps_mm[axis] = STEPPER_MOTOR.steps_per_turn * self.u_step[
+            axis] / self.mech_gain[axis]
+        reply = self.myGCode.__emit__("M92 " +
+                                      self.myGCode.__getTrueAxis__(axis) +
+                                      str(self.steps_mm[axis]))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
-    def saveData(self, key, data) :
+    def saveData(self, key, data):
         '''
         desc: Saves/persists data within the MachineMotion Controller in key - data pairs.
         params:
@@ -1312,8 +1477,8 @@ class MachineMotion :
     #
     # @param device - The io-expander device identifier
     # @return.      - True if the io-expander exists; False otherwise
-    def isIoExpanderAvailable(self, device) :
-        return self.myIoExpanderAvailabilityState[ device-1 ]
+    def isIoExpanderAvailable(self, device):
+        return self.myIoExpanderAvailabilityState[device - 1]
 
     def detectIOModules(self):
         '''
@@ -1330,19 +1495,22 @@ class MachineMotion :
         foundIOModules = {}
         numIOModules = 0
 
-        for ioDeviceID in range(0,3):
+        for ioDeviceID in range(0, 3):
             if self.isIoExpanderAvailable(ioDeviceID):
-                foundIOModules["Digital IO Network Id " + str(ioDeviceID)] = ioDeviceID
+                foundIOModules["Digital IO Network Id " +
+                               str(ioDeviceID)] = ioDeviceID
                 numIOModules = numIOModules + 1
 
         if numIOModules == 0:
-            raise NoIOModulesFound("Application Error: No IO Modules found. Please verify the connection between Digital IO and MachineMotion.")
+            raise NoIOModulesFound(
+                "Application Error: No IO Modules found. Please verify the connection between Digital IO and MachineMotion."
+            )
         else:
             return foundIOModules
 
         return
 
-    def digitalRead(self, deviceNetworkId, pin) :
+    def digitalRead(self, deviceNetworkId, pin):
         '''
         desc: Reads the state of a digital IO modules input pins.
         params:
@@ -1358,8 +1526,10 @@ class MachineMotion :
         note: The pin labels on the digital IO module (pin 1, pin 2, pin 3, pin 4) correspond in software to (0, 1, 2, 3). Therefore, digitalRead(deviceNetworkId, 2)  will read the value on input pin 3.
         '''
 
-        if ( not self.isIoExpanderInputIdValid( deviceNetworkId, pin ) ):
-            logging.warning("DEBUG: unexpected digital-output parameters: device= " + str(deviceNetworkId) + " pin= " + str(pin))
+        if (not self.isIoExpanderInputIdValid(deviceNetworkId, pin)):
+            logging.warning(
+                "DEBUG: unexpected digital-output parameters: device= " +
+                str(deviceNetworkId) + " pin= " + str(pin))
             return
         if (not hasattr(self, 'digitalInputs')):
             self.digitalInputs = {}
@@ -1369,7 +1539,7 @@ class MachineMotion :
             self.digitalInputs[deviceNetworkId][pin] = 0
         return self.digitalInputs[deviceNetworkId][pin]
 
-    def digitalWrite(self, deviceNetworkId, pin, value) :
+    def digitalWrite(self, deviceNetworkId, pin, value):
         '''
         desc: Sets voltage on specified pin of digital IO output pin to either logic HIGH (24V) or LOW (0V).
         params:
@@ -1388,14 +1558,18 @@ class MachineMotion :
 
         '''
 
-        if ( not self.isIoExpanderOutputIdValid( deviceNetworkId, pin ) ):
-            logging.warning("DEBUG: unexpected digitalOutput parameters: device= " + str(deviceNetworkId) + " pin= " + str(pin))
+        if (not self.isIoExpanderOutputIdValid(deviceNetworkId, pin)):
+            logging.warning(
+                "DEBUG: unexpected digitalOutput parameters: device= " +
+                str(deviceNetworkId) + " pin= " + str(pin))
             return
-        resp = self.myMqttClient.publish('devices/io-expander/' + str(deviceNetworkId) + '/digital-output/' +  str(pin), '1' if value else '0')
+        resp = self.myMqttClient.publish(
+            'devices/io-expander/' + str(deviceNetworkId) +
+            '/digital-output/' + str(pin), '1' if value else '0')
 
         return
 
-    def emitDwell(self, milliseconds) :
+    def emitDwell(self, milliseconds):
         '''
         desc: Pauses motion for a specified time. This function is non-blocking; your program may accomplish other tasks while the machine is dwelling.
         params:
@@ -1405,14 +1579,14 @@ class MachineMotion :
         note: The timer starts after all previous MachineMotion movement commands have finished execution.
         exampleCodePath: emitDwell.py
         '''
-        reply = self.myGCode.__emit__("G4 P"+str(milliseconds))
+        reply = self.myGCode.__emit__("G4 P" + str(milliseconds))
 
-        if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        if ("echo" in reply and "ok" in reply): pass
+        else: raise Exception('Error in gCode execution')
 
         return
 
-    def readEncoder(self, encoder, readingType=ENCODER_TYPE.real_time) :
+    def readEncoder(self, encoder, readingType=ENCODER_TYPE.real_time):
         '''
         desc: Returns the last received encoder position in counts.
         params:
@@ -1430,7 +1604,8 @@ class MachineMotion :
         self._restrictInputValue("readingType", readingType, ENCODER_TYPE)
 
         if (not self.isEncoderIdValid(encoder)):
-            print ( "DEBUG: unexpected encoder identifier: encoderId= " + str(encoder) )
+            print("DEBUG: unexpected encoder identifier: encoderId= " +
+                  str(encoder))
             return
 
         if readingType == ENCODER_TYPE.real_time:
@@ -1442,8 +1617,9 @@ class MachineMotion :
 
     #This function is left in for legacy, however it is not documented because it is the same functionality as readEncoder
     def readEncoderRealtimePosition(self, encoder):
-        if (self.isEncoderIdValid( encoder ) == False):
-            print ( "DEBUG: unexpected encoder identifier: encoderId= " + str(encoder) )
+        if (self.isEncoderIdValid(encoder) == False):
+            print("DEBUG: unexpected encoder identifier: encoderId= " +
+                  str(encoder))
             return
         return self.myEncoderRealtimePositions[encoder]
 
@@ -1453,24 +1629,27 @@ class MachineMotion :
     # @param {bool} status - true or false
     # @return : call to callback function
 
-    def eStopEvent(self, status) :
+    def eStopEvent(self, status):
         self.eStopCallback(status)
         return
 
-    def triggerEstop (self) :
+    def triggerEstop(self):
         '''
         desc: Triggers the MachineMotion software emergency stop, cutting power to all drives and enabling brakes (if any). The software E stop must be released (using releaseEstop()) in order to re-enable the machine.
         '''
         # Creating return value for the function. If nothing good happens, it will return False
         return_value = False
 
-        def mqttResponse() :
+        def mqttResponse():
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+            return_value = json.loads(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE,
+                                     retained=False,
+                                     hostname=self.IP).payload.decode('utf-8'))
 
             return
 
-        mqttResponseThread = threading.Thread(target = mqttResponse)
+        mqttResponseThread = threading.Thread(target=mqttResponse)
         mqttResponseThread.daemon = True
         mqttResponseThread.start()
 
@@ -1478,32 +1657,36 @@ class MachineMotion :
         time.sleep(0.2)
 
         # Publish trigger request on MQTT
-        self.myMqttClient.publish(MQTT.PATH.ESTOP_TRIGGER_REQUEST, "message is not important")
+        self.myMqttClient.publish(MQTT.PATH.ESTOP_TRIGGER_REQUEST,
+                                  "message is not important")
 
         mqttResponseThread.join(MQTT.TIMEOUT)
 
-        if mqttResponseThread.isAlive() :
+        if mqttResponseThread.isAlive():
             raise Exception('MQTT response timeout!')
             return False
-        else :
+        else:
             return return_value
 
         return return_value
 
-    def releaseEstop (self) :
+    def releaseEstop(self):
         '''
         desc: Releases the software E-stop and provides power back to the drives.
         '''
         # Creating return value for the function. If nothing good happens, it will return False
         return_value = False
 
-        def mqttResponse() :
+        def mqttResponse():
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+            return_value = json.loads(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE,
+                                     retained=False,
+                                     hostname=self.IP).payload.decode('utf-8'))
 
             return
 
-        mqttResponseThread = threading.Thread(target = mqttResponse)
+        mqttResponseThread = threading.Thread(target=mqttResponse)
         mqttResponseThread.daemon = True
         mqttResponseThread.start()
 
@@ -1511,20 +1694,20 @@ class MachineMotion :
         time.sleep(0.2)
 
         # Publish release request on MQTT
-        self.myMqttClient.publish(MQTT.PATH.ESTOP_RELEASE_REQUEST, "message is not important")
+        self.myMqttClient.publish(MQTT.PATH.ESTOP_RELEASE_REQUEST,
+                                  "message is not important")
 
         mqttResponseThread.join(MQTT.TIMEOUT)
 
-        if mqttResponseThread.isAlive() :
+        if mqttResponseThread.isAlive():
             raise Exception('MQTT response timeout!')
             return False
-        else :
+        else:
             return return_value
 
         return return_value
 
-    def resetSystem (self) :
-
+    def resetSystem(self):
         '''
         desc: Resets the system after an eStop event
         '''
@@ -1532,13 +1715,16 @@ class MachineMotion :
         # Creating return value for the function. If nothing good happens, it will return False
         return_value = False
 
-        def mqttResponse() :
+        def mqttResponse():
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+            return_value = json.loads(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE,
+                                     retained=False,
+                                     hostname=self.IP).payload.decode('utf-8'))
 
             return
 
-        mqttResponseThread = threading.Thread(target = mqttResponse)
+        mqttResponseThread = threading.Thread(target=mqttResponse)
         mqttResponseThread.daemon = True
         mqttResponseThread.start()
 
@@ -1546,20 +1732,20 @@ class MachineMotion :
         time.sleep(0.2)
 
         # Publish reset system request on MQTT
-        self.myMqttClient.publish(MQTT.PATH.ESTOP_SYSTEMRESET_REQUEST, "message is not important")
+        self.myMqttClient.publish(MQTT.PATH.ESTOP_SYSTEMRESET_REQUEST,
+                                  "message is not important")
 
         mqttResponseThread.join(MQTT.TIMEOUT)
 
-        if mqttResponseThread.isAlive() :
+        if mqttResponseThread.isAlive():
             raise Exception('MQTT response timeout!')
             return False
-        else :
+        else:
             return return_value
 
         return return_value
 
-
-    def bindeStopEvent (self, callback_function) :
+    def bindeStopEvent(self, callback_function):
         '''
         desc: Configures a user defined function to execute immediately after an E-stop event.
         params:
@@ -1578,9 +1764,11 @@ class MachineMotion :
     # @param flags    - Connection flags
     # @param rc       - The connection return code
     def __onConnect(self, client, userData, flags, rc):
+
         if rc == 0:
             self.myMqttClient.subscribe('devices/io-expander/+/available')
-            self.myMqttClient.subscribe('devices/io-expander/+/digital-input/#')
+            self.myMqttClient.subscribe(
+                'devices/io-expander/+/digital-input/#')
             self.myMqttClient.subscribe('devices/encoder/+/realtime-position')
             self.myMqttClient.subscribe(MQTT.PATH.ESTOP_STATUS)
 
@@ -1596,42 +1784,42 @@ class MachineMotion :
         topicParts = msg.topic.split('/')
         deviceType = topicParts[1]
 
-        if len(topicParts) > 2 :
-            device = int( topicParts[2] )
+        if len(topicParts) > 2:
+            device = int(topicParts[2])
 
         if (deviceType == 'io-expander'):
             if (topicParts[3] == 'available'):
                 availability = json.loads(msg.payload.decode('utf-8'))
                 if (availability):
-                    self.myIoExpanderAvailabilityState[device-1] = True
+                    self.myIoExpanderAvailabilityState[device - 1] = True
                     return
                 else:
-                    self.myIoExpanderAvailabilityState[device-1] = False
+                    self.myIoExpanderAvailabilityState[device - 1] = False
                     return
-            pin = int( topicParts[4] )
-            if ( not self.isIoExpanderInputIdValid(device, pin) ):
+            pin = int(topicParts[4])
+            if (not self.isIoExpanderInputIdValid(device, pin)):
                 return
-            value  = int( msg.payload.decode('utf-8') )
+            value = int(msg.payload.decode('utf-8'))
             if (not hasattr(self, 'digitalInputs')):
                 self.digitalInputs = {}
             if (not device in self.digitalInputs):
                 self.digitalInputs[device] = {}
-            self.digitalInputs[device][pin]= value
+            self.digitalInputs[device][pin] = value
             return
         if (deviceType == 'encoder'):
-            position = float( msg.payload.decode('utf-8') )
+            position = float(msg.payload.decode('utf-8'))
             self.myEncoderRealtimePositions[device] = position
 
-        if (topicParts[0] == MQTT.PATH.ESTOP) :
-            if (topicParts[1] == "status") :
+        if (topicParts[0] == MQTT.PATH.ESTOP):
+            if (topicParts[1] == "status"):
                 self.eStopEvent(json.loads(msg.payload.decode('utf-8')))
 
         return
 
     def __onDisconnect(self, client, userData, rc):
-       logging.info("Disconnected with rtn code [%d]"% (rc))
+        logging.info("Disconnected with rtn code [%d]" % (rc))
 
-       return
+        return
 
     def __establishConnection(self, isReconnection, callback):
 

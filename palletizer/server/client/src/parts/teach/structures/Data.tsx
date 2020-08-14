@@ -86,8 +86,8 @@ export interface PalletGeometry {
 
 export function getPalletDimensions(pallet: PalletGeometry) {
     let { name, corner1, corner2, corner3 } = pallet;
-    let width_vector = Subtract2D(corner1, corner2);
-    let length_vector = Subtract2D(corner3, corner2);
+    let length_vector = Subtract2D(corner1, corner2);
+    let width_vector = Subtract2D(corner3, corner2);
     let width = Norm2D(width_vector);
     let length = Norm2D(length_vector);
     let planar_dimensions = {

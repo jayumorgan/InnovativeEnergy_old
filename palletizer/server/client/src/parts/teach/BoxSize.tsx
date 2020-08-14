@@ -187,6 +187,8 @@ function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateB
     };
 
     let selectAction = (c: Coordinate) => {
+        console.log("Selected Pick Location....", c);
+
         updateBox({ ...box, pickLocation: c });
     };
 

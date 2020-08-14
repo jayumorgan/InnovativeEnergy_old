@@ -34,6 +34,8 @@ class MachineMotion {
     HTTPSend(port: string, path: string, data: any | null, callback?: (res: AxiosResponse) => void) {
         let url = "http://" + this.myConfiguration.machineIp + ":" + port + "/" + path;
 
+        console.log(url);
+
         if (data) {
             axios.post(url, data).then((res: AxiosResponse) => {
                 //  console.log(`POST Response (${url}): `, res);
@@ -56,6 +58,7 @@ class MachineMotion {
 
         let encoded_path = Object.keys(data).map(key => key + '=' + data[key]).join('&');
 
+
         // console.log("Encoded path: ", encoded_path);
 
         this.HTTPSend("8000", "gcode?" + encoded_path, null, callback);
@@ -72,6 +75,8 @@ class MachineMotion {
 
         let url = "http://" + this.myConfiguration.machineIp + ":8000" + "/" + encoded_path;
 
+        console.log("Sync url: ", url);
+
         let res = await axios.get(url);
         return res.data;
     }
@@ -86,12 +91,23 @@ class MachineMotion {
         });
     };
 
+    configAxis(drive: number, gain: number) {
+        let value = 200 * 8 / gain;
+
+        let gcode = "M92 " + String(drive) + String(value);
+        this.emitGCode(gcode, () => {
+            console.log("Set the gcode gain...");
+        });
+
+    }
+
     emitSpeed(speed: number) {
         let gcode = "G0 F" + String(60 * speed);
         this.emitGCode(gcode);
     };
 
     async getCurrentPositions() {
+
         let gcode = "M114";
         let response: string = await this.emitGCodeSync(gcode);
 
@@ -111,13 +127,13 @@ class MachineMotion {
             let vals = [XVal, YVal, ZVal] as number[];
             return vals;
 
-        } else {
+        } else
             console.log("Regex Error", response);
-            return [0, 0, 0];
-        }
+        return [0, 0, 0];
+    }
 
-    };
 };
+
 
 
 // Define some wrappers for actual control.
@@ -146,6 +162,7 @@ export class TeachModeController {
         this.mm = new MachineMotion(net);
         this.speed = speed;
         this.mm.emitSpeed(this.speed); // in mm/second
+
         this.distance = distance;
         this.axes = {
             x: 2,
@@ -166,7 +183,9 @@ export class TeachModeController {
 
 
     async getPosition() {
-        return await this.mm.getCurrentPositions();
+        console.log("inside teach");
+        let p = await this.mm.getCurrentPositions();
+        return p;
     };
 
     Move(drive: number, positive: boolean) {

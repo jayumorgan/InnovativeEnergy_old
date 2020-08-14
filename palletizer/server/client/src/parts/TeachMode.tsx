@@ -106,11 +106,9 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
         Stack.forEach((n: number, index: number) => {
 
             let { boxPositions, height } = Layouts[n];
-
-            currentHeightIncrement += height;
+            currentHeightIncrement -= height;
 
             boxPositions.forEach((b: BoxPosition2D) => {
-
                 let { box, position } = b;
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
@@ -137,7 +135,6 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 y_pos = Add3D(y_pos, corner2);
 
                 let z_add = currentHeightIncrement;
-
 
                 let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
 		/* 

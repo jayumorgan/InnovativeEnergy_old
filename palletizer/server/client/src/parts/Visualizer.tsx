@@ -115,6 +115,7 @@ function parseConfig(pallet: SavedPalletConfiguration) {
     usedPallets.forEach((p: PalletGeometry) => {
         let h = 0;
         p.Stack.forEach((s: number) => {
+
             h += p.Layouts[s].height;
         });
         if (h > H) {

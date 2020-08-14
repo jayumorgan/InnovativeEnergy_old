@@ -1,4 +1,4 @@
-import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
+import React, { useContext, useState, Fragment, ReactElement, ChangeEvent, useEffect } from 'react';
 
 import { AxesDirections, TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
 
@@ -169,24 +169,36 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
     Controllers.push(new TeachModeController(networkConfig1, speed, distance));
     Controllers.push(new TeachModeController(networkConfig2, speed, distance));
+
+
     let MotionConfig: any = {
         "Z": {
             "DRIVE": 1,
             "MACHINE": 0,
-            "REVERSE": true
+            "REVERSE": true,
+            "GAIN": 31.416
         },
         "X": {
             "DRIVE": 1,
             "MACHINE": 1,
-            "REVERSE": true
+            "REVERSE": true,
+            "GAIN": 208
         },
         "Y": {
             "DRIVE": 3,
             "MACHINE": 0,
-            "REVERSE": true
+            "REVERSE": true,
+            "GAIN": 208 //157.8
         }
     };
 
+    Object.keys(MotionConfig).forEach((axis: string) => {
+        let drive = MotionConfig[axis]["DRIVE"];
+        let machine = MotionConfig[axis]["MACHINE"];
+        let gain = MotionConfig[axis]["GAIN"];
+
+        Controllers[machine].mm.configAxis(drive, gain);
+    });
 
     let handleSpeed = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
@@ -211,7 +223,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                 let drive_index = MotionConfig["Y"]["DRIVE"];
                 let reverse_bool = MotionConfig["Y"]["REVERSE"];
                 let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, false);
+                Controller.Move(drive_index, true);
                 break;
             };
             case Directions.DOWN: {
@@ -219,7 +231,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                 let drive_index = MotionConfig["Y"]["DRIVE"];
                 let reverse_bool = MotionConfig["Y"]["REVERSE"];
                 let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, true);
+                Controller.Move(drive_index, false);
                 break;
             }
             case Directions.RIGHT: {
@@ -227,7 +239,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                 let drive_index = MotionConfig["X"]["DRIVE"];
                 let reverse_bool = MotionConfig["X"]["REVERSE"];
                 let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, false);
+                Controller.Move(drive_index, true);
 
                 break;
             }
@@ -236,7 +248,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                 let drive_index = MotionConfig["X"]["DRIVE"];
                 let reverse_bool = MotionConfig["X"]["REVERSE"];
                 let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, true);
+                Controller.Move(drive_index, false);
                 break;
             }
         };
@@ -249,7 +261,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
         let drive_index = MotionConfig["Z"]["DRIVE"];
         let reverse_bool = MotionConfig["Z"]["REVERSE"];
         let Controller = Controllers[controller_index];
-        Controller.Move(drive_index, dagger);
+        Controller.Move(drive_index, !dagger);
         getPositions();
     };
 
@@ -261,10 +273,16 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
     let [currentPosition, setCurrentPosition] = useState<Coordinate>({ x: 0, y: 0, z: 0 });
 
     let getPositions = async () => {
-        let position1 = await Controllers[0].getPosition();
-        let position2 = await Controllers[1].getPosition();
-        let positions = [position1, position2];
 
+        console.log("Get Positions...");
+        let position1 = await Controllers[0].getPosition();
+
+        console.log("Get Position....");
+        let position2 = await Controllers[1].getPosition();
+
+
+        let positions = [position1, position2];
+        console.log("HAve psositions...");
         let x_controller_index = MotionConfig["X"]["MACHINE"];
         let x_drive_index = MotionConfig["X"]["DRIVE"];
 
@@ -282,6 +300,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
         console.log(`x ${x_value} y ${y_value} z ${z_value}`);
 
+
         let position: Coordinate = {
             x: x_value,
             y: y_value,
@@ -294,6 +313,8 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
 
     let handleSelect = async () => {
+
+        console.log("Handle Selec...t");
         let pos = {
             x: 0, y: 0, z: 0
         } as Coordinate;
@@ -311,6 +332,7 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
         let position = await getPositions();
 
+        console.log("Got Positions and seleted", position);
         selectAction(position);
 
 
@@ -332,7 +354,13 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
     let arrowSize = 120;
 
+    useEffect(() => {
+        getPositions();
+    }, []);
+
     let { x, y, z } = currentPosition;
+
+
 
     return (
         <div className="Jogger">

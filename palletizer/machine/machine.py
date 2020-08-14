@@ -69,15 +69,26 @@ class Machine:
         self.pressure_input = self.machine_config["PRESSURE_INPUT"]
 
         deploy = read_env()
+        deploy = True
         print(f"Running Production Environment: {deploy}")
         #  deploy = True
         self.Machines = []
 
         if deploy:
+            print(machine1["IP_ADDRESS"], machine2["IP_ADDRESS"])
             mm1 = mm.MachineMotion(machine1["IP_ADDRESS"])
             mm2 = mm.MachineMotion(machine2["IP_ADDRESS"])
+            mm1.emitSpeed(speed)
+            mm1.emitAcceleration(acceleration)
+            mm2.emitSpeed(speed)
+            mm2.emitAcceleration(acceleration)
+            homingSpeed = 250
+            mm1.configHomingSpeed([1, 2, 3], [250, 250, 250])
+            mm2.configHomingSpeed([1, 2, 3], [250, 250, 250])
+
             self.Machines.append(mm1)
             self.Machines.append(mm2)
+
         else:
             mm1 = fmm.FakeMachineMotion()
             mm2 = fmm.FakeMachineMotion()
@@ -92,10 +103,6 @@ class Machine:
             self.dropCoodinates.append(boxData["dropLocation"])
             self.pickCoordinates.append(boxData["pickLocation"])
 
-        for m in self.Machines:
-            m.emitSpeed(speed)
-            m.emitAcceleration(acceleration)
-
         for a, gain in gain.items():
             axis = axes[a]
             machine_index = axis["MACHINE"]
@@ -105,40 +112,43 @@ class Machine:
 
         # specify in configuration file.
         for axis, params in axes.items():
-            machine_index = axis["MACHINE"]
-            reverse_bool = axis["REVERSE"]
+            machine_index = params["MACHINE"]
+            reverse_bool = params["REVERSE"]
+            drive_index = params["DRIVE"]
             machine_direction = mm.DIRECTION.REVERSE if reverse_bool else mm.DIRECTION.NORMAL
-            self.Machines[machine_index].configAxisDirection(machine_direction)
+            self.Machines[machine_index].configAxisDirection(
+                drive_index, machine_direction)
 
-        for m in self.Machines:
-            m.releaseEstop()
-            m.resetSystem()
+        for i in range(len(self.Machines)):
+            #self.Machines[i].emitSpeed(speed)
+            #self.Machines[i].emitAcceleration(acceleration)
+
+            self.Machines[i].releaseEstop()
+            self.Machines[i].resetSystem()
 
         self.box_count = len(boxCoordinates)
 
     def home(self):
-        z_machine_index = self.z["MACHINE"]
+        self.home_axis(self.z)
+        #      z_machine_index = self.z["MACHINE"]
         vertical_point = {"z": self.z_0}
         self.move_vertical(vertical_point)
+        self.move_planar({"x": 0, "y": 0})
         self.home_axis(self.x)
         self.home_axis(self.y)
-
-        self.home_axis(self.z)
         self.move_vertical(vertical_point)
         self.home_axis(self.i)
 
     def home_axis(self, axis):
         machine_index = axis["MACHINE"]
-        machine = self.Machines[machine_index]
-        machine.emitHome(axis["DRIVE"])
-        machine.waitForMotionCompletion()
+        self.Machines[machine_index].emitHome(axis["DRIVE"])
+        self.Machines[machine_index].waitForMotionCompletion()
 
     def move_rotation(self, value):
         machine_index = self.i["MACHINE"]
         drive_index = self.i["DRIVE"]
-        machine = self.Machines[machine_index]
-        machine.emitAbsoluteMove(drive_index, value)
-        machine.waitForMotionCompletion()
+        self.Machines[machine_index].emitAbsoluteMove(drive_index, value)
+        self.Machines[machine_index].waitForMotionCompletion()
 
     def move_planar(self, point):  # Point is 2D [x,y] coordinate.
         self.move_vertical({"z": self.z_0})
@@ -147,25 +157,23 @@ class Machine:
         [x, y] = [point["x"], point["y"]]
         x_machine_index = self.x["MACHINE"]
         x_drive_index = self.x["DRIVE"]
-        x_machine = self.Machines[x_machine_index]
         y_machine_index = self.y["MACHINE"]
         y_drive_index = self.y["DRIVE"]
-        y_machine = self.Machines[y_machine_index]
         if x_machine_index == y_machine_index:
-            x_machine.emitCombinedAxesAbsoluteMove(
+            self.Machines[x_machine_index].emitCombinedAxesAbsoluteMove(
                 [x_drive_index, y_drive_index], [x, y])
         else:
-            x_machine.emitAbsoluteMove(x_drive_index, x)
-            y_machine_index.emitAbsoluteMove(y_drive_index, y)
+            self.Machines[x_machine_index].emitAbsoluteMove(x_drive_index, x)
+            self.Machines[y_machine_index].emitAbsoluteMove(y_drive_index, y)
 
-        x_machine.waitForMotionCompletion()
-        y_machine.waitForMotionCompletion()
+        self.Machines[x_machine_index].waitForMotionCompletion()
+        self.Machines[y_machine_index].waitForMotionCompletion()
 
     def move_vertical(self, point):  # point is z_coordinate
         z_machine_index = self.z["MACHINE"]
-        machine = self.Machines[z_machine_index]
-        machine.emitAbsoluteMove(self.z["DRIVE"], point["z"])
-        machine.waitForMotionCompletion()
+        self.Machines[z_machine_index].emitAbsoluteMove(
+            self.z["DRIVE"], point["z"])
+        self.Machines[z_machine_index].waitForMotionCompletion()
 
     def move_all(self, point):
         self.move_planar(point)
@@ -173,16 +181,17 @@ class Machine:
 
     def move_to_pick(self, count):
         coordinate = self.pickCoordinates[count]
+        print("Moving to Pick Location: ", self.pickCoordinates[count])
         self.move_all(coordinate)
 
     def move_to_drop(self, index):
         coordinate = self.dropCoodinates[index]
+        print("Moving to Drop Coordinate", coordinate)
         self.move_planar(coordinate)
         self.move_vertical(coordinate)
 
     def __read_io(self, machine_index, network_id, pin):
-        machine = self.Machines[machine_index]
-        return machine.digitalRead(network_id, pin)
+        return self.Machines[machine_index].digitalRead(network_id, pin)
 
     def detect_box(self):
         pin = self.box_detector["PIN"]
@@ -218,12 +227,14 @@ class Palletizer(pc.PalletizerControl):
 
     def __init__(self):
         # Intialize state+controls (PalletizerControl)
+        print("PRe Init")
         super().__init__()
+
+        print("Starting Palletizer")
 
         self.start(0)
 
     def start(self, count):
-        # Setup the machine. (load configuration)
 
         self.machine = Machine()
 
