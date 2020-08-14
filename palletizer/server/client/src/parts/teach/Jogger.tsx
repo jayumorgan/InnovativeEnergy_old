@@ -328,14 +328,12 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
         }
 
         TEMP_JOGGER_INDEX++;
-        //  selectAction(pos);
 
-        let position = await getPositions();
+        selectAction(pos);
 
-        console.log("Got Positions and seleted", position);
-        selectAction(position);
-
-
+        //    let position = await getPositions();
+        //      console.log("Got Positions and seleted", position);
+        //        selectAction(position);
     };
 
     let distanceParams: JoggerParameterProps = {

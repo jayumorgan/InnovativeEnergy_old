@@ -907,7 +907,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     if (summaryScreen) {
         instruction = "Create and edit layers";
         let AddButton: ButtonProps = {
-            name: "Add new layout",
+            name: "Add new layer",
             action: newLayout
         };
 

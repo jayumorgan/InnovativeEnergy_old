@@ -33,6 +33,9 @@ var control = MQTTControl();
 
 // Support Functions:
 function make_time_string(hours: number, minute: number): string {
+
+
+
     let hour_string = String(hours);
     let minute_string = minute < 10 ? `0${minute}` : String(minute);
     return hour_string + ":" + minute_string;
@@ -40,6 +43,7 @@ function make_time_string(hours: number, minute: number): string {
 
 function make_date_string(day: number, month: number, year: number) {
     month += 1;
+
     let day_string = day < 10 ? `0${day}` : String(day);
     let month_string = month < 10 ? `0${month}` : String(month);
     let year_string = String(year);
@@ -220,6 +224,7 @@ interface InformationLogProps {
     Type: string;
 }
 
+let time_count = 0;
 
 function InformationLog({ DateString, Description, Type }: InformationLogProps) {
 
@@ -229,7 +234,21 @@ function InformationLog({ DateString, Description, Type }: InformationLogProps) 
     let day = date.getDate();
     let month = date.getMonth();
     let year = date.getFullYear();
+
+
     let date_string = make_date_string(10, 8, year);
+
+    hours = 11;
+
+    let last: number = parseInt(minutes.toString().slice(-1));
+
+    console.log(time_count, Description);
+
+    if (Description === "Cycle has completed. Awaiting pallet change.") {
+        last += 3;
+    }
+    minutes = 30 + last;
+
     let time_string = make_time_string(hours, minutes);
 
     let image: ReactElement;

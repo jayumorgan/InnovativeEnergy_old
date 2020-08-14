@@ -106,7 +106,9 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
         Stack.forEach((n: number, index: number) => {
 
             let { boxPositions, height } = Layouts[n];
-            currentHeightIncrement -= height;
+
+            // Change this to minus if Z-home is at the top of the machine.
+            currentHeightIncrement += height;
 
             boxPositions.forEach((b: BoxPosition2D) => {
                 let { box, position } = b;

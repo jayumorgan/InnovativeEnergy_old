@@ -69,7 +69,7 @@ class Machine:
         self.pressure_input = self.machine_config["PRESSURE_INPUT"]
 
         deploy = read_env()
-        deploy = True
+        # deploy = True
         print(f"Running Production Environment: {deploy}")
         #  deploy = True
         self.Machines = []

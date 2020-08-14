@@ -187,7 +187,11 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                 handleBack()
             } else {
                 if (PALLETCORNERS.TOP_LEFT === cornerNumber) {
-                    handleBack();
+                    if (allPallets.length > 0) {
+                        setSummaryScreen(true);
+                    } else {
+                        handleBack();
+                    }
                 } else {
                     if (cornerNumber === PALLETCORNERS.BOTTOM_LEFT) {
                         setCornerNumber(PALLETCORNERS.TOP_LEFT)
