@@ -147,8 +147,8 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
         Directions.RIGHT
     ];
 
-    let [speed, setSpeed] = useState<number>(100);
-    let [distance, setDistance] = useState<number>(100);
+    let [speed, setSpeed] = useState<number>(400);
+    let [distance, setDistance] = useState<number>(300);
 
     let networkConfig1 = {
         mode: NETWORK_MODE.static,

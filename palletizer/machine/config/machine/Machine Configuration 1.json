@@ -1,5 +1,5 @@
 {
-    "TOP_Z" : 1697,
+    "TOP_Z" : 0,
 	"AXES": {
 	    "x": {
 		"DRIVE" : 1,
@@ -13,7 +13,7 @@
 	    },
 	    "z": {
 		"DRIVE" : 1,
-		"REVERSE" : true,
+		"REVERSE" : false,
 		"MACHINE" : 0
 	    },
 	    "i" : {
@@ -24,8 +24,8 @@
 	},
 	"GAIN": {
 		"x": 208,
-	    "y": 157.8,
-		"z": 208,
+	    "y": 208,
+		"z": 31.416,
 		"i": 36
 	},
 	"SPEED": 400,
@@ -45,12 +45,12 @@
 	"PRESSURE_INPUT" : {
 		"PIN" : 0,
 	    "NETWORK_ID" : 1,
-	    "MACHINE": 0
+	    "MACHINE": 1
 	},
 	"PRESSURE_OUTPUT": {
-		"PIN": 3,
+		"PIN": 0,
 	    "NETWORK_ID" : 1,
-	    "MACHINE": 0
+	    "MACHINE": 1
 	},
 	"BOX_DETECTION" : {
 		"PIN" : 2,

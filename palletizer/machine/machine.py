@@ -85,6 +85,8 @@ class Machine:
             homingSpeed = 250
             mm1.configHomingSpeed([1, 2, 3], [250, 250, 250])
             mm2.configHomingSpeed([1, 2, 3], [250, 250, 250])
+            print("Detect IO Modules 1 ", mm1.detectIOModules())
+            print("Detect IO Modules 2 ", mm2.detectIOModules())
 
             self.Machines.append(mm1)
             self.Machines.append(mm2)
@@ -104,6 +106,7 @@ class Machine:
             self.pickCoordinates.append(boxData["pickLocation"])
 
         for a, gain in gain.items():
+            print(a, gain)
             axis = axes[a]
             machine_index = axis["MACHINE"]
             drive_index = axis["DRIVE"]
@@ -129,17 +132,25 @@ class Machine:
         self.box_count = len(boxCoordinates)
 
     def home(self):
+
         self.home_axis(self.z)
         #      z_machine_index = self.z["MACHINE"]
         vertical_point = {"z": self.z_0}
-        self.move_vertical(vertical_point)
-        self.move_planar({"x": 0, "y": 0})
+        print("Moving to vertical point...")
+        #self.move_vertical(vertical_point)
+
+        print("Done to vertical")
+        #name = input("Pause For Input")
+
+        #sleep(20000)
+        #self.move_planar({"x": 0, "y": 0})
         self.home_axis(self.x)
         self.home_axis(self.y)
         self.move_vertical(vertical_point)
-        self.home_axis(self.i)
+        # self.home_axis(self.i)
 
     def home_axis(self, axis):
+        print("Homing axis ", axis)
         machine_index = axis["MACHINE"]
         self.Machines[machine_index].emitHome(axis["DRIVE"])
         self.Machines[machine_index].waitForMotionCompletion()
@@ -208,6 +219,7 @@ class Machine:
         return pin_value == 1
 
     def __write_pressure(self, on):
+        print("Writign pressureee")
         pin = self.pressure_ouput["PIN"]
         network_id = self.pressure_ouput["NETWORK_ID"]
         machine_index = self.pressure_ouput["MACHINE"]
@@ -215,6 +227,7 @@ class Machine:
                                                   1 if on else 0)
 
     def start_pressure(self):
+        print("STarting pressure")
         self.__write_pressure(True)
 
     def stop_pressure(self):

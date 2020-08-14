@@ -135,8 +135,10 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 y_pos = Add3D(y_pos, corner2);
 
                 let z_add = currentHeightIncrement;
+                //console.log(z_add);
 
                 let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
+                box_position.z = z_add;
 		/* 
 		 *                 box_position = {
 		 *                     x: b,

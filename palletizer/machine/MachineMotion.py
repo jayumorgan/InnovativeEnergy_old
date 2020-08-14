@@ -1502,9 +1502,10 @@ class MachineMotion:
                 numIOModules = numIOModules + 1
 
         if numIOModules == 0:
-            raise NoIOModulesFound(
-                "Application Error: No IO Modules found. Please verify the connection between Digital IO and MachineMotion."
-            )
+            print("NO IO MODUELS FOUN")
+            # raise NoIOModulesFound(
+            #     "Application Error: No IO Modules found. Please verify the connection between Digital IO and MachineMotion."
+            # )
         else:
             return foundIOModules
 
@@ -1563,6 +1564,8 @@ class MachineMotion:
                 "DEBUG: unexpected digitalOutput parameters: device= " +
                 str(deviceNetworkId) + " pin= " + str(pin))
             return
+
+        print("Writing Digital Output....")
         resp = self.myMqttClient.publish(
             'devices/io-expander/' + str(deviceNetworkId) +
             '/digital-output/' + str(pin), '1' if value else '0')

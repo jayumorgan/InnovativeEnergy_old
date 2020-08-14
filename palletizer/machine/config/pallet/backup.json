@@ -1,0 +1,201 @@
+{
+	"config": {
+		"name": "Pallet Configuration 4",
+		"boxes": [
+			{
+				"name": "Box 1",
+				"dimensions": {
+					"length": 235,
+					"height": 267,
+					"width": 330
+				},
+				"pickLocation": {
+					"x": 1550,
+					"y": 240,
+					"z": 890
+				}
+			}
+		],
+		"pallets": [
+			{
+				"name": "Pallet 1",
+				"corner1": {
+					"x": 150,
+					"y": 840,
+					"z": 1690
+				},
+				"corner2": {
+					"x": 150,
+					"y": 140,
+					"z": 1690
+				},
+				"corner3": {
+					"x": 1200,
+					"y": 140,
+					"z": 1690
+				},
+				"Layouts": [
+					{
+						"name": "Custom Layer 1",
+						"boxPositions": [
+							{
+								"position": {
+									"x": 0.18571428571428572,
+									"y": 0.1727534562211982
+								},
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 235,
+										"height": 267,
+										"width": 330
+									},
+									"pickLocation": {
+										"x": 1550,
+										"y": 240,
+										"z": 890
+									}
+								},
+								"size": 620
+							},
+							{
+								"position": {
+									"x": 0.5,
+									"y": 0.1727534562211982
+								},
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 235,
+										"height": 267,
+										"width": 330
+									},
+									"pickLocation": {
+										"x": 1550,
+										"y": 240,
+										"z": 890
+									}
+								},
+								"size": 620
+							},
+							{
+								"position": {
+									"x": 0.18571428571428572,
+									"y": 0.5084677419354838
+								},
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 235,
+										"height": 267,
+										"width": 330
+									},
+									"pickLocation": {
+										"x": 1550,
+										"y": 240,
+										"z": 890
+									}
+								},
+								"size": 620
+							},
+							{
+								"position": {
+									"x": 0.5,
+									"y": 0.5084677419354838
+								},
+								"box": {
+									"name": "Box 1",
+									"dimensions": {
+										"length": 235,
+										"height": 267,
+										"width": 330
+									},
+									"pickLocation": {
+										"x": 1550,
+										"y": 240,
+										"z": 890
+									}
+								},
+								"size": 620
+							}
+						],
+						"height": 267
+					}
+				],
+				"Stack": [
+					0
+				]
+			}
+		]
+	},
+	"boxCoordinates": [
+		{
+			"pickLocation": {
+				"x": 1550,
+				"y": 240,
+				"z": 890
+			},
+			"dropLocation": {
+				"x": 660,
+				"y": 741.5725806451612,
+				"z": 1423
+			},
+			"dimensions": {
+				"length": 235,
+				"height": 267,
+				"width": 330
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 1550,
+				"y": 240,
+				"z": 890
+			},
+			"dropLocation": {
+				"x": 990,
+				"y": 741.5725806451612,
+				"z": 1423
+			},
+			"dimensions": {
+				"length": 235,
+				"height": 267,
+				"width": 330
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 1550,
+				"y": 240,
+				"z": 890
+			},
+			"dropLocation": {
+				"x": 660,
+				"y": 506.57258064516134,
+				"z": 1423
+			},
+			"dimensions": {
+				"length": 235,
+				"height": 267,
+				"width": 330
+			}
+		},
+		{
+			"pickLocation": {
+				"x": 1550,
+				"y": 240,
+				"z": 890
+			},
+			"dropLocation": {
+				"x": 990,
+				"y": 506.57258064516134,
+				"z": 1423
+			},
+			"dimensions": {
+				"length": 235,
+				"height": 267,
+				"width": 330
+			}
+		}
+	]
+}
