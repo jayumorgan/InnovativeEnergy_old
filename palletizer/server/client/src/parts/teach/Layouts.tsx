@@ -8,9 +8,42 @@ import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, BoxPositionObject, SVGPosition, Rect } from "./structures/Data";
+import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, BoxPositionObject, SVGPosition, Rect, BoxDimensions } from "./structures/Data";
 
 import "./css/Layouts.scss";
+
+
+interface RotateIconProps {
+    size: number;
+    rotate: boolean;
+}
+
+function RotateIcon({ size, rotate }: RotateIconProps) {
+    let dString: string;
+    if (rotate) {
+        dString = "M 10 10 C 10 10, 90 10, 90 90";
+    } else {
+        dString = "M 90 90 C 90 90, 90 10 10 10";
+    }
+
+    let scale = Math.round(size / 100 * 10) / 10;
+    let scaleString = `scale(${scale}, ${scale})`;
+
+    let polygonPoints = ""
+
+    return (
+        <svg width={size} height={size}>
+
+            <g transform={scaleString}>
+                <marker id="arrowhead" markerWidth={size / 20} markerHeight={size / 20}
+                    refX="0" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" />
+                </marker>
+                <path d={dString} stroke="black" strokeWidth={size / 15} fill="transparent" markerEnd="url(#arrowhead)" />
+            </g>
+        </svg>
+    );
+};
 
 
 interface DropDownProps {
@@ -381,7 +414,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
     let BoxSVGs: Rect[] = [];
     if (boxes) {
         boxes.forEach((b: BoxPositionObject) => {
-            let { position, box } = b;
+            let { position, box, rotated } = b;
 
             let x = w * position.x + topX + svg_props.x;
             let y = l * position.y + topY + svg_props.y;
@@ -399,8 +432,8 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             let boxprops: Rect = {
                 x,
                 y,
-                width,
-                height: length,
+                width: rotated ? length : width,
+                height: rotated ? width : length,
                 fill: boxColor,
                 stroke: boxColor,
                 strokeWidth: 0
@@ -627,8 +660,19 @@ function BoxCell({ box, index }: BoxCellProps) {
 
     let [isDragging, setIsDragging] = useState<boolean>(false);
 
+    let [isRotated, setIsRotated] = useState<boolean>(false);
+
+    let toggleRotate = () => {
+        setIsRotated(!isRotated);
+    };
+
     let dragStart = (ev: DragEvent) => {
-        ev.dataTransfer.setData("BoxIndex", String(index));
+
+        let transferData = {
+            index,
+            isRotated
+        } as any;
+        ev.dataTransfer.setData("BoxData", JSON.stringify(transferData));
         setIsDragging(true);
     };
 
@@ -636,13 +680,23 @@ function BoxCell({ box, index }: BoxCellProps) {
         setIsDragging(false);
     };
 
+
+
     let { width, height, length } = box.dimensions;
+
+    let renderDimensions: BoxDimensions = {
+        height,
+        length: isRotated ? width : length,
+        width: isRotated ? length : width
+    };
+
+
 
     return (
         <div className="BoxContainer">
             <div className="Box" draggable onDragStart={dragStart} onDragEnd={dragEnd}>
                 <div className="MiniRender">
-                    <Box {...box.dimensions} />
+                    <Box {...renderDimensions} />
                 </div>
                 <div className="BoxInfo">
                     <div className="Name">
@@ -669,6 +723,10 @@ function BoxCell({ box, index }: BoxCellProps) {
                             </div>
                         </div>
                     </div>
+
+                </div>
+                <div className="Rotate" onClick={toggleRotate}>
+                    <RotateIcon size={60} rotate={!isRotated} />
                 </div>
             </div>
         </div>
@@ -878,7 +936,11 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             let { x, y } = DisplayElement.current.getBoundingClientRect();
             let prX = clientX - x;
             let prY = clientY - y;
-            let index = parseInt(e.dataTransfer.getData("BoxIndex"));
+
+            let transferData = e.dataTransfer.getData("BoxData");
+
+            let tD = JSON.parse(transferData);
+            let { index, isRotated } = tD;
 
             let px = clientX - x;
             let py = clientY - y;
@@ -891,7 +953,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                     y: fracY
                 },
                 box: allBoxes[index],
-                size: modelSize
+                size: modelSize,
+                rotated: isRotated
             };
             setModelBoxes([...modelBoxes, bpo]);
         }

@@ -124,6 +124,7 @@ export interface BoxPositionObject {
     position: SVGPosition;
     box: BoxObject;
     size: number;
+    rotated: boolean;
 };
 
 export interface LayoutObject {
@@ -134,9 +135,20 @@ export interface LayoutObject {
 };
 
 
+
+
+export interface CoordinateRot {
+    x: number,
+    y: number,
+    z: number,
+    i: boolean
+};
+
+
+
 export interface BoxCoordinates {
     pickLocation: Coordinate;
-    dropLocation: Coordinate;
+    dropLocation: CoordinateRot;
     dimensions: BoxDimensions;
 };
 

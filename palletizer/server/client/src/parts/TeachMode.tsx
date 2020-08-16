@@ -5,7 +5,7 @@ import Modal from "./Modal";
 //import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
-import { Coordinate, PalletGeometry, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates } from "./teach/structures/Data";
+import { Coordinate, PalletGeometry, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
 
 //import ConfigurationName from "./teach/ConfigurationName";
 import Jogger from "./teach/Jogger";
@@ -110,14 +110,22 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
             // Change this to minus if Z-home is at the top of the machine.
             currentHeightIncrement += height;
 
-            boxPositions.forEach((b: BoxPosition2D) => {
-                let { box, position } = b;
+            boxPositions.forEach((b: BoxPositionObject) => {
+                let { box, position, rotated } = b;
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
 
+                let { width, height } = box.dimensions;
+
+                let boxWidth = box.dimensions.width;
+                let boxLength = box.dimensions.length;
+                let temp = boxWidth;
+                boxWidth = rotated ? boxLength : boxWidth;
+                boxLength = rotated ? boxWidth : boxLength;
+
                 //compute the middle of the box shift.
-                let boxXmid = box.dimensions.width / 2;
-                let boxYmid = box.dimensions.length / 2;
+                let boxXmid = boxWidth / 2;
+                let boxYmid = boxLength / 2;
                 let boxHeight = height; // Assume Same Height;
 
                 // Move along the X axis defined by the pallet.
@@ -141,6 +149,9 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
                 box_position.z = z_add;
+
+
+
 		/* 
 		 *                 box_position = {
 		 *                     x: b,
@@ -150,7 +161,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 boxCoordinates.push({
                     pickLocation,
-                    dropLocation: box_position,
+                    dropLocation: { ...box_position, i: rotated },
                     dimensions: box.dimensions
                 } as BoxCoordinates);
             });

@@ -66,11 +66,16 @@
                         width: 80%;
                         display: grid;
                         grid-template-rows: 100%;
-                        grid-template-columns: 30% 70%;
+                        grid-template-columns: 30% 55% 15%;
                         height: 100%;
                         border-radius: $border-radius;
                         border: $container-border;
                         background-color: $desert-storm;
+
+                        .Rotate {
+                            @include flex-center();
+                        }
+
 
                         .MiniRender {
                             @include flex-center();
@@ -257,6 +262,8 @@
                     .BoxImage {
                         @include flex-center();
                     }
+
+                    .Rotate {}
 
                     .BoxDetails {
                         display: grid;
