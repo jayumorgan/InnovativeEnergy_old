@@ -28,6 +28,9 @@ class MICROSTEPS:  # from machine motion.
 QUARTER_TURN = 1480
 NO_TURN = 0
 
+MIN_HEIGHT_OFFSET = 100
+# IN MM
+
 
 class Machine:
     def __init__(self):
@@ -47,6 +50,8 @@ class Machine:
         self.y_0 = 0
 
         self.z = axes["z"]
+
+        # We wi
         # home to top part.
         self.z_0 = self.machine_config["TOP_Z"]
 
@@ -98,12 +103,36 @@ class Machine:
             self.Machines.append(mm2)
 
         boxCoordinates = self.pallet_config["boxCoordinates"]
-        self.dropCoodinates = []
+        self.dropCoordinates = []
         self.pickCoordinates = []
 
+        # Somewhat confusingly for now: Max height is really the lowest coordinate value (b/c home is at the top -> positive is down)
+        maxHeight = None
+
         for boxData in boxCoordinates:
-            self.dropCoodinates.append(boxData["dropLocation"])
-            self.pickCoordinates.append(boxData["pickLocation"])
+            dropLocation = boxData["dropLocation"]
+            pickLocation = boxData["pickLocation"]
+
+            h1 = dropLocation["z"]
+            h2 = pickLocation["z"]
+
+            if maxHeight == None:
+                maxHeight = h1
+
+            maxHeight = h1 if maxHeight == None else maxHeight
+
+            maxHeight = h1 if h1 < maxHeight else maxHeight
+
+            maxHeight = h2 if h2 < maxHeight else maxHeight
+
+            self.dropCoordinates.append(dropLocation)
+            self.pickCoordinates.append(pickLocation)
+
+        maxHeight -= MIN_HEIGHT_OFFSET
+        if maxHeight >= 0:
+            self.z_0 = maxHeight
+
+        print(f"Max Height: {maxHeight}, Z_0 = {self.z_0}")
 
         for a, gain in gain.items():
             print(a, gain)
@@ -196,7 +225,7 @@ class Machine:
         self.move_all(coordinate)
 
     def move_to_drop(self, index):
-        coordinate = self.dropCoodinates[index]
+        coordinate = self.dropCoordinates[index]
         print("Moving to Drop Coordinate", coordinate)
         self.move_planar(coordinate)
         self.move_vertical(coordinate)
