@@ -12,6 +12,10 @@ import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, Layout
 
 import "./css/Layouts.scss";
 
+import { ReactComponent as Clockwise } from "./images/clockwise.svg";
+
+import { ReactComponent as CounterClockwise } from "./images/counterclockwise.svg";
+
 
 interface RotateIconProps {
     size: number;
@@ -726,7 +730,7 @@ function BoxCell({ box, index }: BoxCellProps) {
 
                 </div>
                 <div className="Rotate" onClick={toggleRotate}>
-                    <RotateIcon size={60} rotate={!isRotated} />
+                    {isRotated ? <Clockwise /> : <CounterClockwise />}
                 </div>
             </div>
         </div>
