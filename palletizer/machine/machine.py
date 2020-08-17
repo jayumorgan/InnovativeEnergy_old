@@ -128,12 +128,11 @@ class Machine:
             self.dropCoordinates.append(dropLocation)
             self.pickCoordinates.append(pickLocation)
 
-            # self.dropCoodinates.append(boxData["dropLocation"])
-            # self.pickCoordinates.append(boxData["pickLocation"])
-
         maxHeight -= MIN_HEIGHT_OFFSET
+        if maxHeight >= 0:
+            self.z_0 = maxHeight
 
-        print("Max Height Value:", maxHeight)
+        print(f"Max Height: {maxHeight}, Z_0 = {self.z_0}")
 
         for a, gain in gain.items():
             print(a, gain)
