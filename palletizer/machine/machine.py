@@ -29,6 +29,8 @@ QUARTER_TURN = 1480
 NO_TURN = 0
 
 MIN_HEIGHT_OFFSET = 100
+
+NINETY_DEG = 87
 # IN MM
 
 
@@ -76,7 +78,7 @@ class Machine:
         deploy = read_env()
         # deploy = True
         print(f"Running Production Environment: {deploy}")
-        #  deploy = True
+        deploy = True
         self.Machines = []
 
         if deploy:
@@ -175,6 +177,7 @@ class Machine:
         #self.move_planar({"x": 0, "y": 0})
         self.home_axis(self.x)
         self.home_axis(self.y)
+        self.home_axis(self.i)
         self.move_vertical(vertical_point)
         # self.home_axis(self.i)
 
@@ -185,9 +188,15 @@ class Machine:
         self.Machines[machine_index].waitForMotionCompletion()
 
     def move_rotation(self, value):
+        # Value is boolean
         machine_index = self.i["MACHINE"]
         drive_index = self.i["DRIVE"]
-        self.Machines[machine_index].emitAbsoluteMove(drive_index, value)
+        if value:
+            self.Machines[machine_index].emitAbsoluteMove(
+                drive_index, NINETY_DEG)
+        else:
+            self.Machines[machine_index].imitAbsoluteMove(drive_index, 0)
+
         self.Machines[machine_index].waitForMotionCompletion()
 
     def move_planar(self, point):  # Point is 2D [x,y] coordinate.

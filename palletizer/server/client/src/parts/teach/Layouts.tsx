@@ -170,17 +170,17 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let cy = yl + (yh - yl) / 2;
 
 
-            newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
-            newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
-            newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
-            newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
+            /* newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
+	     * newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
+	     * newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
+	     * newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
 
 
-            newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
-            newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
-            newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
-            newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY);
-
+	     * newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
+	     * newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
+	     * newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
+	     * newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY);
+	     */
 
 
             setRectangle(newR);

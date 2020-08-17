@@ -390,9 +390,16 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                     z /= frameNorm;
                     z -= height / 2;
 
+
+
                     console.log(x, y, z, "Box positions", height, "height");
 
                     box.position.set(x, z, y);
+
+                    if (dropLocation.i) {
+                        box.rotateY(Math.PI / 2);
+                    }
+
                     controls.current?.add_mesh(box);
                 }
             });
