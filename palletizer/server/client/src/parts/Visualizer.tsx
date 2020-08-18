@@ -232,7 +232,7 @@ function getPlank(w: number, h: number, l: number) {
 }
 
 
-function GetPalletMesh(width: number, height: number, length: number, callback: (pallet: Three.Mesh, height: number) => void) {
+function GetPalletMesh(width: number, height: number, length: number, callback: (pallet: Three.Mesh, fheight: number) => void) {
 
     let singleGeometry = new Three.Geometry();
 
@@ -244,25 +244,21 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     let zeroY = -length / 2;
     let zeroZ = -fullHeight / 2;
 
-
     let plankWidth = length / 20;
     let plankHeight = fullHeight * 4 / 5;
     let plankLength = width;
 
-    let plank1 = getPlank(plankWidth, plankHeight, plankLength);
-
-    plank1.rotateY(Math.PI / 2);
+    let plank1 = getPlank(plankLength, plankHeight, plankWidth);
     let plank2 = plank1.clone();
+
     plank1.position.set(zeroX + width / 2, zeroZ + plankHeight / 2, zeroY + length - plankWidth / 2);
     plank2.position.set(zeroX + width / 2, zeroZ + plankHeight / 2, zeroY + plankWidth / 2);
-
 
     let crossPlank1 = getPlank(plankWidth, plankHeight, length - plankWidth);
     let crossPlank2 = crossPlank1.clone();
 
     crossPlank1.position.set(zeroX + plankWidth / 2, zeroZ + plankHeight / 2, zeroY + (length - plankWidth) / 2);
     crossPlank2.position.set(zeroX + width - plankWidth / 2, zeroZ + plankHeight / 2, zeroY + (length - plankWidth) / 2);
-
 
     singleGeometry.mergeMesh(crossPlank1);
     singleGeometry.mergeMesh(crossPlank2);
@@ -290,8 +286,6 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     let m = new Three.MeshPhongMaterial({ color: String(COLORS.PLANK) });
 
     let fullMesh = new Three.Mesh(singleGeometry, m);
-
-
 
     callback(fullMesh, fullHeight);
 };
@@ -356,8 +350,9 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         scene.add(axesHelper);
 
         let camera = get_camera(width, height);
-        let distance = 2
-        camera.position.set(distance, distance, distance);
+        let distance = 1.4
+        camera.position.set(distance, distance - 0.2, distance);
+        //camera.rotateY(Math.PI / 2);
         camera.lookAt(0, -0.1, 0);
 
         let render_scene = () => {
@@ -375,7 +370,6 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                 scene.remove(box);
             }
         };
-
 
         let handleResize = () => {
             if (mount.current) {
@@ -402,10 +396,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         if (palletConfig && controls.current) {
 
             let frameDims = parseConfig(palletConfig);
-
             let frameNorm = FrameNorm(frameDims);
-
-            // Look at frame center
 
             // Loop through the things and get them all
             palletConfig.config.pallets.forEach((p: PalletGeometry) => {
@@ -413,30 +404,22 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
                 let height = 5;
 
-                console.log("Pallet Dims ", width, length);
-
                 width /= frameNorm;
                 height /= frameNorm;
                 length /= frameNorm;
 
-                console.log("Pallet Dims ", width, length);
                 let { x, y, z } = getCenterOfPallet(p);
-
-                console.log("Center of pallet: ", getCenterOfPallet(p));
 
                 x /= frameNorm;
                 y /= frameNorm;
                 z /= frameNorm;
-                console.log(z);
+
                 z = - height;
-                console.log(z);
                 // z = - height;
 
-                GetPalletMesh(width, height, length, (palletMesh: Three.Mesh, height: number) => {
-                    console.log("Mesh Position ", palletMesh.position);
-                    z = -height;
+                GetPalletMesh(width, height, length, (palletMesh: Three.Mesh, fheight: number) => {
+                    z = -fheight / 2;
                     palletMesh.position.set(x, z, y);
-                    console.log("Mesh Position ", palletMesh.position);
                     controls.current?.add_mesh(palletMesh);
                 });
             });
@@ -447,7 +430,6 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
             palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
                 if (i < currentBoxNumber) {
-
 
                     let BoxName = "BOXNAME-" + String(i);
 
@@ -470,8 +452,6 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                     y /= frameNorm;
                     z = 0;
                     z += zHome * height / 2;
-
-                    console.log(x, y, z, "Box positions", height, "height");
 
                     box.position.set(x, z, y);
 

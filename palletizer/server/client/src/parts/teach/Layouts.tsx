@@ -171,9 +171,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         //        document.addEventListener("keydown", rotate90, true);
     };
 
-
-
-
     let handleMove = (e: React.PointerEvent) => {
         let bb = (e.target as any).getBoundingClientRect();
         let x = e.clientX - bb.left;
@@ -197,17 +194,17 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let cy = yl + (yh - yl) / 2;
 
 
-            /* newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
-	     * newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
-	     * newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
-	     * newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
+            newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
+            newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
+            newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
+            newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
 
 
-	     * newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
-	     * newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
-	     * newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
-	     * newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY);
-	     */
+            newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
+            newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
+            newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
+            newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY);
+
 
 
             setRectangle(newR);
@@ -230,7 +227,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     } as any;
 
     let fill = active ? String(COLORS.MOVE_BOX) : String(COLORS.CLEAR_BOX);
-
+    let stroke = active ? String("white") : String(COLORS.CARDBOARD);
 
     let textProps = {
         x: (rectangle.x as number) + (rectangle.width as number) / 2,
@@ -245,7 +242,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     return (
         <Fragment>
             <rect
-                {...rectangle} fill={fill} {...actions}
+                {...rectangle} fill={fill} stroke={stroke} {...actions}
             />
             {showName &&
                 <text {...textProps}> {name} </text>}
@@ -412,7 +409,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             strokeWidth: 0
         };
         planks.push(plk);
-    }
+    };
 
     let svg_props = {
         width: size,
@@ -455,6 +452,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             length *= size * scale / norm;
 
             let boxColor = String(COLORS.CLEAR_BOX);
+            let strokeColor = String(COLORS.CARDBOARD);
 
             let boxprops: Rect = {
                 x,
@@ -462,8 +460,8 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 width: rotated ? length : width,
                 height: rotated ? width : length,
                 fill: boxColor,
-                stroke: boxColor,
-                strokeWidth: 0
+                stroke: strokeColor,
+                strokeWidth: 1
             };
 
             BoxSVGs.push(boxprops);

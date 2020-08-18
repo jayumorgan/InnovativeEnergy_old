@@ -6,5 +6,7 @@ export enum COLORS {
     MOVE_BOX = "rgba(195,129,66, 0.9)",
     LOG = "#D2AB6F",
     PLANK = "#E6BF83",
-    DARK_PLANK = "rgb(230, 191,131)"
+    DARK_PLANK = "rgb(230, 191,131)",
+    YELLOW_METAL = "#725932",
+    CARDBOARD = "#AD8762"
 };
