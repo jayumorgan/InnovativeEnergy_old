@@ -95,7 +95,7 @@
 
                     display: grid;
                     grid-template-rows: 100%;
-                    grid-template-columns: 12% 30% 20% 38%;
+                    grid-template-columns: 12% 30% 25% 33%;
 
                     .MiniRender {
                         @include flex-center();
@@ -129,7 +129,7 @@
                         @include flex-center();
 
                         .DimensionsGrid {
-                            width: 80%;
+                            width: 90%;
                             height: 40%;
                             display: grid;
                             grid-template-rows: 100%;
@@ -165,7 +165,7 @@
                         padding-right: 10%;
 
                         .EditButton {
-                            width: 30%;
+                            width: 40%;
                             height: 40%;
                             @include flex-center();
 

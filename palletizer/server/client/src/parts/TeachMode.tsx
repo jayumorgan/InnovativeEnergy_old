@@ -94,7 +94,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
     // We should also write the entire file.
     let boxCoordinates: BoxCoordinates[] = [];
 
-    pallets.forEach((p: PalletGeometry) => {
+    pallets.forEach((p: PalletGeometry, palletIndex: number) => {
         let { width, length } = getPalletDimensions(p);
         let { Layouts, Stack } = p;
 
@@ -174,7 +174,8 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 boxCoordinates.push({
                     pickLocation,
                     dropLocation: { ...averagePosition, i: rotated },
-                    dimensions: box.dimensions
+                    dimensions: box.dimensions,
+                    palletIndex
                 } as BoxCoordinates);
             });
         });

@@ -205,39 +205,96 @@ export function getCardboardBox(width: number, height: number, length: number): 
     let box = new Three.Mesh(geometry, material);
     box.add(edges);
     return box;
-}
-
-
+};
 
 interface Coordinate { // To allow for angle.
     x: number;
     y: number;
     z: number;
-}
+};
 
 interface VisualizerControls {
     add_mesh(mesh: Three.Mesh): void;
     removeBox: (n: string) => void;
-}
+};
 
 function get_box_name(box_number: number): string {
     return "Box-" + String(box_number);
+};
+
+
+
+function getPlank(w: number, h: number, l: number) {
+    let g = new Three.BoxGeometry(w, h, l);
+    let m = new Three.MeshPhongMaterial({ color: String(COLORS.PLANK) });
+    let p = new Three.Mesh(g, m);
+    return p;
 }
 
 
+function GetPalletMesh(width: number, height: number, length: number, callback: (pallet: Three.Mesh, height: number) => void) {
+
+    let singleGeometry = new Three.Geometry();
+
+    let fullHeight = height * 20;
+
+    //let singleGeometry = new Three.BoxGeometry(width, fullHeight, lenght);
+
+    let zeroX = -width / 2;
+    let zeroY = -length / 2;
+    let zeroZ = -fullHeight / 2;
 
 
-function GetPalletMesh(width: number, height: number, length: number, callback: (pallet: Three.Mesh) => void) {
+    let plankWidth = length / 20;
+    let plankHeight = fullHeight * 4 / 5;
+    let plankLength = width;
 
-    let loader = new Three.TextureLoader();
+    let plank1 = getPlank(plankWidth, plankHeight, plankLength);
 
-    loader.load(wood, (t: Three.Texture) => {
-        let g = new Three.BoxGeometry(width, height, length);
-        let m = new Three.MeshBasicMaterial({ map: t });
-        let pallet = new Three.Mesh(g, m);
-        callback(pallet);
-    });
-}
+    plank1.rotateY(Math.PI / 2);
+    let plank2 = plank1.clone();
+    plank1.position.set(zeroX + width / 2, zeroZ + plankHeight / 2, zeroY + length - plankWidth / 2);
+    plank2.position.set(zeroX + width / 2, zeroZ + plankHeight / 2, zeroY + plankWidth / 2);
+
+
+    let crossPlank1 = getPlank(plankWidth, plankHeight, length - plankWidth);
+    let crossPlank2 = crossPlank1.clone();
+
+    crossPlank1.position.set(zeroX + plankWidth / 2, zeroZ + plankHeight / 2, zeroY + (length - plankWidth) / 2);
+    crossPlank2.position.set(zeroX + width - plankWidth / 2, zeroZ + plankHeight / 2, zeroY + (length - plankWidth) / 2);
+
+
+    singleGeometry.mergeMesh(crossPlank1);
+    singleGeometry.mergeMesh(crossPlank2);
+
+
+    let boardNumber = 6;
+    let spaceFraction = 2 / 3;
+    let boardWidth = width * spaceFraction / boardNumber;
+    let boardHeight = fullHeight * 1 / 5;
+
+    let startX = (boardWidth / 2);
+    let incrementX = (width - boardNumber * boardWidth) / (boardNumber - 1) + boardWidth;
+
+
+    let board1 = getPlank(boardWidth, boardHeight, length);
+    for (let i = 0; i < boardNumber; i++) {
+        let b = board1.clone();
+        b.position.set(zeroX + startX + i * incrementX, zeroZ + fullHeight - boardHeight / 2, zeroY + length / 2);
+        singleGeometry.mergeMesh(b);
+    }
+
+    singleGeometry.mergeMesh(plank1);
+    singleGeometry.mergeMesh(plank2);
+
+    let m = new Three.MeshPhongMaterial({ color: String(COLORS.PLANK) });
+
+    let fullMesh = new Three.Mesh(singleGeometry, m);
+
+
+
+    callback(fullMesh, fullHeight);
+};
 
 interface VisualizerProps {
     palletConfig: SavedPalletConfiguration;
@@ -267,7 +324,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         //        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
 
         let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
-        hemiLight.position.set(0, 20, 0);
+        hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
 
         let dirLight = new Three.DirectionalLight(0xffffff);
@@ -279,7 +336,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         dirLight.shadow.camera.right = 10;
         dirLight.shadow.camera.near = 0.1;
         dirLight.shadow.camera.far = 40;
-        scene.add(dirLight);
+        // scene.add(dirLight);
 
         // ground
         var groundMesh = new Three.Mesh(
@@ -295,9 +352,12 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         groundMesh.position.set(0, -1, 0);
         scene.add(groundMesh);
 
+        var axesHelper = new Three.AxesHelper(5);
+        scene.add(axesHelper);
+
         let camera = get_camera(width, height);
-        let distance = 1.4
-        camera.position.set(distance, 0.75, distance);
+        let distance = 2
+        camera.position.set(distance, distance, distance);
         camera.lookAt(0, -0.1, 0);
 
         let render_scene = () => {
@@ -345,35 +405,56 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
             let frameNorm = FrameNorm(frameDims);
 
+            // Look at frame center
+
             // Loop through the things and get them all
             palletConfig.config.pallets.forEach((p: PalletGeometry) => {
                 let { width, length } = getPalletDimensions(p);
 
                 let height = 5;
 
+                console.log("Pallet Dims ", width, length);
+
                 width /= frameNorm;
                 height /= frameNorm;
                 length /= frameNorm;
 
+                console.log("Pallet Dims ", width, length);
                 let { x, y, z } = getCenterOfPallet(p);
+
+                console.log("Center of pallet: ", getCenterOfPallet(p));
 
                 x /= frameNorm;
                 y /= frameNorm;
                 z /= frameNorm;
-                z = - height / 2;
+                console.log(z);
+                z = - height;
+                console.log(z);
+                // z = - height;
 
-                GetPalletMesh(width, height, length, (palletMesh: Three.Mesh) => {
-
+                GetPalletMesh(width, height, length, (palletMesh: Three.Mesh, height: number) => {
+                    console.log("Mesh Position ", palletMesh.position);
+                    z = -height;
                     palletMesh.position.set(x, z, y);
+                    console.log("Mesh Position ", palletMesh.position);
                     controls.current?.add_mesh(palletMesh);
                 });
             });
+            // Identify by layer? -- associate to pallet?
+
+            let zHome = 1; // (-1 for bottom);
+
 
             palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
                 if (i < currentBoxNumber) {
+
+
                     let BoxName = "BOXNAME-" + String(i);
 
-                    let { dropLocation, dimensions } = b;
+                    let { dropLocation, dimensions, palletIndex } = b;
+
+                    let pallet = palletConfig.config.pallets[palletIndex];
+
                     let { width, height, length } = dimensions;
 
                     width /= frameNorm;
@@ -387,10 +468,8 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
                     x /= frameNorm;
                     y /= frameNorm;
-                    z /= frameNorm;
-                    z -= height / 2;
-
-
+                    z = 0;
+                    z += zHome * height / 2;
 
                     console.log(x, y, z, "Box positions", height, "height");
 

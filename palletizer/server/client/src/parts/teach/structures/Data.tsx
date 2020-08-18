@@ -135,8 +135,6 @@ export interface LayoutObject {
 };
 
 
-
-
 export interface CoordinateRot {
     x: number,
     y: number,
@@ -150,6 +148,7 @@ export interface BoxCoordinates {
     pickLocation: Coordinate;
     dropLocation: CoordinateRot;
     dimensions: BoxDimensions;
+    palletIndex: number;
 };
 
 

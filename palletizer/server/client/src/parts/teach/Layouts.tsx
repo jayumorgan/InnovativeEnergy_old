@@ -23,27 +23,50 @@ interface RotateIconProps {
 }
 
 function RotateIcon({ size, rotate }: RotateIconProps) {
-    let dString: string;
-    if (rotate) {
-        dString = "M 10 10 C 10 10, 90 10, 90 90";
-    } else {
-        dString = "M 90 90 C 90 90, 90 10 10 10";
-    }
+    let dString: string = "M 35 15 L 35 15, 70 15 C 75 15, 75 15, 75 35 L 75 35 75 55";
 
     let scale = Math.round(size / 100 * 10) / 10;
+
     let scaleString = `scale(${scale}, ${scale})`;
 
-    let polygonPoints = ""
+    let polygonPoints = "";
+
+    let rectProps: Rect = {
+        x: 10,
+        y: 30,
+        width: 50,
+        height: 50,
+        fill: "none",
+        stroke: "black",
+        strokeWidth: 3
+    };
+
+    let pathProps = {
+        d: dString,
+        stroke: "black",
+        strokeWidth: size / 15,
+        fill: "transparent",
+    } as any;
+
+    if (!rotate) {
+        pathProps.markerStart = "url(#arrowheadback)";
+    } else {
+        pathProps.markerEnd = "url(#arrowhead)";
+    }
 
     return (
         <svg width={size} height={size}>
-
             <g transform={scaleString}>
-                <marker id="arrowhead" markerWidth={size / 20} markerHeight={size / 20}
-                    refX="0" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" />
+                <marker id="arrowhead" markerWidth={5} markerHeight={4}
+                    refX="0" refY="2" orient="auto">
+                    <polygon points="0 0, 5 2, 0 4" />
                 </marker>
-                <path d={dString} stroke="black" strokeWidth={size / 15} fill="transparent" markerEnd="url(#arrowhead)" />
+                <marker id="arrowheadback" markerWidth={5} markerHeight={4}
+                    refX="2.5" refY="2" orient="auto">
+                    <polygon points="5 0, 0 2, 5 4" />
+                </marker>
+                <rect {...rectProps} />
+                <path {...pathProps} />
             </g>
         </svg>
     );
@@ -730,7 +753,7 @@ function BoxCell({ box, index }: BoxCellProps) {
 
                 </div>
                 <div className="Rotate" onClick={toggleRotate}>
-                    {isRotated ? <Clockwise /> : <CounterClockwise />}
+                    <RotateIcon size={50} rotate={!isRotated} />
                 </div>
             </div>
         </div>

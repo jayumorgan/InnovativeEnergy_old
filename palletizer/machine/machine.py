@@ -81,7 +81,7 @@ class Machine:
         deploy = read_env()
         # deploy = True
         print(f"Running Production Environment: {deploy}")
-        deploy = True
+        #deploy = True
         self.Machines = []
 
         if deploy:
@@ -427,6 +427,7 @@ class Palletizer(pc.PalletizerControl):
     def control_checks(self, interrupted=False):
         # Use walrus operator if python 3.8
         while True:
+            sleep(0.3)
             command = self.get_command()
             self.command_status_update(command)
             if interrupted:
