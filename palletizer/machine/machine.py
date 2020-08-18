@@ -45,6 +45,9 @@ class Machine:
 
         axes = self.machine_config["AXES"]
 
+        self.highAccel = 700
+        self.lowAccel = 500
+
         self.x = axes["x"]
         self.x_0 = 0
 
@@ -209,29 +212,50 @@ class Machine:
         x_drive_index = self.x["DRIVE"]
         y_machine_index = self.y["MACHINE"]
         y_drive_index = self.y["DRIVE"]
-        if isPicking:
-            if "i" in point:
-                self.move_rotation(point["i"])
-            else:
-                self.move_rotation(False)
+        i_machine_index = self.i["MACHINE"]
+        i_drive_index = self.i["DRIVE"]
+
+        self.Machines[x_machine_index].emitAcceleration(self.highAccel)
+        self.Machines[y_machine_index].emitAcceleration(self.highAccel)
+
+        # if isPicking:
+        #     if "i" in point:
+        #         self.move_rotation(point["i"])
+        #     else:
+        #         self.move_rotation(False)
+
+        hasAngle = "i" in point
+        i_coordinate = NINETY_DEG if (not hasAngle or not point["i"]) else 0
 
         if x_machine_index == y_machine_index:
             self.Machines[x_machine_index].emitCombinedAxesAbsoluteMove(
                 [x_drive_index, y_drive_index], [x, y])
+            self.Machines[i_machine_index].emitAbsoluteMove(
+                i_drive_index, i_coordinate)
         else:
+            if x_machine_index == i_machine_index:
+                self.Machines[x_machine_index].emitCombinedAxesAbsoluteMove(
+                    [x_drive_index, i_drive_index], [x, i_coordinate])
+            else:
+                self.Machines[i_machine_index].emitAbsoluteMove(
+                    i_drive_index, i_coordinate)
+
             self.Machines[x_machine_index].emitAbsoluteMove(x_drive_index, x)
             self.Machines[y_machine_index].emitAbsoluteMove(y_drive_index, y)
-        if not isPicking:
-            if "i" in point:
-                self.move_rotation(point["i"])
-            else:
-                self.move_rotation(False)
+        # if not isPicking:
+        #     if "i" in point:
+        #         self.move_rotation(point["i"])
+        #     else:
+        #         self.move_rotation(False)
 
         self.Machines[x_machine_index].waitForMotionCompletion()
         self.Machines[y_machine_index].waitForMotionCompletion()
+        self.Machines[i_machine_index].waitForMotionCompletion()
 
     def move_vertical(self, point):  # point is z_coordinate
         z_machine_index = self.z["MACHINE"]
+        self.Machines[z_machine_index].emitAcceleration(self.lowAccel)
+
         self.Machines[z_machine_index].emitAbsoluteMove(
             self.z["DRIVE"], point["z"])
         self.Machines[z_machine_index].waitForMotionCompletion()
