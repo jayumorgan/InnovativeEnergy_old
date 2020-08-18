@@ -30,7 +30,7 @@ NO_TURN = 0
 
 MIN_HEIGHT_OFFSET = 100
 
-NINETY_DEG = 87
+NINETY_DEG = 90
 # IN MM
 
 
@@ -177,7 +177,9 @@ class Machine:
         #self.move_planar({"x": 0, "y": 0})
         self.home_axis(self.x)
         self.home_axis(self.y)
-        self.home_axis(self.i)
+        #self.home_axis(self.i)
+        #self.move_rotation(NINETY_DEG)
+
         self.move_vertical(vertical_point)
         # self.home_axis(self.i)
 
@@ -192,28 +194,38 @@ class Machine:
         machine_index = self.i["MACHINE"]
         drive_index = self.i["DRIVE"]
         if value:
+            self.Machines[machine_index].emitAbsoluteMove(drive_index, 0)
+        else:
             self.Machines[machine_index].emitAbsoluteMove(
                 drive_index, NINETY_DEG)
-        else:
-            self.Machines[machine_index].imitAbsoluteMove(drive_index, 0)
 
         self.Machines[machine_index].waitForMotionCompletion()
 
-    def move_planar(self, point):  # Point is 2D [x,y] coordinate.
+    def move_planar(self, point, isPicking):  # Point is 2D [x,y] coordinate.
         self.move_vertical({"z": self.z_0})
-        if "i" in point:
-            self.move_rotation(point["i"])
+
         [x, y] = [point["x"], point["y"]]
         x_machine_index = self.x["MACHINE"]
         x_drive_index = self.x["DRIVE"]
         y_machine_index = self.y["MACHINE"]
         y_drive_index = self.y["DRIVE"]
+        if isPicking:
+            if "i" in point:
+                self.move_rotation(point["i"])
+            else:
+                self.move_rotation(False)
+
         if x_machine_index == y_machine_index:
             self.Machines[x_machine_index].emitCombinedAxesAbsoluteMove(
                 [x_drive_index, y_drive_index], [x, y])
         else:
             self.Machines[x_machine_index].emitAbsoluteMove(x_drive_index, x)
             self.Machines[y_machine_index].emitAbsoluteMove(y_drive_index, y)
+        if not isPicking:
+            if "i" in point:
+                self.move_rotation(point["i"])
+            else:
+                self.move_rotation(False)
 
         self.Machines[x_machine_index].waitForMotionCompletion()
         self.Machines[y_machine_index].waitForMotionCompletion()
@@ -224,19 +236,21 @@ class Machine:
             self.z["DRIVE"], point["z"])
         self.Machines[z_machine_index].waitForMotionCompletion()
 
-    def move_all(self, point):
-        self.move_planar(point)
+    def move_all(self, point, isPicking):
+        self.move_planar(point, isPicking)
+
         self.move_vertical(point)
 
     def move_to_pick(self, count):
         coordinate = self.pickCoordinates[count]
         print("Moving to Pick Location: ", self.pickCoordinates[count])
-        self.move_all(coordinate)
+
+        self.move_all(coordinate, True)
 
     def move_to_drop(self, index):
         coordinate = self.dropCoordinates[index]
         print("Moving to Drop Coordinate", coordinate)
-        self.move_planar(coordinate)
+        self.move_planar(coordinate, False)
         self.move_vertical(coordinate)
 
     def __read_io(self, machine_index, network_id, pin):

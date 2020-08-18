@@ -108,7 +108,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
             let { boxPositions, height } = Layouts[n];
 
             // Change this to minus if Z-home is at the top of the machine.
-            currentHeightIncrement += height;
+            currentHeightIncrement -= height;
 
             boxPositions.forEach((b: BoxPositionObject) => {
                 let { box, position, rotated } = b;
@@ -121,7 +121,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let boxLength = box.dimensions.length;
                 let temp = boxWidth;
                 boxWidth = rotated ? boxLength : boxWidth;
-                boxLength = rotated ? boxWidth : boxLength;
+                boxLength = rotated ? temp : boxLength;
 
                 //compute the middle of the box shift.
                 let boxXmid = boxWidth / 2;
@@ -131,37 +131,49 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 // Move along the X axis defined by the pallet.
                 let Ydirection = Subtract3D(corner1, corner2);
                 let Xdirection = Subtract3D(corner3, corner2);
+
+                console.log(Xdirection, Ydirection);
                 // form the two vectors that specify the position
                 let x_pos = MultiplyScalar(Xdirection, x);
                 let y_pos = MultiplyScalar(Ydirection, 1 - y); // Due to top left -> bottom left coordinate shift on y-axis.
 
+                console.log("First X, Y pos", x_pos, y_pos);
+
                 let Xunit = MultiplyScalar(Xdirection, 1 / Norm(Xdirection));
                 let Yunit = MultiplyScalar(Ydirection, 1 / Norm(Ydirection));
+
+                console.log(Xunit, Yunit, "Unit Vectors");
+
+                console.log("Box Mids X,Y", boxXmid, boxYmid);
+
 
                 x_pos = Add3D(x_pos, MultiplyScalar(Xunit, boxXmid));
                 y_pos = Add3D(y_pos, MultiplyScalar(Yunit, -boxYmid)); // Again; top left -> bottom left coordinate shift.
 
-                x_pos = Add3D(x_pos, corner2);
-                y_pos = Add3D(y_pos, corner2);
+                let averagePosition = Add3D(x_pos, y_pos);
 
-                let z_add = currentHeightIncrement;
-                //console.log(z_add);
-
-                let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
-                box_position.z = z_add;
-
-
+                averagePosition = Add3D(averagePosition, corner2);
 
 		/* 
-		 *                 box_position = {
-		 *                     x: b,
-		 *                     y: Math.round(box_position.y * 100) / 100,
-		 *                     z: Math.round(box_position.z * 100) / 100
-		 *                 } as Coordinate; */
+		 * x_pos = Add3D(x_pos, corner2);
+		 * y_pos = Add3D(y_pos, corner2); */
+
+                let z_add = currentHeightIncrement;
+
+                averagePosition.z = z_add;
+
+                //console.log(z_add);
+
+                // console.log(x_pos, y_pos, "x , y pos");
+
+                // let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
+                // console.log(box_position, "Box Position");
+                // box_position.z = z_add;
+                //
 
                 boxCoordinates.push({
                     pickLocation,
-                    dropLocation: { ...box_position, i: rotated },
+                    dropLocation: { ...averagePosition, i: rotated },
                     dimensions: box.dimensions
                 } as BoxCoordinates);
             });
