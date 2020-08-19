@@ -321,7 +321,7 @@ class Palletizer(pc.PalletizerControl):
 
         print("Starting Palletizer")
 
-        self.start(0)
+        self.start(4)
 
     def start(self, count):
 
@@ -332,7 +332,8 @@ class Palletizer(pc.PalletizerControl):
             "status": "Waiting" if self.state["cycle"] == 0 else "Complete",
             "total_box": self.total_box_count,
             "palletConfig": self.machine.pallet_config,
-            "time": 0
+            "time": 0,
+            "current_box": count
         })
 
         self.control_checks(interrupted=True)

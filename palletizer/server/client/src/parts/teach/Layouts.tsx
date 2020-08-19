@@ -193,17 +193,29 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let cx = xl + (xh - xl) / 2;
             let cy = yl + (yh - yl) / 2;
 
-
-            newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
-            newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
-            newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
-            newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
+	    let xWidth = newR.width as number;
+	    let yWidth = newR.height as number;
 
 
-            newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
-            newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
-            newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
-            newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY);
+            /* newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
+	     * newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
+	     * newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
+	     * newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
+	     */
+	    let highFrac = 784/1003;
+	    let lowFrac = 219/1003;
+
+
+	    newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * lowFrac), newR.width as number ,thresholdX);
+	    newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * highFrac), newR.width as number , thresholdX);
+
+	    newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * lowFrac), newR.height as number, thresholdY);
+	    newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * highFrac), newR.height as number, thresholdY);
+
+            /* newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
+	     * newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
+	     * newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
+	     * newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY); */
 
 
 

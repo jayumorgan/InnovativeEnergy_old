@@ -90,10 +90,15 @@ function getPalletExtrema(p: PalletGeometry) {
 
 function FrameNorm(f: FrameDimensions) {
     let dx = f.xh - f.xl;
+
+    console.log(dx);
+    
     let dy = f.yh - f.yl;
+
+    console.log(dy);
     let dz = f.h;
 
-    return Math.sqrt(dx ** 2 + dy ** 2 + dz ** 2);
+    return Math.sqrt(dx ** 2 + dy ** 2) / Math.sqrt(2);
 };
 
 
@@ -346,14 +351,14 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         groundMesh.position.set(0, -1, 0);
         scene.add(groundMesh);
 
-        var axesHelper = new Three.AxesHelper(5);
-        scene.add(axesHelper);
-
+        /* var axesHelper = new Three.AxesHelper(5);
+	 * scene.add(axesHelper);
+	 */
         let camera = get_camera(width, height);
-        let distance = 1.4
-        camera.position.set(distance, distance - 0.2, distance);
+        let distance = 1.2
+        camera.position.set(- distance * 2, distance + 0.5, 0.5);
         //camera.rotateY(Math.PI / 2);
-        camera.lookAt(0, -0.1, 0);
+        camera.lookAt(-0.5, 0.25, 0.5);
 
         let render_scene = () => {
             renderer.render(scene, camera);
@@ -368,7 +373,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
             let box = scene.getObjectByName(n);
             if (box) {
                 scene.remove(box);
-            }
+            };
         };
 
         let handleResize = () => {
@@ -410,9 +415,11 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
                 let { x, y, z } = getCenterOfPallet(p);
 
-                x /= frameNorm;
+                x /= frameNorm * -1;
                 y /= frameNorm;
                 z /= frameNorm;
+
+		console.log("x ,y ", x , y);
 
                 z = - height;
                 // z = - height;
@@ -428,6 +435,15 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
             let zHome = 1; // (-1 for bottom);
 
 
+	    let getPalletHeight = (p:PalletGeometry) => {
+		let {corner1, corner2, corner3} = p;
+		let z1 = corner1.z;
+		let z2 = corner2.z;
+		let z3 = corner3.z;
+		return (z1 + z2 + z3) / 3;
+	    }
+	    
+
             palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
                 if (i < currentBoxNumber) {
 
@@ -436,6 +452,9 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                     let { dropLocation, dimensions, palletIndex } = b;
 
                     let pallet = palletConfig.config.pallets[palletIndex];
+
+		    let palletHeight = getPalletHeight(pallet);
+		    
 
                     let { width, height, length } = dimensions;
 
@@ -448,10 +467,13 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
                     let { x, y, z } = dropLocation;
 
-                    x /= frameNorm;
+		    let delta_z = palletHeight - z;
+		    delta_z /= frameNorm;
+
+                    x /= frameNorm * -1;
                     y /= frameNorm;
                     z = 0;
-                    z += zHome * height / 2;
+                    z += delta_z - height / 2;
 
                     box.position.set(x, z, y);
 

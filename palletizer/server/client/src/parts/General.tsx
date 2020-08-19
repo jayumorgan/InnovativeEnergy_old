@@ -34,8 +34,6 @@ var control = MQTTControl();
 // Support Functions:
 function make_time_string(hours: number, minute: number): string {
 
-
-
     let hour_string = String(hours);
     let minute_string = minute < 10 ? `0${minute}` : String(minute);
     return hour_string + ":" + minute_string;
@@ -144,7 +142,7 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
             </ConfigCell>
             <ConfigCell title={box_title}>
                 <div className="BoxStartItem">
-                    <input type="text" name={box_title} onChange={handle_input} value={start_box} />
+                    <input type="text" name={box_title} onChange={handle_input} value={current_box} />
                 </div>
             </ConfigCell>
             <div className="ButtonGrid">

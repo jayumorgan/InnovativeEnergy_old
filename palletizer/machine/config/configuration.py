@@ -8,7 +8,7 @@ FILE_PATH = pathlib.Path(__file__).parent.absolute()
 print(FILE_PATH)
 
 PALLET_FILE_PATH = pathlib.Path(__file__).parent.absolute()
-PALLET_FILE_PATH = PALLET_FILE_PATH.joinpath("PC1.json")
+PALLET_FILE_PATH = PALLET_FILE_PATH.joinpath("GOOD.json")
 
 
 def load_config(name, machine):
@@ -16,8 +16,8 @@ def load_config(name, machine):
     filename = filename.joinpath("machine" if machine else "pallet")
     filename = filename.joinpath(name)
 
-    # if not machine:
-    #     filename = PALLET_FILE_PATH
+    if not machine:
+        filename = PALLET_FILE_PATH
 
     print(filename)
 
