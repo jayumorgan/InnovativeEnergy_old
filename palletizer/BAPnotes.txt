@@ -1,7 +1,0 @@
-Machine Motion 2 (Right) (192.168.0.2)
-- First Axis controls X (l/r from table)
-- Second Axis Controls Y (Nothin)
-
--Third Axis controls rotation. 
-
-
