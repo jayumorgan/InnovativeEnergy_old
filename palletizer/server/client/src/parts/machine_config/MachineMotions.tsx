@@ -34,10 +34,37 @@ export interface MachineMotion {
 
 interface DropDownProps {
     name: string;
+    currentValue: MM_VERSION
+    handleSelect: (m: MM_VERSION) => void;
 }
 
-function DropDown({ name }: DropDownProps) {
+function DropDown({ name, currentValue, handleSelect }: DropDownProps) {
 
+    let options = [MM_VERSION.ONE, MM_VERSION.TWO] as MM_VERSION[];
+
+    let onChange = (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        handleSelect(val);
+    };
+
+    return (
+        <div className="PropertyInput">
+            <div className="Name">
+                {name + ":"}
+            </div>
+            <div className="Input">
+                <select value={currentValue as number} onChange={onChange} >
+                    {options.map((o: MM_VERSION, i: number) => {
+                        return (
+                            <option value={o as number}>
+                                {"V" + String(o)}
+                            </option>
+                        )
+                    })}
+                </select>
+            </div>
+        </div>
+    );
 }
 
 
@@ -310,6 +337,16 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             }
         };
 
+        let dropDownProps: DropDownProps = {
+            name: "Version",
+            currentValue: editingMachine.version,
+            handleSelect: (e: MM_VERSION) => {
+                let nm = { ...editingMachine };
+                nm.version = e;
+                setEditingMachine(nm);
+            }
+        };
+
 
         return (
             <ContentItem {...contentItemProps} >
@@ -323,6 +360,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                                 <input value={editingMachine.name} onChange={updateEditingName} />
                             </div>
                         </div>
+                        <DropDown {...dropDownProps} />
                         <PropertyInput {...ipProps} />
                         <PropertyInput {...gatewayProps} />
                         <PropertyInput {...netmaskProps} />
