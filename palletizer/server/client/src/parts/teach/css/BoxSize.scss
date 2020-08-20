@@ -97,7 +97,6 @@
                     border-radius: $border-radius;
                     background-color: $desert-storm;
                     justify-content: flex-start;
-
                     display: grid;
                     grid-template-rows: 100%;
                     grid-template-columns: 12% 30% 38% 20%;
@@ -112,12 +111,10 @@
                             height: auto;
                         }
 
-
                         .BoxMount {
                             height: 100%;
                             width: 100%;
                             @include flex-center();
-
 
                             canvas {
                                 height: 100%;
@@ -177,7 +174,7 @@
                         padding-right: 10%;
 
                         .EditButton {
-                            width: 40%;
+                            width: 70%;
                             height: 40%;
                             @include flex-center();
 

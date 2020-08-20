@@ -132,7 +132,9 @@
                  font-size: $large-font;
                  color: white;
                  height: 65%;
-                 width: 50%;
+                 width: auto;
+                 padding-left: $margin * 2;
+                 padding-right: $margin * 2;
 
                  svg {
                      line {
