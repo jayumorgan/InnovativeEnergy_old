@@ -14,9 +14,10 @@ interface NameProps {
     changeName: (s: string) => void;
     handleStart: () => void;
     existing: boolean;
+    isPallet: boolean;
 }
 
-export default function TeachModeName({ name, close, changeName, handleStart, existing }: NameProps) {
+export default function TeachModeName({ name, close, changeName, handleStart, existing, isPallet }: NameProps) {
 
     let icon_size = 25;
     let onChange = (e: ChangeEvent) => {
@@ -24,8 +25,9 @@ export default function TeachModeName({ name, close, changeName, handleStart, ex
         changeName(newName);
     };
 
-    let title = existing ? "Edit the name of your pallet configuration" : "Enter a name for your new pallet configuration";
+    let typeName = isPallet ? "pallet" : "machine";
 
+    let title = existing ? `Edit the name of your ${typeName} configuration` : `Enter a name for your new ${typeName} configuration`;
 
     return (
         <div className="TeachModeNameStart">

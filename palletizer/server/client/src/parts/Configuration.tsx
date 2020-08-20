@@ -4,6 +4,8 @@ import Modal, { Editor, Unlock } from "./Modal";
 
 import PalletConfigurator from "./TeachMode";
 
+import MachineConfigurator from "./MachineConfig";
+
 import { ConfigContext } from "../context/ConfigContext";
 
 import { ConfigState } from "../types/Types";
@@ -102,11 +104,12 @@ function Configuration() {
         machine: true
     });
 
-    console.log("Unlock for development");
-    let [locked, set_locked] = useState<boolean>(true);
+
+    let [locked, set_locked] = useState<boolean>(false);
 
     // True for development
     let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
+    let [add_machine_config, set_add_machine_config] = useState<boolean>(true);
 
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
@@ -147,8 +150,9 @@ function Configuration() {
         setEditPalletConfig(null);
     };
 
-
-
+    let new_machine = (val: boolean) => () => {
+        set_add_machine_config(val);
+    };
 
     let add_new_machine = () => {
         console.log("Add Machine Config");
@@ -164,6 +168,7 @@ function Configuration() {
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}
             {add_pallet_config && <PalletConfigurator close={new_pallet(false)} palletConfig={editPalletConfig} index={configCount} />}
+            {add_machine_config && <MachineConfigurator close={new_machine(false)} index={0} machineConfig={null} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );

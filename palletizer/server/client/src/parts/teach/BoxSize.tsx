@@ -327,8 +327,16 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
             </ContentItem>
         );
     } else {
+        let createBoxProps: CreateNewBoxProps = {
+            box: editingBox,
+            LeftButton,
+            RightButton,
+            updateBox: setEditingBox,
+            instructionNumber
+        };
+
         return (
-            <CreateNewBox box={editingBox} LeftButton={LeftButton} RightButton={RightButton} updateBox={setEditingBox} instructionNumber={instructionNumber} />
+            <CreateNewBox {...createBoxProps} />
         );
     }
 };

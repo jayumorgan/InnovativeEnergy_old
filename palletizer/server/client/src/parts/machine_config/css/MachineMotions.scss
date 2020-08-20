@@ -1,0 +1,62 @@
+@import "../../../master.scss";
+
+
+.MachineMotion {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 50% 50%;
+
+    .ImageContainer {
+        width: 99%;
+        height: 100%;
+        border: $container-border;
+        border-radius: $border-radius;
+        background-color: $desert-storm;
+
+        @include flex-center();
+
+        img {
+            width: 90%;
+            height: auto;
+        }
+    }
+
+
+    .ParameterContainer {
+        display: grid;
+        grid-template-rows: 15% 15% 70%;
+        grid-template-columns: 100%;
+
+        .Name {
+            display: grid;
+            grid-template-columns: 30% 70%;
+
+            .NamePrompt {
+                @include flex-center();
+                font-size: $large-font;
+                font-weight: $bold-font;
+                justify-content: flex-end;
+                padding-right: $margin;
+            }
+
+            .NameInput {
+                @include flex-center();
+                justify-content: flex-start;
+
+                input {
+                    width: 70%;
+                    font-size: $large-font;
+                    padding: $margin;
+                    color: $dark-blue;
+
+
+                }
+
+            }
+        }
+    }
+
+
+}

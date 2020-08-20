@@ -286,7 +286,7 @@ function PalletConfigurator({ close, index, palletConfig }: PalletConfiguratorPr
     if (teachState === PalletTeachState.CONFIG_NAME) {
         return (
             <Modal close={close}>
-                <Name name={configuration.name} close={close} changeName={setName} handleStart={handleNext} existing={palletConfig !== null} />
+                <Name name={configuration.name} close={close} changeName={setName} handleStart={handleNext} existing={palletConfig !== null} isPallet={true} />
             </Modal>
         );
     } else {
@@ -330,38 +330,3 @@ function PalletConfigurator({ close, index, palletConfig }: PalletConfiguratorPr
 };
 
 export default PalletConfigurator;
-
-/*
- * let allBoxes = [] as BoxObject[];
- *
- * let allPallets = [] as PalletGeometry[];
- *
- * for (let i = 0; i < 10; i++) {
- *
- *     let box = new BoxObject("Box " + String(i + 1), { width: 25, height: 25, length: 25 }, { x: 200, y: 200, z: 200 });
- *     allBoxes.push(box);
- *
- *     let c1: Coordinate = {
- *         x: 0,
- *         y: 100,
- *         z: 0
- *     };
- *     let c2: Coordinate = {
- *         x: 0,
- *         y: 0,
- *         z: 0
- *     };
- *     let c3: Coordinate = {
- *         x: 100,
- *         y: 0,
- *         z: 0
- *     };
- *     let pallet_name = "Pallet " + String(i + 1);
- *
- *     let pal = new PalletGeometry(pallet_name, c1, c2, c3);
- *
- *     allPallets.push(pal);
- * }
- *  */
-
-
