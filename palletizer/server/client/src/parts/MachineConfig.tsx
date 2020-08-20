@@ -9,10 +9,7 @@ import Name from "./teach/Name";
 
 import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
 
-
-
 import "./css/TeachMode.scss";
-
 
 interface MachineConfiguratorProps {
     close: () => void;
@@ -78,8 +75,6 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
 
     let [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
 
-
-
     let setName = (s: string) => {
         dispatch({
             type: MACHINE_ACTION.NAME,
@@ -107,20 +102,18 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
         }
     }
 
+    completionFraction.n = configState as number;
+
     let controlProps: any = {
         handleNext,
         handleBack,
         instructionNumber: completionFraction.n
-
     };
-
-    completionFraction.n = configState as number;
 
     let ChildElement: ReactElement = (<> </>);
 
     switch (configState) {
         case (MachineConfigState.CONFIG_NAME): {
-
             break;
         }
         case (MachineConfigState.ADD_MACHINE_MOTIONS): {
@@ -132,6 +125,7 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
             } as any;
 
             ChildElement = (<MachineMotions {...props} />);
+
             break;
         }
         default: {
@@ -139,8 +133,6 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
 
         }
     };
-
-
 
     if (configState === MachineConfigState.CONFIG_NAME) {
 

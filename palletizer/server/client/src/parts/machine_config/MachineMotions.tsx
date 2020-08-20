@@ -5,10 +5,23 @@ import ContentItem, { ButtonProps } from "../teach/ContentItem";
 
 import mmV1image from "./images/mmV1.png";
 
-
 import "./css/MachineMotions.scss";
 
+import "../teach/css/BoxSize.scss";
 
+
+function IPValidator(s: string): boolean {
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(s)) {
+        return true;
+    } else {
+        return false
+    }
+}
+
+export enum MM_VERSION {
+    ONE,
+    TWO
+};
 
 
 export interface MachineMotion {
@@ -16,13 +29,65 @@ export interface MachineMotion {
     ipAddress: string;
     gateway: string;
     netMask: string;
+    version: MM_VERSION;
 };
+
+interface DropDownProps {
+    name: string;
+}
+
+function DropDown({ name }: DropDownProps) {
+
+}
+
+
+interface PropertyInputProps {
+    name: string;
+    currentValue: string;
+    handleChange: (s: string) => void;
+    validator: (s: string) => boolean;
+};
+
+function PropertyInput({ name, currentValue, handleChange, validator }: PropertyInputProps) {
+    // We will wait un
+    let [valid, setValid] = useState<boolean>(validator(currentValue));
+    let [value, setValue] = useState<string>(currentValue);
+
+    let onChange = (e: ChangeEvent) => {
+        let s = (e.target as any).value;
+
+        let isValid = validator(s);
+        if (isValid) {
+            handleChange(s);
+        }
+        setValid(isValid);
+        setValue(s);
+    }
+
+    console.log(valid);
+
+    return (
+        <div className="PropertyInput">
+            <div className="Name">
+                {name + ":"}
+            </div>
+            <div className={"Input" + (valid ? " Valid" : "")} >
+                <input type="text" value={value} onChange={onChange} />
+            </div>
+        </div>
+    );
+}
+
+
+
+
 
 interface MachineCellProps {
     machine: MachineMotion,
     startEdit: () => void;
     editName: (s: string) => void;
 };
+
 
 
 function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
@@ -38,9 +103,7 @@ function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
         <div className="BoxCellContainer">
             <div className="BoxCell">
                 <div className="MiniRender">
-                    <div className="BoxMount">
-                        <img src={mmV1image} />
-                    </div>
+                    <img src={mmV1image} />
                 </div>
                 <div className="Name">
                     <input type="text" value={machine.name} onChange={handleName} />
@@ -71,10 +134,11 @@ function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
                         </span>
                     </div>
                 </div>
-                <div className="Trash">
-                    <span className="icon-delete">
-                    </span>
-                </div>
+
+            </div>
+            <div className="Trash">
+                <span className="icon-delete">
+                </span>
             </div>
         </div>
     );
@@ -96,7 +160,8 @@ function defaultMachine(index: number): MachineMotion {
         name: "Machine Motion " + String(index + 1),
         ipAddress: "192.168.7.2",
         gateway: "255.255.255.0",
-        netMask: "192.168.0.1"
+        netMask: "192.168.0.1",
+        version: MM_VERSION.ONE
     };
     return m;
 }
@@ -190,9 +255,11 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             <ContentItem {...contentItemProps} >
                 <div className="BoxSummary">
                     <div className="BoxScrollContainer">
-                        {allMachines.map((m: MachineMotion, index: number) => {
-                            return (<MachineCell key={index} startEdit={startEdit(index)} editName={editName(index)} machine={m} />)
-                        })}
+                        <div className="BoxScroll">
+                            {allMachines.map((m: MachineMotion, index: number) => {
+                                return (<MachineCell key={index} startEdit={startEdit(index)} editName={editName(index)} machine={m} />)
+                            })}
+                        </div>
                     </div>
                 </div>
             </ContentItem>
@@ -210,6 +277,40 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             RightButton,
         };
 
+        let ipProps: PropertyInputProps = {
+            name: "IP Address",
+            currentValue: editingMachine.ipAddress,
+            validator: IPValidator,
+            handleChange: (s: string) => {
+                let nm = { ...editingMachine };
+                nm.ipAddress = s;
+                setEditingMachine(nm);
+            }
+        }
+
+        let gatewayProps: PropertyInputProps = {
+            name: "Gateway",
+            currentValue: editingMachine.gateway,
+            validator: IPValidator,
+            handleChange: (s: string) => {
+                let nm = { ...editingMachine };
+                nm.gateway = s;
+                setEditingMachine(nm);
+            }
+        }
+
+        let netmaskProps: PropertyInputProps = {
+            name: "Subnet Mask",
+            currentValue: editingMachine.netMask,
+            validator: IPValidator,
+            handleChange: (s: string) => {
+                let nm = { ...editingMachine };
+                nm.netMask = s;
+                setEditingMachine(nm);
+            }
+        };
+
+
         return (
             <ContentItem {...contentItemProps} >
                 <div className="MachineMotion">
@@ -222,6 +323,10 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                                 <input value={editingMachine.name} onChange={updateEditingName} />
                             </div>
                         </div>
+                        <PropertyInput {...ipProps} />
+                        <PropertyInput {...gatewayProps} />
+                        <PropertyInput {...netmaskProps} />
+
                     </div>
                     <div className="ImageContainer">
                         <img src={mmV1image} />

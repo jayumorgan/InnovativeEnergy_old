@@ -26,8 +26,50 @@
 
     .ParameterContainer {
         display: grid;
-        grid-template-rows: 15% 15% 70%;
+        grid-template-rows: 15% 15% 15% 15%;
         grid-template-columns: 100%;
+
+        .PropertyInput {
+
+            display: grid;
+            grid-template-columns: 30% 70%;
+
+            .Name {
+                @include flex-center();
+                font-size: $large-font;
+                font-weight: $bold-font;
+                justify-content: flex-end;
+                padding-right: $margin;
+            }
+
+            .Input {
+                @include flex-center();
+                justify-content: flex-start;
+
+                input {
+                    width: 70%;
+                    font-size: $large-font;
+                    padding: $margin;
+                    color: $dark-blue;
+                }
+
+            }
+
+            .Valid {
+
+                input {
+                    border: 1pt solid $green;
+                    border-color: $green;
+                    @include cshadow($green);
+                }
+            }
+
+        }
+
+
+
+
+
 
         .Name {
             display: grid;

@@ -3,19 +3,6 @@
 
 
 
- @mixin jin-style($width, $fs) {
-     input {
-         border-radius: $border-radius;
-         color: $dark-blue;
-         border: $container-border;
-         font-size: $fs;
-         width: $width;
-         //padding: $margin;
-         // Testing this out.
-         text-align: center;
-     }
- }
-
  .CornerGrid {
      height: 100%;
      width: 100%;
