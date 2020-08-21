@@ -57,7 +57,7 @@ function DropDown({ name, currentValue, handleSelect }: DropDownProps) {
                     {options.map((o: MM_VERSION, i: number) => {
                         return (
                             <option value={o as number}>
-                                {"V" + String(o)}
+                                {"V" + String(o + 1)}
                             </option>
                         )
                     })}
@@ -186,8 +186,8 @@ function defaultMachine(index: number): MachineMotion {
     let m: MachineMotion = {
         name: "Machine Motion " + String(index + 1),
         ipAddress: "192.168.7.2",
-        gateway: "255.255.255.0",
-        netMask: "192.168.0.1",
+        netMask: "255.255.255.0",
+        gateway: "192.168.0.1",
         version: MM_VERSION.ONE
     };
     return m;
