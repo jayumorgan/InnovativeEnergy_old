@@ -10,8 +10,6 @@ import { MachineMotion } from "./MachineMotions";
 //---------------Images---------------
 import palletizerImage from "./images/palletizer.png";
 
-
-
 enum AXES {
     X,
     Y,
@@ -32,7 +30,7 @@ export interface Drive {
     axis: AXES;
     MachineMotionIndex: number;
     DriveNumber: DRIVE;
-}
+};
 
 
 interface DriveCellProps {
@@ -154,7 +152,6 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
         };
 
 
-
         return (
             <ContentItem {...contentItemProps}>
                 <div className="Drives">
@@ -207,7 +204,7 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
                 </div>
             </ContentItem>
         );
-    }
+    };
 };
 
 
