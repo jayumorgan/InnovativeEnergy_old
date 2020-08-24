@@ -155,6 +155,7 @@ function Configuration() {
     };
 
     let add_new_machine = () => {
+
         console.log("Add Machine Config");
     };
 
@@ -163,7 +164,7 @@ function Configuration() {
     return (
         <Fragment>
             <div className="ConfigContainer">
-                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_editor(machine_title)} start_add_config={add_new_machine} />
+                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_editor(machine_title)} start_add_config={new_machine(true)} />
                 <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={startPalletEditor} start_add_config={new_pallet(true)} />
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}

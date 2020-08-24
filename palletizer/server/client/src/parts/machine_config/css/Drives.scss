@@ -1,0 +1,151 @@
+@import "../../../master.scss";
+@import "../../css/TeachMode.scss";
+
+
+.Drives {
+    width: 100%;
+    height: 100%;
+    @include flex-center();
+
+    .DriveScrollContainer {
+
+        height: 100%;
+        width: 100%;
+
+        .DriveScroll {
+            margin: 1%;
+            width: 98%;
+            height: 96%;
+            max-height: $container-height * 8/10;
+            overflow: scroll;
+
+            .DriveCellContainer {
+                padding-top: 1%;
+                padding-left: 1%;
+                width: 99%;
+                height: $container-height / 7;
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 96% 4%;
+
+                .Trash {
+                    @include flex-center();
+
+                    span {
+                        cursor: pointer;
+                        font-size: $large-font;
+                        color: $red;
+                    }
+
+                    span:hover {
+                        font-weight: $bold-font;
+                    }
+                }
+
+                .DriveCell {
+                    cursor: pointer;
+                    width: 99%;
+                    height: 100%;
+                    border: $container-border;
+                    border-radius: $border-radius;
+                    background-color: $desert-storm;
+                    justify-content: flex-start;
+                    display: grid;
+                    grid-template-rows: 100%;
+                    grid-template-columns: 12% 30% 38% 20%;
+
+
+                }
+            }
+        }
+    }
+}
+
+
+.Configure {
+    height: 100%;
+    width: 99%;
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 50% 50%;
+
+    .DriveConfig {
+        height: 100%;
+        width: 100%;
+        display: grid;
+        grid-template-rows: 7% 15% 15% 15% 15% auto;
+        grid-template-columns: 100%;
+
+        .AxisName {
+            @include flex-center();
+            align-items: flex-start;
+
+            span {
+                font-size: $large-font;
+                font-weight: $bold-font;
+            }
+        }
+
+        .ConfigInput {
+            display: grid;
+            grid-template-columns: 30% 70%;
+
+            .Name {
+                @include flex-center();
+                font-size: $large-font;
+                font-weight: $bold-font;
+                justify-content: flex-end;
+                padding-right: $margin;
+            }
+
+            .Input {
+                @include flex-center();
+                justify-content: flex-start;
+
+                input {
+                    width: 70%;
+                    font-size: $large-font;
+                    padding: $margin;
+                    color: $dark-blue;
+                }
+
+                select {
+                    width: 85%;
+                    font-size: $large-font;
+                    padding: $margin;
+                    color: $dark-blue;
+                }
+
+            }
+        }
+    }
+
+
+    .DisplayContainer {
+        width: 100%;
+        height: 100%;
+        @include flex-center();
+
+
+        .Display {
+            border: $container-border;
+            border-radius: $border-radius;
+            background-color: $desert-storm;
+            width: 99%;
+            height: 100%;
+            @include flex-center();
+
+            img {
+
+                width: 95%;
+                height: auto;
+            }
+
+
+
+        }
+
+    }
+
+
+}

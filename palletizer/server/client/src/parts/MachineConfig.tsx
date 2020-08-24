@@ -5,9 +5,14 @@ import { Fraction } from "./teach/CompletionDots";
 
 import Modal from "./Modal";
 
-import Name from "./teach/Name";
 
+//---------------Configuration Steps---------------
+
+import Name from "./teach/Name";
 import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
+import Drives, { Drive } from "./machine_config/Drives";
+
+//---------------Style---------------
 
 import "./css/TeachMode.scss";
 
@@ -20,25 +25,29 @@ interface MachineConfiguratorProps {
 enum MachineConfigState {
     CONFIG_NAME,
     ADD_MACHINE_MOTIONS,
+    ADD_DRIVE_AXES,
 };
 
 
 interface MachineConfiguration {
     name: string;
     machines: MachineMotion[]; // String of IP Addresses
+    drives: Drive[];
 };
 
 
 function defaultConfiguration(index: number): MachineConfiguration {
     return {
         name: "Machine Configuration " + String(index + 1),
-        machines: [] as MachineMotion[]
+        machines: [] as MachineMotion[],
+        drives: [] as Drive[]
     } as MachineConfiguration;
 };
 
 enum MACHINE_ACTION {
     NAME,
     MACHINES,
+    DRIVES,
 };
 
 interface ReducerAction {
@@ -59,12 +68,14 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
         case MACHINE_ACTION.MACHINES: {
             return { ...state, machines: action.payload as MachineMotion[] };
         }
+        case MACHINE_ACTION.DRIVES: {
+            return { ...state, drives: action.payload as Drive[] };
+        }
         default: {
             return state;
         }
     }
 };
-
 
 
 function MachineConfigurator({ close, index, machineConfig }: MachineConfiguratorProps) {
@@ -86,6 +97,13 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
         dispatch({
             type: MACHINE_ACTION.MACHINES,
             payload: m as any
+        });
+    };
+
+    let setDrives = (d: Drive[]) => {
+        dispatch({
+            type: MACHINE_ACTION.DRIVES,
+            payload: d as any
         });
     };
 
@@ -117,15 +135,22 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
             break;
         }
         case (MachineConfigState.ADD_MACHINE_MOTIONS): {
-
             let props = {
                 allMachines: configuration.machines,
                 setMachines,
                 ...controlProps
             } as any;
-
             ChildElement = (<MachineMotions {...props} />);
-
+            break;
+        }
+        case (MachineConfigState.ADD_DRIVE_AXES): {
+            let props = {
+                allDrives: configuration.drives,
+                setDrives,
+                allMachines: configuration.machines,
+                ...controlProps
+            } as any;
+            ChildElement = (<Drives {...props} />);
             break;
         }
         default: {

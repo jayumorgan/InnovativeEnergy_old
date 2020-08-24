@@ -14,15 +14,14 @@ function IPValidator(s: string): boolean {
     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(s)) {
         return true;
     } else {
-        return false
+        return false;
     }
-}
+};
 
 export enum MM_VERSION {
     ONE,
     TWO
 };
-
 
 export interface MachineMotion {
     name: string;
@@ -36,7 +35,7 @@ interface DropDownProps {
     name: string;
     currentValue: MM_VERSION
     handleSelect: (m: MM_VERSION) => void;
-}
+};
 
 function DropDown({ name, currentValue, handleSelect }: DropDownProps) {
 
@@ -65,8 +64,7 @@ function DropDown({ name, currentValue, handleSelect }: DropDownProps) {
             </div>
         </div>
     );
-}
-
+};
 
 interface PropertyInputProps {
     name: string;
@@ -91,8 +89,6 @@ function PropertyInput({ name, currentValue, handleChange, validator }: Property
         setValue(s);
     }
 
-    console.log(valid);
-
     return (
         <div className="PropertyInput">
             <div className="Name">
@@ -105,17 +101,11 @@ function PropertyInput({ name, currentValue, handleChange, validator }: Property
     );
 }
 
-
-
-
-
 interface MachineCellProps {
     machine: MachineMotion,
     startEdit: () => void;
     editName: (s: string) => void;
 };
-
-
 
 function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
 
@@ -161,7 +151,6 @@ function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
                         </span>
                     </div>
                 </div>
-
             </div>
             <div className="Trash">
                 <span className="icon-delete">
@@ -171,7 +160,6 @@ function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
     );
 };
 
-
 interface MachineMotionsProps {
     allMachines: MachineMotion[];
     setMachines: (machines: MachineMotion[]) => void;
@@ -180,9 +168,7 @@ interface MachineMotionsProps {
     instructionNumber: number;
 };
 
-
 function defaultMachine(index: number): MachineMotion {
-
     let m: MachineMotion = {
         name: "Machine Motion " + String(index + 1),
         ipAddress: "192.168.7.2",
@@ -191,7 +177,7 @@ function defaultMachine(index: number): MachineMotion {
         version: MM_VERSION.ONE
     };
     return m;
-}
+};
 
 function MachineMotions({ allMachines, setMachines, handleBack, handleNext, instructionNumber }: MachineMotionsProps) {
 
@@ -201,9 +187,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
 
     let [editingMachine, setEditingMachine] = useState<MachineMotion>(defaultMachine(allMachines.length));
 
-
     let instruction = "Add Machine Motion Controllers";
-
 
     let LeftButton: ButtonProps = {
         name: "Back",
@@ -268,7 +252,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
         let AddButton: ButtonProps = {
             name: "Add new Machine Motion",
             action: startEdit(-1)
-        }
+        };
 
         let contentItemProps = {
             instruction,
@@ -292,7 +276,6 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             </ContentItem>
         );
 
-
     } else {
 
         instruction = "Define Machine Motion version and network parameters";
@@ -313,7 +296,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                 nm.ipAddress = s;
                 setEditingMachine(nm);
             }
-        }
+        };
 
         let gatewayProps: PropertyInputProps = {
             name: "Gateway",
@@ -324,7 +307,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                 nm.gateway = s;
                 setEditingMachine(nm);
             }
-        }
+        };
 
         let netmaskProps: PropertyInputProps = {
             name: "Subnet Mask",
@@ -347,7 +330,6 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             }
         };
 
-
         return (
             <ContentItem {...contentItemProps} >
                 <div className="MachineMotion">
@@ -364,7 +346,6 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                         <PropertyInput {...ipProps} />
                         <PropertyInput {...gatewayProps} />
                         <PropertyInput {...netmaskProps} />
-
                     </div>
                     <div className="ImageContainer">
                         <img src={mmV1image} />
