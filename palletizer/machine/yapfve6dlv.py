@@ -23,6 +23,13 @@ else:
     import http.client
 
 
+def parseMqttMessage(message):
+    if sys.version_info[0] < 3:
+        return json.loads(message.payload)
+    else:
+        return json.loads(message.payload.decode('utf-8'))
+
+
 class CONTROL_DEVICE_SIGNALS:
     SIGNAL0 = "SIGNAL0"
     SIGNAL1 = "SIGNAL1"
@@ -310,13 +317,6 @@ class GCode:
 # @status
 #
 class MachineMotion:
-    # Version independent MQTT parser
-    def __parseMessage(message):
-        if sys.version_info[0] < 3:
-            return json.loads(message.payload)
-        else:
-            return json.loads(message.payload.decode('utf-8'))
-    
     # Class variables
 
     validPorts = ["AUX1", "AUX2", "AUX3"]
@@ -327,9 +327,6 @@ class MachineMotion:
 
     def stopMqtt(self):
         self.myMqttClient.loop_stop()
-
-
-        
 
     # Class constructor
     def __init__(self, machineIp, gCodeCallback=None):
@@ -1654,9 +1651,11 @@ class MachineMotion:
 
         def mqttResponse():
             # Wait for response
-            return_value = self.__parseMessage(MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE,
+            return_value = json.loads(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE,
                                      retained=False,
-                                     hostname=self.IP))
+                                     hostname=self.IP).payload.decode('utf-8'))
+
             return
 
         mqttResponseThread = threading.Thread(target=mqttResponse)
@@ -1689,9 +1688,11 @@ class MachineMotion:
 
         def mqttResponse():
             # Wait for response
-            return_value = self.__parseMessage(MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE,
+            return_value = json.loads(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE,
                                      retained=False,
-                                     hostname=self.IP))
+                                     hostname=self.IP).payload.decode('utf-8'))
+
             return
 
         mqttResponseThread = threading.Thread(target=mqttResponse)
@@ -1725,9 +1726,11 @@ class MachineMotion:
 
         def mqttResponse():
             # Wait for response
-            return_value = self.__parseMessage(MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE,
+            return_value = json.loads(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE,
                                      retained=False,
-                                     hostname=self.IP))
+                                     hostname=self.IP).payload.decode('utf-8'))
+
             return
 
         mqttResponseThread = threading.Thread(target=mqttResponse)
@@ -1795,7 +1798,7 @@ class MachineMotion:
 
         if (deviceType == 'io-expander'):
             if (topicParts[3] == 'available'):
-                availability = self.__parseMessage(msg)
+                availability = json.loads(msg.payload.decode('utf-8'))
                 if (availability):
                     self.myIoExpanderAvailabilityState[device - 1] = True
                     return
@@ -1805,8 +1808,7 @@ class MachineMotion:
             pin = int(topicParts[4])
             if (not self.isIoExpanderInputIdValid(device, pin)):
                 return
-            value = int(self.__parseMessage(msg))
-
+            value = int(msg.payload.decode('utf-8'))
             if (not hasattr(self, 'digitalInputs')):
                 self.digitalInputs = {}
             if (not device in self.digitalInputs):
@@ -1814,12 +1816,12 @@ class MachineMotion:
             self.digitalInputs[device][pin] = value
             return
         if (deviceType == 'encoder'):
-            position = float(self.__parseMessage(msg))
+            position = float(msg.payload.decode('utf-8'))
             self.myEncoderRealtimePositions[device] = position
 
         if (topicParts[0] == MQTT.PATH.ESTOP):
             if (topicParts[1] == "status"):
-                self.eStopEvent(self.__parseMessage(msg))
+                self.eStopEvent(json.loads(msg.payload.decode('utf-8')))
 
         return
 

@@ -316,7 +316,7 @@ class MachineMotion:
             return json.loads(message.payload)
         else:
             return json.loads(message.payload.decode('utf-8'))
-    
+
     # Class variables
 
     validPorts = ["AUX1", "AUX2", "AUX3"]
@@ -327,9 +327,6 @@ class MachineMotion:
 
     def stopMqtt(self):
         self.myMqttClient.loop_stop()
-
-
-        
 
     # Class constructor
     def __init__(self, machineIp, gCodeCallback=None):
@@ -1654,7 +1651,8 @@ class MachineMotion:
 
         def mqttResponse():
             # Wait for response
-            return_value = self.__parseMessage(MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE,
+            return_value = self.__parseMessage(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE,
                                      retained=False,
                                      hostname=self.IP))
             return
@@ -1689,7 +1687,8 @@ class MachineMotion:
 
         def mqttResponse():
             # Wait for response
-            return_value = self.__parseMessage(MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE,
+            return_value = self.__parseMessage(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE,
                                      retained=False,
                                      hostname=self.IP))
             return
@@ -1725,7 +1724,8 @@ class MachineMotion:
 
         def mqttResponse():
             # Wait for response
-            return_value = self.__parseMessage(MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE,
+            return_value = self.__parseMessage(
+                MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE,
                                      retained=False,
                                      hostname=self.IP))
             return
