@@ -34,10 +34,10 @@ function getPalletExtrema(p: PalletGeometry) {
     let Y = [y1, y2, y3];
 
     let f: FrameDimensions = {
-        xl: Math.min(x1, x2, x3),
-        xh: Math.max(x1, x2, x3),
-        yl: Math.min(y1, y2, y3),
-        yh: Math.max(y1, y2, y3),
+        xl: Math.min(...X),
+        xh: Math.max(...X),
+        yl: Math.min(...Y),
+        yh: Math.max(...Y),
         h: 0
     };
 
@@ -47,14 +47,8 @@ function getPalletExtrema(p: PalletGeometry) {
 
 function FrameNorm(f: FrameDimensions) {
     let dx = f.xh - f.xl;
-
-    console.log(dx);
-
     let dy = f.yh - f.yl;
-
-    console.log(dy);
-    let dz = f.h;
-
+    //    let dz = f.h;
     return Math.sqrt(dx ** 2 + dy ** 2) / Math.sqrt(2);
 };
 
@@ -103,48 +97,13 @@ function parseConfig(pallet: SavedPalletConfiguration) {
     return f;
 };
 
-function get_camera(width: number, height: number): Three.PerspectiveCamera {
+function getCamera(width: number, height: number): Three.PerspectiveCamera {
     let camera = new Three.PerspectiveCamera(45, width / height, 1, 1000);
     camera.position.set(0, 1.2, 1.2);
     // camera.position.set(0, 2, 2);
     camera.lookAt(0, 0, 0);
     return camera;
 }
-
-function get_scene(): Three.Scene {
-    let scene = new Three.Scene();
-    scene = new Three.Scene();
-    scene.background = new Three.Color(0xf8f8f8);
-
-    let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
-    hemiLight.position.set(0, 20, 0);
-    scene.add(hemiLight);
-
-    let dirLight = new Three.DirectionalLight(0xffffff);
-    dirLight.position.set(0, 1, 1);
-    dirLight.castShadow = true;
-    dirLight.shadow.camera.top = 10;
-    dirLight.shadow.camera.bottom = - 10;
-    dirLight.shadow.camera.left = - 10;
-    dirLight.shadow.camera.right = 10;
-    dirLight.shadow.camera.near = 0.1;
-    dirLight.shadow.camera.far = 40;
-    scene.add(dirLight);
-
-    // ground
-    var groundMesh = new Three.Mesh(
-        new Three.PlaneBufferGeometry(40, 40),
-        new Three.MeshPhongMaterial({
-            color: 0xf8f8f8,
-            depthWrite: false
-        })
-    );
-
-    groundMesh.rotation.x = - Math.PI / 2;
-    groundMesh.receiveShadow = true;
-    scene.add(groundMesh);
-    return scene;
-};
 
 export function getCardboardBox(width: number, height: number, length: number): Three.Mesh {
     let geometry = new Three.BoxGeometry(width, height, length);
@@ -168,12 +127,6 @@ interface VisualizerControls {
     add_mesh: (mesh: Three.Mesh) => void;
     remove_mesh: (n: string) => void;
 };
-
-function get_box_name(box_number: number): string {
-    return "Box-" + String(box_number);
-};
-
-
 
 function getPlank(w: number, h: number, l: number) {
     let g = new Three.BoxGeometry(w, h, l);
@@ -248,7 +201,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
     let mount = useRef<HTMLDivElement>(null);
 
     let controls = useRef<VisualizerControls | null>(null);
-    let box_positions = useRef<Coordinate[] | null>(null);
+    //    let box_positions = useRef<Coordinate[] | null>(null);
 
     let [boxNames, setBoxNames] = useState<string[]>([]);
     let [palletNames, setPalletNames] = useState<string[]>([]);
@@ -298,7 +251,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         /* var axesHelper = new Three.AxesHelper(5);
 	 * scene.add(axesHelper);
 	 */
-        let camera = get_camera(width, height);
+        let camera = getCamera(width, height);
         let distance = 1.2
         camera.position.set(- distance * 2, distance + 0.5, 0.5);
         //camera.rotateY(Math.PI / 2);

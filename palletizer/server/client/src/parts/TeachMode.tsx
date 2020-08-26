@@ -5,7 +5,7 @@ import Modal from "./Modal";
 //import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
-import { PalletGeometry, BoxObject, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
+import { PalletGeometry, BoxObject, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
 
 //import ConfigurationName from "./teach/ConfigurationName";
 // import Jogger from "./teach/Jogger";
@@ -115,7 +115,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
 
-                let { height } = box.dimensions;
+
 
                 let boxWidth = box.dimensions.width;
                 let boxLength = box.dimensions.length;
@@ -219,7 +219,6 @@ function PalletConfigurator({ close, index, palletConfig }: PalletConfiguratorPr
 
     let handleBack = () => {
         if (teachState > 0) {
-            let state = teachState;
             setTeachState(--teachState);
         } else {
             close();

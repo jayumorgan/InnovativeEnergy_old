@@ -226,7 +226,7 @@ interface InformationLogProps {
     Type: string;
 }
 
-let time_count = 0;
+
 
 function InformationLog({ DateString, Description, Type }: InformationLogProps) {
 
@@ -237,20 +237,7 @@ function InformationLog({ DateString, Description, Type }: InformationLogProps) 
     let month = date.getMonth();
     let year = date.getFullYear();
 
-
-    let date_string = make_date_string(10, 8, year);
-
-    hours = 11;
-
-    let last: number = parseInt(minutes.toString().slice(-1));
-
-    console.log(time_count, Description);
-
-    if (Description === "Cycle has completed. Awaiting pallet change.") {
-        last += 3;
-    }
-    minutes = 30 + last;
-
+    let date_string = make_date_string(day, month, year);
     let time_string = make_time_string(hours, minutes);
 
     let image: ReactElement;

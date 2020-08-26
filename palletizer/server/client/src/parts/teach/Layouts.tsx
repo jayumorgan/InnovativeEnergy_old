@@ -240,7 +240,7 @@ export enum PALLETCORNERS {
 };
 
 export function IncreaseCorner(c: PALLETCORNERS) {
-    if (c == PALLETCORNERS.TOP_LEFT) {
+    if (c === PALLETCORNERS.TOP_LEFT) {
         return PALLETCORNERS.BOTTOM_LEFT;
     } else if (c === PALLETCORNERS.BOTTOM_LEFT) {
         return PALLETCORNERS.BOTTOM_RIGHT;
@@ -427,7 +427,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             let y = l * position.y + topY + svg_props.y;
 
             let scaleSize = b.size;
-            let scaleRatio = size / scaleSize;
 
             let { width, length } = box.dimensions;
 
@@ -467,7 +466,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
 
     if (corner) {
         let green = "rgb(91,196,126)"
-        let grey = "rgb(135,135,135)"
+        //        let grey = "rgb(135,135,135)"
         cornerCircleProps.r = 30;
         cornerCircleProps.fill = green;
         //cornerCircleProps.stroke = grey;
@@ -536,60 +535,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
     );
 
 };
-//---------------Box Image Props---------------
-interface BoxImageProps {
-    width: number;
-    length: number;
-}
-
-
-function BoxImage({ width, length }: BoxImageProps) {
-    let norm = Math.sqrt(width ** 2 + length ** 2);
-
-    let w = width / norm * 100;
-    let h = length / norm * 100;
-
-    let x = 50 - w / 2;
-    let y = 50 - h / 2;
-
-    let cardboard = "rgb(89,69,50)";
-    let box = "rgb(89,69,50)";
-
-    let rect: Rect = {
-        x,
-        y,
-        width: w,
-        height: h,
-        fill: box,
-        stroke: cardboard,
-        strokeWidth: "1"
-    };
-
-
-    return (
-        <svg width="100" height="100">
-            <g transform="scale(1,1)">
-                <rect {...rect} />
-            </g>
-        </svg>
-    )
-}
-
-
-interface DimensionCellProps {
-    axis: string;
-    value: number;
-}
-
-function DimensionCell({ axis, value }: DimensionCellProps) {
-    return (
-        <div className="DimensionCell">
-            <span>
-                {axis + ": " + String(value)}
-            </span>
-        </div>
-    );
-};
 
 interface LayoutCellProps {
     pallet: PalletGeometry;
@@ -602,7 +547,6 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
     let { name, boxPositions } = layout;
     let { width, length } = getPalletDimensions(pallet)
 
-    let iconSize = 30;
     let size = 100;
 
     let model_props = {
@@ -610,14 +554,12 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
         size,
         outerWidth: size,
         outerHeight: size,
-        boxes: layout.boxPositions
+        boxes: boxPositions
     } as LayoutModelProps;
 
     let round = (n: number) => {
         return Math.round(n * 10) / 10;
-
     };
-
 
     return (
         <div className="BoxCellContainer">
@@ -666,8 +608,6 @@ interface BoxCellProps {
 
 function BoxCell({ box, index }: BoxCellProps) {
 
-    let [isDragging, setIsDragging] = useState<boolean>(false);
-
     let [isRotated, setIsRotated] = useState<boolean>(false);
 
     let toggleRotate = () => {
@@ -681,14 +621,12 @@ function BoxCell({ box, index }: BoxCellProps) {
             isRotated
         } as any;
         ev.dataTransfer.setData("BoxData", JSON.stringify(transferData));
-        setIsDragging(true);
+        // setIsDragging(true);
     };
 
     let dragEnd = () => {
-        setIsDragging(false);
+        // setIsDragging(false);
     };
-
-
 
     let { width, height, length } = box.dimensions;
 
@@ -697,8 +635,6 @@ function BoxCell({ box, index }: BoxCellProps) {
         length: isRotated ? width : length,
         width: isRotated ? length : width
     };
-
-
 
     return (
         <div className="BoxContainer">
@@ -740,26 +676,6 @@ function BoxCell({ box, index }: BoxCellProps) {
         </div>
     );
 
-
-
-    return (
-        <div className="BoxCell" onDragStart={dragStart} onDragEnd={dragEnd} draggable>
-            <Box {...box.dimensions} />
-            <div className="BoxDetails">
-                <div className="BoxName">
-                    <span>
-                        {box.name}
-                    </span>
-                </div>
-                <div className="BoxDimensions">
-                    <DimensionCell axis={"Width"} value={box.dimensions.width} />
-                    <DimensionCell axis={"Length"} value={box.dimensions.length} />
-                    <DimensionCell axis={"Height"} value={box.dimensions.height} />
-                </div>
-            </div>
-        </div>
-    );
-
 };
 
 interface LayoutProps {
@@ -792,7 +708,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         outerHeight: 627
     };
 
-    let index = 0;
+    //    let index = 0;
     let haveLayout = false;
     let layoutCount = 0;
 
@@ -930,7 +846,7 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
 
 
     let instruction: string;
-    let placeholder = "Custom Layer " + String(1);
+    //  let placeholder = "Custom Layer " + String(1);
 
     let dragOver = (e: DragEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -942,8 +858,8 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
             let modelData = getModelData(allPallets[currentPalletIndex], modelSize);
             let { clientX, clientY } = e;
             let { x, y } = DisplayElement.current.getBoundingClientRect();
-            let prX = clientX - x;
-            let prY = clientY - y;
+            //let prX = clientX - x;
+            // let prY = clientY - y;
 
             let transferData = e.dataTransfer.getData("BoxData");
 
