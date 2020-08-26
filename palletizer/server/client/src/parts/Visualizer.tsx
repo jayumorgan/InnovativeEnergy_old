@@ -92,7 +92,7 @@ function FrameNorm(f: FrameDimensions) {
     let dx = f.xh - f.xl;
 
     console.log(dx);
-    
+
     let dy = f.yh - f.yl;
 
     console.log(dy);
@@ -103,6 +103,7 @@ function FrameNorm(f: FrameDimensions) {
 
 
 function parseConfig(pallet: SavedPalletConfiguration) {
+
     let usedPallets: PalletGeometry[] = (() => {
         let Ps = [] as PalletGeometry[];
         pallet.config.pallets.forEach((p: PalletGeometry) => {
@@ -188,18 +189,6 @@ function get_scene(): Three.Scene {
     return scene;
 };
 
-/* function get_green_cardboard_box(width: number, height: number, length: number): Three.Mesh {
- *     let box = get_cardboard_box(width, height, length);
- *     (box.material as Three.Material[]).forEach((mat: Three.Material) => {
- *         let m = mat as Three.MeshBasicMaterial;
- *         m.color.setRGB(0, 1, 0);
- * 
- *         // color = "rgb(250, 234, 47)"
- *     });
- *     return box;
- * };
- *  */
-
 export function getCardboardBox(width: number, height: number, length: number): Three.Mesh {
     let geometry = new Three.BoxGeometry(width, height, length);
     let material = new Three.MeshPhongMaterial({ color: String(COLORS.BOX) });
@@ -219,8 +208,8 @@ interface Coordinate { // To allow for angle.
 };
 
 interface VisualizerControls {
-    add_mesh(mesh: Three.Mesh): void;
-    removeBox: (n: string) => void;
+    add_mesh: (mesh: Three.Mesh) => void;
+    remove_mesh: (n: string) => void;
 };
 
 function get_box_name(box_number: number): string {
@@ -242,8 +231,6 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     let singleGeometry = new Three.Geometry();
 
     let fullHeight = height * 20;
-
-    //let singleGeometry = new Three.BoxGeometry(width, fullHeight, lenght);
 
     let zeroX = -width / 2;
     let zeroY = -length / 2;
@@ -267,7 +254,6 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
 
     singleGeometry.mergeMesh(crossPlank1);
     singleGeometry.mergeMesh(crossPlank2);
-
 
     let boardNumber = 6;
     let spaceFraction = 2 / 3;
@@ -308,6 +294,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
     let box_positions = useRef<Coordinate[] | null>(null);
 
     let [boxNames, setBoxNames] = useState<string[]>([]);
+    let [palletNames, setPalletNames] = useState<string[]>([]);
 
     useEffect(() => {
         let width = (mount.current as HTMLDivElement).clientWidth;
@@ -369,12 +356,12 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
             render_scene();
         };
 
-        let removeBox = (n: string) => {
-            let box = scene.getObjectByName(n);
-            if (box) {
-                scene.remove(box);
-            };
-        };
+        let remove_mesh = (n: string) => {
+            let m = scene.getObjectByName(n);
+            if (m) {
+                scene.remove(m);
+            }
+        }
 
         let handleResize = () => {
             if (mount.current) {
@@ -393,8 +380,9 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         render_scene();
         controls.current = {
             add_mesh,
-            removeBox
+            remove_mesh
         } as VisualizerControls;
+
     }, []);
 
     useEffect(() => {
@@ -403,8 +391,15 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
             let frameDims = parseConfig(palletConfig);
             let frameNorm = FrameNorm(frameDims);
 
+            let newPalletNames = [] as string[];
+
+            palletNames.forEach((pn: string) => {
+                controls.current?.remove_mesh(pn);
+            });
+
+
             // Loop through the things and get them all
-            palletConfig.config.pallets.forEach((p: PalletGeometry) => {
+            palletConfig.config.pallets.forEach((p: PalletGeometry, palletIndex: number) => {
                 let { width, length } = getPalletDimensions(p);
 
                 let height = 5;
@@ -418,43 +413,48 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                 x /= frameNorm * -1;
                 y /= frameNorm;
                 z /= frameNorm;
+                z = -1 * height;
 
-		console.log("x ,y ", x , y);
-
-                z = - height;
-                // z = - height;
+                let palletName = "PALLET-" + String(palletIndex);
+                newPalletNames.push(palletName);
 
                 GetPalletMesh(width, height, length, (palletMesh: Three.Mesh, fheight: number) => {
                     z = -fheight / 2;
                     palletMesh.position.set(x, z, y);
+                    palletMesh.name = palletName;
                     controls.current?.add_mesh(palletMesh);
                 });
             });
-            // Identify by layer? -- associate to pallet?
+
+            setPalletNames([...newPalletNames]);
 
             let zHome = 1; // (-1 for bottom);
 
+            let getPalletHeight = (p: PalletGeometry) => {
+                let { corner1, corner2, corner3 } = p;
+                let z1 = corner1.z;
+                let z2 = corner2.z;
+                let z3 = corner3.z;
+                return (z1 + z2 + z3) / 3;
+            }
+            let newBoxNames = [] as string[];
 
-	    let getPalletHeight = (p:PalletGeometry) => {
-		let {corner1, corner2, corner3} = p;
-		let z1 = corner1.z;
-		let z2 = corner2.z;
-		let z3 = corner3.z;
-		return (z1 + z2 + z3) / 3;
-	    }
-	    
+            boxNames.forEach((bn: string) => {
+                controls.current?.remove_mesh(bn);
+            });
 
             palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
                 if (i < currentBoxNumber) {
 
                     let BoxName = "BOXNAME-" + String(i);
 
+
                     let { dropLocation, dimensions, palletIndex } = b;
 
                     let pallet = palletConfig.config.pallets[palletIndex];
 
-		    let palletHeight = getPalletHeight(pallet);
-		    
+                    let palletHeight = getPalletHeight(pallet);
+
 
                     let { width, height, length } = dimensions;
 
@@ -465,10 +465,12 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                     let box = getCardboardBox(width, height, length);
                     box.name = BoxName;
 
+                    newBoxNames.push(BoxName);
+
                     let { x, y, z } = dropLocation;
 
-		    let delta_z = palletHeight - z;
-		    delta_z /= frameNorm;
+                    let delta_z = palletHeight - z;
+                    delta_z /= frameNorm;
 
                     x /= frameNorm * -1;
                     y /= frameNorm;
@@ -485,7 +487,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                 }
             });
 
-
+            setBoxNames([...newBoxNames]);
         }
     }, [palletConfig]);
 
