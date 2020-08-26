@@ -5,11 +5,6 @@ import { TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../M
 import SolidArrow, { ROTATION } from "./SolidArrow";
 
 
-import Up from "../images/up.png";
-import Down from "../images/down.png";
-import Left from "../images/left.png";
-import Right from "../images/right.png";
-
 import "./css/Jogger.scss";
 import { Coordinate } from './structures/Data';
 
@@ -109,14 +104,7 @@ interface JoggerProps {
 
 
 function Jogger({ selectAction, updateName, name }: JoggerProps) {
-    // get the machine configuration...
-
-    let directions: Directions[] = [
-        Directions.UP,
-        Directions.DOWN,
-        Directions.LEFT,
-        Directions.RIGHT
-    ];
+    // Get Machine Configuration for Setup.
 
     let [speed, setSpeed] = useState<number>(400);
     let [distance, setDistance] = useState<number>(300);

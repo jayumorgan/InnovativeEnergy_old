@@ -71,33 +71,6 @@ function RotateIcon({ size, rotate }: RotateIconProps) {
 };
 
 
-interface DropDownProps {
-    allPallets: PalletGeometry[];
-    selectPallet: (index: number) => void;
-    value: number;
-};
-
-function LayoutDropDown({ allPallets, value, selectPallet }: DropDownProps) {
-
-    let handleChange = (e: ChangeEvent) => {
-        let val: number = +(e.target as any).value;
-        selectPallet(val);
-    }
-
-    return (
-        <div className="LayoutDropDown">
-            <select value={value} onChange={handleChange}>
-                {allPallets.map((pallet: PalletGeometry, index: number) => {
-                    return (
-                        <option value={index} key={index}> {pallet.name} </option>
-                    );
-                })}
-            </select>
-        </div>
-    );
-};
-
-
 interface DraggableRectProps {
     rect: Rect;
     updatePosition: (index: number, x: number, y: number) => void;

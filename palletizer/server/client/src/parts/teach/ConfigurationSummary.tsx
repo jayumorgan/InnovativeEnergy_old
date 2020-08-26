@@ -4,14 +4,11 @@ import { PalletGeometry, BoxObject } from "./structures/Data";
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
-import RightImage from "./images/Boxes.png";
-
 import { SavedPalletConfiguration } from "../TeachMode";
 
 import Visualizer from "../Visualizer";
 
 import "./css/ConfigurationSummary.scss";
-import { Pallet } from "../../services/TeachMode";
 
 
 interface SummaryCellProps {

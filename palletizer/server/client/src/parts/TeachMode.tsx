@@ -5,7 +5,7 @@ import Modal from "./Modal";
 //import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
-import { Coordinate, PalletGeometry, BoxObject, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
+import { PalletGeometry, BoxObject, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
 
 //import ConfigurationName from "./teach/ConfigurationName";
 // import Jogger from "./teach/Jogger";
@@ -90,12 +90,12 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
 };
 
 export function GenerateFinalConfig(config: PalletConfiguration) {
-    let { name, pallets } = config;
+    let { pallets } = config;
     // We should also write the entire file.
     let boxCoordinates: BoxCoordinates[] = [];
 
     pallets.forEach((p: PalletGeometry, palletIndex: number) => {
-        let { width, length } = getPalletDimensions(p);
+
         let { Layouts, Stack } = p;
 
         let { corner1, corner2, corner3 } = p;
@@ -115,7 +115,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
 
-                let { width, height } = box.dimensions;
+                let { height } = box.dimensions;
 
                 let boxWidth = box.dimensions.width;
                 let boxLength = box.dimensions.length;
@@ -126,7 +126,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 //compute the middle of the box shift.
                 let boxXmid = boxWidth / 2;
                 let boxYmid = boxLength / 2;
-                let boxHeight = height; // Assume Same Height;
+                // let boxHeight = height; // Assume Same Height;
 
                 // Move along the X axis defined by the pallet.
                 let Ydirection = Subtract3D(corner1, corner2);
@@ -154,22 +154,9 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 averagePosition = Add3D(averagePosition, corner2);
 
-		/* 
-		 * x_pos = Add3D(x_pos, corner2);
-		 * y_pos = Add3D(y_pos, corner2); */
-
                 let z_add = currentHeightIncrement;
 
                 averagePosition.z = z_add;
-
-                //console.log(z_add);
-
-                // console.log(x_pos, y_pos, "x , y pos");
-
-                // let box_position = Add3D(x_pos, Add3D(y_pos, { x: 0, y: 0, z: z_add } as Coordinate));
-                // console.log(box_position, "Box Position");
-                // box_position.z = z_add;
-                //
 
                 boxCoordinates.push({
                     pickLocation,

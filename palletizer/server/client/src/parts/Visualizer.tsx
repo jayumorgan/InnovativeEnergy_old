@@ -3,23 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 // 3D rendering
 import * as Three from "three";
 
-// Context
-// import { PalletizerContext } from "../context/PalletizerContext";
-// import { ConfigContext } from "../context/ConfigContext";
-
-// Requests
-// import { get_state_config } from "../requests/requests";
-
-// Types
-// import { ConfigState } from "../types/Types";
-
 // Styles.
 import "./css/Visualizer.scss";
-
-// Images.
-/* import wood from "./images/wood.jpg";
- * import carboard from "./images/cardboard.jpg";
- * import vcardboard from "./images/vcardboard.jpg"; */
 
 import { COLORS } from "./teach/shared/Colors";
 
@@ -35,34 +20,6 @@ interface FrameDimensions {
     yh: number;
     h: number;
 };
-
-/* function getCornerExtrema(c: Coordinate) {
- * 
- *     let { x, y, z } = c;
- * 
- *     let f: FrameDimensions = {
- *         xl: Infinity,
- *         xh: -Infinity,
- *         yl: Infinity,
- *         yh: -Infinity,
- *         h: 0
- *     };
- * 
- *     if (x < f.xl) {
- *         f.xl = x;
- *     }
- *     if (x > f.xh) {
- *         f.xh = x;
- *     }
- * 
- *     if (y < f.yl) {
- *         f.yl = y;
- *     }
- * 
- *     if (y > f.yh) {
- *         f.yh = y;
- *     }
- * } */
 
 function getPalletExtrema(p: PalletGeometry) {
     let { corner1, corner2, corner3 } = p;

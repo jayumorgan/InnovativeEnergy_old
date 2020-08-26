@@ -6,9 +6,6 @@ import { BoxDimensions } from "../structures/Data";
 import { COLORS } from "../shared/Colors";
 
 
-import { MeshDepthMaterial, MeshBasicMaterialParameters } from "three";
-
-
 interface Animation {
     scene: Three.Scene;
     render: () => void;
