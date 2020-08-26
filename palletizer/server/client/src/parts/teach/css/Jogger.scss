@@ -178,6 +178,17 @@
                          @include polygon();
                      }
 
+                     .Rotate {
+                         @include flex-center();
+                         @include grid-coordinate(1, 3);
+                         cursor: pointer;
+
+                         img {
+                             height: 50%;
+                             width: auto;
+                         }
+                     }
+
                  }
              }
          }

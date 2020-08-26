@@ -55,7 +55,7 @@ function DropDown({ name, currentValue, handleSelect }: DropDownProps) {
                 <select value={currentValue as number} onChange={onChange} >
                     {options.map((o: MM_VERSION, i: number) => {
                         return (
-                            <option value={o as number}>
+                            <option value={o as number} key={i} >
                                 {"V" + String(o + 1)}
                             </option>
                         )

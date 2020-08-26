@@ -15,14 +15,6 @@ export interface PlaneDimensions {
     length: number;
 };
 
-function Area2D(c1: Coordinate, c2: Coordinate) {
-    let x1 = c1.x;
-    let y1 = c1.y;
-    let x2 = c2.x;
-    let y2 = c2.y;
-    return Math.abs(x1 * y2 - x2 * y1);
-}
-
 export interface Coordinate2D {
     x: number;
     y: number;
@@ -85,7 +77,7 @@ export interface PalletGeometry {
 };
 
 export function getPalletDimensions(pallet: PalletGeometry) {
-    let { name, corner1, corner2, corner3 } = pallet;
+    let { corner1, corner2, corner3 } = pallet;
     let length_vector = Subtract2D(corner1, corner2);
     let width_vector = Subtract2D(corner3, corner2);
     let width = Norm2D(width_vector);

@@ -1,24 +1,23 @@
-import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 
-import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
+import ContentItem, { ButtonProps } from "./ContentItem";
 
-import { getPalletDimensions, Coordinate, PlaneDimensions, PalletGeometry, Rect } from "./structures/Data";
+import { getPalletDimensions, Coordinate, PalletGeometry } from "./structures/Data";
 
 //import { PalletGeometry, getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
 
 import Jogger from "./Jogger";
 
-import PalletRender from "./3D/PalletRender";
-import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
+// import PalletRender from "./3D/PalletRender";
+//import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-import { LayoutModel, PALLETCORNERS, IncreaseCorner, DecreaseCorner, CornerNumber } from "./Layouts";
+import { LayoutModel, PALLETCORNERS, IncreaseCorner, CornerNumber } from "./Layouts";
 
 // Styles for summary -- rename later.
 import "./css/BoxSize.scss";
 //import "../css/TeachMode.scss";
 import "./css/Pallet.scss";
 
-import PalletImage from "../images/Pallet.jpg";
 
 //---------------Pallet Model---------------
 interface PalletModelProps {
@@ -57,7 +56,6 @@ function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
 
     let { width, length } = getPalletDimensions(pallet)
 
-    let iconSize = 30;
     let size = 100;
 
     let model_props = {
@@ -107,32 +105,32 @@ function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
     );
 }
 
-interface NewPalletCellProps {
-    startEdit: () => void;
-}
-
-function NewPalletCell({ startEdit }: NewPalletCellProps) {
-    let iconSize = {
-        height: 50,
-        width: 50
-    } as IconProps;
-
-    return (
-        <div className="BoxCellContainer">
-            <div className="NewBoxCell" onClick={startEdit}>
-                <div className="Icon">
-                    <PlusIcon {...iconSize} />
-                </div>
-                <div className="BoxName">
-                    <span>
-                        {"Add A New Pallet"}
-                    </span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
+/* interface NewPalletCellProps {
+ *     startEdit: () => void;
+ * }
+ * 
+ * function NewPalletCell({ startEdit }: NewPalletCellProps) {
+ *     let iconSize = {
+ *         height: 50,
+ *         width: 50
+ *     } as IconProps;
+ * 
+ *     return (
+ *         <div className="BoxCellContainer">
+ *             <div className="NewBoxCell" onClick={startEdit}>
+ *                 <div className="Icon">
+ *                     <PlusIcon {...iconSize} />
+ *                 </div>
+ *                 <div className="BoxName">
+ *                     <span>
+ *                         {"Add A New Pallet"}
+ *                     </span>
+ *                 </div>
+ *             </div>
+ *         </div>
+ *     );
+ * };
+ *  */
 interface PalletCornerProps {
     //    allPallets =
     allPallets: PalletGeometry[];
@@ -260,13 +258,13 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         setSummaryScreen(false);
     };
 
-    let title = "Select Corner " + String(CornerNumber(cornerNumber) + 1);
+    //let title = "Select Corner " + String(CornerNumber(cornerNumber) + 1);
 
-    let backAction = () => {
-        if (cornerNumber !== PALLETCORNERS.TOP_LEFT) {
-            setCornerNumber(DecreaseCorner(cornerNumber));
-        }
-    };
+    /* let backAction = () => {
+     *     if (cornerNumber !== PALLETCORNERS.TOP_LEFT) {
+     *         setCornerNumber(DecreaseCorner(cornerNumber));
+     *     }
+     * }; */
 
     let addCorner = (c: Coordinate) => {
         switch (cornerNumber) {

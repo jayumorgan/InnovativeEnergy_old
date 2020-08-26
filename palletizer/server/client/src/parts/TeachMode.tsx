@@ -1,16 +1,16 @@
-import React, { useReducer, useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
+import React, { useReducer, useState, ReactElement } from 'react';
 
 import Modal from "./Modal";
 
 //import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
-import { Coordinate, PalletGeometry, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
+import { Coordinate, PalletGeometry, BoxObject, getPalletDimensions, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
 
 //import ConfigurationName from "./teach/ConfigurationName";
-import Jogger from "./teach/Jogger";
+// import Jogger from "./teach/Jogger";
 import PalletCorners from "./teach/Pallet";
-import CompletionDots, { Fraction } from "./teach/CompletionDots";
+import { Fraction } from "./teach/CompletionDots";
 import BoxSize from "./teach/BoxSize";
 import Layout from "./teach/Layouts";
 import Stack from "./teach/Stack";

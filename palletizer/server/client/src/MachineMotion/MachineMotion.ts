@@ -1,7 +1,7 @@
 //-----Axios HTTP Requests------
 import axios, { AxiosResponse } from "axios";
 
-import { Coordinate } from "../parts/teach/structures/Data";
+//import { Coordinate } from "../parts/teach/structures/Data";
 
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 axios.defaults.headers.get['Content-Type'] = "application/x-www-form-urlencoded";

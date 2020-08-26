@@ -1,20 +1,20 @@
-import React, { useRef, useState, DragEvent, ReactElement, ChangeEvent, Fragment } from 'react';
+import React, { useRef, useState, DragEvent, ChangeEvent, Fragment } from 'react';
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
-import PlusIcon, { IconProps } from "./PlusIcon";
+// import PlusIcon, { IconProps } from "./PlusIcon";
 
 import { COLORS } from "./shared/Colors";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPosition2D, Coordinate2D, BoxPositionObject, SVGPosition, Rect, BoxDimensions } from "./structures/Data";
+import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPositionObject, Rect, BoxDimensions } from "./structures/Data";
 
 import "./css/Layouts.scss";
 
-import { ReactComponent as Clockwise } from "./images/clockwise.svg";
+// import { ReactComponent as Clockwise } from "./images/clockwise.svg";
 
-import { ReactComponent as CounterClockwise } from "./images/counterclockwise.svg";
+// import { ReactComponent as CounterClockwise } from "./images/counterclockwise.svg";
 
 
 interface RotateIconProps {
@@ -28,8 +28,6 @@ function RotateIcon({ size, rotate }: RotateIconProps) {
     let scale = Math.round(size / 100 * 10) / 10;
 
     let scaleString = `scale(${scale}, ${scale})`;
-
-    let polygonPoints = "";
 
     let rectProps: Rect = {
         x: 10,
@@ -193,8 +191,8 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let cx = xl + (xh - xl) / 2;
             let cy = yl + (yh - yl) / 2;
 
-	    let xWidth = newR.width as number;
-	    let yWidth = newR.height as number;
+            let xWidth = newR.width as number;
+            let yWidth = newR.height as number;
 
 
             /* newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
@@ -202,15 +200,15 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
 	     * newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
 	     * newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
 	     */
-	    let highFrac = 784/1003;
-	    let lowFrac = 219/1003;
+            let highFrac = 784 / 1003;
+            let lowFrac = 219 / 1003;
 
 
-	    newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * lowFrac), newR.width as number ,thresholdX);
-	    newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * highFrac), newR.width as number , thresholdX);
+            newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * lowFrac), newR.width as number, thresholdX);
+            newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * highFrac), newR.width as number, thresholdX);
 
-	    newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * lowFrac), newR.height as number, thresholdY);
-	    newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * highFrac), newR.height as number, thresholdY);
+            newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * lowFrac), newR.height as number, thresholdY);
+            newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * highFrac), newR.height as number, thresholdY);
 
             /* newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
 	     * newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);

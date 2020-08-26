@@ -22,7 +22,7 @@ import "./css/General.scss";
 // Logo image
 import logo from "../images/vention_logo.png";
 import { ReactComponent as BellImage } from "./images/bell.svg";
-import { ReactComponent as DangerImage } from "./images/danger.svg";
+// import { ReactComponent as DangerImage } from "./images/danger.svg";
 import { ReactComponent as ExclamationImage } from "./images/exclamation-circle.svg";
 import { ReactComponent as InfoImage } from "./images/info-circle.svg";
 import { ReactComponent as CircleImage } from "./images/circle.svg";
@@ -117,7 +117,11 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
     let handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
         let file_name = (e.target as HTMLSelectElement).value;
         set_config(file_name, machine); // server request.
-        set_machine_current_config(file_name);
+        if (machine) {
+            set_machine_current_config(file_name);
+        } else {
+            set_pallet_current_config(file_name);
+        }
     };
 
     return (

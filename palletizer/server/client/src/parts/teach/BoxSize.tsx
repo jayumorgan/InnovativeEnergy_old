@@ -1,47 +1,19 @@
-import React, { useContext, useState, Fragment, ReactElement, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 
-import ContentItem, { ContentItemProps, ButtonProps } from "./ContentItem";
+import ContentItem, { ButtonProps } from "./ContentItem";
 
 
 import Jogger from "./Jogger";
 
 // 3D display of box.
 import Box from "./3D/BoxRender";
-import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
+// import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
 import { BoxObject, BoxDimensions, Coordinate } from "./structures/Data";
 
 import "./css/BoxSize.scss";
 
 //---------------Box Size---------------
-enum DimensionEnum {
-    L,
-    W,
-    H
-};
-
-interface DimensionCellProps {
-    axis: string;
-    value: number;
-    update: (val: number) => void;
-}
-
-function DimensionCell({ axis, value, update }: DimensionCellProps) {
-
-    let handle_update = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = (e.target.value as unknown) as number;
-        update(val);
-    };
-
-    return (
-        <div className="DimensionCell">
-            <span>
-                {axis + ": "}
-            </span>
-            <input type="number" value={value} onChange={handle_update} />
-        </div>
-    );
-};
 
 interface BoxProps {
     box: BoxObject;
@@ -50,37 +22,16 @@ interface BoxProps {
 };
 
 function BoxCell({ box, startEdit, editName }: BoxProps) {
-    let placeholder = box.name;
+    // let placeholder = box.name;
 
     let { dimensions } = box;
     let { width, length, height } = dimensions;
-    let { x, y, z } = box.pickLocation;
+    // let { x, y, z } = box.pickLocation;
 
     let handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         editName(newName);
-    }
-
-
-    let update_dim = (dimension: DimensionEnum) => (val: number) => {
-        let newDim = { ...dimensions } as BoxDimensions;
-        switch (dimension) {
-            case (DimensionEnum.L): {
-                newDim.length = val;
-                break;
-            };
-            case (DimensionEnum.W): {
-                newDim.width = val;
-                break;
-            };
-            case (DimensionEnum.H): {
-                newDim.height = val;
-                break;
-            }
-        }
     };
-
-    let iconSize = 30;
 
     return (
         <div className="BoxCellContainer">
@@ -167,9 +118,6 @@ interface CreateNewBoxProps {
 };
 
 function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
-
-    let pallet_seq_name = "Pallet Sequence 1";
-    let input_name = "PalletSequenceTitle";
 
     let updateName = (name: string) => {
         updateBox({ ...box, name });

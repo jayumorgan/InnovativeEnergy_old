@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState, useRef, ReactEventHandler } from 'react';
+import React, { ReactNode, useEffect, useState, useRef } from 'react';
 
 // Ace Editor
 import AceEditor, { IAceEditorProps } from "react-ace";

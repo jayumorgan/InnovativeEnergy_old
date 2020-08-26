@@ -1,6 +1,6 @@
 import React, { useContext, useState, Fragment } from 'react';
 
-import Modal, { Editor, Unlock } from "./Modal";
+import { Editor, Unlock } from "./Modal";
 
 import PalletConfigurator from "./TeachMode";
 
@@ -152,11 +152,6 @@ function Configuration() {
 
     let new_machine = (val: boolean) => () => {
         set_add_machine_config(val);
-    };
-
-    let add_new_machine = () => {
-
-        console.log("Add Machine Config");
     };
 
     let configCount = pallet_configs.length;

@@ -1,6 +1,6 @@
-import React, { useContext, useState, Fragment, ReactElement, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 
-import { AxesDirections, TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
+import { TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
 
 import SolidArrow, { ROTATION } from "./SolidArrow";
 
@@ -10,9 +10,11 @@ import Down from "../images/down.png";
 import Left from "../images/left.png";
 import Right from "../images/right.png";
 
-
 import "./css/Jogger.scss";
 import { Coordinate } from './structures/Data';
+
+import clockwise from "./images/clockwise.svg";
+import counterclockwise from "./images/counterclockwise.svg";
 
 let TEMP_JOGGER_INDEX = 0;
 
@@ -23,37 +25,6 @@ enum Directions {
     RIGHT = "Right"
 };
 
-interface ArrowImageProps {
-    direction: Directions;
-    handleClick: () => void;
-};
-
-function ArrowImage({ direction, handleClick }: ArrowImageProps) {
-    let image: string;
-    switch (direction) {
-        case (Directions.UP): {
-            image = Up;
-            break;
-        };
-        case (Directions.DOWN): {
-            image = Down;
-            break;
-        };
-        case (Directions.LEFT): {
-            image = Left;
-            break;
-        };
-        case (Directions.RIGHT): {
-            image = Right;
-            break;
-        };
-    };
-    return (
-        <div className={direction} onClick={handleClick}>
-            <img src={image} />
-        </div>
-    );
-};
 
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
     let coordinates: string = "";
@@ -407,6 +378,9 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
                             </div>
                             <div className="Left" onClick={handleMove(Directions.LEFT)}>
                                 <SolidArrow rotation={ROTATION.LEFT} size={arrowSize} />
+                            </div>
+                            <div className="Rotate" onClick={() => { console.log("Handle Rotate") }}>
+                                <img src={clockwise} />
                             </div>
                         </div>
                     </div>
