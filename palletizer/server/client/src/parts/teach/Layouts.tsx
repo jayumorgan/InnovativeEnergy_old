@@ -111,17 +111,13 @@ function lockCoordinateEdges(currentPosition: number, dimensionSize: number, ful
     if (centerFromCenter < thresholdDistance) {
         newPosition = (fullDistance - dimensionSize) / 2;
         return newPosition;
-    }
-
-
-    if (leftEdgeLowMultiple < 0) { // It has gone over the edge
+    } else if (leftEdgeLowMultiple < 0) { // It has gone over the edge
         newPosition = leftEdge;
         return newPosition;
     } else {
         let [lowModDistance, highModDistance] = modDistances(leftEdge);
         let rightEdgeFromCenter = Math.abs(rightEdge - fullDistance / 2);
         let rightEdgeFromEdge = Math.abs(rightEdge - fullDistance);
-
         if (lowModDistance < thresholdDistance) {
             newPosition = leftEdgeLowMultiple * distanceUnit;
         } else if (highModDistance < thresholdDistance) {
@@ -133,6 +129,7 @@ function lockCoordinateEdges(currentPosition: number, dimensionSize: number, ful
         }
         return newPosition;
     }
+
 };
 
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
