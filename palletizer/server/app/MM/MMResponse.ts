@@ -50,15 +50,16 @@ export function get_positions_response(res: string): vResponse {
     let YMatch = Yreg.exec(res);
     let ZMatch = Zreg.exec(res);
 
-    success = success && (XMatch && YMatch && ZMatch);
+
+    success = success && (XMatch !== null && YMatch !== null && ZMatch !== null);
 
     if (!success) {
         return make_vResponse(success);
     }
 
-    let X: number = + XMatch[1];
-    let Y: number = + YMatch[1];
-    let Z: number = + ZMatch[1];
+    let X: number = + XMatch![1];
+    let Y: number = + YMatch![1];
+    let Z: number = + ZMatch![1];
 
     let axesPositions: AxesPositions = {
         X,
@@ -100,7 +101,11 @@ export function end_stop_sensors_response(res: string): vResponse {
     let Zm_Match = Zm_Reg.exec(res);
     let ZM_Match = ZM_Reg.exec(res);
 
-    success = success && Xm_Match && XM_Match && Ym_Match && YM_Match && Zm_Match && ZM_Match;
+    let nn = (a: any) => {
+        return a !== null;
+    }
+
+    success = success && nn(Xm_Match) && nn(XM_Match) && nn(Ym_Match) && nn(YM_Match) && nn(Zm_Match) && nn(ZM_Match);
 
     if (!success) {
         return make_vResponse(success);
@@ -112,12 +117,12 @@ export function end_stop_sensors_response(res: string): vResponse {
         return trigger_test.test(m);
     };
 
-    let X_MIN = test_triggered(Xm_Match[1]);
-    let X_MAX = test_triggered(XM_Match[1]);
-    let Y_MIN = test_triggered(Ym_Match[1]);
-    let Y_MAX = test_triggered(YM_Match[1]);
-    let Z_MIN = test_triggered(Zm_Match[1]);
-    let Z_MAX = test_triggered(ZM_Match[1]);
+    let X_MIN = test_triggered(Xm_Match![1]);
+    let X_MAX = test_triggered(XM_Match![1]);
+    let Y_MIN = test_triggered(Ym_Match![1]);
+    let Y_MAX = test_triggered(YM_Match![1]);
+    let Z_MIN = test_triggered(Zm_Match![1]);
+    let Z_MAX = test_triggered(ZM_Match![1]);
 
     let sensorState: EndStopState = {
         X_MIN,
@@ -166,7 +171,7 @@ export interface mqtt_Message {
     message: any;
 };
 
-enum MQTT_EVENT_TYPE {
+export enum MQTT_EVENT_TYPE {
     NONE,
     ESTOP_EVENT,
     IO_AVAILABILITY,
@@ -174,7 +179,7 @@ enum MQTT_EVENT_TYPE {
     ENCODER_POSITION
 };
 
-interface MQTT_Event {
+export interface MQTT_Event {
     type: MQTT_EVENT_TYPE;
     payload: any;
 };
@@ -201,7 +206,7 @@ enum DEVICE_TYPES {
 };
 
 // Enum possible parsing types, then work from there.
-function parse_mqtt_message({ topic, message }: mqtt_Message): MQTT_Event {
+export function parse_mqtt_message({ topic, message }: mqtt_Message): MQTT_Event {
 
     let topic_parts: string[] = topic.split('/');
     let root_path: string = topic_parts[0];
@@ -222,10 +227,12 @@ function parse_mqtt_message({ topic, message }: mqtt_Message): MQTT_Event {
             let device_topic: string = topic_parts[3];
             if (device_topic === "available") {
                 let device_availability: boolean = message as boolean;
+
                 let availability_event: Availability_Event = {
                     device: device - 1,
                     availability: device_availability
                 };
+
                 let event: MQTT_Event = {
                     type: MQTT_EVENT_TYPE.IO_AVAILABILITY,
                     payload: availability_event
@@ -254,7 +261,7 @@ function parse_mqtt_message({ topic, message }: mqtt_Message): MQTT_Event {
             let position: number = +(message as number);
 
             let encoder_event: Encoder_Event = {
-                device: device;
+                device: device,
                 position
             };
 

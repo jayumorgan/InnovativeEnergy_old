@@ -1,14 +1,22 @@
 //---------------Machine Motion Javascript---------------
+
+import axios, { AxiosResponse } from "axios";
+import mqtt from "mqtt";
+import { v4 as uuidv4 } from 'uuid';
+
+
 import {
     vResponse,
     echo_okay_response,
     get_positions_response,
     end_stop_sensors_response,
-    motion_completion_response
+    motion_completion_response,
+    mqtt_Message,
+    parse_mqtt_message,
+    MQTT_Event,
+    MQTT_EVENT_TYPE
 } from "./MMResponse";
-
-import axios, { AxiosResponse } from "axios";
-import { response } from "express";
+import Axios from "axios";
 
 export enum DIRECTION {
     POSITIVE = "positive",
@@ -89,19 +97,6 @@ interface STEPS {
 
 //---------------Machine Motion gCode Translator---------------
 
-// Can we make this layer smaller? There are probably a few ways. // function are quite tight actually. -- I don't think this part of things would be too hard. -> commandName, gcodes[] and argument insert type [];
-
-// Then we can make a general parser of some sort.... Think about this.
-
-
-let testGcodeHander = (gcode: string) => {
-    // Make some request;
-    return new Promise<vResponse>((resolve, reject) => {
-        // Make axios request and handle;
-
-    });
-};
-
 
 interface NetworkParameters {
     ipAddress: string;
@@ -113,7 +108,7 @@ interface gCodeItem {
     responseHandler: (res: string) => vResponse;
 };
 
-export class MotionController {
+class MotionController {
     gCodeHandler: (gCodes: gCodeItem[]) => Promise<vResponse>;
 
     mechGain: GAINS = {
@@ -130,15 +125,9 @@ export class MotionController {
 
     //    baseUrl = "http://192.168.7.2:8000/";
 
-    constructor(gCode_handler: (gCodes: string[]) => Promise<vResponse>) {
+    constructor(gCode_handler: (gCodes: gCodeItem[]) => Promise<vResponse>) {
         this.gCodeHandler = gCode_handler;
     };
-
-    // __makeUrl(gCode: string): string {
-    //     let gCodeData: any = { "gcode": gCode };
-    //     let encoded_path: string = "gcode?" + Object.keys(gCodeData).map(key => key + "=" + data[key]).join("&");
-    //     return this.baseUrl + encoded_path;
-    // }
 
     __getAccelParameter(axis: AXES, acceleration: number): number {
         let a: number = acceleration / this.mechGain[axis] * STEPPER_MOTOR.steps_per_turn * this.uStep[axis];
@@ -183,9 +172,9 @@ export class MotionController {
     };
 
     getCurrentPositions(): Promise<vResponse> {
-        let gCodes: gCodeItem = [];
+        let gCodes: gCodeItem[] = [];
         gCodes.push({
-            gCode: "M114";
+            gCode: "M114",
             responseHandler: get_positions_response
         } as gCodeItem);
 
@@ -436,7 +425,190 @@ export class MotionController {
             });
         }
     };
+};
+
+
+//---------------MQTT Message Controller---------------
+interface MessageControllerInterface {
+    client: mqtt.Client,
+    digitalWrite: (device: number, pin: number, value: boolean) => void;
+};
+
+function MessageController(server_ip: string, mqtt_port: string, message_handler: (event: MQTT_Event) => void) {
+    let mqtt_uri = "mqtt://" + server_ip + ":" + mqtt_port;
+
+    let options: any = {
+        clientId: "message_controller" + String(uuidv4())
+    };
+
+    let client: mqtt.Client = mqtt.connect(mqtt_uri, options);
+
+    let topics: string[] = [
+        "devices/io-expander/+/available",
+        "devices/io-expander/+/digital-input/#",
+        "devices/encoder/+/realtime-position",
+        String(MQTT_PATH.ESTOP_STATUS)
+    ];
+
+    client.on("connect", () => {
+        for (let i = 0; i < topics.length; i++) {
+            let t: string = topics[i];
+            client.subscribe(t, () => {
+                console.log("Message Controller: " + options.clientId + " subscribed to: " + t);
+            });
+        }
+    });
+
+    client.on("message", (topic: string, message_buffer: Buffer) => {
+        let mqtt_message: mqtt_Message = {
+            topic,
+            message: JSON.parse(message_buffer.toString())
+        };
+        let event: MQTT_Event = parse_mqtt_message(mqtt_message);
+        message_handler(event);
+    });
+
+    let digitalWrite = (device: number, pin: number, value: boolean) => {
+        let topic = "devices/io-expander/" + String(device) + "/digital-output/" + String(pin);
+        let msg = value ? "1" : "0";
+        client.publish(topic, msg);
+    }
+
+    return {
+        client,
+        digitalWrite
+    } as MessageControllerInterface;
+};
+
+
+function generateGCodeHandler(server_ip: string, server_port: string = "8000"): (gCodes: gCodeItem[]) => Promise<vResponse> {
+
+    let baseUri: string = "http://" + server_ip + ":" + server_port + "/";
+
+    let url_gen = (gcode: string) => {
+        let data: any = { gcode };
+        let encoded_path: string = "gcode?" + Object.keys(data).map(key => key + "=" + data[key]).join("&");
+
+        return baseUri + encoded_path;
+    };
+
+    let handler = (gCodes: gCodeItem[]) => {
+
+        return new Promise<vResponse>((resolve, reject) => {
+            let next = (index: number) => {
+                let { gCode, responseHandler } = gCodes[index];
+                let gUri = url_gen(gCode);
+                axios.get(gUri).then((res: AxiosResponse) => {
+                    let { data } = res;
+                    let vRes = responseHandler(data);
+                    if (vRes.success) {
+                        if (index === gCodes.length - 1) {
+                            resolve(vRes);
+                        } else {
+                            next(index + 1);
+                        }
+                    } else {
+                        reject(vRes);
+                    }
+                }).catch((e: any) => {
+                    reject({
+                        success: false,
+                        result: "Failed Axios Request: " + gUri
+                    } as vResponse);
+                });
+            };
+            next(0);
+        });
+    };
+
+    return handler;
+};
+
+
+
+// Refactor shortly. 
+//---------------Machine Motion---------------
+
+export interface MM_Network {
+    machineIP: string;
+    serverPort: string;
+    mqttPort: string;
+};
+
+
+
+export default class MachineMotion extends MotionController {
+
+    constructor({ machineIP, serverPort, mqttPort }: MM_Network) {
+
+        super(generateGCodeHandler(machineIP, serverPort));
+
+        this.__messageHandler = this.__messageHandler.bind(this);
+
+        let { client, digitalWrite } = MessageController(machineIP, mqttPort, this.__messageHandler);
+
+        this.digitalWrite = digitalWrite;
+    };
+
+    digitalInputs: { [key: number]: { [key: number]: boolean } } = {};
+    myEncoderRealtimePositions = [0, 0, 0];
+    myIoExpanderAvailabilityState = [false, false, false, false];
+
+    digitalWrite = (device: number, pin: number, value: boolean) => {
+        console.log("Digital write not initialized.");
+    };
+
+    digitalRead(device: number, pin: number): boolean {
+        if (this.digitalInputs.hasOwnProperty(device) && this.digitalInputs[device].hasOwnProperty(pin)) {
+            return this.digitalInputs[device][pin];
+        } else {
+            return false;
+        }
+    }
+
+    eStopCallback = () => {
+        console.log("Estop!");
+    };
+
+    bindEstopEvent(fn: () => void) {
+        this.eStopCallback = fn;
+    };
+
+    __messageHandler(event: MQTT_Event) {
+        let { type, payload } = event;
+        switch (type) {
+            case (MQTT_EVENT_TYPE.NONE): {
+                break;
+            };
+            case (MQTT_EVENT_TYPE.ESTOP_EVENT): {
+                this.eStopCallback();
+                break;
+            };
+            case (MQTT_EVENT_TYPE.ENCODER_POSITION): {
+                let { device, position } = payload;
+                this.myEncoderRealtimePositions[device] = position;
+                break;
+            };
+            case (MQTT_EVENT_TYPE.IO_AVAILABILITY): {
+                let { device, availability } = payload;
+                this.myIoExpanderAvailabilityState[device] = availability;
+                break;
+            };
+            case (MQTT_EVENT_TYPE.IO_VALUE): {
+                let { device, pin, value } = payload;
+                if (!this.digitalInputs.hasOwnProperty(pin)) {
+                    this.digitalInputs[device] = {};
+                }
+                this.digitalInputs[device][pin] = value;
+                break;
+            };
+            default: {
+                break;
+            };
+        };
+    };
 }
+
 
 
 

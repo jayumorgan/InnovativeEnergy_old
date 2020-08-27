@@ -8,6 +8,9 @@ import router, { start_machine } from "./router";
 // Types
 import { AddressInfo } from "net";
 
+import { m } from "./app/palletizer";
+
+
 // Config
 const PORT = 3011;
 
