@@ -80,57 +80,6 @@ interface DraggableRectProps {
     yh: number;
 }
 
-let getLockCoordinate = (x: number, lx: number, width: number, thresholdX: number) => {
-
-    if (Math.abs(x - lx) < thresholdX) {
-        return lx;
-    } else if (Math.abs(lx - width - x) < thresholdX) {
-        return lx - width;
-    } else {
-        return x;
-    }
-}
-
-let getLockCoordinateCenter = (x: number, lx: number, width: number, thresholdX: number) => {
-    if (Math.abs(x + width / 2 - lx) < thresholdX) {
-        return lx - width / 2;
-    } else {
-        return x;
-    }
-};
-
-// Need current position, full width;
-function lockCoordinateCenter(currentPosition: number, fullDistance: number): number {
-    let divisor = 2 * 6; // Even Number
-    let distanceUnit = fullDistance / divisor;
-    let thresholdDistance = distanceUnit / 3;
-    let lowModDistance = Math.abs(currentPosition % distanceUnit);
-    let highModDistance = Math.abs(distanceUnit - lowModDistance);
-    let lowMultiple = Math.floor(currentPosition / distanceUnit);
-    let highMultiple = Math.ceil(currentPosition / distanceUnit);
-
-    let pRint = {
-        distanceUnit,
-        thresholdDistance,
-        lowModDistance,
-        highModDistance,
-        lowMultiple,
-        highMultiple,
-        currentPosition
-    };
-    console.log(pRint);
-    if (lowMultiple < 0) {
-        return currentPosition;
-    }
-    if (lowModDistance <= thresholdDistance) {
-        return lowMultiple * distanceUnit;
-    } else if (highModDistance <= thresholdDistance) {
-        return highMultiple * distanceUnit;
-    } else {
-        return currentPosition
-    }
-};
-
 // Right Edge to Line, amount other things
 
 function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
