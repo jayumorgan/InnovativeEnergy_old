@@ -2,7 +2,7 @@
 
 
 //---------------Vention Response---------------
-interface vResponse {
+export interface vResponse {
     success: boolean;
     result: any;
 };
@@ -17,7 +17,7 @@ function make_vResponse(success: boolean, result?: any) {
 
 
 //---------------Functions to parse response types---------------
-function echo_okay_response(res: string): vResponse {
+export function echo_okay_response(res: string): vResponse {
     // regex for both types.
     let echo_test: RegExp = /echo/im;
     let ok_test: RegExp = /ok/im;
@@ -33,7 +33,7 @@ interface AxesPositions {
     Z: number;
 };
 
-function get_positions_response(res: string): vResponse {
+export function get_positions_response(res: string): vResponse {
 
     let { success } = echo_okay_response(res);
 
@@ -77,7 +77,7 @@ interface EndStopState {
     Z_MAX: boolean
 };
 
-function end_stop_sensors_response(res: string): vResponse {
+export function end_stop_sensors_response(res: string): vResponse {
 
     let { success } = echo_okay_response(res);
 
@@ -138,7 +138,7 @@ interface MotionCompletion {
     completed: boolean;
 }
 
-function motion_completion_response(res: string): vResponse {
+export function motion_completion_response(res: string): vResponse {
 
     let { success } = echo_okay_response(res);
 
@@ -158,3 +158,14 @@ function motion_completion_response(res: string): vResponse {
 };
 
 
+//---------------MQTT Parser---------------
+
+export interface mqtt_Message {
+    topic: string;
+    message: string;
+};
+
+// Enum possible parsing types, then work from there.
+function parse_topic(msg: mqtt_Message) {
+    let topic_parts: string[] = msg.topic.split('/');
+};
