@@ -1,4 +1,6 @@
 //---------------Machine Motion Javascript---------------
+import { vResponse } from "./MMResponse";
+
 
 export enum DIRECTION {
     POSITIVE = "positive",
@@ -77,7 +79,11 @@ interface STEPS {
 };
 
 //---------------Machine Motion gCode Translator---------------
-export class MachineMotion {
+
+// Motion Controller
+export class MotionController {
+    gCodeHandler: (gCode: string) => Promise<vResponse>;
+
     mechGain: GAINS = {
         X: MECH_GAIN.timing_belt_150mm_turn,
         Y: MECH_GAIN.timing_belt_150mm_turn,
@@ -90,10 +96,10 @@ export class MachineMotion {
         Z: MICRO_STEPS.ustep_8
     };
 
-    constructor() {
-	console.log("new MachineMotion");
-    }
-    
+    constructor(gCode_handler: (gCode: string) => Promise<vResponse>) {
+        this.gCodeHandler = gCode_handler;
+    };
+
     getAccelParameter(axis: AXES, acceleration: number): number {
         let a: number = acceleration / this.mechGain[axis] * STEPPER_MOTOR.steps_per_turn * this.uStep[axis];
         return a;
@@ -104,7 +110,7 @@ export class MachineMotion {
         return s;
     };
 
-    setContinuousMove(axis: AXES, speed: number, acceleration: number = 100) : string[] {
+    setContinuousMove(axis: AXES, speed: number, acceleration: number = 100): string[] {
         // Return multiple promises.
         let modeCmd: string = "V5 " + String(axis) + "2";
 
@@ -112,81 +118,81 @@ export class MachineMotion {
         let a = this.getAccelParameter(axis, acceleration);
 
         let moveCmd: string = "V4 S" + String(s) + " A" + String(a) + " " + String(axis);
-	
-	return [modeCmd, moveCmd];
+
+        return [modeCmd, moveCmd];
     };
 
-    stopContinuousMove(axis: AXES, acceleration: number = 100) : string[] {
+    stopContinuousMove(axis: AXES, acceleration: number = 100): string[] {
         let a = this.getAccelParameter(axis, acceleration);
         let stopCmd: string = "V4 S0 A" + String(a) + " " + String(axis);
-	return [stopCmd];
+        return [stopCmd];
     };
 
-    getCurrentPositions() : string[] {
+    getCurrentPositions(): string[] {
         let positionCmd = "M114";
-	return [positionCmd];
+        return [positionCmd];
         // Parse
     };
 
-    getEndStopState() : string[] {
+    getEndStopState(): string[] {
         let stateCmd = "M119";
-	return [stateCmd];
+        return [stateCmd];
     };
 
-    emitStop() : string[] {
+    emitStop(): string[] {
         let stopCmd = "M410";
-	return [stopCmd];
+        return [stopCmd];
     };
 
-    emitHomeAll() : string[] {
+    emitHomeAll(): string[] {
         let homeCmd = "G28";
-	return [homeCmd];
+        return [homeCmd];
     };
 
-    emitHome(axis: AXES) : string[] {
+    emitHome(axis: AXES): string[] {
         let homeCmd = "G28 " + String(axis);
-	return homeCmd;
+        return homeCmd;
     };
 
-    emitSpeed(speed: number) : string[] { // in mm/s
+    emitSpeed(speed: number): string[] { // in mm/s
         let speedCmd = "G0 F" + String(speed * 60);
-	return [speedCmd];
+        return [speedCmd];
     };
 
-    emitAcceleration(acceleration: number) : string[] { // in mm/s^2
+    emitAcceleration(acceleration: number): string[] { // in mm/s^2
         let accelCmd = "M204 T" + String(acceleration);
-	return [accelCmd];
+        return [accelCmd];
     };
 
-    emitAbsoluteMove(axis: AXES, postion: number) : string[] {
+    emitAbsoluteMove(axis: AXES, postion: number): string[] {
         let modeCmd = "G90";
 
         let moveCmd = "G0 " + String(axis) + String(position);
-	return [modeCmd, moveCmd];
+        return [modeCmd, moveCmd];
     };
 
-    emitCombinesAxesAbsoluteMove(axes: AXES[], positions: number[]) : string[] {
+    emitCombinesAxesAbsoluteMove(axes: AXES[], positions: number[]): string[] {
         if (axes.length === positions.length) {
             let modeCmd = "G90";
             let moveCmd = "G0 ";
             for (let i = 0; i < axes.length; i++) {
                 moveCmd += String(axes[i]) + String(positions[i]) + " ";
             }
-	    return [modeCmd, moveCmd];
+            return [modeCmd, moveCmd];
         } else {
-	    return [] as string[];
+            return [] as string[];
             // Error
         }
     };
 
-    emitRelativeMove(axis: AXES, direction: DIRECTION, distance: number) : string[] {
+    emitRelativeMove(axis: AXES, direction: DIRECTION, distance: number): string[] {
         let modeCmd = "G91";
         let d: string = (String(direction) === String(DIRECTION.POSITIVE)) ? String(distance) : "-" + String(distance);
         let moveCmd = "G0 " + String(axis) + d;
-	return [modeCmd, moveCmd];
+        return [modeCmd, moveCmd];
     };
 
-    emitCombinedAxisRelativeMode(axes: AXES[], directions: DIRECTION[], distances: number[]) : string[] {
+    emitCombinedAxisRelativeMode(axes: AXES[], directions: DIRECTION[], distances: number[]): string[] {
         if (axes.length === directions.length && axes.length === distances.length) {
             let modeCmd = "G91";
 
@@ -199,49 +205,49 @@ export class MachineMotion {
                 let d: string = (String(direction) === String(DIRECTION.POSITIVE)) ? String(distance) : "-" + String(distance);
                 moveCmd += String(axis) + d + " ";
             }
-	    return [modeCmd, moveCmd];
+            return [modeCmd, moveCmd];
 
         } else {
-	    return [] as string[];
+            return [] as string[];
             // Error
         }
     };
 
-    setPosition(axis: AXES, position: number) : string[] {
+    setPosition(axis: AXES, position: number): string[] {
         let posCmd = "G92 " + String(axis) + String(position);
-	return [posCmd];
+        return [posCmd];
     };
 
-    emitgCode(gCode: string) : string[] {
+    emitgCode(gCode: string): string[] {
         let Cmd = gCode;
-	return [Cmd];
+        return [Cmd];
     };
 
-    configAxis(axis: AXES, uStep: MICRO_STEPS, mechGain: MECH_GAIN, direction: DIRECTION) : string[] {
+    configAxis(axis: AXES, uStep: MICRO_STEPS, mechGain: MECH_GAIN, direction: DIRECTION): string[] {
         this.uStep[axis] = uStep;
         this.mechGain[axis] = mechGain;
         let steps_mm = ((direction === DIRECTION.POSITIVE) ? "" : "-") + STEPPER_MOTOR.steps_per_turn * this.uStep[axis] / this.mechGain[axis];
 
         let configCmd = "M92 " + String(axis) + String(steps_mm);
-	return [configCmd];
+        return [configCmd];
 
     };
 
-    isMotionCompleted() : string[] {
+    isMotionCompleted(): string[] {
         let motionCmd = "V0";
         // PARSE
-	return [motionCmd];
+        return [motionCmd];
     };
 
-    waitForMotionCompletion() : string[] {
+    waitForMotionCompletion(): string[] {
         let motionCmd = "V0";
         // Loop and retry.
-	return [motionCmd];
+        return [motionCmd];
 
     };
 
 
-    configHomingSpeed(axes: AXES[], speeds: number[]) : string[] { // mm / s
+    configHomingSpeed(axes: AXES[], speeds: number[]): string[] { // mm / s
         if (axes.length === speeds.length) {
             let speedCmd = "V2";
 
@@ -249,11 +255,11 @@ export class MachineMotion {
                 speedCmd += " " + String(axes[i]) + String(speeds[i] * 60);
             }
 
-	    return [speedCmd];
-	    
+            return [speedCmd];
+
         } else {
             // Error
-	    return [] as string[];
+            return [] as string[];
         }
     };
 }

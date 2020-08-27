@@ -1,5 +1,7 @@
 //---------------gCode Response Parser---------------
 
+import { MQTT_PATH } from "./MM";
+
 
 //---------------Vention Response---------------
 export interface vResponse {
@@ -14,7 +16,6 @@ function make_vResponse(success: boolean, result?: any) {
     };
     return vres;
 };
-
 
 //---------------Functions to parse response types---------------
 export function echo_okay_response(res: string): vResponse {
@@ -162,10 +163,115 @@ export function motion_completion_response(res: string): vResponse {
 
 export interface mqtt_Message {
     topic: string;
-    message: string;
+    message: any;
+};
+
+enum MQTT_EVENT_TYPE {
+    NONE,
+    ESTOP_EVENT,
+    IO_AVAILABILITY,
+    IO_VALUE,
+    ENCODER_POSITION
+};
+
+interface MQTT_Event {
+    type: MQTT_EVENT_TYPE;
+    payload: any;
+};
+
+interface Availability_Event {
+    device: number;
+    availability: boolean;
+};
+
+interface IO_Pin_Event {
+    device: number;
+    pin: number;
+    value: number;
+};
+
+interface Encoder_Event {
+    device: number;
+    position: number;
+};
+
+enum DEVICE_TYPES {
+    IO_EXPANDER = "io-expander",
+    ENCODER = "encoder"
 };
 
 // Enum possible parsing types, then work from there.
-function parse_topic(msg: mqtt_Message) {
-    let topic_parts: string[] = msg.topic.split('/');
+function parse_mqtt_message({ topic, message }: mqtt_Message): MQTT_Event {
+
+    let topic_parts: string[] = topic.split('/');
+    let root_path: string = topic_parts[0];
+
+    if (root_path === String(MQTT_PATH.ESTOP)) {
+        let event: MQTT_Event = {
+            type: MQTT_EVENT_TYPE.ESTOP_EVENT,
+            payload: message as boolean
+        };
+        return event;
+    }
+
+    let device_type: string = topic_parts[1];
+    let device: number = +(topic_parts[2]);
+
+    switch (device_type) {
+        case (DEVICE_TYPES.IO_EXPANDER): {
+            let device_topic: string = topic_parts[3];
+            if (device_topic === "available") {
+                let device_availability: boolean = message as boolean;
+                let availability_event: Availability_Event = {
+                    device: device - 1,
+                    availability: device_availability
+                };
+                let event: MQTT_Event = {
+                    type: MQTT_EVENT_TYPE.IO_AVAILABILITY,
+                    payload: availability_event
+                };
+
+                return event;
+            } else {
+                let pin: number = +(topic_parts[4]);
+                let value: number = +(message as number);
+
+                let pin_event: IO_Pin_Event = {
+                    device: device - 1,
+                    pin: pin,
+                    value
+                };
+
+                let event: MQTT_Event = {
+                    type: MQTT_EVENT_TYPE.IO_VALUE,
+                    payload: pin_event
+                };
+                return event;
+            }
+
+        };
+        case (DEVICE_TYPES.ENCODER): {
+            let position: number = +(message as number);
+
+            let encoder_event: Encoder_Event = {
+                device: device;
+                position
+            };
+
+            let event: MQTT_Event = {
+                type: MQTT_EVENT_TYPE.ENCODER_POSITION,
+                payload: encoder_event
+            };
+
+            return event;
+        };
+        default: {
+            let noEvent: MQTT_Event = {
+                type: MQTT_EVENT_TYPE.NONE,
+                payload: null
+            };
+            return noEvent;
+        }
+    }
+
 };
