@@ -1,6 +1,14 @@
 //---------------Machine Motion Javascript---------------
-import { vResponse } from "./MMResponse";
+import {
+    vResponse,
+    echo_okay_response,
+    get_positions_response,
+    end_stop_sensors_response,
+    motion_completion_response
+} from "./MMResponse";
 
+import axios, { AxiosResponse } from "axios";
+import { response } from "express";
 
 export enum DIRECTION {
     POSITIVE = "positive",
@@ -10,6 +18,7 @@ export enum DIRECTION {
     CLOCKWISE = "positive",
     COUNTERCLOCKWISE = "negative"
 };
+
 
 export enum NETWORK_MODE {
     static = "static",
@@ -80,9 +89,32 @@ interface STEPS {
 
 //---------------Machine Motion gCode Translator---------------
 
-// Motion Controller
+// Can we make this layer smaller? There are probably a few ways. // function are quite tight actually. -- I don't think this part of things would be too hard. -> commandName, gcodes[] and argument insert type [];
+
+// Then we can make a general parser of some sort.... Think about this.
+
+
+let testGcodeHander = (gcode: string) => {
+    // Make some request;
+    return new Promise<vResponse>((resolve, reject) => {
+        // Make axios request and handle;
+
+    });
+};
+
+
+interface NetworkParameters {
+    ipAddress: string;
+    port: string;
+};
+
+interface gCodeItem {
+    gCode: string;
+    responseHandler: (res: string) => vResponse;
+};
+
 export class MotionController {
-    gCodeHandler: (gCode: string) => Promise<vResponse>;
+    gCodeHandler: (gCodes: gCodeItem[]) => Promise<vResponse>;
 
     mechGain: GAINS = {
         X: MECH_GAIN.timing_belt_150mm_turn,
@@ -96,105 +128,204 @@ export class MotionController {
         Z: MICRO_STEPS.ustep_8
     };
 
-    constructor(gCode_handler: (gCode: string) => Promise<vResponse>) {
+    //    baseUrl = "http://192.168.7.2:8000/";
+
+    constructor(gCode_handler: (gCodes: string[]) => Promise<vResponse>) {
         this.gCodeHandler = gCode_handler;
     };
 
-    getAccelParameter(axis: AXES, acceleration: number): number {
+    // __makeUrl(gCode: string): string {
+    //     let gCodeData: any = { "gcode": gCode };
+    //     let encoded_path: string = "gcode?" + Object.keys(gCodeData).map(key => key + "=" + data[key]).join("&");
+    //     return this.baseUrl + encoded_path;
+    // }
+
+    __getAccelParameter(axis: AXES, acceleration: number): number {
         let a: number = acceleration / this.mechGain[axis] * STEPPER_MOTOR.steps_per_turn * this.uStep[axis];
         return a;
     };
 
-    getSpeedParameter(axis: AXES, speed: number): number {
+    __getSpeedParameter(axis: AXES, speed: number): number {
         let s: number = speed / this.mechGain[axis] * STEPPER_MOTOR.steps_per_turn * this.uStep[axis];
         return s;
     };
 
-    setContinuousMove(axis: AXES, speed: number, acceleration: number = 100): string[] {
+    setContinuousMove(axis: AXES, speed: number, acceleration: number = 100): Promise<vResponse> {
         // Return multiple promises.
-        let modeCmd: string = "V5 " + String(axis) + "2";
+        let gCodes: gCodeItem[] = [];
 
-        let s = this.getSpeedParameter(axis, speed);
-        let a = this.getAccelParameter(axis, acceleration);
+        gCodes.push({
+            gCode: "V5 " + String(axis) + "2",
+            responseHandler: echo_okay_response
+        } as gCodeItem);
 
-        let moveCmd: string = "V4 S" + String(s) + " A" + String(a) + " " + String(axis);
+        let s = this.__getSpeedParameter(axis, speed);
+        let a = this.__getAccelParameter(axis, acceleration);
 
-        return [modeCmd, moveCmd];
+        gCodes.push({
+            gCode: "V4 S" + String(s) + " A" + String(a) + " " + String(axis),
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    stopContinuousMove(axis: AXES, acceleration: number = 100): string[] {
-        let a = this.getAccelParameter(axis, acceleration);
-        let stopCmd: string = "V4 S0 A" + String(a) + " " + String(axis);
-        return [stopCmd];
+    stopContinuousMove(axis: AXES, acceleration: number = 100): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+        let a = this.__getAccelParameter(axis, acceleration);
+
+        gCodes.push({
+            gCode: "V4 S0 A" + String(a) + " " + String(axis),
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    getCurrentPositions(): string[] {
-        let positionCmd = "M114";
-        return [positionCmd];
-        // Parse
+    getCurrentPositions(): Promise<vResponse> {
+        let gCodes: gCodeItem = [];
+        gCodes.push({
+            gCode: "M114";
+            responseHandler: get_positions_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    getEndStopState(): string[] {
-        let stateCmd = "M119";
-        return [stateCmd];
+    getEndStopState(): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "M119",
+            responseHandler: end_stop_sensors_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitStop(): string[] {
-        let stopCmd = "M410";
-        return [stopCmd];
+    emitStop(): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "M410",
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitHomeAll(): string[] {
-        let homeCmd = "G28";
-        return [homeCmd];
+    emitHomeAll(): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "G28",
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+        return this.gCodeHandler(gCodes);
     };
 
-    emitHome(axis: AXES): string[] {
-        let homeCmd = "G28 " + String(axis);
-        return homeCmd;
+    emitHome(axis: AXES): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "G28 " + String(axis),
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitSpeed(speed: number): string[] { // in mm/s
-        let speedCmd = "G0 F" + String(speed * 60);
-        return [speedCmd];
+    emitSpeed(speed: number): Promise<vResponse> { // in mm/s
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "G0 F" + String(speed * 60),
+            responseHandler: echo_okay_response
+        });
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitAcceleration(acceleration: number): string[] { // in mm/s^2
-        let accelCmd = "M204 T" + String(acceleration);
-        return [accelCmd];
+    emitAcceleration(acceleration: number): Promise<vResponse> { // in mm/s^2
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "M204 T" + String(acceleration),
+            responseHandler: echo_okay_response
+        });
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitAbsoluteMove(axis: AXES, postion: number): string[] {
-        let modeCmd = "G90";
+    emitAbsoluteMove(axis: AXES, postion: number): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
 
-        let moveCmd = "G0 " + String(axis) + String(position);
-        return [modeCmd, moveCmd];
+        gCodes.push({
+            gCode: "G90",
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        gCodes.push({
+            gCode: "G0 " + String(axis) + String(postion),
+            responseHandler: echo_okay_response
+        } as gCodeItem)
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitCombinesAxesAbsoluteMove(axes: AXES[], positions: number[]): string[] {
+    emitCombinesAxesAbsoluteMove(axes: AXES[], positions: number[]): Promise<vResponse> {
         if (axes.length === positions.length) {
             let modeCmd = "G90";
             let moveCmd = "G0 ";
             for (let i = 0; i < axes.length; i++) {
                 moveCmd += String(axes[i]) + String(positions[i]) + " ";
             }
-            return [modeCmd, moveCmd];
+
+            let gCodes: gCodeItem[] = [];
+
+            gCodes.push({
+                gCode: modeCmd,
+                responseHandler: echo_okay_response
+            } as gCodeItem);
+
+            gCodes.push({
+                gCode: moveCmd,
+                responseHandler: echo_okay_response
+            } as gCodeItem);
+
+            return this.gCodeHandler(gCodes);
         } else {
-            return [] as string[];
-            // Error
+            return new Promise<vResponse>((resolve, reject) => {
+                reject({
+                    success: false,
+                    result: "Different array lengths"
+                } as vResponse);
+            });
         }
     };
 
-    emitRelativeMove(axis: AXES, direction: DIRECTION, distance: number): string[] {
-        let modeCmd = "G91";
+    emitRelativeMove(axis: AXES, direction: DIRECTION, distance: number): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+
+        gCodes.push({
+            gCode: "G91",
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
         let d: string = (String(direction) === String(DIRECTION.POSITIVE)) ? String(distance) : "-" + String(distance);
         let moveCmd = "G0 " + String(axis) + d;
-        return [modeCmd, moveCmd];
+
+        gCodes.push({
+            gCode: moveCmd,
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitCombinedAxisRelativeMode(axes: AXES[], directions: DIRECTION[], distances: number[]): string[] {
+    emitCombinedAxisRelativeMode(axes: AXES[], directions: DIRECTION[], distances: number[]): Promise<vResponse> {
         if (axes.length === directions.length && axes.length === distances.length) {
-            let modeCmd = "G91";
+
+            let gCodes: gCodeItem[] = [];
+
+            gCodes.push({
+                gCode: "G91",
+                responseHandler: echo_okay_response
+            } as gCodeItem);
 
             let moveCmd = "G0 ";
 
@@ -205,49 +336,82 @@ export class MotionController {
                 let d: string = (String(direction) === String(DIRECTION.POSITIVE)) ? String(distance) : "-" + String(distance);
                 moveCmd += String(axis) + d + " ";
             }
-            return [modeCmd, moveCmd];
+
+            gCodes.push({
+                gCode: moveCmd,
+                responseHandler: echo_okay_response
+            } as gCodeItem);
+
+            return this.gCodeHandler(gCodes);
 
         } else {
-            return [] as string[];
-            // Error
+            return new Promise<vResponse>((resolve, reject) => {
+                reject({
+                    success: false,
+                    result: "Different array lengths"
+                } as vResponse);
+            });
         }
     };
 
-    setPosition(axis: AXES, position: number): string[] {
-        let posCmd = "G92 " + String(axis) + String(position);
-        return [posCmd];
+    setPosition(axis: AXES, position: number): Promise<vResponse> {
+        let gCodes: gCodeItem[] = [];
+
+        gCodes.push({
+            gCode: "G92 " + String(axis) + String(position),
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    emitgCode(gCode: string): string[] {
-        let Cmd = gCode;
-        return [Cmd];
+    emitgCode(gCode: string): Promise<vResponse> {
+
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode,
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    configAxis(axis: AXES, uStep: MICRO_STEPS, mechGain: MECH_GAIN, direction: DIRECTION): string[] {
+    configAxis(axis: AXES, uStep: MICRO_STEPS, mechGain: MECH_GAIN, direction: DIRECTION): Promise<vResponse> {
         this.uStep[axis] = uStep;
         this.mechGain[axis] = mechGain;
         let steps_mm = ((direction === DIRECTION.POSITIVE) ? "" : "-") + STEPPER_MOTOR.steps_per_turn * this.uStep[axis] / this.mechGain[axis];
 
         let configCmd = "M92 " + String(axis) + String(steps_mm);
-        return [configCmd];
 
+        let gCodes: gCodeItem[] = [];
+
+        gCodes.push({
+            gCode: configCmd,
+            responseHandler: echo_okay_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    isMotionCompleted(): string[] {
-        let motionCmd = "V0";
-        // PARSE
-        return [motionCmd];
+    isMotionCompleted(): Promise<vResponse> {
+
+        let gCodes: gCodeItem[] = [];
+        gCodes.push({
+            gCode: "V0",
+            responseHandler: motion_completion_response
+        } as gCodeItem);
+
+        return this.gCodeHandler(gCodes);
     };
 
-    waitForMotionCompletion(): string[] {
-        let motionCmd = "V0";
-        // Loop and retry.
-        return [motionCmd];
+    // Doesn't make much sense in node
+    // waitForMotionCompletion(): string[] {
+    //     let motionCmd = "V0";
+    //     // Loop and retry.
+    //     return [motionCmd];
+    // };
 
-    };
-
-
-    configHomingSpeed(axes: AXES[], speeds: number[]): string[] { // mm / s
+    configHomingSpeed(axes: AXES[], speeds: number[]): Promise<vResponse> { // mm / s
         if (axes.length === speeds.length) {
             let speedCmd = "V2";
 
@@ -255,11 +419,21 @@ export class MotionController {
                 speedCmd += " " + String(axes[i]) + String(speeds[i] * 60);
             }
 
-            return [speedCmd];
+            let gCodes: gCodeItem[] = [];
+            gCodes.push({
+                gCode: speedCmd,
+                responseHandler: echo_okay_response
+            } as gCodeItem);
+
+            return this.gCodeHandler(gCodes);
 
         } else {
-            // Error
-            return [] as string[];
+            return new Promise<vResponse>((resolve, reject) => {
+                reject({
+                    success: false,
+                    result: "Different array lengths"
+                } as vResponse);
+            });
         }
     };
 }
