@@ -12,10 +12,6 @@ import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, Layout
 
 import "./css/Layouts.scss";
 
-// import { ReactComponent as Clockwise } from "./images/clockwise.svg";
-
-// import { ReactComponent as CounterClockwise } from "./images/counterclockwise.svg";
-
 
 interface RotateIconProps {
     size: number;
@@ -103,7 +99,92 @@ let getLockCoordinateCenter = (x: number, lx: number, width: number, thresholdX:
     }
 };
 
+// Need current position, full width;
+function lockCoordinateCenter(currentPosition: number, fullDistance: number): number {
+    let divisor = 2 * 6; // Even Number
+    let distanceUnit = fullDistance / divisor;
+    let thresholdDistance = distanceUnit / 3;
+    let lowModDistance = Math.abs(currentPosition % distanceUnit);
+    let highModDistance = Math.abs(distanceUnit - lowModDistance);
+    let lowMultiple = Math.floor(currentPosition / distanceUnit);
+    let highMultiple = Math.ceil(currentPosition / distanceUnit);
 
+    let pRint = {
+        distanceUnit,
+        thresholdDistance,
+        lowModDistance,
+        highModDistance,
+        lowMultiple,
+        highMultiple,
+        currentPosition
+    };
+    console.log(pRint);
+    if (lowMultiple < 0) {
+        return currentPosition;
+    }
+    if (lowModDistance <= thresholdDistance) {
+        return lowMultiple * distanceUnit;
+    } else if (highModDistance <= thresholdDistance) {
+        return highMultiple * distanceUnit;
+    } else {
+        return currentPosition
+    }
+};
+
+// Right Edge to Line, amount other things
+
+function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
+
+    let leftEdge = currentPosition - dimensionSize / 2;
+    let rightEdge = currentPosition + dimensionSize / 2;
+    let newPosition = leftEdge;
+
+    let divisor = 2 * 6; // Even Number
+    let distanceUnit = fullDistance / divisor;
+    let thresholdDistance = distanceUnit / 3;
+
+    let modDistances = (a: number) => {
+        let lmd = Math.abs(a % distanceUnit);
+        let hmd = Math.abs(distanceUnit - lmd);
+        return [lmd, hmd];
+    };
+
+    let lowMultiple = (a: number) => Math.floor(a / distanceUnit);
+    let highMultiple = (a: number) => Math.ceil(a / distanceUnit);
+
+    let [lowModDistance, highModDistance] = modDistances(leftEdge);
+
+    let leftEdgeLowMultiple = lowMultiple(leftEdge);
+    let leftEdgeHighMultiple = highMultiple(leftEdge);
+
+    let centerFromCenter = Math.abs(currentPosition - fullDistance / 2);
+
+    if (centerFromCenter < thresholdDistance) {
+        newPosition = (fullDistance - dimensionSize) / 2;
+        return newPosition;
+    }
+
+
+    if (leftEdgeLowMultiple < 0) { // It has gone over the edge
+        newPosition = leftEdge;
+        return newPosition;
+    } else {
+        let [lowModDistance, highModDistance] = modDistances(leftEdge);
+        let rightEdgeFromCenter = Math.abs(rightEdge - fullDistance / 2);
+        let rightEdgeFromEdge = Math.abs(rightEdge - fullDistance);
+
+        if (lowModDistance < thresholdDistance) {
+            newPosition = leftEdgeLowMultiple * distanceUnit;
+        } else if (highModDistance < thresholdDistance) {
+            newPosition = leftEdgeHighMultiple * distanceUnit;
+        } else if (rightEdgeFromCenter < thresholdDistance) {
+            newPosition = fullDistance / 2 - dimensionSize;
+        } else if (rightEdgeFromEdge < thresholdDistance) {
+            newPosition = fullDistance - dimensionSize;
+        }
+        return newPosition;
+    }
+};
 
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
 
@@ -115,15 +196,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         updatePosition(index, r.x, r.y);
     };
 
-    let rotate90 = (k: any) => {
-        if (k.key === "r") {
-            console.log("Rotation .. ");
-            // setRectangle(r);
-        }
-    };
-
     let handleDown = (e: React.PointerEvent) => {
-
         if (enabled) {
             let el = e.target;
             let bb = (e.target as any).getBoundingClientRect();
@@ -139,7 +212,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             });
             setActive(true);
         }
-        //        document.addEventListener("keydown", rotate90, true);
     };
 
     let handleMove = (e: React.PointerEvent) => {
@@ -167,28 +239,10 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let xWidth = newR.width as number;
             let yWidth = newR.height as number;
 
-
-            /* newR.x = getLockCoordinate(newR.x, xl, newR.width as number, thresholdX);
-	     * newR.x = getLockCoordinate(newR.x, xh, newR.width as number, thresholdX);
-	     * newR.x = getLockCoordinate(newR.x, cx, newR.width as number, thresholdX);
-	     * newR.x = getLockCoordinateCenter(newR.x, cx, newR.width as number, thresholdX);
-	     */
-            let highFrac = 784 / 1003;
-            let lowFrac = 219 / 1003;
-
-
-            newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * lowFrac), newR.width as number, thresholdX);
-            newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * highFrac), newR.width as number, thresholdX);
-
-            newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * lowFrac), newR.height as number, thresholdY);
-            newR.y = getLockCoordinate(newR.y, (yl + (yh - yl) * highFrac), newR.height as number, thresholdY);
-
-            /* newR.y = getLockCoordinate(newR.y, yl, newR.height as number, thresholdY);
-	     * newR.y = getLockCoordinate(newR.y, yh, newR.height as number, thresholdY);
-	     * newR.y = getLockCoordinate(newR.y, cy, newR.height as number, thresholdY);
-	     * newR.y = getLockCoordinateCenter(newR.y, cy, newR.height as number, thresholdY); */
-
-
+            // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
+            newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
+            // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
+            newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
 
             setRectangle(newR);
         }
