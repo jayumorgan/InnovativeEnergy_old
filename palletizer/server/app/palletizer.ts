@@ -9,31 +9,23 @@ let NETWORK: MM_Network = {
 };
 
 
-// Things we will need to do to get the palletizer setup.
-// 1. Parse Configurations.
-// 2. Controls with User Interface.
-// 3. Await Other Things.
-// 4.
-
 let m = new MachineMotion(NETWORK);
 
 m.digitalRead(1, 1);
 
 
-// So first lets parse a pallet configuration....
-// Then we can handle the rest of course...
+
+
+class Palletizer extends MachineMotion {
+
+    constructor(mm_network: MM_Network, configuration: any) {
+        super
+
+    }
 
 
 
 
-
-
-
-
-
-
-
-
-
+}
 
 
