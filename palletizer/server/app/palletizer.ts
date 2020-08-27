@@ -1,4 +1,5 @@
-import MachineMotion, { MM_Network } from "./MM/MM";
+import MachineMotion, { MM_Network, AXES } from "./MM/MM";
+import { vResponse } from "./MM/MMResponse";
 
 
 let NETWORK: MM_Network = {
@@ -8,9 +9,29 @@ let NETWORK: MM_Network = {
 };
 
 
+// Things we will need to do to get the palletizer setup.
+// 1. Parse Configurations.
+// 2. Controls with User Interface.
+// 3. Await Other Things.
+// 4.
+
 let m = new MachineMotion(NETWORK);
 
-export { m };
+m.digitalRead(1, 1);
+
+
+// So first lets parse a pallet configuration....
+// Then we can handle the rest of course...
+
+
+
+
+
+
+
+
+
+
 
 
 

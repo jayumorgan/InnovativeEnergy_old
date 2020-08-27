@@ -16,7 +16,7 @@ import {
     MQTT_Event,
     MQTT_EVENT_TYPE
 } from "./MMResponse";
-import Axios from "axios";
+
 
 export enum DIRECTION {
     POSITIVE = "positive",
@@ -435,10 +435,11 @@ interface MessageControllerInterface {
 };
 
 function MessageController(server_ip: string, mqtt_port: string, message_handler: (event: MQTT_Event) => void) {
+
     let mqtt_uri = "mqtt://" + server_ip + ":" + mqtt_port;
 
     let options: any = {
-        clientId: "message_controller" + String(uuidv4())
+        clientId: "MessageController/" + String(uuidv4())
     };
 
     let client: mqtt.Client = mqtt.connect(mqtt_uri, options);
@@ -520,7 +521,6 @@ function generateGCodeHandler(server_ip: string, server_port: string = "8000"): 
             next(0);
         });
     };
-
     return handler;
 };
 
