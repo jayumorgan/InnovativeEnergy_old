@@ -7,7 +7,7 @@ import path from "path";
 
 // Python process.
 import { spawn } from "child_process";
-import { set_selected_config, get_configurations, PALLET_PATH, MACHINE_PATH, ConfigData, ConfigUpload, getConfigs } from "./config/config";
+import { setSelectedConfig, PALLET_PATH, MACHINE_PATH, ConfigData, ConfigUpload, getConfigs } from "./config/config";
 
 let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', 'client', 'build');
 let PYTHON_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'machine', 'machine.py');
@@ -34,8 +34,11 @@ router.post("/configs/set", (req: express.Request, res: express.Response) => {
     let file_name = req.body.file_name as string;
     let config_type = req.body.config_type as string;
 
-    set_selected_config(file_name, config_type, (success: boolean) => {
-        res.sendStatus(success ? 200 : 500);
+    setSelectedConfig(file_name, config_type).then((b: boolean) => {
+        res.sendStatus(b ? 200 : 500);
+    }).catch((e: any) => {
+        console.log(e);
+        res.sendStatus(500);
     });
 });
 
@@ -101,7 +104,6 @@ router.post("/pallet", (req: express.Request, res: express.Response) => {
 
 // List current configurations.
 router.get("/configs", (req: express.Request, res: express.Response) => {
-
     getConfigs().then((c: ConfigData) => {
         res.json(c);
     }).catch((e: any) => {
