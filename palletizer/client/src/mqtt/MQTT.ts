@@ -11,12 +11,10 @@ if (SERVER_IP === "localhost") {
 console.log(SERVER_IP);
 
 //SERVER_IP = "192.168.7.2";
-
 const MQTT_SERVER = "ws://" + SERVER_IP + ":" + PORT;
 const TOPIC = "palletizer/";
-// MQTT example: https://www.cloudamqp.com/docs/nodejs_mqtt.html
 
-function MQTTSubscriber(handle_information: any, handle_state: any): mqtt.MqttClient {
+function MQTTSubscriber(handle_information: (v: any) => void, handle_state: (v: any) => void): mqtt.MqttClient {
 
     let options = {
         clientId: "Client_MQTT_Subscriber-" + uuidv4(),
@@ -97,7 +95,7 @@ function MQTTControl() {
 function MQTTEstop() {
 
     let options = {
-        clientId: "server-MQTTEstop"
+        clientId: "Client_MQTT_Estop-" + uuidv4()
     };
 
     let topic = "estop/trigger/request";
@@ -106,14 +104,13 @@ function MQTTEstop() {
 
     client.on("connect", () => {
         console.log("Connecting...", options);
-        // console.log("Connected to estop client"); 
     });
     client.publish(topic, "Command is irrelevant");
 };
 
 function RequestState() {
     let options = {
-        clientId: "server-MQTTRequester",
+        clientId: "Client_MQTT_Requester-" + uuidv4(),
     };
     let topic = TOPIC + "request";
     let client: mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
@@ -122,7 +119,6 @@ function RequestState() {
     });
     client.publish(topic, "Client State Request");
 };
-
 
 
 export { MQTTSubscriber, MQTTControl, RequestState, MQTTEstop };
