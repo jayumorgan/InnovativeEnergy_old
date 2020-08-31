@@ -20,9 +20,8 @@ function get_configs(callback: any) {
 async function get_config(filename: string, machine: boolean) {
     let url = get_url(machine ? "/machine" : "/pallet");
     let res = await axios.post(url, { filename });
-    console.log(res.data);
     return res.data;
-}
+};
 
 async function get_state_config(state: ConfigState) {
     let { machine_configs, pallet_configs, machine_index, pallet_index } = state;

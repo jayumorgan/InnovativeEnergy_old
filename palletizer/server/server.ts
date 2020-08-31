@@ -8,6 +8,7 @@ import router, { start_machine } from "./router";
 // Types
 import { AddressInfo } from "net";
 
+
 // Config
 const PORT = 3011;
 
@@ -17,7 +18,6 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 app.use(router);
-
 
 let server = app.listen(PORT, () => {
 

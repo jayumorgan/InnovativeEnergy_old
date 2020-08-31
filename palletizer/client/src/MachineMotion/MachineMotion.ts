@@ -127,9 +127,10 @@ class MachineMotion {
             let vals = [XVal, YVal, ZVal] as number[];
             return vals;
 
-        } else
+        } else {
             console.log("Regex Error", response);
-        return [0, 0, 0];
+	    return [0, 0, 0];
+	}
     }
 
 };

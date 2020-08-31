@@ -79,11 +79,7 @@ interface DraggableRectProps {
     yl: number;
     yh: number;
 }
-
-// Right Edge to Line, amount other things
-
 function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
-
     let leftEdge = currentPosition - dimensionSize / 2;
     let rightEdge = currentPosition + dimensionSize / 2;
     let newPosition = leftEdge;
@@ -129,7 +125,6 @@ function lockCoordinateEdges(currentPosition: number, dimensionSize: number, ful
         }
         return newPosition;
     }
-
 };
 
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
@@ -179,12 +174,14 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let thresholdY = (newR.height as number) / 7;
 
 
-            let cx = xl + (xh - xl) / 2;
-            let cy = yl + (yh - yl) / 2;
+            // let cx = xl + (xh - xl) / 2;
+            // let cy = yl + (yh - yl) / 2;
+
 
             let xWidth = newR.width as number;
             let yWidth = newR.height as number;
 
+	    
             // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
             newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
             // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
