@@ -164,26 +164,32 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
 
         // check distances -- with tolerance
         if (active) {
+            // console.log("Client", e.clientX, e.clientY);
+            //console.log("Bounds", x, y);
+
             let { offset } = rectangle;
+
             let newR = {
                 ...rectangle,
                 x: rectangle.x - (offset.x - x),
                 y: rectangle.y - (offset.y - y)
             };
 
-            //---------------Locking/Snap Mechanism---------------
-            let thresholdX = (newR.width as number) / 7;
-            let thresholdY = (newR.height as number) / 7;
-
             let xWidth = newR.width as number;
             let yWidth = newR.height as number;
 
-            // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
-            newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
-            // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
-            newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
+            if (!(newR.x < 0 || newR.y < 0 || newR.x > xh || newR.y > yh - yWidth / 2)) {
+                //---------------Locking/Snap Mechanism---------------
+                let thresholdX = (newR.width as number) / 7;
+                let thresholdY = (newR.height as number) / 7;
 
-            setRectangle(newR);
+                // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
+                newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
+                // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
+                newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
+
+                setRectangle(newR);
+            }
         }
     };
 
