@@ -19,6 +19,7 @@ interface RotateIconProps {
 }
 
 function RotateIcon({ size, rotate }: RotateIconProps) {
+
     let dString: string = "M 35 15 L 35 15, 70 15 C 75 15, 75 15, 75 35 L 75 35 75 55";
 
     let scale = Math.round(size / 100 * 10) / 10;
@@ -66,7 +67,6 @@ function RotateIcon({ size, rotate }: RotateIconProps) {
     );
 };
 
-
 interface DraggableRectProps {
     rect: Rect;
     updatePosition: (index: number, x: number, y: number) => void;
@@ -78,7 +78,8 @@ interface DraggableRectProps {
     xh: number;
     yl: number;
     yh: number;
-}
+};
+
 function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
     let leftEdge = currentPosition - dimensionSize / 2;
     let rightEdge = currentPosition + dimensionSize / 2;
@@ -156,6 +157,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     };
 
     let handleMove = (e: React.PointerEvent) => {
+
         let bb = (e.target as any).getBoundingClientRect();
         let x = e.clientX - bb.left;
         let y = e.clientY - bb.top;
@@ -175,7 +177,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
 
             let xWidth = newR.width as number;
             let yWidth = newR.height as number;
-	    
+
             // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
             newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
             // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
@@ -874,6 +876,13 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
         }
     };
 
+    let removeBox = () => {
+        if (modelBoxes.length > 0) {
+            let copy = [...modelBoxes];
+            copy.pop();
+            setModelBoxes([...copy]);
+        }
+    };
 
     let handlePalletSelect = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
@@ -968,6 +977,15 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
                     <div className="LayoutView">
                         <div className="LayoutContainer">
                             <div className="PalletSelect">
+                                <div className="DeleteBox">
+                                    {(modelBoxes.length > 0) &&
+                                        <div className="DeleteBoxButton" onClick={removeBox}>
+                                            <span>
+                                                {"Remove box"}
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
                                 <div className="Title">
                                     <span>
                                         {"On to pallet:"}

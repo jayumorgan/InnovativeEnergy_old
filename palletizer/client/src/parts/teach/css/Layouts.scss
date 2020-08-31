@@ -203,8 +203,32 @@
 
             .PalletSelect {
                 display: grid;
-                grid-template-columns: 70% 40%;
+                grid-template-columns: 30% 30% 40%;
 
+                .DeleteBox {
+                    @include flex-center();
+                    justify-content: flex-start;
+                    width: 100%;
+                    height: 100%;
+                    padding-left: $margin;
+
+                    .DeleteBoxButton {
+                        @include flex-center();
+                        cursor: pointer;
+                        width: 65%;
+                        background-color: $medium-blue;
+                        border-radius: $border-radius;
+                        color: white;
+                        height: 70%;
+                        font-size: $large-font;
+                        //font-weight: $bold-font;
+                    }
+
+                    .DeleteBoxButton:hover {
+                        @include shadow();
+                        background-color: $red;
+                    }
+                }
 
                 .Title {
                     @include flex-center();
@@ -217,34 +241,21 @@
                 .Drop {
                     @include flex-center();
                     justify-content: flex-start;
+                    width: 100%;
 
                     select {
                         padding: $margin;
-                        width: 70%;
+                        width: 98%;
                         font-size: $large-font;
                         color: $dark-blue;
                         @include select-style();
                         font-size: $large-font;
                     }
                 }
-
-
             }
-
-            .LayoutModel {}
-
-
-
         }
-
-
-
-
     }
 }
-
-
-
 
 
 .LayoutContainer {
