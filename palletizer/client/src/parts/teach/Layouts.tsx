@@ -173,14 +173,8 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             let thresholdX = (newR.width as number) / 7;
             let thresholdY = (newR.height as number) / 7;
 
-
-            // let cx = xl + (xh - xl) / 2;
-            // let cy = yl + (yh - yl) / 2;
-
-
             let xWidth = newR.width as number;
             let yWidth = newR.height as number;
-
 	    
             // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
             newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
@@ -197,7 +191,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             setRectPosition(rectangle);
             setActive(false);
         }
-        //     document.removeEventListener("keydown", rotate90, false);
     };
 
     let actions = {

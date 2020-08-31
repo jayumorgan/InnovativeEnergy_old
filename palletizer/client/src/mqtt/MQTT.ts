@@ -1,4 +1,5 @@
 import mqtt from "mqtt";
+import { v4 as uuidv4 } from 'uuid';
 
 // Config + Globals.
 const PORT = 9001;
@@ -18,7 +19,7 @@ const TOPIC = "palletizer/";
 function MQTTSubscriber(handle_information: any, handle_state: any): mqtt.MqttClient {
 
     let options = {
-        clientId: "server-MQTTSubscriber",
+        clientId: "Client_MQTT_Subscriber-" + uuidv4(),
     };
 
     let client: mqtt.MqttClient = mqtt.connect(MQTT_SERVER, options);
@@ -62,7 +63,7 @@ function MQTTSubscriber(handle_information: any, handle_state: any): mqtt.MqttCl
 function MQTTControl() {
 
     let options = {
-        clientId: "server-MQTTControl"
+        clientId: "Client_MQTT_Control-" + uuidv4()
     };
 
     let topic = TOPIC + "control";
