@@ -4,7 +4,6 @@ import axios, { AxiosResponse } from "axios";
 import mqtt from "mqtt";
 import { v4 as uuidv4 } from 'uuid';
 
-
 import {
     vResponse,
     echo_okay_response,
@@ -534,8 +533,6 @@ export interface MM_Network {
     serverPort: string;
     mqttPort: string;
 };
-
-
 
 export default class MachineMotion extends MotionController {
 

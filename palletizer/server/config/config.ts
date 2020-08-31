@@ -32,6 +32,9 @@ export interface CurrentConfig {
     pallet: string;
 };
 
+
+
+
 export function getConfigs(): Promise<ConfigData> {
 
     return new Promise<ConfigData>((resolve, reject) => {
