@@ -114,7 +114,6 @@ interface DraggableRectProps {
 }
 
 let getLockCoordinate = (x: number, lx: number, width: number, thresholdX: number) => {
-
     if (Math.abs(x - lx) < thresholdX) {
         return lx;
     } else if (Math.abs(lx - width - x) < thresholdX) {
@@ -132,8 +131,6 @@ let getLockCoordinateCenter = (x: number, lx: number, width: number, thresholdX:
     }
 };
 
-
-
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
 
     let [rectangle, setRectangle] = useState<Rect>(rect);
@@ -142,13 +139,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
 
     let setRectPosition = (r: Rect) => {
         updatePosition(index, r.x, r.y);
-    };
-
-    let rotate90 = (k: any) => {
-        if (k.key === "r") {
-            console.log("Rotation .. ");
-            // setRectangle(r);
-        }
     };
 
     let handleDown = (e: React.PointerEvent) => {
@@ -168,7 +158,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             });
             setActive(true);
         }
-        //        document.addEventListener("keydown", rotate90, true);
     };
 
     let handleMove = (e: React.PointerEvent) => {
@@ -204,7 +193,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
 	     */
 	    let highFrac = 784/1003;
 	    let lowFrac = 219/1003;
-
 
 	    newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * lowFrac), newR.width as number ,thresholdX);
 	    newR.x = getLockCoordinate(newR.x, (xl + (xh - xl) * highFrac), newR.width as number , thresholdX);
