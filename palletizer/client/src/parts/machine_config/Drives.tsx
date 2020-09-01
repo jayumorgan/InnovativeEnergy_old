@@ -39,8 +39,8 @@ enum MICRO_STEPS {
     ustep_8 = 8,
     ustep_16 = 16,
 };
-const ALL_MICRO_STEPS = [MICRO_STEPS.ustep_full, MICRO_STEPS.ustep_2, MICRO_STEPS.ustep_4, MICRO_STEPS.ustep_8, MICRO_STEPS.ustep_16];
 
+const ALL_MICRO_STEPS = [MICRO_STEPS.ustep_full, MICRO_STEPS.ustep_2, MICRO_STEPS.ustep_4, MICRO_STEPS.ustep_8, MICRO_STEPS.ustep_16];
 
 enum DIRECTION {
     NORMAL = 1,
@@ -48,19 +48,6 @@ enum DIRECTION {
 };
 
 const ALL_DIRECTIONS = { "Normal": DIRECTION.NORMAL, "Reverse": DIRECTION.REVERSE } as { [key: string]: DIRECTION };
-/* enum MECH_GAIN {
- *     timing_belt_150mm_turn = 150,
- *     legacy_timing_belt_200_mm_turn = 200,
- *     enclosed_timing_belt_mm_turn = 208,
- *     ballscrew_10mm_turn = 10,
- *     legacy_ballscrew_5_mm_turn = 5,
- *     indexer_deg_turn = 85,
- *     indexer_v2_deg_turn = 36,
- *     roller_conveyor_mm_turn = 157,
- *     belt_conveyor_mm_turn = 73.563,
- *     rack_pinion_mm_turn = 157.08,
- * };
- *  */
 
 const MECH_GAIN = {
     timing_belt_150mm_turn: [150, "Timing Belt"],
@@ -77,7 +64,6 @@ const MECH_GAIN = {
 
 
 export interface Drive {
-    axis: AXES;
     MachineMotionIndex: number;
     DriveNumber: DRIVE;
     MechGainKey: string;
@@ -85,10 +71,27 @@ export interface Drive {
     Direction: DIRECTION
 };
 
-function getNextDrive() {
-    // Increments are key here.
+export interface AxesConfiguration {
+    X: Drive[];
+    Y: Drive[];
+    Z: Drive[];
+    θ: Drive[];
+};
+
+export function defaultAxesConfiguration() {
+    return {
+        X: [],
+        Y: [],
+        Z: [],
+        θ: []
+    } as AxesConfiguration;
+};
+
+function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
+    let allDrives = [...a.X, ...a.Y, ...a.Z, ...a.θ];
+
+
     let d: Drive = {
-        axis: AXES.X,
         MachineMotionIndex: 0,
         DriveNumber: DRIVE.ONE,
         MechGainKey: Object.keys(MECH_GAIN)[0] as string,
@@ -99,9 +102,9 @@ function getNextDrive() {
 };
 
 interface DrivesProps {
-    allDrives: Drive[];
+    Axes: AxesConfiguration;
     allMachines: MachineMotion[];
-    setDrives: (d: Drive[]) => void;
+    setAxes: (a: AxesConfiguration) => void;
     handleBack: () => void;
     handleNext: () => void;
     instructionNumber: number;
@@ -117,16 +120,21 @@ interface DriveCellProps {
     index: number;
 };
 
-function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, instructionNumber }: DrivesProps) {
+function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructionNumber }: DrivesProps) {
 
     let haveAllDrives = () => {
-        return false;
+        let { X, Y, Z, θ } = Axes;
+        let all = (X.length > 0 && Y.length > 0 && Z.length > 0 && θ.length > 0);
+        return all;
     };
 
-    let [editingDrives, setEditingDrives] = useState<Drive[]>(allDrives.length > 0 ? [...allDrives] : [getNextDrive()]);
+    let getNextDrive = () => {
+        return nextDrive(Axes, allMachines);
+    };
+
+    let [editingDrives, setEditingDrives] = useState<Drive[]>([getNextDrive()]);
     let [summaryScreen, setSummaryScreen] = useState<boolean>(haveAllDrives());
     let [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
-
 
     let instruction: string = "Add and configure the palletizer X, Y, Z and θ axes.";
 
@@ -140,11 +148,45 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
     let RightButton: ButtonProps = {
         name: "Next",
         action: () => {
-            if (haveAllDrives()) {
+            if (summaryScreen) {
                 handleNext();
+            } else {
+                if (editingDrives.length > 0) {
+                    let cp: AxesConfiguration = { ...Axes };
+                    let cAxis: AXES = AXES.X;
+                    switch (currentAxis) {
+                        case (AXES.X): {
+                            cp.X = [...editingDrives];
+                            cAxis = AXES.Y;
+                            break;
+                        };
+                        case (AXES.Y): {
+                            cp.Y = [...editingDrives];
+                            cAxis = AXES.Z;
+                            break;
+                        };
+                        case (AXES.Z): {
+                            cp.Z = [...editingDrives];
+                            cAxis = AXES.θ;
+                            break;
+                        };
+                        case (AXES.θ): {
+                            cp.θ = [...editingDrives];
+                            break;
+                        };
+                    };
+                    setAxes(cp);
+                    setCurrentAxis(cAxis);
+                    // Increment the current axis
+                    setEditingDrives([getNextDrive()]);
+
+                    if (currentAxis === AXES.θ) {
+                        setSummaryScreen(true);
+                    };
+                }
             }
         },
-        enabled: haveAllDrives()
+        enabled: summaryScreen || (editingDrives.length > 0)
     };
 
     let contentItemProps = {
@@ -255,11 +297,15 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
                             <div className="DropDown">
                                 <select value={DriveNumber} onChange={selectDrive}>
                                     {ALL_DRIVES.map((d: DRIVE, i: number) => {
-                                        return (
-                                            <option value={d as number} key={i}>
-                                                {"Drive " + String((d as number) + 1)}
-                                            </option>
-                                        );
+                                        if (i < (allMachines[MachineMotionIndex].version as number)) {
+                                            return (
+                                                <option value={d as number} key={i}>
+                                                    {"Drive " + String((d as number) + 1)}
+                                                </option>
+                                            );
+                                        } else {
+                                            return null;
+                                        }
                                     })}
                                 </select>
                             </div>

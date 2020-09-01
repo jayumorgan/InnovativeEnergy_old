@@ -19,8 +19,8 @@ function IPValidator(s: string): boolean {
 };
 
 export enum MM_VERSION {
-    ONE,
-    TWO
+    ONE = 3, // Number of drives
+    TWO = 4
 };
 
 export interface MachineMotion {
@@ -56,7 +56,7 @@ function DropDown({ name, currentValue, handleSelect }: DropDownProps) {
                     {options.map((o: MM_VERSION, i: number) => {
                         return (
                             <option value={o as number} key={i} >
-                                {"V" + String(o + 1)}
+                                {"V" + String(i + 1)}
                             </option>
                         )
                     })}

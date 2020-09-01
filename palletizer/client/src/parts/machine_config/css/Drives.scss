@@ -68,8 +68,6 @@
     grid-template-rows: 100%;
     grid-template-columns: 70% 30%;
 
-
-
     .DriveContainer {
         width: 100%;
         height: 100%;
@@ -82,8 +80,8 @@
         .DriveConfigCell {
             padding-top: 1%;
             padding-left: 1%;
-            width: 99%;
-            height: $container-height / 7;
+            width: 98%;
+            height: $container-height / 10;
             display: grid;
             grid-template-rows: 100%;
             grid-template-columns: 96% 4%;
@@ -111,13 +109,14 @@
                 background-color: $desert-storm;
                 @include flex-center();
                 justify-content: space-around;
+                align-items: flex-start;
 
                 .Input {
-                    height: 70%;
+                    padding-top: 0.5%;
+                    height: 80%;
                     // width: 100%;
                     display: grid;
                     grid-template-rows: 50% 50%;
-
 
                     .Title {
                         @include flex-center();
@@ -141,14 +140,13 @@
                             font-size: $normal-font-size;
                             width: auto;
                         }
-
                     }
                 }
             }
         }
 
         .NewDriveCell {
-            height: 15%;
+            height: 20%;
             width: 100%;
             @include flex-center();
 
@@ -190,7 +188,6 @@
         height: 100%;
         @include flex-center();
 
-
         .Display {
             border: $container-border;
             border-radius: $border-radius;
@@ -200,16 +197,9 @@
             @include flex-center();
 
             img {
-
                 width: 95%;
                 height: auto;
             }
-
-
-
         }
-
     }
-
-
 }
