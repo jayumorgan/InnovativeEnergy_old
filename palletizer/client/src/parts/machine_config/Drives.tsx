@@ -139,18 +139,54 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
     let [editingDrives, setEditingDrives] = useState<Drive[]>([getNextDrive()]);
     let [summaryScreen, setSummaryScreen] = useState<boolean>(haveAllDrives());
     let [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
+    let [fromSummary, setFromSummary] = useState<boolean>(summaryScreen);
 
     let instruction: string = "Add and configure the palletizer X, Y, Z and θ axes.";
+
+
+    let handleEdit = (a: AXES) => () => {
+        let eDrives: Drive[] = [];
+
+        switch (a) {
+            case (AXES.X): {
+                eDrives = [...Axes.X];
+                break;
+            };
+            case (AXES.Y): {
+                eDrives = [...Axes.Y];
+                break;
+            };
+            case (AXES.Z): {
+                eDrives = [...Axes.Z];
+                break;
+            };
+            case (AXES.θ): {
+                eDrives = [...Axes.θ];
+                break;
+            };
+        };
+
+        setEditingDrives(eDrives.length > 0 ? eDrives : [getNextDrive()]);
+        setCurrentAxis(a);
+        setSummaryScreen(false);
+    };
 
     let LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
-            handleBack();
+            if (fromSummary && !summaryScreen) {
+                setSummaryScreen(true);
+            } else if (summaryScreen || currentAxis === AXES.X) {
+                handleBack();
+            } else {
+                handleEdit((currentAxis as number) - 1)();
+            }
         }
     };
 
+
     let RightButton: ButtonProps = {
-        name: "Next",
+        name: (fromSummary && !summaryScreen) || (summaryScreen) ? "Done" : "Next",
         action: () => {
             if (summaryScreen) {
                 handleNext();
@@ -187,8 +223,9 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                     setCurrentAxis(cAxis);
                     // Increment the current axis
                     setEditingDrives(eDrives.length > 0 ? eDrives : [getNextDrive()]);
-                    if (currentAxis === AXES.θ) {
+                    if (currentAxis === AXES.θ || fromSummary) {
                         setSummaryScreen(true);
+                        setFromSummary(true);
                     };
                 }
             }
@@ -236,7 +273,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                             </div>
                         </div>
                         <div className="Edit">
-                            <div className="EditButton">
+                            <div className="EditButton" onClick={handleEdit}>
                                 <span>
                                     {"Edit"}
                                 </span>
@@ -246,13 +283,6 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                 </div>
             );
         };
-
-        let handleEdit = (a: AXES) => () => {
-
-
-            console.log("Edit " + String(a));
-        };
-
         return (
             <ContentItem {...contentItemProps} >
                 <div className="AxesSummary">
@@ -261,6 +291,11 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                         <AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEdit(AXES.Y)} />
                         <AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEdit(AXES.Z)} />
                         <AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEdit(AXES.θ)} />
+                    </div>
+                    <div className="DisplayContainer">
+                        <div className="Display">
+                            <img src={palletizerImage} />
+                        </div>
                     </div>
                 </div>
             </ContentItem>
