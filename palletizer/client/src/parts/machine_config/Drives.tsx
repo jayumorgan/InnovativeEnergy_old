@@ -10,6 +10,12 @@ import plus_icon from "../teach/images/plus.svg";
 
 import "./css/Drives.scss";
 
+
+function changeVal(e: ChangeEvent): string {
+    let val: string = (e.target as any).value;
+    return val;
+};
+
 enum AXES {
     X,
     Y,
@@ -33,11 +39,15 @@ enum MICRO_STEPS {
     ustep_8 = 8,
     ustep_16 = 16,
 };
+const ALL_MICRO_STEPS = [MICRO_STEPS.ustep_full, MICRO_STEPS.ustep_2, MICRO_STEPS.ustep_4, MICRO_STEPS.ustep_8, MICRO_STEPS.ustep_16];
+
 
 enum DIRECTION {
     NORMAL = 1,
     REVERSE = -1
 };
+
+const ALL_DIRECTIONS = { "Normal": DIRECTION.NORMAL, "Reverse": DIRECTION.REVERSE } as { [key: string]: DIRECTION };
 /* enum MECH_GAIN {
  *     timing_belt_150mm_turn = 150,
  *     legacy_timing_belt_200_mm_turn = 200,
@@ -75,16 +85,6 @@ export interface Drive {
     Direction: DIRECTION
 };
 
-interface DriveCellProps {
-    drive: Drive,
-    updateDrive: (d: Drive) => void;
-};
-
-// We could enforce an order to the madness. 
-function DriveCell({ drive, updateDrive }: DriveCellProps) {
-
-};
-
 function getNextDrive() {
     // Increments are key here.
     let d: Drive = {
@@ -107,15 +107,17 @@ interface DrivesProps {
     instructionNumber: number;
 };
 
-
 function axisString(ax: AXES): string {
     let arr = ["X", "Y", "Z", "θ"] as string[];
     return arr[ax as number];
-}
+};
 
+interface DriveCellProps {
+    drive: Drive,
+    index: number;
+};
 
 function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, instructionNumber }: DrivesProps) {
-
 
     let haveAllDrives = () => {
         return false;
@@ -124,7 +126,7 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
     let [editingDrives, setEditingDrives] = useState<Drive[]>(allDrives.length > 0 ? [...allDrives] : [getNextDrive()]);
     let [summaryScreen, setSummaryScreen] = useState<boolean>(haveAllDrives());
     let [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
-    let [editingDrive, setEditingDrive] = useState<Drive>(getNextDrive());
+
 
     let instruction: string = "Add and configure the palletizer X, Y, Z and θ axes.";
 
@@ -173,43 +175,182 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
             </ContentItem>
         );
     } else {
-
         contentItemProps.instruction = "Configure drives for " + axisString(currentAxis) + " axis";
 
-        let { MachineMotionIndex, DriveNumber } = editingDrive;
-
-        let handleMachine = (e: ChangeEvent) => {
-            let machineIndex: number = +(e.target as any).value;
-            setEditingDrive({ ...editingDrive, MachineMotionIndex: machineIndex });
-        };
-
-        let handleDrive = (e: ChangeEvent) => {
-            let driveNumber: number = +(e.target as any).value;
-            setEditingDrive({ ...editingDrive, DriveNumber: driveNumber });
-        };
-
         // Axis Cells Are Needed Now;
-        let DriveCell = ({ axis }: Drive) => {
+        let DriveCell = ({ drive, index }: DriveCellProps) => {
+
+            let { MachineMotionIndex, DriveNumber, MechGainKey, MicroSteps, Direction } = drive;
+
+            let selectMachineMotion = (e: ChangeEvent) => {
+                let val: number = +(changeVal(e));
+                let cp = [...editingDrives];
+                cp[index].MachineMotionIndex = val;
+                setEditingDrives([...cp]);
+            };
+
+            let selectDrive = (e: ChangeEvent) => {
+                let d_num: number = +(changeVal(e));
+                let cp = [...editingDrives];
+                cp[index].DriveNumber = d_num as DRIVE;
+                setEditingDrives([...cp]);
+            };
+
+            let selectGain = (e: ChangeEvent) => {
+                let key: string = changeVal(e);
+                let cp = [...editingDrives];
+                cp[index].MechGainKey = key;
+                setEditingDrives([...cp]);
+            };
+
+            let selectMicroSteps = (e: ChangeEvent) => {
+                let steps: number = +(changeVal(e));
+                let cp = [...editingDrives];
+                cp[index].MicroSteps = steps;
+                setEditingDrives([...cp]);
+            };
+
+            let selectDirection = (e: ChangeEvent) => {
+                let direction: number = +(changeVal(e));
+                let cp = [...editingDrives];
+                cp[index].Direction = direction as DIRECTION;
+                setEditingDrives([...cp]);
+            };
+
+            let removeDrive = () => {
+                if (editingDrives.length > 1) {
+                    let cp = [...editingDrives];
+                    cp.splice(index, 1);
+                    setEditingDrives([...cp]);
+                }
+            };
+
             return (
                 <div className="DriveConfigCell">
-                    {axis}
+                    <div className="DriveCell">
+                        <div className="Input">
+                            <div className="Title">
+                                <span>
+                                    {"Machine Motion"}
+                                </span>
+                            </div>
+                            <div className="DropDown">
+                                <select value={MachineMotionIndex} onChange={selectMachineMotion}>
+                                    {allMachines.map((mm: MachineMotion, i: number) => {
+                                        return (
+                                            <option value={i} key={i}>
+                                                {mm.name}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="Input">
+                            <div className="Title">
+                                <span>
+                                    {"Drive"}
+                                </span>
+                            </div>
+                            <div className="DropDown">
+                                <select value={DriveNumber} onChange={selectDrive}>
+                                    {ALL_DRIVES.map((d: DRIVE, i: number) => {
+                                        return (
+                                            <option value={d as number} key={i}>
+                                                {"Drive " + String((d as number) + 1)}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="Input">
+                            <div className="Title">
+                                <span>
+                                    {"Type"}
+                                </span>
+                            </div>
+                            <div className="DropDown">
+                                <select value={MechGainKey} onChange={selectGain}>
+                                    {Object.keys(MECH_GAIN).map((key: string, i: number) => {
+                                        let [gain, display_name] = MECH_GAIN[key] as [number, string];
+                                        return (
+                                            <option value={key} key={i}>
+                                                {display_name}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="Input">
+                            <div className="Title">
+                                <span>
+                                    {"Micro Steps"}
+                                </span>
+                            </div>
+                            <div className="DropDown">
+                                <select value={MicroSteps} onChange={selectMicroSteps}>
+                                    {ALL_MICRO_STEPS.map((m: MICRO_STEPS, i: number) => {
+                                        return (
+                                            <option value={m} key={i}>
+                                                {m}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="Input">
+                            <div className="Title">
+                                <span>
+                                    {"Direction"}
+                                </span>
+                            </div>
+                            <div className="DropDown">
+                                <select value={Direction} onChange={selectDirection}>
+                                    {Object.keys(ALL_DIRECTIONS).map((key: string, i: number) => {
+                                        return (
+                                            <option value={ALL_DIRECTIONS[key] as number} key={i}>
+                                                {key}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="Trash">
+                        <span className="icon-delete" onClick={removeDrive}>
+                        </span>
+                    </div>
                 </div>
             );
+        };
+
+        let addDrive = () => {
+            let newDrive = getNextDrive();
+            setEditingDrives([...editingDrives, newDrive]);
         };
 
         return (
             <ContentItem {...contentItemProps}>
                 <div className="Drives">
                     <div className="Configure">
-                        <div className="AxisContainer">
-                            {allDrives.map((d: Drive, i: number) => {
+                        <div className="DriveContainer">
+                            {editingDrives.map((d: Drive, i: number) => {
                                 return (
-                                    <DriveCell {...d} />
+                                    <DriveCell drive={d} index={i} key={i} />
                                 );
                             })}
-                            <div className="DriveConfigCell">
+                            <div className="NewDriveCell">
                                 <div className="NewDriveCell">
-
+                                    <div className="AddButton" onClick={addDrive} >
+                                        <img src={plus_icon} />
+                                        <span>
+                                            {"Add drive"}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
