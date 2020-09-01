@@ -10,13 +10,11 @@ import plus_icon from "./images/plus.svg";
 
 import "./css/Stack.scss";
 
-
-
 interface PalletLayoutProps {
     pallet: PalletGeometry;
     addLayer: () => void;
     setLayoutOnLayer: (stackIndex: number, layoutIndex: number) => void;
-}
+};
 
 function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps) {
     let { name, Layouts, Stack } = pallet;

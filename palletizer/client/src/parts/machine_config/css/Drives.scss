@@ -8,7 +8,6 @@
     @include flex-center();
 
     .DriveScrollContainer {
-
         height: 100%;
         width: 100%;
 
@@ -69,57 +68,52 @@
     grid-template-rows: 100%;
     grid-template-columns: 50% 50%;
 
-    .DriveConfig {
-        height: 100%;
+    .DriveContainer {
         width: 100%;
-        display: grid;
-        grid-template-rows: 7% 15% 15% 15% 15% auto;
-        grid-template-columns: 100%;
+        height: 100%;
+        @include flex-center();
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: scroll;
+        overflow-x: hidden;
 
-        .AxisName {
+        .DriveConfigCell {
+            height: 20%;
+            width: 100%;
             @include flex-center();
-            align-items: flex-start;
 
-            span {
-                font-size: $large-font;
-                font-weight: $bold-font;
-            }
-        }
+            .NewDriveCell {
 
-        .ConfigInput {
-            display: grid;
-            grid-template-columns: 30% 70%;
-
-            .Name {
                 @include flex-center();
-                font-size: $large-font;
-                font-weight: $bold-font;
+                align-self: flex-start;
+                width: 89%;
+                padding-top: 2%;
                 justify-content: flex-end;
-                padding-right: $margin;
-            }
 
-            .Input {
-                @include flex-center();
-                justify-content: flex-start;
+                .AddButton {
+                    cursor: pointer;
+                    width: 30%;
+                    @include flex-center();
 
-                input {
-                    width: 70%;
-                    font-size: $large-font;
-                    padding: $margin;
-                    color: $dark-blue;
+                    span {
+                        font-size: $large-font;
+                        padding-left: $margin;
+                    }
+
+                    img {
+                        height: 100%;
+                        widht: auto;
+                    }
                 }
 
-                select {
-                    width: 85%;
-                    font-size: $large-font;
-                    padding: $margin;
-                    color: $dark-blue;
+                .AddButton:hover {
+                    span {
+                        text-decoration: underline;
+                    }
                 }
-
             }
         }
     }
-
 
     .DisplayContainer {
         width: 100%;

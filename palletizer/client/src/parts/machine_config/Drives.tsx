@@ -2,13 +2,13 @@ import React, { useState, ChangeEvent } from "react";
 
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 
-
-//---------------Style---------------
-import "./css/Drives.scss";
 import { MachineMotion } from "./MachineMotions";
 
-//---------------Images---------------
 import palletizerImage from "./images/palletizer.png";
+
+import plus_icon from "../teach/images/plus.svg";
+
+import "./css/Drives.scss";
 
 enum AXES {
     X,
@@ -26,12 +26,54 @@ enum DRIVE {
 
 const ALL_DRIVES = [DRIVE.ONE, DRIVE.TWO, DRIVE.THREE, DRIVE.FOUR];
 
+enum MICRO_STEPS {
+    ustep_full = 1,
+    ustep_2 = 2,
+    ustep_4 = 4,
+    ustep_8 = 8,
+    ustep_16 = 16,
+};
+
+enum DIRECTION {
+    NORMAL = 1,
+    REVERSE = -1
+};
+/* enum MECH_GAIN {
+ *     timing_belt_150mm_turn = 150,
+ *     legacy_timing_belt_200_mm_turn = 200,
+ *     enclosed_timing_belt_mm_turn = 208,
+ *     ballscrew_10mm_turn = 10,
+ *     legacy_ballscrew_5_mm_turn = 5,
+ *     indexer_deg_turn = 85,
+ *     indexer_v2_deg_turn = 36,
+ *     roller_conveyor_mm_turn = 157,
+ *     belt_conveyor_mm_turn = 73.563,
+ *     rack_pinion_mm_turn = 157.08,
+ * };
+ *  */
+
+const MECH_GAIN = {
+    timing_belt_150mm_turn: [150, "Timing Belt"],
+    legacy_timing_belt_200_mm_turn: [200, "Legacy Timing Belt"],
+    enclosed_timing_belt_mm_turn: [208, "Enclosed Timing Belt"],
+    ballscrew_10mm_turn: [10, "Ball Screw"],
+    legacy_ballscrew_5_mm_turn: [5, "Legacy Ball Screw"],
+    indexer_deg_turn: [85, "Indexer Degree Turn"],
+    indexer_v2_deg_turn: [36, "Indexer V2 Degree Turn"],
+    roller_conveyor_mm_turn: [157, "Roller Conveyor"],
+    belt_conveyor_mm_turn: [73.563, "Belt Conveyor"],
+    rack_pinion_mm_turn: [157.08, "Rack & Pinion"]
+} as { [key: string]: [number, string] };
+
+
 export interface Drive {
     axis: AXES;
     MachineMotionIndex: number;
     DriveNumber: DRIVE;
+    MechGainKey: string;
+    MicroSteps: MICRO_STEPS;
+    Direction: DIRECTION
 };
-
 
 interface DriveCellProps {
     drive: Drive,
@@ -48,11 +90,13 @@ function getNextDrive() {
     let d: Drive = {
         axis: AXES.X,
         MachineMotionIndex: 0,
-        DriveNumber: DRIVE.ONE
+        DriveNumber: DRIVE.ONE,
+        MechGainKey: Object.keys(MECH_GAIN)[0] as string,
+        MicroSteps: MICRO_STEPS.ustep_8,
+        Direction: DIRECTION.NORMAL
     };
     return d;
 };
-
 
 interface DrivesProps {
     allDrives: Drive[];
@@ -80,7 +124,6 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
     let [editingDrives, setEditingDrives] = useState<Drive[]>(allDrives.length > 0 ? [...allDrives] : [getNextDrive()]);
     let [summaryScreen, setSummaryScreen] = useState<boolean>(haveAllDrives());
     let [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
-
     let [editingDrive, setEditingDrive] = useState<Drive>(getNextDrive());
 
     let instruction: string = "Add and configure the palletizer X, Y, Z and θ axes.";
@@ -101,13 +144,6 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
         },
         enabled: haveAllDrives()
     };
-
-    /* let AddButton: ButtonProps = {
-     *     name: "Add new axis",
-     *     action: () => {
-     *         setEditingDrives([...editingDrives, getNextDrive()]);
-     *     }
-     * }; */
 
     let contentItemProps = {
         instruction,
@@ -137,7 +173,8 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
             </ContentItem>
         );
     } else {
-        contentItemProps.instruction = "Configure drive for " + axisString(currentAxis) + " axis";
+
+        contentItemProps.instruction = "Configure drives for " + axisString(currentAxis) + " axis";
 
         let { MachineMotionIndex, DriveNumber } = editingDrive;
 
@@ -151,47 +188,28 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
             setEditingDrive({ ...editingDrive, DriveNumber: driveNumber });
         };
 
+        // Axis Cells Are Needed Now;
+        let DriveCell = ({ axis }: Drive) => {
+            return (
+                <div className="DriveConfigCell">
+                    {axis}
+                </div>
+            );
+        };
 
         return (
             <ContentItem {...contentItemProps}>
                 <div className="Drives">
                     <div className="Configure">
-                        <div className="DriveConfig">
-                            <div className="AxisName">
-                                <span>
-                                    {axisString(currentAxis) + "-Axis Configuration"}
-                                </span>
-                            </div>
-                            <div className="ConfigInput">
-                                <div className="Name">
-                                    <span>
-                                        {"Machine Motion:"}
-                                    </span>
-                                </div>
-                                <div className="Input">
-                                    <select value={MachineMotionIndex} onChange={handleMachine}>
-                                        {allMachines.map((m: MachineMotion, i: number) => {
-                                            return (
-                                                <option value={i} key={i}> {m.name + ` (${m.ipAddress})`} </option>
-                                            )
-                                        })}
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="ConfigInput">
-                                <div className="Name">
-                                    <span>
-                                        {"Drive:"}
-                                    </span>
-                                </div>
-                                <div className="Input">
-                                    <select value={DriveNumber} onChange={handleDrive}>
-                                        {ALL_DRIVES.map((a: DRIVE, i: number) => {
-                                            return (
-                                                <option value={a} key={i}> {String(a + 1)} </option>
-                                            )
-                                        })}
-                                    </select>
+                        <div className="AxisContainer">
+                            {allDrives.map((d: Drive, i: number) => {
+                                return (
+                                    <DriveCell {...d} />
+                                );
+                            })}
+                            <div className="DriveConfigCell">
+                                <div className="NewDriveCell">
+
                                 </div>
                             </div>
                         </div>
@@ -206,6 +224,7 @@ function Drives({ allDrives, setDrives, allMachines, handleBack, handleNext, ins
         );
     };
 };
+
 
 
 export default Drives;

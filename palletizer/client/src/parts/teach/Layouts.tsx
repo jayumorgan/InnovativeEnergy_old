@@ -161,11 +161,8 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         let bb = (e.target as any).getBoundingClientRect();
         let x = e.clientX - bb.left;
         let y = e.clientY - bb.top;
-
         // check distances -- with tolerance
         if (active) {
-            // console.log("Client", e.clientX, e.clientY);
-            //console.log("Bounds", x, y);
 
             let { offset } = rectangle;
 
