@@ -1,5 +1,5 @@
-@import "../../../master.scss";
-
+@import "../../../_master.scss";
+@import "../../css/TeachMode.scss";
 
 .MachineMotion {
     width: 100%;
@@ -22,7 +22,6 @@
             height: auto;
         }
     }
-
 
     .ParameterContainer {
         display: grid;
@@ -67,15 +66,10 @@
                 input {
                     border: 1pt solid $green;
                     border-color: $green;
-                    @include cshadow($green);
+                    //                    @include cshadow($green);
                 }
             }
-
         }
-
-
-
-
 
 
         .Name {
@@ -106,6 +100,122 @@
             }
         }
     }
+}
 
 
+
+.MachineMotionCellContainer {
+    padding-top: 1%;
+    padding-left: 1%;
+    width: 99%;
+    height: $container-height / 7;
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 96% 4%;
+
+    .Trash {
+        @include flex-center();
+
+        span {
+            cursor: pointer;
+            font-size: $large-font;
+            color: $red;
+        }
+
+        span:hover {
+            font-weight: $bold-font;
+        }
+
+    }
+
+
+    .MachineMotionCell {
+        cursor: pointer;
+        width: 99%;
+        height: 100%;
+        border: $container-border;
+        border-radius: $border-radius;
+        background-color: $desert-storm;
+        justify-content: flex-start;
+        display: grid;
+        grid-template-rows: 100%;
+        grid-template-columns: 12% 20% 53% 15%;
+
+        .MiniRender {
+            @include flex-center();
+            height: 100%;
+            width: 100%;
+
+            img {
+                width: 90%;
+                height: auto;
+            }
+
+            .MachineMotionMount {
+                height: 100%;
+                width: 100%;
+                @include flex-center();
+
+                canvas {
+                    height: 100%;
+                    width: 100%;
+                }
+            }
+        }
+
+        .Name {
+            @include flex-center();
+
+            input {
+                padding: $margin;
+                font-size: $large-font;
+                color: $dark-blue;
+                //border-radius: $border-radius;
+                width: 80%;
+            }
+        }
+
+        .Dimensions {
+            @include flex-center();
+
+            .DimensionsGrid {
+                width: 90%;
+                height: 40%;
+                display: grid;
+                grid-template-rows: 100%;
+                grid-template-columns: 33% 33% 33%;
+                border-radius: $border-radius;
+                border: $container-border;
+
+                .Dimension {
+                    @include flex-center();
+                    font-size: $medium-font;
+                }
+            }
+
+        }
+
+        .Edit {
+            @include flex-center();
+            justify-content: flex-end;
+            padding-right: 10%;
+
+            .EditButton {
+                width: 95%;
+                height: 40%;
+                @include flex-center();
+
+                border-radius: $border-radius;
+                background-color: $medium-blue;
+                color: white;
+                font-size: $large-font;
+                // font-weight: $bold-font;
+            }
+
+            .EditButton:hover {
+                @include shadow();
+                background-color: $green;
+            }
+        }
+    }
 }

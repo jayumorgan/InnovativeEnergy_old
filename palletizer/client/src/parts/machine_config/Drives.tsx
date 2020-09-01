@@ -73,6 +73,7 @@ export interface Drive {
     Direction: DIRECTION
 };
 
+//---------------Fix This To Avoid The Horrific Switch Statements---------------
 export interface AxesConfiguration {
     X: Drive[];
     Y: Drive[];
@@ -143,7 +144,6 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
 
     let instruction: string = "Add and configure the palletizer X, Y, Z and θ axes.";
 
-
     let handleEdit = (a: AXES) => () => {
         let eDrives: Drive[] = [];
 
@@ -183,7 +183,6 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
             }
         }
     };
-
 
     let RightButton: ButtonProps = {
         name: (fromSummary && !summaryScreen) || (summaryScreen) ? "Done" : "Next",

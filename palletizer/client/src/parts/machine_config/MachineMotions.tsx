@@ -117,8 +117,8 @@ function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
     let { ipAddress, gateway, netMask } = machine;
 
     return (
-        <div className="BoxCellContainer">
-            <div className="BoxCell">
+        <div className="MachineMotionCellContainer">
+            <div className="MachineMotionCell">
                 <div className="MiniRender">
                     <img src={mmV1image} />
                 </div>
