@@ -69,6 +69,21 @@ body {
     overflow: hidden;
 }
 
+@mixin polygon() {
+    cursor: pointer;
+
+    svg {
+        polygon {
+            fill: $medium-blue;
+        }
+    }
+
+    svg:hover {
+        polygon {
+            fill: $green;
+        }
+    }
+}
 
 @mixin jin-style($width, $fs) {
     input {

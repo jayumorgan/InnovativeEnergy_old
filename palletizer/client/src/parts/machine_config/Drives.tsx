@@ -4,6 +4,8 @@ import ContentItem, { ButtonProps } from "../teach/ContentItem";
 
 import { MachineMotion } from "./MachineMotions";
 
+import SolidArrow, { ROTATION } from "../teach/SolidArrow";
+
 import palletizerImage from "./images/palletizer.png";
 
 import plus_icon from "../teach/images/plus.svg";
@@ -87,10 +89,12 @@ export function defaultAxesConfiguration() {
     } as AxesConfiguration;
 };
 
+function getAllDrives(a: AxesConfiguration) {
+    return [...a.X, ...a.Y, ...a.Z, ...a.θ];
+};
+
 function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
-    let allDrives = [...a.X, ...a.Y, ...a.Z, ...a.θ];
-
-
+    let allDrives = getAllDrives(a);
     let d: Drive = {
         MachineMotionIndex: 0,
         DriveNumber: DRIVE.ONE,
@@ -154,20 +158,24 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                 if (editingDrives.length > 0) {
                     let cp: AxesConfiguration = { ...Axes };
                     let cAxis: AXES = AXES.X;
+                    let eDrives: Drive[] = [];
                     switch (currentAxis) {
                         case (AXES.X): {
                             cp.X = [...editingDrives];
                             cAxis = AXES.Y;
+                            eDrives = [...Axes.Y];
                             break;
                         };
                         case (AXES.Y): {
                             cp.Y = [...editingDrives];
                             cAxis = AXES.Z;
+                            eDrives = [...Axes.Z];
                             break;
                         };
                         case (AXES.Z): {
                             cp.Z = [...editingDrives];
                             cAxis = AXES.θ;
+                            eDrives = [...Axes.Z];
                             break;
                         };
                         case (AXES.θ): {
@@ -178,8 +186,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                     setAxes(cp);
                     setCurrentAxis(cAxis);
                     // Increment the current axis
-                    setEditingDrives([getNextDrive()]);
-
+                    setEditingDrives(eDrives.length > 0 ? eDrives : [getNextDrive()]);
                     if (currentAxis === AXES.θ) {
                         setSummaryScreen(true);
                     };
@@ -197,21 +204,63 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
     } as any;
 
     if (summaryScreen) {
+        interface AxisListingProps {
+            drives: Drive[];
+            title: string;
+            handleEdit: () => void;
+        };
+
+
+        let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
+            return (
+                <div className="AxisListing">
+                    <div className="AxisListingCell">
+                        <div className="Title">
+                            <span>
+                                {title + " Axis"}
+                            </span>
+                        </div>
+                        <div className="DetailsContainer">
+                            <div className="Details">
+                                <span>
+                                    {String(drives.length) + " Drive" + (drives.length > 1 ? "s" : "")}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="AxisJog">
+                            <div className="ArrowLeft">
+                                <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
+                            </div>
+                            <div className="ArrowRight">
+                                <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
+                            </div>
+                        </div>
+                        <div className="Edit">
+                            <div className="EditButton">
+                                <span>
+                                    {"Edit"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        let handleEdit = (a: AXES) => () => {
+
+
+            console.log("Edit " + String(a));
+        };
+
         return (
             <ContentItem {...contentItemProps} >
-                <div className="Drives">
-                    <div className="DriveScrollcontainer">
-                        <div className="DriveScroll">
-                            {editingDrives.map((d: Drive, index: number) => {
-                                return (
-                                    <div className="DriveCellContainer">
-                                        <div className="DriveCell">
-
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
+                <div className="AxesSummary">
+                    <div className="AxesScroll">
+                        <AxisListing drives={Axes.X} title={"X"} handleEdit={handleEdit(AXES.X)} />
+                        <AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEdit(AXES.Y)} />
+                        <AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEdit(AXES.Z)} />
+                        <AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEdit(AXES.θ)} />
                     </div>
                 </div>
             </ContentItem>
@@ -219,7 +268,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
     } else {
         contentItemProps.instruction = "Configure drives for " + axisString(currentAxis) + " axis";
 
-        // Axis Cells Are Needed Now;
+        // Drive Cell Component
         let DriveCell = ({ drive, index }: DriveCellProps) => {
 
             let { MachineMotionIndex, DriveNumber, MechGainKey, MicroSteps, Direction } = drive;
