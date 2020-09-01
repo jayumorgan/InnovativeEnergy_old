@@ -74,20 +74,19 @@ interface PropertyInputProps {
 };
 
 function PropertyInput({ name, currentValue, handleChange, validator }: PropertyInputProps) {
-    // We will wait un
+
     let [valid, setValid] = useState<boolean>(validator(currentValue));
     let [value, setValue] = useState<string>(currentValue);
 
     let onChange = (e: ChangeEvent) => {
         let s = (e.target as any).value;
-
         let isValid = validator(s);
         if (isValid) {
             handleChange(s);
         }
         setValid(isValid);
         setValue(s);
-    }
+    };
 
     return (
         <div className="PropertyInput">
@@ -99,7 +98,7 @@ function PropertyInput({ name, currentValue, handleChange, validator }: Property
             </div>
         </div>
     );
-}
+};
 
 interface MachineCellProps {
     machine: MachineMotion,
@@ -353,8 +352,8 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                 </div>
             </ContentItem>
         );
-    }
-}
+    };
+};
 
 
 export default MachineMotions;

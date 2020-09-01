@@ -58,7 +58,6 @@
                     padding: $margin;
                     color: $dark-blue;
                 }
-
             }
 
             .Valid {
@@ -204,7 +203,6 @@
                 width: 95%;
                 height: 40%;
                 @include flex-center();
-
                 border-radius: $border-radius;
                 background-color: $medium-blue;
                 color: white;

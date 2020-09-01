@@ -11,6 +11,7 @@ import Modal from "./Modal";
 import Name from "./teach/Name";
 import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
 import Drives, { Drive, AxesConfiguration, defaultAxesConfiguration } from "./machine_config/Drives";
+import IOConfig, { IOState, IO, defaultIO } from "./machine_config/IO";
 
 //---------------Style---------------
 
@@ -26,13 +27,14 @@ enum MachineConfigState {
     CONFIG_NAME,
     ADD_MACHINE_MOTIONS,
     AXES_CONFIG,
+    IO_CONFIG,
 };
-
 
 interface MachineConfiguration {
     name: string;
     machines: MachineMotion[]; // String of IP Addresses
     axes: AxesConfiguration;
+    io: IO;
 };
 
 
@@ -40,7 +42,8 @@ function defaultConfiguration(index: number): MachineConfiguration {
     return {
         name: "Machine Configuration " + String(index + 1),
         machines: [] as MachineMotion[],
-        axes: defaultAxesConfiguration()
+        axes: defaultAxesConfiguration(),
+        io: defaultIO()
     } as MachineConfiguration;
 };
 
@@ -48,6 +51,7 @@ enum MACHINE_ACTION {
     NAME,
     MACHINES,
     AXES,
+    IO
 };
 
 interface ReducerAction {
@@ -62,14 +66,17 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
     let { payload } = action;
 
     switch (actionType) {
-        case MACHINE_ACTION.NAME: {
+        case (MACHINE_ACTION.NAME): {
             return { ...state, name: payload as string };
         }
-        case MACHINE_ACTION.MACHINES: {
+        case (MACHINE_ACTION.MACHINES): {
             return { ...state, machines: action.payload as MachineMotion[] };
         }
-        case MACHINE_ACTION.AXES: {
+        case (MACHINE_ACTION.AXES): {
             return { ...state, axes: action.payload as AxesConfiguration };
+        }
+        case (MACHINE_ACTION.IO): {
+            return { ...state, io: action.payload as IO };
         }
         default: {
             return state;
@@ -107,6 +114,13 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
         });
     };
 
+    let setIO = (io: IO) => {
+        dispatch({
+            type: MACHINE_ACTION.IO,
+            payload: io as any
+        });
+    };
+
     let handleNext = () => {
         setConfigState(++configState);
     };
@@ -117,7 +131,7 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
         } else {
             close();
         }
-    }
+    };
 
     completionFraction.n = configState as number;
 
@@ -132,7 +146,7 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
     switch (configState) {
         case (MachineConfigState.CONFIG_NAME): {
             break;
-        }
+        };
         case (MachineConfigState.ADD_MACHINE_MOTIONS): {
             let props = {
                 allMachines: configuration.machines,
@@ -141,7 +155,7 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
             } as any;
             ChildElement = (<MachineMotions {...props} />);
             break;
-        }
+        };
         case (MachineConfigState.AXES_CONFIG): {
             let props = {
                 setAxes,
@@ -151,7 +165,17 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
             } as any;
             ChildElement = (<Drives {...props} />);
             break;
-        }
+        };
+        case (MachineConfigState.IO_CONFIG): {
+            let props = {
+                io: configuration.io,
+                setIO,
+                allMachines: configuration.machines,
+                ...controlProps
+            } as any;
+            ChildElement = (<IOConfig {...props} />);
+            break;
+        };
         default: {
             console.log("Unhandled MachineConfigState....");
         }
