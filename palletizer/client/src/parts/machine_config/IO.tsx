@@ -10,7 +10,7 @@ import "./css/IO.scss";
 export interface IOState {
     MachineMotionIndex: number;
     NetworkId: number;
-    Pin: [boolean, boolean, boolean, boolean];
+    Pins: [boolean, boolean, boolean, boolean];
 };
 
 const ALL_NETWORK_IDS: number[] = [0, 1, 2];
@@ -31,7 +31,7 @@ function defaultIOState(): IOState {
     return {
         MachineMotionIndex: 0,
         NetworkId: 0, // 0, 1, 2? 
-        Pin: [false, false, false, false] // 0,1,2,3
+        Pins: [false, false, false, false] // 0,1,2,3
     };
 };
 
@@ -87,6 +87,9 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         enabled: true
     };
 
+
+
+
     let contentItemProps = {
         instruction,
         instructionNumber,
@@ -109,9 +112,14 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         state: IOState;
     };
 
+    let handleTest = (i: number) => () => {
+        let s: IOState = editingIOs[i];
+        console.log("Test io module ", s.MachineMotionIndex, s.NetworkId, s.Pins);
+    };
+
     let toggleSwitch = (i: number, j: number) => () => {
         let cp = [...editingIOs];
-        cp[i].Pin[j] = !(cp[i].Pin[j]);
+        cp[i].Pins[j] = !(cp[i].Pins[j]);
         setEditingIOs([...cp]);
     };
 
@@ -157,7 +165,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                             </select>
                         </div>
                     </div>
-                    {state.Pin.map((pin: boolean, i: number) => {
+                    {state.Pins.map((pin: boolean, i: number) => {
                         return (
                             <div className="SwitchContainer">
 
@@ -188,6 +196,14 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                             </div>
                         );
                     })}
+
+                    <div className="Test">
+                        <div className="TestButton">
+                            <span>
+                                {"Test"}
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div className="Trash">
                     <span className="icon-delete" onClick={removeOutput(index)}>
