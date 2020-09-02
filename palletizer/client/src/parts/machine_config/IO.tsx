@@ -88,13 +88,19 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
     };
 
 
-
+    let AddButton: ButtonProps = {
+        name: "Add new output",
+        action: () => {
+            setEditingIOs([...editingIOs, defaultIOState()]);
+        }
+    };
 
     let contentItemProps = {
         instruction,
         instructionNumber,
         LeftButton,
         RightButton,
+        AddButton
     } as any;
 
     let removeOutput = (index: number) => () => {
@@ -198,7 +204,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                     })}
 
                     <div className="Test">
-                        <div className="TestButton">
+                        <div className="TestButton" onClick={handleTest(index)}>
                             <span>
                                 {"Test"}
                             </span>
@@ -222,18 +228,20 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                             <IOCell index={i} state={state} key={i} />
                         );
                     })}
-                    <div className="NewIOCell">
-                        <div className="NewIOCell">
-                            <div className="AddButton" onClick={addIOState} >
-                                <img src={plus_icon} />
-                                <span>
-                                    {"Add Output Module"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </ContentItem>
     );
 }
+/*
+ * <div className="NewIOCell">
+ * <div className="NewIOCell">
+ * <div className="AddButton" onClick={addIOState} >
+ * <img src={plus_icon} />
+ * <span>
+ * {"Add Output Module"}
+ * </span>
+ * </div>
+ * </div>
+ * </div> */
