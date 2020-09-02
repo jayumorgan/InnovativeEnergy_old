@@ -52,10 +52,30 @@ router.post("/configs/savepallet", (req: express.Request, res: express.Response)
 
     let file_path = path.join(PALLET_PATH.toString(), name + ".json");
 
+    res.sendStatus(200);
+
     fs.writeFile(file_path, JSON.stringify(config, null, "\t"), () => {
         console.log("Wrote pallet configuration: ", file_path);
     });
 });
+
+router.post("/configs/savemachine", (req: express.Request, res: express.Response) => {
+    let { name, config } = req.body;
+
+    if (!fs.existsSync(MACHINE_PATH)) {
+        fs.mkdirSync(PALLET_PATH);
+    }
+
+    let file_path = path.join(MACHINE_PATH.toString(), name + ".json");
+
+    res.sendStatus(200);
+
+    fs.writeFile(file_path, JSON.stringify(config, null, "\t"), () => {
+        console.log("Wrote machine configuration: ", file_path);
+    });
+});
+
+
 
 // Serve the static configuration files.
 router.use("/machine", express.static(MACHINE_PATH.toString()));

@@ -176,7 +176,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                     </div>
                     {state.Pins.map((pin: boolean, i: number) => {
                         return (
-                            <div className="SwitchContainer">
+                            <div className="SwitchContainer" key={i}>
 
                                 <div className="Name">
                                     <span>

@@ -12,6 +12,8 @@ import { ConfigState } from "../types/Types";
 
 import { SavedPalletConfiguration } from "./TeachMode";
 
+import { SavedMachineConfiguration } from "./MachineConfig";
+
 import { get_config } from "../requests/requests";
 
 // Styles
@@ -109,22 +111,14 @@ function Configuration() {
 
     // True for development
     let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
-    let [add_machine_config, set_add_machine_config] = useState<boolean>(true);
+    let [add_machine_config, set_add_machine_config] = useState<boolean>(false);
 
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
 
     let [editPalletConfig, setEditPalletConfig] = useState<SavedPalletConfiguration | null>(null);
+    let [editMachineConfig, setEditMachineConfig] = useState<SavedMachineConfiguration | null>(null);
 
-    let start_editor = (title: string) => (fn: string) => {
-        let edit = {
-            filename: fn,
-            title: title,
-            edit: true,
-            machine: title === machine_title
-        } as EditorConfig;
-        set_editor(edit);
-    };
 
     let startPalletEditor = (filename: string) => {
 
@@ -135,7 +129,19 @@ function Configuration() {
             //set_data(JSON.stringify(res_data, null, "\t"));
         }
         fetch_data();
-    }
+    };
+
+    let startMachineEditor = (filename: string) => {
+        let fetch_data = async () => {
+            let res_data = await get_config(filename, true) as SavedMachineConfiguration;
+            console.log(res_data);
+            setEditMachineConfig(res_data);
+            set_add_machine_config(true);
+        };
+
+        fetch_data();
+    };
+
 
     let close_editor = () => {
         set_editor({ ...editor, edit: false });
@@ -154,17 +160,19 @@ function Configuration() {
         set_add_machine_config(val);
     };
 
-    let configCount = pallet_configs.length;
+    let pallet_count = pallet_configs.length;
+    let machine_count = machine_configs.length;
+
 
     return (
         <Fragment>
             <div className="ConfigContainer">
-                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={start_editor(machine_title)} start_add_config={new_machine(true)} />
+                <ConfigContainer title={machine_title} configs={machine_configs} start_editor={startMachineEditor} start_add_config={new_machine(true)} />
                 <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={startPalletEditor} start_add_config={new_pallet(true)} />
             </div>
             {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}
-            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} palletConfig={editPalletConfig} index={configCount} />}
-            {add_machine_config && <MachineConfigurator close={new_machine(false)} index={0} machineConfig={null} />}
+            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} palletConfig={editPalletConfig} index={pallet_count} />}
+            {add_machine_config && <MachineConfigurator close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );

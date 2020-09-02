@@ -5,6 +5,7 @@ import { Fraction } from "./teach/CompletionDots";
 
 import Modal from "./Modal";
 
+import { SaveMachineConfig } from "../requests/requests";
 
 //---------------Configuration Steps---------------
 
@@ -12,31 +13,33 @@ import Name from "./teach/Name";
 import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
 import Drives, { Drive, AxesConfiguration, defaultAxesConfiguration } from "./machine_config/Drives";
 import IOConfig, { IOState, IO, defaultIO } from "./machine_config/IO";
+import MachineSummary, { MachineSummaryProps } from "./machine_config/Summary";
 
 //---------------Style---------------
 
 import "./css/TeachMode.scss";
 
-interface MachineConfiguratorProps {
-    close: () => void;
-    index: number;
-    machineConfig: null;
-};
 
 enum MachineConfigState {
     CONFIG_NAME,
     ADD_MACHINE_MOTIONS,
     AXES_CONFIG,
     IO_CONFIG,
+    SUMMARY
 };
 
-interface MachineConfiguration {
+export interface MachineConfiguration {
     name: string;
     machines: MachineMotion[]; // String of IP Addresses
     axes: AxesConfiguration;
     io: IO;
 };
 
+
+export interface SavedMachineConfiguration {
+    name: string;
+    config: MachineConfiguration;
+}
 
 function defaultConfiguration(index: number): MachineConfiguration {
     return {
@@ -85,11 +88,24 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
 };
 
 
+interface MachineConfiguratorProps {
+    close: () => void;
+    index: number;
+    machineConfig: null | SavedMachineConfiguration;
+};
+
 function MachineConfigurator({ close, index, machineConfig }: MachineConfiguratorProps) {
 
-    let completionFraction = { n: 0, d: 5 } as Fraction;
+    let completionFraction = { n: 0, d: 4 } as Fraction;
 
-    let [configuration, dispatch] = useReducer(MachineReducer, defaultConfiguration(index));
+    let [configuration, dispatch] = useReducer(MachineReducer, (() => {
+        if (machineConfig) {
+            console.log(machineConfig, "REturning this values...");
+            return machineConfig.config
+        } else {
+            return defaultConfiguration(index)
+        }
+    })());
 
     let [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
 
@@ -122,7 +138,18 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
     };
 
     let handleNext = () => {
-        setConfigState(++configState);
+        if (configState as number < completionFraction.d) {
+            setConfigState(++configState);
+        } else {
+            let save: SavedMachineConfiguration = {
+                name: configuration.name,
+                config: configuration
+            };
+
+            // Save and close (could alse promisify.)
+            SaveMachineConfig(configuration.name, save);
+            close();
+        }
     };
 
     let handleBack = () => {
@@ -176,9 +203,18 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
             ChildElement = (<IOConfig {...props} />);
             break;
         };
+        case (MachineConfigState.SUMMARY): {
+            let props: MachineSummaryProps = {
+                machineConfig: configuration,
+                ...controlProps
+            };
+
+            ChildElement = (<MachineSummary {...props} />);
+            break;
+        };
         default: {
             console.log("Unhandled MachineConfigState....");
-        }
+        };
     };
 
     if (configState === MachineConfigState.CONFIG_NAME) {

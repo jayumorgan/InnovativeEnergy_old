@@ -142,7 +142,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
     let [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
     let [fromSummary, setFromSummary] = useState<boolean>(summaryScreen);
 
-    let instruction: string = "Add and configure the palletizer X, Y, Z and θ axes.";
+    let instruction: string = "Test palletizer X, Y, Z and θ axes by jogging the actuators";
 
     let handleEdit = (a: AXES) => () => {
         let eDrives: Drive[] = [];

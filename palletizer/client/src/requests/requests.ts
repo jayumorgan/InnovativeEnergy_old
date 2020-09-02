@@ -73,11 +73,24 @@ function SavePalletConfig(name: string, config: any) {
     axios.post(url, data);
 };
 
+
+function SaveMachineConfig(name: string, config: any) {
+    let url = get_url("/configs/savemachine");
+
+    let data = {
+        name,
+        config
+    } as any;
+
+    axios.post(url, data);
+};
+
 export {
     get_configs,
     get_config,
     post_config,
     set_config,
     get_state_config,
-    SavePalletConfig
+    SavePalletConfig,
+    SaveMachineConfig
 };
