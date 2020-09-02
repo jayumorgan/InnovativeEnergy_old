@@ -20,7 +20,6 @@ enum Directions {
     RIGHT = "Right"
 };
 
-
 function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
     let coordinates: string = "";
 
@@ -233,15 +232,12 @@ function Jogger({ selectAction, updateName, name }: JoggerProps) {
 
     let getPositions = async () => {
 
-        console.log("Get Positions...");
         let position1 = await Controllers[0].getPosition();
 
-        console.log("Get Position....");
         let position2 = await Controllers[1].getPosition();
 
-
         let positions = [position1, position2];
-        console.log("HAve psositions...");
+
         let x_controller_index = MotionConfig["X"]["MACHINE"];
         let x_drive_index = MotionConfig["X"]["DRIVE"];
 

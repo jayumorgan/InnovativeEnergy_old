@@ -112,21 +112,6 @@
                      grid-template-rows: 33% 33% 33%;
                      grid-template-columns: 33% 33% 33%;
 
-                     @mixin polygon() {
-                         cursor: pointer;
-
-                         svg {
-                             polygon {
-                                 fill: $dark-blue;
-                             }
-                         }
-
-                         svg:hover {
-                             polygon {
-                                 fill: $green;
-                             }
-                         }
-                     }
 
                      .Select {
                          @include flex-center();
