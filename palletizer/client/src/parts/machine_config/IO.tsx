@@ -55,6 +55,9 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         } else {
             curr = [...io.Off];
         }
+        if (curr.length === 0) {
+            curr.push(defaultIOState());
+        }
         return curr;
     })());
 
@@ -81,7 +84,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                 cp.Off = [...editingIOs];
                 setIO(cp);
                 setCurrentStateStep(true);
-                setEditingIOs(io.On);
+                setEditingIOs(io.On.length > 0 ? [...io.On] : [defaultIOState()]);
             }
         },
         enabled: true
