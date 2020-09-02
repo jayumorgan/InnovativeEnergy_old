@@ -205,7 +205,6 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                             </div>
                         );
                     })}
-
                     <div className="Test">
                         <div className="TestButton" onClick={handleTest(index)}>
                             <span>

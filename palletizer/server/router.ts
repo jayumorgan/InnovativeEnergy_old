@@ -75,8 +75,6 @@ router.post("/configs/savemachine", (req: express.Request, res: express.Response
     });
 });
 
-
-
 // Serve the static configuration files.
 router.use("/machine", express.static(MACHINE_PATH.toString()));
 router.use("/pallet", express.static(PALLET_PATH.toString()));
