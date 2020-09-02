@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 
 import { MachineMotion } from "./MachineMotions";
-
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 
+import plus_icon from "../teach/images/plus.svg";
+
+import "./css/IO.scss";
 
 export interface IOState {
     MachineMotionIndex: number;
     NetworkId: number;
-    Pin: number;
+    Pin: [boolean, boolean, boolean, boolean];
 };
+
+const ALL_NETWORK_IDS: number[] = [0, 1, 2];
 
 export interface IO {
     On: IOState[];
@@ -21,13 +25,13 @@ export function defaultIO(): IO {
         On: [],
         Off: []
     };
-}
+};
 
 function defaultIOState(): IOState {
     return {
         MachineMotionIndex: 0,
         NetworkId: 0, // 0, 1, 2? 
-        Pin: 0 // 0,1,2,3
+        Pin: [false, false, false, false] // 0,1,2,3
     };
 };
 
@@ -38,11 +42,6 @@ interface IOConfigProps {
     handleBack: () => void;
     handleNext: () => void;
     instructionNumber: number;
-};
-
-enum IO_STATES {
-    ON,
-    OFF
 };
 
 export default function IOConfig({ io, allMachines, setIO, handleBack, handleNext, instructionNumber }: IOConfigProps) {
@@ -56,14 +55,10 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         } else {
             curr = [...io.Off];
         }
-        if (curr.length < 1) {
-            curr = [defaultIOState()];
-        }
         return curr;
     })());
 
     let instruction: string = (currentStateStep) ? "Configure the digital outputs for active (suction on)" : "Configure the digital outputs for idle (suction off)";
-
 
     let LeftButton: ButtonProps = {
         name: "Back",
@@ -75,7 +70,19 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
     let RightButton: ButtonProps = {
         name: "Next",
         action: () => {
-            handleNext();
+            let cp = { ...io };
+            if (currentStateStep) {
+                cp.On = [...editingIOs];
+                setIO(cp);
+                handleNext();
+            } else {
+                // save them.
+                let cp = { ...io };
+                cp.Off = [...editingIOs];
+                setIO(cp);
+                setCurrentStateStep(true);
+                setEditingIOs(io.On);
+            }
         },
         enabled: true
     };
@@ -87,14 +94,129 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         RightButton,
     } as any;
 
-    // This is a two step process. (Idle state and on state);
-    // Will have to specify all input outputs of course
+    let removeOutput = (index: number) => () => {
+        let cp = [...editingIOs];
+        cp.splice(index, 1);
+        setEditingIOs([...cp]);
+    };
 
+    let addIOState = () => {
+        setEditingIOs([...editingIOs, defaultIOState()]);
+    };
+
+    interface IOCellProps {
+        index: number;
+        state: IOState;
+    };
+
+    let toggleSwitch = (i: number, j: number) => () => {
+        let cp = [...editingIOs];
+        cp[i].Pin[j] = !(cp[i].Pin[j]);
+        setEditingIOs([...cp]);
+    };
+
+    //-------IO Cell-------
+    let IOCell = ({ index, state }: IOCellProps) => {
+
+        return (
+            <div className="IOCellContainer">
+                <div className="IOCell">
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Machine Motion"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={state.MachineMotionIndex}>
+                                {allMachines.map((mm: MachineMotion, i: number) => {
+                                    return (
+                                        <option value={i} key={i}>
+                                            {mm.name}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"IO Module"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={state.NetworkId}>
+                                {ALL_NETWORK_IDS.map((v: number, i: number) => {
+                                    return (
+                                        <option value={v} key={i}>
+                                            {"Module " + String(v)}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                    {state.Pin.map((pin: boolean, i: number) => {
+                        return (
+                            <div className="SwitchContainer">
+
+                                <div className="Name">
+                                    <span>
+                                        {"Pin " + String(i)}
+                                    </span>
+                                </div>
+
+                                <div className="Status">
+                                    <div className="Switch" onClick={toggleSwitch(index, i)}>
+                                        {pin &&
+                                            <div className="NumberContainer">
+                                                <div className="Number">
+                                                    <span> {"1"} </span>
+                                                </div>
+                                            </div>}
+                                        {pin && <div className="SwitchHandle"></div>}
+                                        {(!pin) && <div className="SwitchHandle"> </div>}
+                                        {(!pin) &&
+                                            <div className="NumberContainer">
+                                                <div className="Number">
+                                                    <span> {"0"} </span>
+                                                </div>
+                                            </div>}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className="Trash">
+                    <span className="icon-delete" onClick={removeOutput(index)}>
+                    </span>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <ContentItem {...contentItemProps}>
             <div className="IOConfig">
-
+                <div className="IOScroll">
+                    {editingIOs.map((state: IOState, i: number) => {
+                        return (
+                            <IOCell index={i} state={state} key={i} />
+                        );
+                    })}
+                    <div className="NewIOCell">
+                        <div className="NewIOCell">
+                            <div className="AddButton" onClick={addIOState} >
+                                <img src={plus_icon} />
+                                <span>
+                                    {"Add Output Module"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </ContentItem>
     );
