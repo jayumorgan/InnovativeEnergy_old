@@ -39,6 +39,7 @@ router.post("/configs/set", (req: Request, res: Response) => {
     } else {
         updater = handler.setCurrentPalletConfig;
     }
+    updater = updater.bind(handler);
     updater(id).then((d) => {
         res.sendStatus(200);
     }).catch(handleCatch(res));

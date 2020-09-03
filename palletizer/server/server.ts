@@ -38,6 +38,8 @@ initDatabaseHandler().then((handler: DatabaseHandler) => {
         let address_string = "http://" + address.address + ":" + address.port;
         console.log(`Server running at ${address_string}.`);
     });
+
+    handler.__checkCurrentConfigs();
 }).catch((e) => {
     console.log("Error initializing database handler", e);
 })
