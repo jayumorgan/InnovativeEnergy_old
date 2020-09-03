@@ -1,7 +1,7 @@
 import mqtt from "mqtt";
 import { v4 as uuidv4 } from 'uuid';
 
-import MachineMotion, { defaultMqttClient } from "mm-js-api";
+import MachineMotion, { defaultMqttClient, vResponse } from "mm-js-api";
 import { DatabaseHandler } from "../database/db";
 
 
@@ -40,9 +40,14 @@ interface PalletizerState {
     palletConfig: any;
 };
 
+function handleCatch(e: any) {
+    console.log("Engine error: ", e);
+};
+
+
 export class Engine {
     mqttClient: mqtt.Client;
-    databaseHander: DatabaseHandler;
+    databaseHandler: DatabaseHandler;
     controlTopics: { [key: string]: TopicStruct } = {};
     palletizerState: PalletizerState = {
         status: PALLETIZER_STATUS.WAITING,
@@ -52,16 +57,11 @@ export class Engine {
         time: 0,
         palletConfig: {}
     };
+    machineConfig: any | null = null;
+    palletConfig: any | null = null;
 
+    // Only need subscribed topics. 
     __initTopics() {
-        this.controlTopics[STATE_TOPIC] = {
-            handler: this.__handleState,
-            regex: /palletizer\/state/
-        };
-        this.controlTopics[INFORMATION_TOPIC] = {
-            handler: this.__handleInformation,
-            regex: /palletizer\/state/
-        };
         this.controlTopics[REQUEST_TOPIC] = {
             handler: this.__handleRequest,
             regex: /palletizer\/request/
@@ -69,17 +69,17 @@ export class Engine {
         this.controlTopics[CONTROL_TOPIC] = {
             handler: this.__handleControl,
             regex: /palletizer\/control/
-        }
+        };
         this.controlTopics[ESTOP_TOPIC] = {
             handler: this.__handleEstop,
             regex: /estop\/trigger\/request/
-        }
+        };
     };
 
     constructor(handler: DatabaseHandler) {
         this.__initTopics();
         //-------Initialize the database handler-------
-        this.databaseHander = handler;
+        this.databaseHandler = handler;
 
         //-------Initialize the engine client-------
         let mqtt_uri = "mqtt://" + HOSTNAME + ":" + String(MQTTPORT);
@@ -118,17 +118,12 @@ export class Engine {
             }
         });
         this.mqttClient = client;
+        this.loadConfigurations().then((b) => {
+            console.log(b);
+        });;
     };
 
-
-    __handleState(m: string) {
-
-        console.log(m);
-    };
-
-    __handleInformation(m: string) {
-        console.log(m);
-    };
+    //-------MQTT Message Handlers-------
 
     __handleRequest(m: string) {
         let state_string = JSON.stringify(this.palletizerState);
@@ -136,6 +131,9 @@ export class Engine {
     };
 
     __handleControl(m: string) {
+        // Handle control is the first step here.
+        // we can have the command handlers in another array.
+
 
     };
 
@@ -143,10 +141,29 @@ export class Engine {
 
     };
 
-    loadConfigurations() {
-
-
+    // Should return a promise on success.
+    loadConfigurations(): Promise<boolean> {
+        let my = this;
+        return new Promise((resolve, reject) => {
+            my.databaseHandler.getCurrentConfigs().then((curr: any) => {
+                let { machine, pallet } = curr;
+                if (machine && pallet) {
+                    my.databaseHandler.getMachineConfig(machine).then((machine_config: any) => {
+                        my.databaseHandler.getPalletConfig(pallet).then((pallet_config: any) => {
+                            my.machineConfig = machine_config;
+                            my.palletConfig = pallet_config;
+                            resolve(true);
+                        }).catch(e => reject(e));
+                    }).catch(e => reject(e));
+                } else {
+                    reject("No current configurations.");
+                }
+            })
+        });
     };
+
+
+
 };
 
 
