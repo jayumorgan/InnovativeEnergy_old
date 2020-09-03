@@ -1,6 +1,8 @@
 // Express
 import express from "express";
 
+import { dbRequest } from "./server";
+
 // File Handling
 import fs, { BaseEncodingOptions, Dirent } from "fs";
 import path from "path";
@@ -9,13 +11,8 @@ import path from "path";
 import { spawn } from "child_process";
 import { setSelectedConfig, PALLET_PATH, MACHINE_PATH, ConfigData, ConfigUpload, getConfigs } from "./config/config";
 
-import { Database } from "./database/db";
-
-
 let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', 'client', 'build');
 let PYTHON_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'machine', 'machine.py');
-
-Database();
 
 
 let router: express.Router = express.Router();
