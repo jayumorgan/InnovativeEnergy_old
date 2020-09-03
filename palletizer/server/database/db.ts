@@ -19,17 +19,12 @@ id INTEGER PRIMARY KEY NOT NULL UNIQUE,
 name TEXT,
 raw_json BLOB
 );`;
-
-
-
 const CREATE_PALLET_CONFIGS: string = `
 CREATE TABLE IF NOT EXISTS pallet_configs (
 id INTEGER PRIMARY KEY NOT NULL UNIQUE,
 name TEXT,
 raw_json BLOB
 );`;
-
-
 const CREATE_CURRENT_TABLE: string = `
 CREATE TABLE IF NOT EXISTS current_config (
 id INTEGER PRIMARY KEY NOT NULL UNIQUE,
@@ -44,7 +39,6 @@ const SELECT_ALL_MACHINE_CONFIGS = `SELECT id, name FROM machine_configs;`
 const SELECT_ALL_PALLET_CONFIGS = `SELECT id, name FROM pallet_configs`;
 const SELECT_MACHINE_CONFIG_ID = `SELECT raw_json FROM machine_configs WHERE id = ?`;
 const SELECT_PALLET_CONFIG_ID = `SELECT raw_json FROM pallet_configs WHERE id = ?`;
-
 const SELECT_CURRENT_MACHINE_CONFIG = `SELECT id, name, raw_json FROM machine_configs WHERE id IN (SELECT machine_config_id FROM current_config);`;
 const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json FROM pallet_configs WHERE id IN (SELECT pallet_config_id FROM current_config);`;
 
@@ -52,8 +46,10 @@ const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json FROM pallet_conf
 //---------------Write Queries---------------
 const UPDATE_CURRENT_PALLET = `UPDATE current_configs SET pallet_config_id = ? WHERE id > 0;`;
 const UPDATE_CURRENT_MACHINE = `UPDATE current_configs SET machine_config_id = ? WHERE i > 0;`;
-const INSERT_MACHINE_CONFIG = `INSERT INTO machine_configs (name, raw_json) VALUES (?,?)`;
-const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json) VALUES (?,?)`;
+const INSERT_MACHINE_CONFIG = `INSERT INTO machine_configs (name, raw_json) VALUES (?,?);`;
+const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json) VALUES (?,?);`;
+const UPDATE_PALLET_CONFIG = `UPDATE pallet_configs SET name = ?, raw_json = ? WHERE id = ?;`;
+const UPDATE_MACHINE_CONFIG = `UPDATE machine_configs SET name = ?, raw_json = ? WHERE id =?;`
 
 
 //---------------Delete Queries---------------
@@ -130,6 +126,16 @@ export class DatabaseHandler {
         return this.db.run(INSERT_MACHINE_CONFIG, [name, data_string]);
     };
 
+    updateMachineConfig(name: string, data: any, id: number) {
+        let data_string = JSON.stringify(data, null, "\t");
+        return this.db.run(UPDATE_MACHINE_CONFIG, [name, data_string, id]);
+    };
+
+    updatePalletConfig(name: string, data: any, id: number) {
+        let data_string = JSON.stringify(data, null, "\t");
+        return this.db.run(UPDATE_PALLET_CONFIG, [name, data_string, id]);
+    };
+
     deleteMachineConfig(id: number) {
         return this.db.run(DELETE_MACHINE_CONFIG, [id]);
     };
@@ -137,8 +143,6 @@ export class DatabaseHandler {
     deletePalletConfig(id: number) {
         return this.db.run(DELETE_PALLET_CONFIG, [id]);
     };
-
-
 };
 
 function getDatabase(): Promise<sqliteDB> {

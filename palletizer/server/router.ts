@@ -46,20 +46,32 @@ router.post("/configs/set", (req: Request, res: Response) => {
 
 router.post("/configs/savepallet", (req: Request, res: Response) => {
     let handler = req.databaseHandler;
-    let { name, config } = req.body;
+    let { name, config, id } = req.body;
 
-    handler.addPalletConfig(name, config).then(() => {
-        res.sendStatus(200);
-    }).catch(handleCatch(res));
+    if (id === null) {
+        handler.addPalletConfig(name, config).then(() => {
+            res.sendStatus(200);
+        }).catch(handleCatch(res));
+    } else {
+        handler.updatePalletConfig(name, config, id).then(() => {
+            res.sendStatus(200);
+        }).catch(handleCatch(res));
+    }
 });
 
 router.post("/configs/savemachine", (req: Request, res: Response) => {
     let handler = req.databaseHandler;
-    let { name, config } = req.body;
+    let { name, config, id } = req.body;
 
-    handler.addMachineConfig(name, config).then(() => {
-        res.sendStatus(200);
-    }).catch(handleCatch(res));
+    if (id === null) {
+        handler.addMachineConfig(name, config).then(() => {
+            res.sendStatus(200);
+        }).catch(handleCatch(res));
+    } else {
+        handler.updateMachineConfig(name, config, id).then(() => {
+            res.sendStatus(200);
+        }).catch(handleCatch(res));
+    }
 });
 
 router.post("/configs/getmachine", (req: Request, res: Response) => {

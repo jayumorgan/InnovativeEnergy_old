@@ -36,6 +36,7 @@ interface PalletConfiguratorProps {
     close: () => void;
     index: number;
     palletConfig: SavedPalletConfiguration | null;
+    id: number | null;
 };
 
 //---------------Pallet Configuration Class---------------
@@ -177,12 +178,8 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
     // Save the file...
 };
 
-function SaveFinalConfig(name: string, configuration: SavedPalletConfiguration) {
-    SavePalletConfig(name, configuration);
-}
-
 //---------------Pallet Configurator Component---------------
-function PalletConfigurator({ close, index, palletConfig }: PalletConfiguratorProps) {
+function PalletConfigurator({ close, index, palletConfig, id }: PalletConfiguratorProps) {
 
     let [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1)));
 
@@ -208,7 +205,7 @@ function PalletConfigurator({ close, index, palletConfig }: PalletConfiguratorPr
         if (teachState === PalletTeachState.SUMMARY) {
             let finalConfig = GenerateFinalConfig(configuration);
             let { name } = configuration;
-            SaveFinalConfig(name, finalConfig);
+            SavePalletConfig(name, finalConfig, id);
             close();
         } else {
             setTeachState(++teachState);

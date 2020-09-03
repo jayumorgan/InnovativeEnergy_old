@@ -154,15 +154,14 @@ function Configuration() {
     let pallet_count = pallet_configs.length;
     let machine_count = machine_configs.length;
 
-
     return (
         <Fragment>
             <div className="ConfigContainer">
                 <ConfigContainer title={machine_title} configs={machine_configs} start_editor={startMachineEditor} start_add_config={new_machine(true)} />
                 <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={startPalletEditor} start_add_config={new_pallet(true)} />
             </div>
-            {add_pallet_config && <PalletConfigurator close={new_pallet(false)} palletConfig={editPalletConfig} index={pallet_count} />}
-            {add_machine_config && <MachineConfigurator close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />}
+            {add_pallet_config && <PalletConfigurator id={editPalletId} close={new_pallet(false)} palletConfig={editPalletConfig} index={pallet_count} />}
+            {add_machine_config && <MachineConfigurator id={editMachineId} close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );

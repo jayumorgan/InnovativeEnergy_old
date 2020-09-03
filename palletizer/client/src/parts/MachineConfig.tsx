@@ -92,9 +92,10 @@ interface MachineConfiguratorProps {
     close: () => void;
     index: number;
     machineConfig: null | SavedMachineConfiguration;
+    id: number | null;
 };
 
-function MachineConfigurator({ close, index, machineConfig }: MachineConfiguratorProps) {
+function MachineConfigurator({ close, index, machineConfig, id }: MachineConfiguratorProps) {
 
     let completionFraction = { n: 0, d: 4 } as Fraction;
 
@@ -145,9 +146,7 @@ function MachineConfigurator({ close, index, machineConfig }: MachineConfigurato
                 name: configuration.name,
                 config: configuration
             };
-
-            // Save and close (could alse promisify.)
-            SaveMachineConfig(configuration.name, save);
+            SaveMachineConfig(configuration.name, save, id);
             close();
         }
     };

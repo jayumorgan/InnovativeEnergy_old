@@ -40,24 +40,26 @@ export function set_config(id: number, machine: boolean) {
 }
 
 
-export function SavePalletConfig(name: string, config: any) {
+export function SavePalletConfig(name: string, config: any, id: number | null) {
     let url = get_url("/configs/savepallet");
 
     let data = {
         name,
-        config
+        config,
+        id
     } as any;
 
     axios.post(url, data);
 };
 
 
-export function SaveMachineConfig(name: string, config: any) {
+export function SaveMachineConfig(name: string, config: any, id: number | null) {
     let url = get_url("/configs/savemachine");
 
     let data = {
         name,
-        config
+        config,
+        id
     } as any;
 
     axios.post(url, data);
