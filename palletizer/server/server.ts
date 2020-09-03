@@ -1,15 +1,17 @@
 // Express
 import express from "express";
 import morgan from "morgan";
-
-// Router
-import router, { start_machine } from "./routes/router";
-
-// Types
 import { AddressInfo } from "net";
 
+
+//---------------Router---------------
+import router, { start_machine } from "./routes/router";
+
+//---------------Database Handler---------------
 import { initDatabaseHandler, DatabaseHandler } from "./database/db";
 
+//---------------Control Engine---------------
+import { Engine } from "./engine/engine";
 
 // Config
 const PORT = 3011;
@@ -29,8 +31,9 @@ initDatabaseHandler().then((handler: DatabaseHandler) => {
         next();
     };
 
-    app.use(attachDatabaseHandler);
+    let engine = new Engine(handler);
 
+    app.use(attachDatabaseHandler);
     app.use(router);
 
     let server = app.listen(PORT, HOSTNAME, () => {
@@ -39,7 +42,6 @@ initDatabaseHandler().then((handler: DatabaseHandler) => {
         console.log(`Server running at ${address_string}.`);
     });
 
-    handler.__checkCurrentConfigs();
 }).catch((e) => {
     console.log("Error initializing database handler", e);
 })
