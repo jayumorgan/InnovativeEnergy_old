@@ -3,7 +3,7 @@ import express from "express";
 import morgan from "morgan";
 
 // Router
-import router, { start_machine } from "./router";
+import router, { start_machine } from "./routes/router";
 
 // Types
 import { AddressInfo } from "net";

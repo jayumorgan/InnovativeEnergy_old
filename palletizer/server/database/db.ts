@@ -2,6 +2,9 @@ import sqlite3 from "sqlite3";
 import { open, Database as sqliteDB } from "sqlite";
 import path from "path";
 import fs from "fs";
+//---------------Notes---------------
+// Make promise chains less stupid.
+
 
 //-------NB: These we be in the dist directory (typescript)-------
 const DATABASE_DIRECTORY = path.join(__dirname, "..", "db");
@@ -89,12 +92,14 @@ export class DatabaseHandler {
     getAllConfigs() {
         let my = this;
         return new Promise((resolve, reject) => {
-            my.getMachineConfigs().then((mc: any) => {
-                my.getPalletConfigs().then((pc: any) => {
-                    resolve({
-                        pallet: pc,
-                        machine: mc
-                    });
+            my.__checkCurrentConfigs().then(() => {
+                my.getMachineConfigs().then((mc: any) => {
+                    my.getPalletConfigs().then((pc: any) => {
+                        resolve({
+                            pallet: pc,
+                            machine: mc
+                        });
+                    }).catch(e => reject(e));
                 }).catch(e => reject(e));
             }).catch(e => reject(e));
         });
@@ -118,9 +123,9 @@ export class DatabaseHandler {
                             machine,
                             pallet
                         });
-                    }, e => reject(e));
-                }, e => reject(e));
-            }, e => reject(e));
+                    }).catch(e => reject(e));
+                }).catch(e => reject(e));
+            }).catch(e => reject(e));
         });
     };
 

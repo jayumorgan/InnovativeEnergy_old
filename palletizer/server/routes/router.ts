@@ -10,8 +10,8 @@ import path from "path";
 // Python process.
 import { spawn } from "child_process";
 
-let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', 'client', 'build');
-let PYTHON_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'machine', 'machine.py');
+let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'client', 'build');
+let PYTHON_PATH: fs.PathLike = path.join(__dirname, '..', '..', '..', 'machine', 'machine.py');
 
 
 function handleCatch(res: Response) {
