@@ -31,10 +31,16 @@ export type PartialState = {
     palletConfig?: SavedPalletConfiguration;
 };
 
+
+export interface ConfigItem {
+    id: number;
+    name: string;
+}
+
 export type ConfigState = {
-    machine_configs: string[];
-    pallet_configs: string[];
-    machine_index: number | null;
-    pallet_index: number | null;
+    machine_configs: ConfigItem[];
+    pallet_configs: ConfigItem[];
+    machine_index: number;
+    pallet_index: number;
 }
 

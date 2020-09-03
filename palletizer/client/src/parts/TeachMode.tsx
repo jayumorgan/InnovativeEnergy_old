@@ -45,11 +45,9 @@ export interface PalletConfiguration {
     pallets: PalletGeometry[];
 };
 
-
 export interface SavedPalletConfiguration {
     config: PalletConfiguration;
     boxCoordinates: BoxCoordinates[];
-
 };
 
 function newPalletConfiguration(name: string) {

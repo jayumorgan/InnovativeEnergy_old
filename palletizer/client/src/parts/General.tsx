@@ -11,7 +11,7 @@ import { ConfigContext } from "../context/ConfigContext";
 import { set_config } from "../requests/requests";
 
 // Types
-import { ConfigState, PalletizerState } from "../types/Types";
+import { ConfigState, PalletizerState, ConfigItem } from "../types/Types";
 
 // Components
 import Visualizer from "./Visualizer";
@@ -21,8 +21,8 @@ import "./css/General.scss";
 
 // Logo image
 import logo from "../images/vention_logo.png";
+
 import { ReactComponent as BellImage } from "./images/bell.svg";
-// import { ReactComponent as DangerImage } from "./images/danger.svg";
 import { ReactComponent as ExclamationImage } from "./images/exclamation-circle.svg";
 import { ReactComponent as InfoImage } from "./images/info-circle.svg";
 import { ReactComponent as CircleImage } from "./images/circle.svg";
@@ -74,10 +74,9 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
 
     let { machine_configs, pallet_configs, machine_index, pallet_index } = config_context as ConfigState;
 
-
     let [start_box, set_start_box] = useState(current_box);
-    let [machine_current_config, set_machine_current_config] = useState<string | null>(null);
-    let [pallet_current_config, set_pallet_current_config] = useState<string | null>(null);
+    let [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
+    let [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);
 
 
     let handle_input = (e: ChangeEvent) => {
@@ -115,31 +114,32 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
     let start_text = is_running ? "Pause" : "Start";
 
     let handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
-        let file_name = (e.target as HTMLSelectElement).value;
-        set_config(file_name, machine); // server request.
+        let id: number = +((e.target as any).value);
+        set_config(id, machine); // server request.
         if (machine) {
-            set_machine_current_config(file_name);
+            set_machine_current_config(id);
         } else {
-            set_pallet_current_config(file_name);
+            set_pallet_current_config(id);
         }
     };
+
 
     return (
         <div className="ExecuteGrid">
             <ConfigCell title={machine_config_title} >
                 <div className="ConfigItem">
-                    <select onChange={handle_config_select(true)} value={machine_current_config ? machine_current_config : machine_configs[machine_index as number]}>
-                        {machine_configs.map((item: string, index: number) => {
-                            return (<option value={item} key={index} > {item} </option>)
+                    <select onChange={handle_config_select(true)} value={machine_current_config}>
+                        {machine_configs.map((item: ConfigItem, index: number) => {
+                            return (<option value={item.id} key={index} > {item.name} </option>)
                         })}
                     </select>
                 </div>
             </ConfigCell>
             <ConfigCell title={pallet_config_title}>
                 <div className="ConfigItem">
-                    <select onChange={handle_config_select(false)} value={pallet_current_config ? pallet_current_config : pallet_configs[pallet_index as number]}>
-                        {pallet_configs.map((item: string, index: number) => {
-                            return (<option value={item} key={index} > {item} </option>)
+                    <select onChange={handle_config_select(false)} value={pallet_current_config}>
+                        {pallet_configs.map((item: ConfigItem, index: number) => {
+                            return (<option value={item.id} key={index} > {item.name} </option>)
                         })}
                     </select>
                 </div>

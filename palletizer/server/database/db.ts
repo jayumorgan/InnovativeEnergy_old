@@ -48,12 +48,15 @@ const SELECT_PALLET_CONFIG_ID = `SELECT raw_json FROM pallet_configs WHERE id = 
 const SELECT_CURRENT_MACHINE_CONFIG = `SELECT id, name, raw_json FROM machine_configs WHERE id IN (SELECT machine_config_id FROM current_config);`;
 const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json FROM pallet_configs WHERE id IN (SELECT pallet_config_id FROM current_config);`;
 
+
 //---------------Write Queries---------------
 const UPDATE_CURRENT_PALLET = `UPDATE current_configs SET pallet_config_id = ? WHERE id > 0;`;
 const UPDATE_CURRENT_MACHINE = `UPDATE current_configs SET machine_config_id = ? WHERE i > 0;`;
 const INSERT_MACHINE_CONFIG = `INSERT INTO machine_configs (name, raw_json) VALUES (?,?)`;
 const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json) VALUES (?,?)`;
 
+
+//---------------Delete Queries---------------
 const DELETE_MACHINE_CONFIG = `DELETE FROM machine_configs WHERE id = ?;`;
 const DELETE_PALLET_CONFIG = `DELTE FROM pallet_configs WHERE id = ?;`;
 
@@ -70,6 +73,20 @@ export class DatabaseHandler {
 
     getPalletConfigs() {
         return this.db.all(SELECT_ALL_PALLET_CONFIGS);
+    };
+
+    getAllConfigs() {
+        let my = this;
+        return new Promise((resolve, reject) => {
+            my.getMachineConfigs().then((mc: any) => {
+                my.getPalletConfigs().then((pc: any) => {
+                    resolve({
+                        pallet: pc,
+                        machine: mc
+                    });
+                }).catch(e => reject(e));
+            }).catch(e => reject(e));
+        });
     };
 
     getMachineConfig(id: number) {

@@ -1,68 +1,46 @@
 import axios, { AxiosResponse } from "axios";
 
-import { ConfigState } from "../types/Types";
-
-
+import { ConfigItem, ConfigState } from "../types/Types";
 
 
 function get_url(url: string): string {
     return "" + url;
 }
 
-function get_configs(callback: any) {
+export function get_configs(callback: (a: ConfigState) => void) {
     let url = get_url("/configs");
     axios.get(url).then((res: AxiosResponse) => {
-        let data = res.data as ConfigState;
-        callback(data);
-    });
-}
 
-async function get_config(filename: string, machine: boolean) {
-    let url = get_url(machine ? "/machine" : "/pallet");
-    let res = await axios.post(url, { filename });
+        let { current, configs } = res.data;
+        let cState: ConfigState = {
+            machine_configs: configs.machine as ConfigItem[],
+            pallet_configs: configs.pallet as ConfigItem[],
+            machine_index: current.machine ? current.machine : 0,
+            pallet_index: current.pallet ? current.pallet : 0
+        };
+        callback(cState);
+    });
+};
+
+export async function get_config(id: number, machine: boolean) {
+    let url = get_url("/configs" + (machine ? "/getmachine" : "/getpallet"));
+    let res = await axios.post(url, { id });
     return res.data;
 };
 
-async function get_state_config(state: ConfigState) {
-    let { machine_configs, pallet_configs, machine_index, pallet_index } = state;
-    let machine_file = machine_configs[machine_index as number];
-    let pallet_file = pallet_configs[pallet_index as number];
-
-    let pallet_data = await get_config(pallet_file, false);
-    let machine_data = await get_config(machine_file, true);
-
-    return { machine: machine_data, pallet: pallet_data };
-}
-
-function post_config(filename: string, content: any, callback: any) {
-    let url = get_url("/configs/new");
-
-    let data = {
-        filename: filename,
-        data: content,
-    };
-
-    axios.post(url, data).then((res: AxiosResponse) => {
-        console.log(res);
-        callback();
-    });
-}
-
-function set_config(file_name: string, machine: boolean) {
+export function set_config(id: number, machine: boolean) {
     let url = get_url("/configs/set");
 
-    let config_type = machine ? "machine" : "pallet";
-
     let data = {
-        file_name,
-        config_type
+        id,
+        is_machine: machine
     } as any;
 
     axios.post(url, data);
 }
 
 
-function SavePalletConfig(name: string, config: any) {
+export function SavePalletConfig(name: string, config: any) {
     let url = get_url("/configs/savepallet");
 
     let data = {
@@ -74,7 +52,7 @@ function SavePalletConfig(name: string, config: any) {
 };
 
 
-function SaveMachineConfig(name: string, config: any) {
+export function SaveMachineConfig(name: string, config: any) {
     let url = get_url("/configs/savemachine");
 
     let data = {
@@ -85,12 +63,12 @@ function SaveMachineConfig(name: string, config: any) {
     axios.post(url, data);
 };
 
-export {
-    get_configs,
-    get_config,
-    post_config,
-    set_config,
-    get_state_config,
-    SavePalletConfig,
-    SaveMachineConfig
-};
+// export {
+//     get_configs,
+//     get_config,
+//     post_config,
+//     set_config,
+//     get_state_config,
+//     SavePalletConfig,
+//     SaveMachineConfig
+// };

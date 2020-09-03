@@ -1,7 +1,7 @@
 // Express
-import express from "express";
+import express, { Request, Response } from "express";
 
-import { dbRequest } from "./server";
+
 
 // File Handling
 import fs, { BaseEncodingOptions, Dirent } from "fs";
@@ -9,128 +9,89 @@ import path from "path";
 
 // Python process.
 import { spawn } from "child_process";
-import { setSelectedConfig, PALLET_PATH, MACHINE_PATH, ConfigData, ConfigUpload, getConfigs } from "./config/config";
 
 let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', 'client', 'build');
 let PYTHON_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'machine', 'machine.py');
 
 
-let router: express.Router = express.Router();
-
-router.use(express.json());
-
-router.post("/configs/new", (req: express.Request, res: express.Response) => {
-
-    res.sendStatus(200);
-
-    let { filename, data, machine } = req.body as ConfigUpload;
-
-    let file_path = path.join((machine ? MACHINE_PATH : PALLET_PATH).toString(), filename);
-
-    fs.writeFile(file_path, JSON.stringify(data, null, "\t"), () => {
-        console.log("Wrote file: " + file_path);
-    });
-});
-
-router.post("/configs/set", (req: express.Request, res: express.Response) => {
-
-    let file_name = req.body.file_name as string;
-    let config_type = req.body.config_type as string;
-
-    setSelectedConfig(file_name, config_type).then((b: boolean) => {
-        res.sendStatus(b ? 200 : 500);
-    }).catch((e: any) => {
+function handleCatch(res: Response) {
+    return (e: any) => {
         console.log(e);
         res.sendStatus(500);
-    });
+    }
+};
+
+
+//---------------Router---------------
+
+let router: express.Router = express.Router();
+router.use(express.json());
+
+router.post("/configs/set", (req: Request, res: Response) => {
+    let handler = req.databaseHandler;
+
+    let { id, is_machine } = req.body;
+
+    let updater: (i: number) => Promise<any>;
+
+    if (is_machine) {
+        updater = handler.setCurrentMachineConfig;
+    } else {
+        updater = handler.setCurrentPalletConfig;
+    }
+    updater(id).then((d) => {
+        res.sendStatus(200);
+    }).catch(handleCatch(res));
 });
 
-router.post("/configs/savepallet", (req: express.Request, res: express.Response) => {
-
+router.post("/configs/savepallet", (req: Request, res: Response) => {
+    let handler = req.databaseHandler;
     let { name, config } = req.body;
 
-    if (!fs.existsSync(PALLET_PATH)) {
-        fs.mkdirSync(PALLET_PATH);
-    }
-
-    let file_path = path.join(PALLET_PATH.toString(), name + ".json");
-
-    res.sendStatus(200);
-
-    fs.writeFile(file_path, JSON.stringify(config, null, "\t"), () => {
-        console.log("Wrote pallet configuration: ", file_path);
-    });
+    handler.addPalletConfig(name, config).then(() => {
+        res.sendStatus(200);
+    }).catch(handleCatch(res));
 });
 
-router.post("/configs/savemachine", (req: express.Request, res: express.Response) => {
+router.post("/configs/savemachine", (req: Request, res: Response) => {
+    let handler = req.databaseHandler;
     let { name, config } = req.body;
 
-    if (!fs.existsSync(MACHINE_PATH)) {
-        fs.mkdirSync(PALLET_PATH);
-    }
-
-    let file_path = path.join(MACHINE_PATH.toString(), name + ".json");
-
-    res.sendStatus(200);
-
-    fs.writeFile(file_path, JSON.stringify(config, null, "\t"), () => {
-        console.log("Wrote machine configuration: ", file_path);
-    });
+    handler.addMachineConfig(name, config).then(() => {
+        res.sendStatus(200);
+    }).catch(handleCatch(res));
 });
 
-// Serve the static configuration files.
-router.use("/machine", express.static(MACHINE_PATH.toString()));
-router.use("/pallet", express.static(PALLET_PATH.toString()));
+router.post("/configs/getmachine", (req: Request, res: Response) => {
+    let handler = req.databaseHandler;
+    let { id } = req.body;
 
-router.post("/machine", (req: express.Request, res: express.Response) => {
-
-    let { filename } = req.body;
-    let p = path.join(MACHINE_PATH.toString(), filename);
-
-    if (fs.existsSync(p)) {
-        fs.readFile(p, { encoding: 'utf-8' }, (err: NodeJS.ErrnoException | null, data: string) => {
-            if (err) {
-                console.log("Read file error " + p.toString(), err);
-                res.sendStatus(500);
-            } else {
-                res.send(JSON.parse(data));
-            }
-        });
-
-    } else {
-        console.log("Machine configuration: " + filename + " not found.");
-        res.sendStatus(404);
-    }
+    handler.getMachineConfig(id).then((c: any) => {
+        res.send(c);
+    }).catch(handleCatch(res));
 });
 
-router.post("/pallet", (req: express.Request, res: express.Response) => {
-    let { filename } = req.body;
-    let p = path.join(PALLET_PATH.toString(), filename);
 
-    if (fs.existsSync(p)) {
-        fs.readFile(p, { encoding: 'utf-8' }, (err: NodeJS.ErrnoException | null, data: string) => {
-            if (err) {
-                console.log("Read file error " + p.toString(), err);
-                res.sendStatus(500);
-            } else {
-                res.send(JSON.parse(data));
-            }
-        });
-
-    } else {
-        console.log("Pallet configuration: " + filename + " not found.");
-        res.sendStatus(404);
-    }
+router.post("/configs/getpallet", (req: Request, res: Response) => {
+    let handler = req.databaseHandler;
+    let { id } = req.body;
+    handler.getPalletConfig(id).then((c: any) => {
+        res.send(c);
+    }).catch(handleCatch(res));
 });
 
-// List current configurations.
-router.get("/configs", (req: express.Request, res: express.Response) => {
-    getConfigs().then((c: ConfigData) => {
-        res.json(c);
-    }).catch((e: any) => {
-        console.log("Error: ", e);
-        res.sendStatus(500);
-    });
+router.get("/configs", (req: Request, res: Response) => {
+
+    let handler = req.databaseHandler;
+
+    handler.getAllConfigs().then((all: any) => {
+        handler.getCurrentConfigs().then((currents: any) => {
+            res.send({
+                current: currents,
+                configs: all
+            });
+        }).catch(handleCatch(res));
+    }).catch(handleCatch(res));
 });
 
 router.use(express.static(BUILD_PATH));

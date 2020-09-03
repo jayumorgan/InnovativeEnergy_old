@@ -18,22 +18,19 @@ const PORT = 3011;
 const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(router);
 
-
-export interface dbRequest extends express.Request {
-    databaseHandler?: DatabaseHandler;
-};
 
 
 initDatabaseHandler().then((handler: DatabaseHandler) => {
 
-    let attachDatabaseHandler = (req: dbRequest, res: express.Response, next: express.NextFunction) => {
+    let attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        console.log("Attaching db handler");
         req.databaseHandler = handler;
         next();
     };
 
     app.use(attachDatabaseHandler);
+    app.use(router);
 
     let server = app.listen(PORT, () => {
         let address = server.address() as AddressInfo;

@@ -1,6 +1,6 @@
 import React, { useContext, useState, Fragment } from 'react';
 
-import { Editor, Unlock } from "./Modal";
+import { Unlock } from "./Modal";
 
 import PalletConfigurator from "./TeachMode";
 
@@ -16,38 +16,34 @@ import { SavedMachineConfiguration } from "./MachineConfig";
 
 import { get_config } from "../requests/requests";
 
+import { ConfigItem } from "../types/Types";
+
 // Styles
 import "./css/Configuration.scss";
 import "./css/Login.scss";
 
 // Use : https://app.quicktype.io for data validation.
 
-interface ConfigContainerProps {
-    title: string;
-    configs: string[];
-    start_editor(fn: string): any;
-    start_add_config: () => void;
-}
-
 interface ConfigCellProps {
-    file_name: string;
-    start_editor(fn: string): any;
+    name: string;
+    id: number;
+    start_editor: (id: number) => void;
 }
 
-function ConfigCell({ file_name, start_editor }: ConfigCellProps) {
+function ConfigCell({ name, id, start_editor }: ConfigCellProps) {
 
     let handle_edit = () => {
-        console.log("Edit config " + file_name);
-        start_editor(file_name);
+        console.log("Edit config " + name);
+        start_editor(id);
     };
 
     let handle_delete = () => {
-        console.log("Delete config " + file_name);
+        console.log("Delete config " + name);
     };
 
     return (
         <div className="ConfigCell">
-            <span> {file_name} </span>
+            <span> {name} </span>
             <div className="EditConfigButton" onClick={handle_edit}>
                 <span> Edit </span>
             </div>
@@ -62,6 +58,13 @@ function ConfigCell({ file_name, start_editor }: ConfigCellProps) {
     );
 }
 
+interface ConfigContainerProps {
+    title: string;
+    configs: ConfigItem[];
+    start_editor: (id: number) => void;
+    start_add_config: () => void;
+};
+
 function ConfigContainer({ title, configs, start_editor, start_add_config }: ConfigContainerProps) {
 
     return (
@@ -71,8 +74,8 @@ function ConfigContainer({ title, configs, start_editor, start_add_config }: Con
             </div>
             <div className="ConfigGrid">
                 <div className="ConfigScroll" >
-                    {configs.map((file_name, index) => {
-                        return (<ConfigCell file_name={file_name} key={index} start_editor={start_editor} />)
+                    {configs.map((item: ConfigItem, index: number) => {
+                        return (<ConfigCell id={item.id} name={item.name} key={index} start_editor={start_editor} />)
                     })}
                 </div>
                 <div className="ConfigAdd">
@@ -83,28 +86,14 @@ function ConfigContainer({ title, configs, start_editor, start_add_config }: Con
             </div>
         </div>
     );
-}
+};
 
-
-interface EditorConfig {
-    title: string;
-    filename: string;
-    edit: boolean;
-    machine: boolean;
-}
 
 function Configuration() {
 
     let config_context = useContext(ConfigContext);
 
     let { machine_configs, pallet_configs } = config_context as ConfigState;
-
-    var [editor, set_editor] = useState<EditorConfig>({
-        title: "",
-        filename: "",
-        edit: false,
-        machine: true
-    });
 
 
     let [locked, set_locked] = useState<boolean>(false);
@@ -118,34 +107,35 @@ function Configuration() {
 
     let [editPalletConfig, setEditPalletConfig] = useState<SavedPalletConfiguration | null>(null);
     let [editMachineConfig, setEditMachineConfig] = useState<SavedMachineConfiguration | null>(null);
+    let [editPalletId, setEditPalletId] = useState<number | null>(null);
+    let [editMachineId, setEditMachineId] = useState<number | null>(null);
 
 
-    let startPalletEditor = (filename: string) => {
+    let startPalletEditor = (id: number) => {
 
         let fetch_data = async () => {
-            let res_data = await get_config(filename, false) as SavedPalletConfiguration;
-            setEditPalletConfig(res_data);
+            let res_data = await get_config(id, false) as any;
+            let saved = JSON.parse(res_data.raw_json);
+            setEditPalletId(id);
+            setEditPalletConfig(saved);
             set_add_pallet_config(true);
             //set_data(JSON.stringify(res_data, null, "\t"));
         }
         fetch_data();
     };
 
-    let startMachineEditor = (filename: string) => {
+    let startMachineEditor = (id: number) => {
         let fetch_data = async () => {
-            let res_data = await get_config(filename, true) as SavedMachineConfiguration;
-            console.log(res_data);
-            setEditMachineConfig(res_data);
+            let res_data = await get_config(id, true) as any;
+            let saved = JSON.parse(res_data.raw_json);
+            setEditMachineId(id)
+            setEditMachineConfig(saved);
             set_add_machine_config(true);
         };
 
         fetch_data();
     };
 
-
-    let close_editor = () => {
-        set_editor({ ...editor, edit: false });
-    };
 
     let close_unlock = () => {
         set_locked(false);
@@ -158,6 +148,7 @@ function Configuration() {
 
     let new_machine = (val: boolean) => () => {
         set_add_machine_config(val);
+        setEditMachineConfig(null);
     };
 
     let pallet_count = pallet_configs.length;
@@ -170,12 +161,11 @@ function Configuration() {
                 <ConfigContainer title={machine_title} configs={machine_configs} start_editor={startMachineEditor} start_add_config={new_machine(true)} />
                 <ConfigContainer title={pallet_title} configs={pallet_configs} start_editor={startPalletEditor} start_add_config={new_pallet(true)} />
             </div>
-            {editor.edit && <Editor file_name={editor.filename} title={editor.title} close={close_editor} machine={editor.machine} />}
             {add_pallet_config && <PalletConfigurator close={new_pallet(false)} palletConfig={editPalletConfig} index={pallet_count} />}
             {add_machine_config && <MachineConfigurator close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />}
             {locked && <Unlock close={close_unlock} />}
         </Fragment>
     );
-}
+};
 
 export default Configuration;
