@@ -69,6 +69,7 @@ export interface Drive {
     MachineMotionIndex: number;
     DriveNumber: DRIVE;
     MechGainKey: string;
+    MechGainValue: number;
     MicroSteps: MICRO_STEPS;
     Direction: DIRECTION
 };
@@ -96,10 +97,12 @@ function getAllDrives(a: AxesConfiguration) {
 
 function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
     let allDrives = getAllDrives(a);
+    let gain_key = Object.keys(MECH_GAIN)[0] as string;
     let d: Drive = {
         MachineMotionIndex: 0,
         DriveNumber: DRIVE.ONE,
-        MechGainKey: Object.keys(MECH_GAIN)[0] as string,
+        MechGainKey: gain_key,
+	MechGainValue: MECH_GAIN[gain_key][0],
         MicroSteps: MICRO_STEPS.ustep_8,
         Direction: DIRECTION.NORMAL
     };
@@ -325,6 +328,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                 let key: string = changeVal(e);
                 let cp = [...editingDrives];
                 cp[index].MechGainKey = key;
+		cp[index].MechGainValue = MECH_GAIN[key][0];
                 setEditingDrives([...cp]);
             };
 

@@ -38,7 +38,6 @@ class PalletizerControl:
 
         # For requests for state.
         self.req_topic = PALLETIZER_TOPIC + "request"
-
         self.commands = []
         self.control_client = None
         self.control_topic = PALLETIZER_TOPIC + "control"

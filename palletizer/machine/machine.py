@@ -443,5 +443,4 @@ class Palletizer(pc.PalletizerControl):
 
 
 if __name__ == "__main__":
-
     Palletizer()
