@@ -159,7 +159,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 boxCoordinates.push({
                     pickLocation,
-                    dropLocation: { ...averagePosition, i: rotated },
+                    dropLocation: { ...averagePosition, θ: rotated },
                     dimensions: box.dimensions,
                     palletIndex
                 } as BoxCoordinates);

@@ -47,3 +47,31 @@ export interface SavedMachineConfiguration {
     config: MachineConfiguration;
     //    config: 
 };
+
+
+
+//---------------Pallet Configuration---------------
+
+//NB: subset of elements.
+export interface Coordinate {
+    X: number;
+    Y: number;
+    Z: number;
+    θ: boolean; // rotated or not.
+};
+
+export interface BoxCoordinate {
+    pickLocation: Coordinate[];
+    dropLocation: Coordinate[];
+};
+
+export interface PalletConfiguration {
+    boxCoordinates: BoxCoordinate[];
+    name: string;
+};
+
+export interface SavedPalletConfiguration {
+    config: PalletConfiguration;
+};
+
+

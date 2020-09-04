@@ -114,6 +114,8 @@ class PalletizerControl:
         state = self.state
         self.__lock.release()
 
+        print(state)
+
         if update or force:
             self.__publish(state)
 

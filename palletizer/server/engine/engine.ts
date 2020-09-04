@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import MachineMotion, { defaultMqttClient, vResponse } from "mm-js-api";
 import { DatabaseHandler } from "../database/db";
 
-import { SavedMachineConfiguration, MachineConfiguration, MachineMotionInfo, Axes, IO, IOState } from "./config";
+import { SavedMachineConfiguration, MachineConfiguration, MachineMotionInfo, Axes, IO, IOState, SavedPalletConfiguration, PalletConfiguration } from "./config";
 
 
 //---------------Network Parameters---------------
@@ -34,11 +34,23 @@ enum PALLETIZER_STATUS {
     ERROR = "Error"
 };
 
+enum INFO_TYPE {
+    WARNING = "Warning",
+    ERROR = "Error",
+    STATUS = "Status"
+};
+
+interface Information {
+    Type: string;
+    Description: string;
+    DateString: string;
+};
+
 interface PalletizerState {
     status: PALLETIZER_STATUS,
     cycle: number;
-    currentBox: number;
-    totalBox: number;
+    current_box: number;
+    total_box: number;
     time: number;
     palletConfig: any;
 };
@@ -81,13 +93,15 @@ export class Engine {
     palletizerState: PalletizerState = {
         status: PALLETIZER_STATUS.WAITING,
         cycle: 0,
-        currentBox: 0,
-        totalBox: 0,
+        current_box: 0,
+        total_box: 0,
         time: 0,
-        palletConfig: {}
+        palletConfig: null
     };
     machineConfigId: number = 0;
     palletConfigId: number = 0;
+
+    informationLog: Information[] = [];
 
     machineConfig: SavedMachineConfiguration | null = null;
     palletConfig: any | null = null;
@@ -98,7 +112,7 @@ export class Engine {
     // Only need subscribed topics. 
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
-            handler: this.__handleRequestState,
+            handler: this.__handleSendState,
             regex: /palletizer\/request/
         };
         this.subscribeTopics[CONTROL_TOPIC] = {
@@ -125,15 +139,19 @@ export class Engine {
 
         let subscribe = () => {
             client.subscribe(Object.keys(this.subscribeTopics), () => {
-                console.log("Client " + options.clientId + "subscribed to palletizer topics.");
+                console.log("Client " + options.clientId + " subscribed to palletizer topics.");
             });
         };
-
         client.on("connect", subscribe);
+
         let my = this;
         client.on("message", (topic: string, message_buffer: Buffer) => {
-
-            let message: string = JSON.parse(message_buffer.toString());
+            let message: string;
+            try {
+                message = JSON.parse(message_buffer.toString());
+            } catch {
+                message = message_buffer.toString();
+            }
             let topics: string[] = Object.keys(my.subscribeTopics);
             let handler: undefined | ((m: string) => void) = undefined;
 
@@ -162,12 +180,51 @@ export class Engine {
         });;
     };
 
+
     //-------MQTT Message Handlers-------
 
-    __handleRequestState(m?: string) {
-        let state_string = JSON.stringify(this.palletizerState);
-        this.mqttClient.publish(STATE_TOPIC, state_string);
+    __publish(topic: string, message: string) {
+        let my = this;
+
+        let pub = () => {
+            my.mqttClient.publish(topic, message);
+        };
+
+        if (my.mqttClient.connected) {
+            pub();
+        } else {
+            my.mqttClient.on("connect", pub);
+        }
     };
+
+    __handleSendState(m?: string) {
+        let state_string = JSON.stringify(this.palletizerState);
+        this.__publish(STATE_TOPIC, state_string);
+        this.__handleSendInformation();
+    };
+
+    __handleSendInformation() {
+        let info_string = JSON.stringify(this.informationLog);
+        this.__publish(INFORMATION_TOPIC, info_string);
+    };
+
+    __handleInformation(t: INFO_TYPE, description: string) {
+
+        let date_string = ((d: Date) => {
+            let ds = `${d.getFullYear()}/${d.getMonth()}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+            return ds;
+        })(new Date());
+
+        let info: Information = {
+            Type: String(t),
+            Description: description,
+            DateString: date_string
+        };
+
+        this.informationLog = this.informationLog.splice(0, 9);
+        this.informationLog = [info, ...this.informationLog];
+        this.__handleSendInformation();
+    }
 
     __handleControl(m: string) {
         if ((/start/mi).test(m)) {
@@ -186,34 +243,54 @@ export class Engine {
     };
 
     __loadMachine(smc: SavedMachineConfiguration | null, id: number) {
-        // queue it up if machine is not loaded.
         this.machineConfig = smc;
         this.machineConfigId = id;
+
+        let is_null = this.machineConfig === null;
+        let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
+        let info_description = (is_null) ? "No machine configuration found. Navigate to the Configuration tab and create a machine configuration before use." : "Successfully loaded machine configuration: " + this.machineConfig?.name;
+        this.__handleInformation(info_status, info_description);
     };
 
     __loadPallet(spc: any | null, id: number) {
-        // queue it up if machine is not loaded.
         this.palletConfig = spc;
         this.palletConfigId = id;
+        let is_null = this.palletConfig === null;
+        let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
+        let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig.config.name;
+
+        this.__handleInformation(info_status, info_description);
     };
 
     // Should return a promise on success.
     loadConfigurations(): Promise<boolean> {
+        let parse_config = (a: any) => {
+            if (a) {
+                return JSON.parse(a.raw_json);
+            } else {
+                return null;
+            }
+        };
+        let parse_id = (a: any) => {
+            if (a) {
+                return a.id;
+            } else {
+                return 0;
+            }
+        };
+
         let my = this;
         return new Promise((resolve, reject) => {
             my.databaseHandler.getCurrentConfigs().then((curr: any) => {
                 let { machine, pallet } = curr;
-                if (machine && pallet) {
-                    my.databaseHandler.getMachineConfig(machine).then((machine_config: any) => {
-                        my.databaseHandler.getPalletConfig(pallet).then((pallet_config: any) => {
-                            my.__loadMachine(machine_config ? machine_config as SavedMachineConfiguration : null, machine);
-                            my.__loadPallet(pallet_config ? pallet_config : null, pallet);
-                            resolve(true);
-                        }).catch(e => reject(e));
-                    }).catch(e => reject(e));
-                } else {
-                    reject("No current configurations.");
-                }
+                let machine_id = parse_id(machine);
+                let pallet_id = parse_id(pallet);
+                let machine_config = parse_config(machine);
+                let pallet_config = parse_config(pallet);
+
+                my.__loadMachine(machine_config as SavedMachineConfiguration, machine_id);
+                my.__loadPallet(pallet_config as SavedPalletConfiguration, pallet_id);
+                resolve(true);
             })
         });
     };
@@ -221,11 +298,14 @@ export class Engine {
     //-------Palletizer State Reducer-------
     __stateReducer(update: any) {
         this.palletizerState = { ...this.palletizerState, ...update };
-        this.__handleRequestState();
+        this.__handleSendState();
     };
 
     //-------Engine Controls-------
     handleStart() {
+        //Load configuration, then...
+
+
 
     };
 
@@ -236,8 +316,6 @@ export class Engine {
     handleStop() {
 
     };
-
-
 };
 
 

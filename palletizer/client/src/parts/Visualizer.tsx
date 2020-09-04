@@ -54,7 +54,7 @@ function FrameNorm(f: FrameDimensions) {
 
 
 function parseConfig(pallet: SavedPalletConfiguration) {
-
+    
     let usedPallets: PalletGeometry[] = (() => {
         let Ps = [] as PalletGeometry[];
         pallet.config.pallets.forEach((p: PalletGeometry) => {
@@ -296,7 +296,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
     }, []);
 
     useEffect(() => {
-        if (palletConfig && controls.current) {
+        if (palletConfig && palletConfig !== null && controls.current) {
 
             let frameDims = parseConfig(palletConfig);
             let frameNorm = FrameNorm(frameDims);
@@ -389,7 +389,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
 
                     box.position.set(x, z, y);
 
-                    if (dropLocation.i) {
+                    if (dropLocation.θ) {
                         box.rotateY(Math.PI / 2);
                     }
 

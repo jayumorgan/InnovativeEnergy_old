@@ -131,10 +131,8 @@ export interface CoordinateRot {
     x: number,
     y: number,
     z: number,
-    i: boolean
+    θ: boolean
 };
-
-
 
 export interface BoxCoordinates {
     pickLocation: Coordinate;
