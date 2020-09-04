@@ -1,10 +1,23 @@
 import mqtt from "mqtt";
 import { v4 as uuidv4 } from 'uuid';
 
-import MachineMotion, { defaultMqttClient, vResponse } from "mm-js-api";
+import MachineMotion, { defaultMqttClient, vResponse, AXES, DIRECTION } from "mm-js-api";
 import { DatabaseHandler } from "../database/db";
 
-import { SavedMachineConfiguration, MachineConfiguration, MachineMotionInfo, Axes, IO, IOState, SavedPalletConfiguration, PalletConfiguration } from "./config";
+import { SavedMachineConfiguration, MachineConfiguration, MachineMotionInfo, Axes, IO, IOState, SavedPalletConfiguration, PalletConfiguration, Drive } from "./config";
+import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
+
+const TESTING = true;
+
+
+//---------------Support Functions---------------
+async function safePromise(p: Promise<any>) {
+    let x = p.then((v) => { return [v, null] }).catch((e) => { return [null, e] });
+    return x;
+}
+
+
+
 
 
 //---------------Network Parameters---------------
@@ -60,6 +73,23 @@ function handleCatch(e: any) {
     console.log("Engine error: ", e);
 };
 
+function numberToDrive(n: number): AXES {
+    switch (n) {
+        case (1): {
+            return AXES.X;
+        };
+        case (2): {
+            return AXES.Y;
+        }
+        case (3): {
+            return AXES.Z;
+        }
+        default: {
+            return AXES.Z;
+        }
+    }
+}
+
 
 interface MechanicalLayout {
     config_id: number;
@@ -100,9 +130,7 @@ export class Engine {
     };
     machineConfigId: number = 0;
     palletConfigId: number = 0;
-
     informationLog: Information[] = [];
-
     machineConfig: SavedMachineConfiguration | null = null;
     palletConfig: any | null = null;
 
@@ -174,6 +202,7 @@ export class Engine {
 
         this.__loadMachine = this.__loadMachine.bind(this);
         this.__loadPallet = this.__loadPallet.bind(this);
+        this.configureMachine = this.configureMachine.bind(this);
 
         this.loadConfigurations().then((b) => {
             console.log(b);
@@ -283,6 +312,7 @@ export class Engine {
         return new Promise((resolve, reject) => {
             my.databaseHandler.getCurrentConfigs().then((curr: any) => {
                 let { machine, pallet } = curr;
+
                 let machine_id = parse_id(machine);
                 let pallet_id = parse_id(pallet);
                 let machine_config = parse_config(machine);
@@ -290,8 +320,12 @@ export class Engine {
 
                 my.__loadMachine(machine_config as SavedMachineConfiguration, machine_id);
                 my.__loadPallet(pallet_config as SavedPalletConfiguration, pallet_id);
-                resolve(true);
-            })
+                if (machine && pallet) {
+                    resolve(true);
+                } else {
+                    reject(false);
+                }
+            }).catch(e => reject(e));
         });
     };
 
@@ -302,11 +336,22 @@ export class Engine {
     };
 
     //-------Engine Controls-------
+    // NOTE:  When you return something from a then() callback, it's a bit magic. If you return a value, the next then() is called with that value. However, if you return something promise-like, the next then() waits on it, and is only called when that promise settles (succeeds/fails).
+
     handleStart() {
-        //Load configuration, then...
+        // Define unique error commands that can be sent to the user + logged to console.
+        let my = this;
+        my.handleStop(); // stop all motion.
+        this.loadConfigurations().then(() => {
+            return my.configureMachine()
+        }).then(() => {
+            // run sequence.
 
 
-
+        }).catch((e) => {
+            my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
+            console.log("Failed in handle start", e);
+        });
     };
 
     handlePause() {
@@ -316,6 +361,62 @@ export class Engine {
     handleStop() {
 
     };
+
+
+    //-------Mechanical Configuration-------
+    configureMachine(): Promise<boolean> {
+        let my = this;
+
+        if (my.machineConfig !== null && my.palletConfig !== null) {
+            let promises: Promise<vResponse>[] = [];
+            let mms: MachineMotion[] = [];
+
+            let { config } = my.machineConfig;
+            let { machines, io, axes } = config;
+
+            machines.forEach((mm: MachineMotionInfo) => {
+                let { ipAddress } = mm;
+                let mm_config: MachineMotionConfig = {
+                    machineIP: TESTING ? "127.0.0.1" : ipAddress,
+                    serverPort: 8000,
+                    mqttPort: 1883,
+                };
+                mms.push(new MachineMotion(mm_config));
+            });
+
+            my.mechanicalLayout.machines = mms;
+
+            let ax = axes as any;
+            Object.keys(ax).forEach((axis: string) => {
+                let drives = ax[axis] as Drive[];
+                drives.forEach((d: Drive) => {
+                    let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
+                    let mm = my.mechanicalLayout.machines[MachineMotionIndex];
+                    let p = mm.configAxis(numberToDrive(DriveNumber), MicroSteps, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
+                    promises.push(p);
+                });
+            });
+
+            my.mechanicalLayout.axes = axes;
+
+            my.mechanicalLayout.io = io;
+
+            return new Promise((resolve, reject) => {
+                Promise.all(promises).then(() => { resolve(true) }).catch(e => reject(e));
+            });
+        } else {
+            return new Promise((resolve, reject) => {
+                reject("No machine configurations.");
+            })
+        }
+    };
+
+    //-------Motion Sequence Control-------
+    runPalletizerSequence() {
+
+
+    };
+
 };
 
 
