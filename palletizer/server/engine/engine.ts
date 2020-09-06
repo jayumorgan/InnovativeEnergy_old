@@ -348,15 +348,14 @@ export class Engine {
         let my = this;
         let { status } = my.palletizerState;
         let box_index = 0;
+
+
         this.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
-            return my.executeHomingSequence();
+            return my.startPalletizer(box_index);
         }).then(() => {
-            my.__updateStatus(PALLETIZER_STATUS.RUNNING);
-            return my.runPalletizerSequence(box_index);
-        }).then(() => {
-            my.__handleInformation(INFO_TYPE.STATUS, "Cycle completed. Awaiting operator control.");
+
         }).catch((e) => {
             my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
             console.log("Failed in handle start", e);
@@ -364,7 +363,6 @@ export class Engine {
     };
 
     handlePause() {
-
     };
 
     handleStop() {
@@ -419,6 +417,26 @@ export class Engine {
     };
 
     //-------Palletizer Sequence-------
+
+    async startPalletizer(box_index: number): Promise<any> {
+        let my = this;
+        my.__updateStatus(PALLETIZER_STATUS.RUNNING);
+
+        if (my.palletConfig !== null) {
+            my.__stateReducer({ current_box: box_index + 1, total_box: my.palletConfig.boxCoordinates.length });
+        }
+
+        return my.runPalletizerSequence(box_index).then(() => {
+            let next_box_index = box_index + 1;
+            if (my.palletConfig !== null && my.palletConfig.boxCoordinates.length > next_box_index) {
+                return my.startPalletizer(next_box_index);
+            } else {
+                my.__updateStatus(PALLETIZER_STATUS.COMPLETE);
+                my.__handleInformation(INFO_TYPE.STATUS, "Cycle completed. Awaiting manual restart.");
+                return;
+            }
+        });
+    };
 
     async runPalletizerSequence(box_index: number) {
         let my = this;
