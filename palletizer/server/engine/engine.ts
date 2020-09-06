@@ -12,7 +12,8 @@ import {
     IOState,
     SavedPalletConfiguration,
     PalletConfiguration,
-    Drive
+    Drive,
+    Coordinate
 } from "./config";
 import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
 
@@ -501,19 +502,19 @@ export class Engine {
 
 
     // Bit of a mess -- problem is an arbitrary number of drives on an arbitrary number of machine motions.
-    __moveVertical(point: number): Promise<any> {
+    __moveVertical(c: Coordinate): Promise<any> {
+        let z_point = c.Z;
         // get Z coordinates;
         let my = this;
         let mm_group = {} as { [key: number]: any };
         let { machines, axes } = my.mechanicalLayout;
-        Object.values(axes).forEach((ds: Drive[]) => {
-            ds.forEach((d: Drive) => {
-                let { MachineMotionIndex, DriveNumber } = d;
-                if (!(MachineMotionIndex in mm_group)) {
-                    mm_group[MachineMotionIndex] = {}
-                }
-                mm_group[MachineMotionIndex][numberToDrive(DriveNumber) as string] = point;
-            });
+        let z_axes = axes.Z;
+        z_axes.forEach((d: Drive) => {
+            let { MachineMotionIndex, DriveNumber } = d;
+            if (!(MachineMotionIndex in mm_group)) {
+                mm_group[MachineMotionIndex] = {}
+            }
+            mm_group[MachineMotionIndex][numberToDrive(DriveNumber) as string] = z_point;
         });
 
         let mm_ids = Object.keys(mm_group) as string[];
@@ -536,15 +537,40 @@ export class Engine {
         return Promise.all(promises);
     };
 
-    __movePlanar() {
+    __movePlanar(c: Coordinate): Promise<any> { // Move X, Y, θ.
+        let x_point: number = c.X;
+        let y_point: number = c.Y;
+        let θ_point: boolean = c.θ;
 
+        let my = this;
 
+        let mm_group = {} as { [key: number]: any };
+
+        let { machines, axes } = my.mechanicalLayout;
+        let x_axes = axes.X;
+        let y_axes = axes.Y;
+        let θ_axes = axes.θ;
+
+        // Can combine Drive arrays, but need to track which axis is which.
+
+        return my.__moveVertical(c);
     };
 
 
-
-
-
+    __moveToCoordinate(c: Coordinate): Promise<any> {
+        let my = this;
+        let zero_z: Coordinate = {
+            X: 0,
+            Y: 0,
+            Z: 0,
+            θ: false
+        };
+        return my.__moveVertical(zero_z).then(() => {
+            return my.__movePlanar(c);
+        }).then(() => {
+            return my.__moveVertical(c);
+        });
+    }
 };
 
 
