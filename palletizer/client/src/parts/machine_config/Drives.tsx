@@ -102,7 +102,7 @@ function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
         MachineMotionIndex: 0,
         DriveNumber: DRIVE.ONE,
         MechGainKey: gain_key,
-	MechGainValue: MECH_GAIN[gain_key][0],
+        MechGainValue: MECH_GAIN[gain_key][0],
         MicroSteps: MICRO_STEPS.ustep_8,
         Direction: DIRECTION.NORMAL
     };
@@ -328,7 +328,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                 let key: string = changeVal(e);
                 let cp = [...editingDrives];
                 cp[index].MechGainKey = key;
-		cp[index].MechGainValue = MECH_GAIN[key][0];
+                cp[index].MechGainValue = MECH_GAIN[key][0];
                 setEditingDrives([...cp]);
             };
 
@@ -406,7 +406,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                             <div className="DropDown">
                                 <select value={MechGainKey} onChange={selectGain}>
                                     {Object.keys(MECH_GAIN).map((key: string, i: number) => {
-                                        let [gain, display_name] = MECH_GAIN[key] as [number, string];
+                                        let [_, display_name] = MECH_GAIN[key] as [number, string];
                                         return (
                                             <option value={key} key={i}>
                                                 {display_name}

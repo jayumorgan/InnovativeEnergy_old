@@ -3,8 +3,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 import MachineMotion, { defaultMqttClient, vResponse, AXES, DIRECTION } from "mm-js-api";
 import { DatabaseHandler } from "../database/db";
-
-import { SavedMachineConfiguration, MachineConfiguration, MachineMotionInfo, Axes, IO, IOState, SavedPalletConfiguration, PalletConfiguration, Drive } from "./config";
+import {
+    SavedMachineConfiguration,
+    MachineConfiguration,
+    MachineMotionInfo,
+    Axes,
+    IO,
+    IOState,
+    SavedPalletConfiguration,
+    PalletConfiguration,
+    Drive
+} from "./config";
 import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
 
 const TESTING = true;
@@ -87,13 +96,21 @@ function numberToDrive(n: number): AXES {
             return AXES.Z;
         }
     }
-}
+};
 
+
+// interface BoundAxes {
+//     X: [number, AXES[]][];
+//     Y: [number, AXES[]][];
+//     Z: [number, AXES[]][];
+//     θ: [number, AXES[]][];
+// };
 
 interface MechanicalLayout {
     config_id: number;
     machines: MachineMotion[];
     axes: Axes;
+    //    bound_axes: BoundAxes;
     io: IO;
 };
 
@@ -112,7 +129,7 @@ function defaultMechanicalLayout(): MechanicalLayout {
             Off: []
         }
     } as MechanicalLayout;
-}
+};
 
 
 export class Engine {
@@ -132,11 +149,8 @@ export class Engine {
     informationLog: Information[] = [];
     machineConfig: SavedMachineConfiguration | null = null;
     palletConfig: any | null = null;
-
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
 
-
-    // Only need subscribed topics. 
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
             handler: this.__handleSendState,
@@ -154,10 +168,8 @@ export class Engine {
 
     constructor(handler: DatabaseHandler) {
         this.__initTopics();
-        //-------Initialize the database handler-------
         this.databaseHandler = handler;
 
-        //-------Initialize the engine client-------
         let mqtt_uri = "mqtt://" + HOSTNAME + ":" + String(MQTTPORT);
         let options: any = {
             clientId: "PalletizerEngine-" + uuidv4()
@@ -198,19 +210,17 @@ export class Engine {
             }
         });
         this.mqttClient = client;
-
         this.__loadMachine = this.__loadMachine.bind(this);
         this.__loadPallet = this.__loadPallet.bind(this);
         this.configureMachine = this.configureMachine.bind(this);
-
-        // this.loadConfigurations().then((b) => {
-        //     console.log(b);
-        // });;
+        this.runPalletizerSequence = this.runPalletizerSequence.bind(this);
+        this.executeHomingSequence = this.executeHomingSequence.bind(this);
+        this.executePickSequence = this.executePickSequence.bind(this);
+        this.executeDropSequence = this.executeDropSequence.bind(this);
     };
 
 
     //-------MQTT Message Handlers-------
-
     __publish(topic: string, message: string) {
         let my = this;
 
@@ -342,13 +352,12 @@ export class Engine {
         let my = this;
         let { status } = my.palletizerState;
 
-
         my.handleStop(); // stop all motion.
         this.loadConfigurations().then(() => {
             return my.configureMachine()
         }).then(() => {
-            // run sequence.
-            // Group by axes, X,Y can run together.
+            return my.executeHomingSequence();
+        }).then(() => {
 
         }).catch((e) => {
             my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
@@ -413,16 +422,139 @@ export class Engine {
     };
 
     //-------Motion Sequence Control-------
+
+    // 1. Home,
+    // 2. Move to pick.
+    // 3. Pick
+    // 4. Drop
+
     runPalletizerSequence() {
+        let my = this;
+        return my.executeHomingSequence().then(() => {
+        });
+    };
+
+
+    //-------Palletizer Sequence-------
+
+    executeHomingSequence() {
+        let my = this;
+        return my.homeVertialAxis().then(() => {
+            return my.homeAllAxes();
+        })
+    };
+
+    executePickSequence() {
+        // This is where things have to get fancy.
 
 
 
     };
 
+    executeDropSequence() {
+
+
+    };
+
+
+    homeVertialAxis() {
+        let my = this;
+        let { axes } = this.mechanicalLayout;
+        let { Z } = axes;
+        return new Promise((resolve, reject) => {
+            let homing_function = async () => {
+                for (let i = 0; i < Z.length; i++) {
+                    let { MachineMotionIndex, DriveNumber } = Z[i];
+                    let drive = numberToDrive(DriveNumber);
+                    let mm = my.mechanicalLayout.machines[MachineMotionIndex];
+                    let [err, result] = await safeAwait(mm.emitHome(drive).then(() => {
+                        return mm.waitForMotionCompletion();
+                    }));
+                    if (err) {
+                        reject(err);
+                        break;
+                    }
+                };
+                resolve();
+            };
+            homing_function();
+        });
+    };
+
+
+    homeAllAxes() {
+        let my = this;
+        return new Promise((resolve, reject) => {
+            let { machines } = my.mechanicalLayout;
+            let promises: Promise<any>[] = [];
+            machines.forEach((m: MachineMotion) => {
+                let p = m.emitHomeAll().then(() => {
+                    return m.waitForMotionCompletion();
+                });
+                promises.push(p);
+            });
+            Promise.all(promises).then(resolve).catch(reject);
+        });
+    };
+
+
+
+
+    // Bit of a mess -- problem is an arbitrary number of drives on an arbitrary number of machine motions.
+    __moveVertical(point: number): Promise<any> {
+        // get Z coordinates;
+        let my = this;
+        let mm_group = {} as { [key: number]: any };
+        let { machines, axes } = my.mechanicalLayout;
+        Object.values(axes).forEach((ds: Drive[]) => {
+            ds.forEach((d: Drive) => {
+                let { MachineMotionIndex, DriveNumber } = d;
+                if (!(MachineMotionIndex in mm_group)) {
+                    mm_group[MachineMotionIndex] = {}
+                }
+                mm_group[MachineMotionIndex][numberToDrive(DriveNumber) as string] = point;
+            });
+        });
+
+        let mm_ids = Object.keys(mm_group) as string[];
+        let promises: Promise<any>[] = [];
+
+        mm_ids.forEach((ids: string) => {
+            let id: number = +(ids);
+            let mm: MachineMotion = machines[id];
+            let pairing = mm_group[id];
+            let axes: AXES[] = Object.keys(pairing) as AXES[];
+            let positions: number[] = Object.values(pairing);
+
+            let p = mm.emitCombinedAxesAbsoluteMove(axes, positions).then(() => {
+                return mm.waitForMotionCompletion();
+            });
+
+            promises.push(p);
+        });
+
+        return Promise.all(promises);
+    };
+
+    __movePlanar() {
+
+
+    };
+
+
+
+
+
 };
 
 
-
+function safeAwait(promise: Promise<any>) {
+    return promise.then(data => {
+        return [undefined, data];
+    }).catch((e) => {
+        return [e];
+    });
+};
 
 
 
