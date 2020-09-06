@@ -16,6 +16,7 @@ import {
     Coordinate
 } from "./config";
 import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
+import { rejects } from "assert";
 
 const TESTING = true;
 
@@ -99,19 +100,10 @@ function numberToDrive(n: number): AXES {
     }
 };
 
-
-// interface BoundAxes {
-//     X: [number, AXES[]][];
-//     Y: [number, AXES[]][];
-//     Z: [number, AXES[]][];
-//     θ: [number, AXES[]][];
-// };
-
 interface MechanicalLayout {
     config_id: number;
     machines: MachineMotion[];
     axes: Axes;
-    //    bound_axes: BoundAxes;
     io: IO;
 };
 
@@ -149,7 +141,7 @@ export class Engine {
     palletConfigId: number = 0;
     informationLog: Information[] = [];
     machineConfig: SavedMachineConfiguration | null = null;
-    palletConfig: any | null = null;
+    palletConfig: SavedPalletConfiguration | null = null;
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
 
     __initTopics() {
@@ -210,6 +202,7 @@ export class Engine {
                 };
             }
         });
+
         this.mqttClient = client;
         this.__loadMachine = this.__loadMachine.bind(this);
         this.__loadPallet = this.__loadPallet.bind(this);
@@ -248,7 +241,6 @@ export class Engine {
     };
 
     __handleInformation(t: INFO_TYPE, description: string) {
-
         let date_string = ((d: Date) => {
             let ds = `${d.getFullYear()}/${d.getMonth()}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
             return ds;
@@ -296,7 +288,7 @@ export class Engine {
         this.palletConfigId = id;
         let is_null = this.palletConfig === null;
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
-        let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig.config.name;
+        let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig!.config.name;
 
         this.__handleInformation(info_status, info_description);
     };
@@ -340,6 +332,10 @@ export class Engine {
     };
 
     //-------Palletizer State Reducer-------
+
+    __updateStatus(status: PALLETIZER_STATUS) {
+        this.__stateReducer({ status });
+    }
     __stateReducer(update: any) {
         this.palletizerState = { ...this.palletizerState, ...update };
         this.__handleSendState();
@@ -349,17 +345,18 @@ export class Engine {
     // NOTE:  When you return something from a then() callback, it's a bit magic. If you return a value, the next then() is called with that value. However, if you return something promise-like, the next then() waits on it, and is only called when that promise settles (succeeds/fails).
 
     handleStart() {
-        // Define unique error commands that can be sent to the user + logged to console.
         let my = this;
         let { status } = my.palletizerState;
-
-        my.handleStop(); // stop all motion.
+        let box_index = 0;
         this.loadConfigurations().then(() => {
-            return my.configureMachine()
+            return my.configureMachine();
         }).then(() => {
             return my.executeHomingSequence();
         }).then(() => {
-
+            my.__updateStatus(PALLETIZER_STATUS.RUNNING);
+            return my.runPalletizerSequence(box_index);
+        }).then(() => {
+            my.__handleInformation(INFO_TYPE.STATUS, "Cycle completed. Awaiting operator control.");
         }).catch((e) => {
             my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
             console.log("Failed in handle start", e);
@@ -373,7 +370,6 @@ export class Engine {
     handleStop() {
 
     };
-
 
     //-------Mechanical Configuration-------
     configureMachine(): Promise<boolean> {
@@ -422,41 +418,51 @@ export class Engine {
         }
     };
 
-    //-------Motion Sequence Control-------
+    //-------Palletizer Sequence-------
 
-    // 1. Home,
-    // 2. Move to pick.
-    // 3. Pick
-    // 4. Drop
-
-    runPalletizerSequence() {
+    async runPalletizerSequence(box_index: number) {
         let my = this;
-        return my.executeHomingSequence().then(() => {
+        return my.executePickSequence(box_index).then(() => {
+            return my.executeDropSequence(box_index);
         });
     };
 
-
-    //-------Palletizer Sequence-------
-
-    executeHomingSequence() {
+    async executeHomingSequence() {
         let my = this;
         return my.homeVertialAxis().then(() => {
             return my.homeAllAxes();
-        })
+        });
     };
 
-    executePickSequence() {
-        // This is where things have to get fancy.
-
-
-
+    async executePickSequence(box_index: number) {
+        let my = this;
+        if (my.palletConfig !== null) {
+            let coordinate: Coordinate = my.palletConfig.boxCoordinates[box_index].pickLocation;
+            return my.__moveToCoordinate(coordinate).then(() => {
+                return my.__detectIO();
+            }).then(() => {
+                return my.__pickIO();
+            });
+        } else {
+            return new Promise((resolve, reject) => {
+                reject("Error with pallet configuration. Verify that the pallet configuration is valid.");
+            });
+        }
     };
 
-    executeDropSequence() {
-
-
+    async executeDropSequence(box_index: number) {
+        let my = this;
+        if (my.palletConfig !== null) {
+            let coordinate: Coordinate = my.palletConfig.boxCoordinates[box_index].dropLocation;
+            return my.__moveToCoordinate(coordinate).then(() => {
+                return my.__dropIO();
+            });
+        } else {
+            return new Promise((resolve, reject) => {
+                reject("Error with pallet configuration. Verify that the pallet configuration is valid.");
+            });
+        }
     };
-
 
     homeVertialAxis() {
         let my = this;
@@ -468,7 +474,7 @@ export class Engine {
                     let { MachineMotionIndex, DriveNumber } = Z[i];
                     let drive = numberToDrive(DriveNumber);
                     let mm = my.mechanicalLayout.machines[MachineMotionIndex];
-                    let [err, result] = await safeAwait(mm.emitHome(drive).then(() => {
+                    let [err, _] = await safeAwait(mm.emitHome(drive).then(() => {
                         return mm.waitForMotionCompletion();
                     }));
                     if (err) {
@@ -499,11 +505,9 @@ export class Engine {
     };
 
 
-
-
     // Bit of a mess -- problem is an arbitrary number of drives on an arbitrary number of machine motions.
     __moveVertical(c: Coordinate): Promise<any> {
-        let z_point = c.Z;
+        let z_point = c.z;
         // get Z coordinates;
         let my = this;
         let mm_group = {} as { [key: number]: any };
@@ -538,8 +542,8 @@ export class Engine {
     };
 
     __movePlanar(c: Coordinate): Promise<any> { // Move X, Y, θ.
-        let x_point: number = c.X;
-        let y_point: number = c.Y;
+        let x_point: number = c.x;
+        let y_point: number = c.y;
         let θ_point: boolean = c.θ;
 
         let my = this;
@@ -551,26 +555,77 @@ export class Engine {
         let y_axes = axes.Y;
         let θ_axes = axes.θ;
 
-        // Can combine Drive arrays, but need to track which axis is which.
+        let tagged: [Drive[], number][] = [];
 
-        return my.__moveVertical(c);
+        tagged.push([x_axes, x_point]);
+        tagged.push([y_axes, y_point]);
+        tagged.push([θ_axes, θ_point ? 90 : 0]);
+
+        for (let i = 0; i < tagged.length; i++) {
+            let [drives, position] = tagged[i];
+            drives.forEach((d: Drive) => {
+                let { MachineMotionIndex, DriveNumber } = d;
+                if (!(MachineMotionIndex in mm_group)) {
+                    mm_group[MachineMotionIndex] = {}
+                }
+                mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = position;
+            });
+        }
+
+        let mm_ids = Object.keys(mm_group) as string[];
+        let promises = [] as Promise<any>[];
+
+        for (let i = 0; i < mm_ids.length; i++) {
+            let id: number = +(mm_ids[i]);
+            let mm: MachineMotion = machines[id];
+            let pairing = mm_group[id];
+            let axes: AXES[] = Object.keys(pairing) as AXES[];
+            let positions: number[] = Object.values(pairing);
+            let p = mm.emitCombinedAxesAbsoluteMove(axes, positions).then(() => {
+                return mm.waitForMotionCompletion();
+            });
+            promises.push(p);
+        };
+
+        return Promise.all(promises);
     };
-
 
     __moveToCoordinate(c: Coordinate): Promise<any> {
         let my = this;
+
+        // zero_z is a minimized height to clear everything inside the cage. Default z = 0 (top).
         let zero_z: Coordinate = {
-            X: 0,
-            Y: 0,
-            Z: 0,
+            x: 0,
+            y: 0,
+            z: 0,
             θ: false
         };
+
         return my.__moveVertical(zero_z).then(() => {
             return my.__movePlanar(c);
         }).then(() => {
             return my.__moveVertical(c);
         });
-    }
+    };
+
+
+    __pickIO() {
+        return new Promise((resolve, reject) => {
+            resolve(true);
+        })
+    };
+
+    __dropIO() {
+        return new Promise((resolve, reject) => {
+            resolve(true);
+        });
+    };
+
+    __detectIO() {
+        return new Promise((resolve, reject) => {
+            resolve(true);
+        });
+    };
 };
 
 
