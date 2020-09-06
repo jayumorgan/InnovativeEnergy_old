@@ -14,11 +14,6 @@ interface ArrowProps {
 };
 
 
-
-
-
-
-
 function percentage(p: number, scale: number) {
     return String(p * scale / 100);
 }
@@ -32,14 +27,10 @@ interface point {
 function rotate(p: point, center: point, θ: number): point {
     let vec: number[] = [p.x, p.y];
     let c: number[] = [center.x, center.y];
-
     let sine = Math.sin(θ);
     let cosine = Math.cos(θ);
-
-    console.log(θ * Math.PI / 180, "Angle")
     // Clockwise rotation matrix
     let rM: number[][] = [[cosine, -1 * sine], [1 * sine, cosine]];
-
     let outvec = rM.map((row: number[]) => {
         let val = 0;
         row.forEach((r: number, i: number) => {
@@ -47,9 +38,6 @@ function rotate(p: point, center: point, θ: number): point {
         });
         return val;
     });
-
-    console.log(vec, outvec);
-
     return {
         x: outvec[0] + c[0],
         y: outvec[1] + c[1]

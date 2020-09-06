@@ -14,10 +14,7 @@ const TESTING = true;
 async function safePromise(p: Promise<any>) {
     let x = p.then((v) => { return [v, null] }).catch((e) => { return [null, e] });
     return x;
-}
-
-
-
+};
 
 
 //---------------Network Parameters---------------
@@ -44,7 +41,9 @@ enum PALLETIZER_STATUS {
     PAUSED = "Paused",
     WAITING = "Waiting",
     COMPLETE = "Complete",
-    ERROR = "Error"
+    ERROR = "Error",
+    STOPPED = "Stopped",
+    RUNNING = "Running"
 };
 
 enum INFO_TYPE {
@@ -204,9 +203,9 @@ export class Engine {
         this.__loadPallet = this.__loadPallet.bind(this);
         this.configureMachine = this.configureMachine.bind(this);
 
-        this.loadConfigurations().then((b) => {
-            console.log(b);
-        });;
+        // this.loadConfigurations().then((b) => {
+        //     console.log(b);
+        // });;
     };
 
 
@@ -341,12 +340,15 @@ export class Engine {
     handleStart() {
         // Define unique error commands that can be sent to the user + logged to console.
         let my = this;
+        let { status } = my.palletizerState;
+
+
         my.handleStop(); // stop all motion.
         this.loadConfigurations().then(() => {
             return my.configureMachine()
         }).then(() => {
             // run sequence.
-
+            // Group by axes, X,Y can run together.
 
         }).catch((e) => {
             my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
@@ -398,14 +400,13 @@ export class Engine {
             });
 
             my.mechanicalLayout.axes = axes;
-
             my.mechanicalLayout.io = io;
 
             return new Promise((resolve, reject) => {
                 Promise.all(promises).then(() => { resolve(true) }).catch(e => reject(e));
             });
         } else {
-            return new Promise((resolve, reject) => {
+            return new Promise((_, reject) => {
                 reject("No machine configurations.");
             })
         }
@@ -413,6 +414,7 @@ export class Engine {
 
     //-------Motion Sequence Control-------
     runPalletizerSequence() {
+
 
 
     };
