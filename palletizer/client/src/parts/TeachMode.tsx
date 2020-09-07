@@ -2,29 +2,38 @@ import React, { useReducer, useState, ReactElement } from 'react';
 
 import Modal from "./Modal";
 
-//import { PalletConfiguration } from "../services/TeachMode";
 import { SavePalletConfig } from "../requests/requests";
 
-import { PalletGeometry, BoxObject, Subtract3D, MultiplyScalar, Add3D, Norm, BoxCoordinates, BoxPositionObject } from "./teach/structures/Data";
+import {ConfigItem} from "../types/Types";
 
-//import ConfigurationName from "./teach/ConfigurationName";
-// import Jogger from "./teach/Jogger";
-import PalletCorners from "./teach/Pallet";
+import { PalletGeometry,
+	 BoxObject,
+	 Subtract3D,
+	 MultiplyScalar,
+	 Add3D,
+	 Norm,
+	 BoxCoordinates,
+	 BoxPositionObject
+} from "./teach/structures/Data";
+
 import { Fraction } from "./teach/CompletionDots";
+
+import Name from "./teach/Name";
+import MachineSelect, {MachineSelectProps} from "./teach/MachineSelect";
 import BoxSize from "./teach/BoxSize";
+import PalletCorners from "./teach/Pallet";
 import Layout from "./teach/Layouts";
 import Stack from "./teach/Stack";
-import Name from "./teach/Name";
-
 import ConfigurationSummary from "./teach/ConfigurationSummary";
 
+//---------------Styles---------------
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";
 
-
 enum PalletTeachState {
     CONFIG_NAME,
+    SELECT_MACHINE_CONFIG,
     BOX_SIZE,
     PALLET_CORNERS,
     LAYER_SETUP,
@@ -32,14 +41,6 @@ enum PalletTeachState {
     SUMMARY
 };
 
-interface PalletConfiguratorProps {
-    close: () => void;
-    index: number;
-    palletConfig: SavedPalletConfiguration | null;
-    id: number | null;
-};
-
-//---------------Pallet Configuration Class---------------
 export interface PalletConfiguration {
     name: string;
     boxes: BoxObject[];
@@ -113,26 +114,21 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let { box, position, rotated } = b;
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
-
-
-
+		
                 let boxWidth = box.dimensions.width;
                 let boxLength = box.dimensions.length;
                 let temp = boxWidth;
                 boxWidth = rotated ? boxLength : boxWidth;
                 boxLength = rotated ? temp : boxLength;
 
-                //compute the middle of the box shift.
                 let boxXmid = boxWidth / 2;
                 let boxYmid = boxLength / 2;
-                // let boxHeight = height; // Assume Same Height;
 
-                // Move along the X axis defined by the pallet.
                 let Ydirection = Subtract3D(corner1, corner2);
                 let Xdirection = Subtract3D(corner3, corner2);
 
                 console.log(Xdirection, Ydirection);
-                // form the two vectors that specify the position
+
                 let x_pos = MultiplyScalar(Xdirection, x);
                 let y_pos = MultiplyScalar(Ydirection, 1 - y); // Due to top left -> bottom left coordinate shift on y-axis.
 
@@ -175,11 +171,19 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
     } as SavedPalletConfiguration;
 
     return configuration;
-    // Save the file...
 };
 
+
 //---------------Pallet Configurator Component---------------
-function PalletConfigurator({ close, index, palletConfig, id }: PalletConfiguratorProps) {
+interface PalletConfiguratorProps {
+    close: () => void;
+    index: number;
+    palletConfig: SavedPalletConfiguration | null;
+    id: number | null;
+    machine_configs: ConfigItem[];
+};
+
+function PalletConfigurator({ close, index, palletConfig, id, machine_configs }: PalletConfiguratorProps) {
 
     let [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1)));
 
@@ -236,12 +240,15 @@ function PalletConfigurator({ close, index, palletConfig, id }: PalletConfigurat
         case (PalletTeachState.CONFIG_NAME): {
             ChildElement = (<></>);
             break;
-        }
+        };
+	case (PalletTeachState.SELECT_MACHINE_CONFIG) : {	    
+	    ChildElement = (<MachineSelect machine_configs={machine_configs} {...controlProps} />)
+	    break;
+	};
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} {...controlProps} />);
-
             break;
-        }
+        };
         case (PalletTeachState.PALLET_CORNERS): {
             ChildElement = (<PalletCorners allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
             break;
@@ -249,19 +256,18 @@ function PalletConfigurator({ close, index, palletConfig, id }: PalletConfigurat
         case (PalletTeachState.LAYER_SETUP): {
             ChildElement = (<Layout allBoxes={allBoxes} allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
             break;
-        }
+        };
         case (PalletTeachState.STACK_SETUP): {
             ChildElement = (<Stack allPallets={allPallets} setPallets={setPallets} {...controlProps} />)
             break;
-        }
+        };
         case (PalletTeachState.SUMMARY): {
             ChildElement = (<ConfigurationSummary allPallets={allPallets} finalConfig={GenerateFinalConfig(configuration)} allBoxes={allBoxes} {...controlProps} />)
             break;
-        }
+        };
         default: {
             console.log("Default Pallet Configurator Case -- unhandled");
-
-        }
+        };
     };
 
     if (teachState === PalletTeachState.CONFIG_NAME) {

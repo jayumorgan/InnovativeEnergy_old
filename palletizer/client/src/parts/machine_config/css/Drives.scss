@@ -305,7 +305,6 @@
                     @include flex-center();
                     justify-content: flex-end;
 
-
                     .EditButton {
                         cursor: pointer;
                         width: 100%;
@@ -323,19 +322,8 @@
                         @include shadow();
                         background-color: $green;
                     }
-
                 }
-
-
-
             }
-
-
         }
-
-
-
     }
-
-    //    @include
 }
