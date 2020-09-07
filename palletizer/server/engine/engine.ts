@@ -335,7 +335,8 @@ export class Engine {
 
     __updateStatus(status: PALLETIZER_STATUS) {
         this.__stateReducer({ status });
-    }
+    };
+
     __stateReducer(update: any) {
         this.palletizerState = { ...this.palletizerState, ...update };
         this.__handleSendState();
@@ -346,14 +347,14 @@ export class Engine {
 
     handleStart() {
         let my = this;
+        // start from box command? 
         let { status } = my.palletizerState;
-        let box_index = 0;
-
+        let start_box = 0;
 
         this.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
-            return my.startPalletizer(box_index);
+            return my.startPalletizer(start_box);
         }).then(() => {
 
         }).catch((e) => {
@@ -420,6 +421,7 @@ export class Engine {
 
     async startPalletizer(box_index: number): Promise<any> {
         let my = this;
+
         my.__updateStatus(PALLETIZER_STATUS.RUNNING);
 
         if (my.palletConfig !== null) {
