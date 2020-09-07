@@ -27,16 +27,10 @@ CREATE TABLE IF NOT EXISTS pallet_configs (
 id INTEGER PRIMARY KEY NOT NULL UNIQUE,
 name TEXT,
 raw_json BLOB,
-selected INTEGER NOT NULL DEFAULT 0
+machine_config_id INTEGER NOT NULL,
+selected INTEGER NOT NULL DEFAULT 0,
+FOREIGN KEY(machine_config_id) REFERENCES machine_configs(id)
 );`;
-// const CREATE_CURRENT_TABLE: string = `
-// CREATE TABLE IF NOT EXISTS current_config (
-// id INTEGER PRIMARY KEY NOT NULL UNIQUE,
-// machine_config_id INTEGER NOT NULL,
-// pallet_config_id INTEGER NOT NULL,
-// FOREIGN KEY(machine_config_id) REFERENCES machine_configs(id),
-// FOREIGN KEY(pallet_config_id) REFERENCES pallet_configs(id)
-// );`;
 
 //---------------Select Queries---------------
 const SELECT_ALL_MACHINE_CONFIGS = `SELECT id, name FROM machine_configs;`
@@ -50,13 +44,14 @@ const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json FROM pallet_conf
 const UPDATE_CURRENT_PALLET = `UPDATE pallet_configs SET selected = (CASE WHEN id = ? THEN 1 ELSE 0 END) WHERE id > 0;`;
 const UPDATE_CURRENT_MACHINE = `UPDATE machine_configs SET selected = (CASE WHEN id = ? THEN 1 ELSE 0 END) WHERE id > 0;`;
 const INSERT_MACHINE_CONFIG = `INSERT INTO machine_configs (name, raw_json) VALUES (?,?);`;
-const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json) VALUES (?,?);`;
-const UPDATE_PALLET_CONFIG = `UPDATE pallet_configs SET name = ?, raw_json = ? WHERE id = ?;`;
+const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json, machine_config_id) VALUES (?,?,?);`;
+const UPDATE_PALLET_CONFIG = `UPDATE pallet_configs SET name = ?, raw_json = ?, machine_config_id = ? WHERE id = ?;`;
 const UPDATE_MACHINE_CONFIG = `UPDATE machine_configs SET name = ?, raw_json = ? WHERE id =?;`
 
 //---------------Delete Queries---------------
 const DELETE_MACHINE_CONFIG = `DELETE FROM machine_configs WHERE id = ?;`;
-const DELETE_PALLET_CONFIG = `DELTE FROM pallet_configs WHERE id = ?;`;
+const DELETE_PALLET_BY_MACHINE = `DELETE FROM pallet_configs WHERE machine_config_id = ?;`;
+const DELETE_PALLET_CONFIG = `DELETE FROM pallet_configs WHERE id = ?;`;
 
 //---------------Current Config Checks---------------
 const DEFAULT_CURRENT_MACHINE_CONFIG = `UPDATE machine_configs SET selected = (CASE WHEN EXISTS(SELECT 1 FROM machine_configs WHERE selected = 1 LIMIT 1) THEN selected ELSE 1 END) WHERE id IN (SELECT MIN(id) FROM machine_configs);`
@@ -138,8 +133,9 @@ export class DatabaseHandler {
     };
 
     addPalletConfig(name: string, data: any) {
+	let machine_config_id = data.config.machine_config_id;
         let data_string = JSON.stringify(data, null, "\t");
-        return this.db.run(INSERT_PALLET_CONFIG, [name, data_string]);
+        return this.db.run(INSERT_PALLET_CONFIG, [name, data_string, machine_config_id]);
     };
 
     addMachineConfig(name: string, data: any) {
@@ -153,12 +149,16 @@ export class DatabaseHandler {
     };
 
     updatePalletConfig(name: string, data: any, id: number) {
+	let machine_config_id = data.config.machine_config_id;
         let data_string = JSON.stringify(data, null, "\t");
-        return this.db.run(UPDATE_PALLET_CONFIG, [name, data_string, id]);
+        return this.db.run(UPDATE_PALLET_CONFIG, [name, data_string, machine_config_id, id]);
     };
 
     deleteMachineConfig(id: number) {
-        return this.db.run(DELETE_MACHINE_CONFIG, [id]);
+	let my = this;
+	return my.db.run(DELETE_PALLET_BY_MACHINE,[id]).then(()=>{
+	    return my.db.run(DELETE_MACHINE_CONFIG, [id]);
+	});
     };
 
     deletePalletConfig(id: number) {

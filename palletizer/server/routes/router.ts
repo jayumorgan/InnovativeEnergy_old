@@ -21,7 +21,6 @@ function handleCatch(res: Response) {
     }
 };
 
-
 //---------------Router---------------
 
 let router: express.Router = express.Router();
@@ -106,6 +105,21 @@ router.get("/configs", (req: Request, res: Response) => {
         }).catch(handleCatch(res));
     }).catch(handleCatch(res));
 });
+
+router.post("/configs/delete", (req: Request, res: Response) => {
+    let handler = req.databaseHandler;
+    let {id, is_machine } = req.body;
+    let handleFn : (id: number) => Promise<any> = is_machine ? handler.deleteMachineConfig.bind(handler) : handler.deletePalletConfig.bind(handler);
+
+    handleFn(id).then(()=>{
+	res.sendStatus(200);
+    }).catch((e)=>{
+	console.log("Error configs/delete", e);
+	res.sendStatus(500);
+    });
+});
+
+
 
 router.use(express.static(BUILD_PATH));
 

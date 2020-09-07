@@ -8,6 +8,23 @@ function get_url(url: string): string {
     return "" + url;
 }
 
+export function delete_config(id: number, is_machine: boolean) {
+    let url = get_url("/configs/delete");
+    return new Promise<boolean>((resolve, reject) => {
+	axios.post(url, {id, is_machine}).then((res: AxiosResponse) => {
+	    if (res.status === 200) {
+		resolve(true)
+	    } else {
+		reject(false);
+	    }
+	}).catch((e)=>{
+	    console.log("Error with axios delete", e);
+	    reject(e);
+	})
+    });
+};
+
+
 export function get_configs(callback: (a: ConfigState) => void) {
     let url = get_url("/configs");
     axios.get(url).then((res: AxiosResponse) => {
@@ -78,13 +95,3 @@ export function SaveMachineConfig(name: string, config: any, id: number | null) 
 
     axios.post(url, data);
 };
-
-// export {
-//     get_configs,
-//     get_config,
-//     post_config,
-//     set_config,
-//     get_state_config,
-//     SavePalletConfig,
-//     SaveMachineConfig
-// };
