@@ -45,6 +45,7 @@ export interface PalletConfiguration {
     name: string;
     boxes: BoxObject[];
     pallets: PalletGeometry[];
+    machine_config_id: number;
 };
 
 export interface SavedPalletConfiguration {
@@ -52,11 +53,12 @@ export interface SavedPalletConfiguration {
     boxCoordinates: BoxCoordinates[];
 };
 
-function newPalletConfiguration(name: string) {
+function newPalletConfiguration(name: string, machine_config_id: number) {
     return {
         name,
         boxes: [],
         pallets: [],
+	machine_config_id
     } as PalletConfiguration;
 }
 
@@ -64,6 +66,7 @@ enum CONF_ACTION {
     SET_NAME,
     SET_BOXES,
     SET_PALLETS,
+    SET_MACHINE_CONFIG_ID
 };
 
 type ConfigAction = {
@@ -83,6 +86,9 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
         case (CONF_ACTION.SET_PALLETS): {
             return { ...state, pallets: payload as PalletGeometry[] };
         };
+	case (CONF_ACTION.SET_MACHINE_CONFIG_ID) : {
+	    return {...state, machine_config_id: payload as number};
+	};
         default: {
             return state;
         };
@@ -185,7 +191,7 @@ interface PalletConfiguratorProps {
 
 function PalletConfigurator({ close, index, palletConfig, id, machine_configs }: PalletConfiguratorProps) {
 
-    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1)));
+    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1), machine_configs[0].id));
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
@@ -203,6 +209,10 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     let setPallets = (pallets: PalletGeometry[]) => {
         dispatchConfiguration({ type: CONF_ACTION.SET_PALLETS, payload: pallets as any });
+    };
+
+    let setMachineConfigId = (id: number) => {
+	dispatchConfiguration({type: CONF_ACTION.SET_MACHINE_CONFIG_ID, payload: id as any});
     };
 
     let handleNext = () => {
@@ -235,14 +245,13 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
     let allBoxes = configuration.boxes;
     let allPallets = configuration.pallets;
 
-
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
             ChildElement = (<></>);
             break;
         };
 	case (PalletTeachState.SELECT_MACHINE_CONFIG) : {	    
-	    ChildElement = (<MachineSelect machine_configs={machine_configs} {...controlProps} />)
+	    ChildElement = (<MachineSelect machine_configs={machine_configs} setMachineConfigId={setMachineConfigId} {...controlProps} />)
 	    break;
 	};
         case (PalletTeachState.BOX_SIZE): {

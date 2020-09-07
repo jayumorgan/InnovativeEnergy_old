@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from "axios";
 
 import { ConfigItem, ConfigState } from "../types/Types";
 
+import {SavedMachineConfiguration} from "../parts/MachineConfig";
 
 function get_url(url: string): string {
     return "" + url;
@@ -20,6 +21,19 @@ export function get_configs(callback: (a: ConfigState) => void) {
         };
         callback(cState);
     });
+};
+
+export function get_machine_config(id: number) : Promise<SavedMachineConfiguration> {
+    let url = get_url("/configs" + "/getmachine");
+    return new Promise<SavedMachineConfiguration>((resolve, reject) => {
+	axios.post(url, { id }).then((res: any) => {
+	    let data = res.data as any;
+	    let config = JSON.parse(data.raw_json) as SavedMachineConfiguration;
+	    resolve(config);
+	}).catch((e:any)=>{
+	    reject(e);
+	});
+    });  
 };
 
 export async function get_config(id: number, machine: boolean) {

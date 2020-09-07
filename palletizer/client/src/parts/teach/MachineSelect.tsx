@@ -1,6 +1,6 @@
 import React, {useState, useEffect, ChangeEvent} from "react";
 
-import {get_config} from "../../requests/requests";
+import {get_machine_config} from "../../requests/requests";
 
 import {SavedMachineConfiguration} from "../MachineConfig";
 
@@ -16,11 +16,12 @@ import "./css/MachineSelect.scss";
 export interface MachineSelectProps {
     machine_configs: ConfigItem[];
     instructionNumber: number;
+    setMachineConfigId: (id:number) => void;
     handleNext: () => void;
     handleBack: () => void;
 };
 
-export default function MachineSelect({instructionNumber, handleNext, handleBack, machine_configs} : MachineSelectProps) {
+export default function MachineSelect({instructionNumber, handleNext, handleBack, machine_configs, setMachineConfigId} : MachineSelectProps) {
 
     let [selectedMachine, setSelectedMachine] = useState<ConfigItem>(machine_configs[0]);
 
@@ -38,6 +39,7 @@ export default function MachineSelect({instructionNumber, handleNext, handleBack
     let RightButton : ButtonProps = {
 	name: "Next",
 	action: () => {
+	    setMachineConfigId(selectedMachine.id);
 	    handleNext();
 	},
 	enabled: true
@@ -56,20 +58,18 @@ export default function MachineSelect({instructionNumber, handleNext, handleBack
 	    let ci : ConfigItem = machine_configs[i];
 	    if (ci.id == value) {
 		setSelectedMachine(ci);
-		break
+		break;
 	    }
 	};
     };
 
-
     useEffect(()=>{
-	let get_axes_configuration = async () => {
-	    let res_data = await get_config(selectedMachine.id, true) as any;
-            let saved = JSON.parse(res_data.raw_json) as SavedMachineConfiguration;
-	    let {axes} = saved.config;
+	get_machine_config(selectedMachine.id).then((c: SavedMachineConfiguration) => {
+	    let {axes} = c.config;
 	    setAxes(axes);
-	};
-	get_axes_configuration();
+	}).catch((e) => {
+	    console.log("Error get machine configuration");
+	});
     }, [selectedMachine]);
 
     let handleEditAxis =  (a:AXES) => () => {
