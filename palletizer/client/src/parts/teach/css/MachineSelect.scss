@@ -1,0 +1,34 @@
+@import "../../../master.scss";
+
+
+.MachineSelect {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 10% 90%;
+    grid-template-columns: 100%;
+
+    .MachineDropDown {
+        width: 100%;
+        height: 100%;
+        @include flex-center();
+
+        .DropDown {
+            @incldue flex-center();
+            width: 30%;
+            height: 100%;
+
+            select {
+                @include select-style();
+                width: 80%;
+            }
+        }
+    }
+
+    .MainContent {
+        width: 100%;
+        height: 100%;
+        @include flex-center();
+
+    }
+}

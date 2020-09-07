@@ -130,7 +130,9 @@ export default function ConfigurationSummary({ allPallets, allBoxes, handleNext,
                     })}
                 </div>
                 <div className="RightSide">
-                    <Visualizer palletConfig={finalConfig} currentBoxNumber={Infinity} />
+		    <div className="DisplayContainer">
+			<Visualizer palletConfig={finalConfig} currentBoxNumber={Infinity} />
+		    </div>
                     {/* <img src={RightImage} /> */}
                 </div>
             </div>

@@ -18,7 +18,7 @@ function changeVal(e: ChangeEvent): string {
     return val;
 };
 
-enum AXES {
+export enum AXES {
     X,
     Y,
     Z,
@@ -90,6 +90,75 @@ export function defaultAxesConfiguration() {
         θ: []
     } as AxesConfiguration;
 };
+
+
+
+export interface DriveSummaryProps {
+    Axes: AxesConfiguration;
+    handleEditAxis: (a:AXES) => () => void;
+};
+
+export function DriveSummary({Axes, handleEditAxis} : DriveSummaryProps) {
+
+    interface AxisListingProps {
+        drives: Drive[];
+        title: string;
+        handleEdit: () => void;
+    };
+
+    let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
+        return (
+            <div className="AxisListing">
+                <div className="AxisListingCell">
+                    <div className="Title">
+                        <span>
+                            {title + " Axis"}
+                        </span>
+                    </div>
+                    <div className="DetailsContainer">
+                        <div className="Details">
+                            <span>
+                                {String(drives.length) + " Drive" + (drives.length > 1 ? "s" : "")}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="AxisJog">
+                        <div className="ArrowLeft">
+                            <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
+                        </div>
+                        <div className="ArrowRight">
+                            <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
+                        </div>
+                    </div>
+                    <div className="Edit">
+                        <div className="EditButton" onClick={handleEdit}>
+                            <span>
+                                {"Edit"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+	<div className="AxesSummary">
+            <div className="AxesScroll">
+		<AxisListing drives={Axes.X} title={"X"} handleEdit={handleEditAxis(AXES.X)} />
+		<AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEditAxis(AXES.Y)} />
+		<AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEditAxis(AXES.Z)} />
+		<AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEditAxis(AXES.θ)} />
+            </div>
+            <div className="DisplayContainer">
+		<div className="Display">
+                    <img src={palletizerImage} />
+		</div>
+            </div>
+	</div>
+    );
+};
+
 
 function getAllDrives(a: AxesConfiguration) {
     return [...a.X, ...a.Y, ...a.Z, ...a.θ];
@@ -243,65 +312,18 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
     } as any;
 
     if (summaryScreen) {
-        interface AxisListingProps {
-            drives: Drive[];
-            title: string;
-            handleEdit: () => void;
-        };
 
+	let driveSummaryProps : DriveSummaryProps = {
+	    Axes,
+	    handleEditAxis: handleEdit
+	};
 
-        let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
-            return (
-                <div className="AxisListing">
-                    <div className="AxisListingCell">
-                        <div className="Title">
-                            <span>
-                                {title + " Axis"}
-                            </span>
-                        </div>
-                        <div className="DetailsContainer">
-                            <div className="Details">
-                                <span>
-                                    {String(drives.length) + " Drive" + (drives.length > 1 ? "s" : "")}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="AxisJog">
-                            <div className="ArrowLeft">
-                                <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
-                            </div>
-                            <div className="ArrowRight">
-                                <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
-                            </div>
-                        </div>
-                        <div className="Edit">
-                            <div className="EditButton" onClick={handleEdit}>
-                                <span>
-                                    {"Edit"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-        return (
-            <ContentItem {...contentItemProps} >
-                <div className="AxesSummary">
-                    <div className="AxesScroll">
-                        <AxisListing drives={Axes.X} title={"X"} handleEdit={handleEdit(AXES.X)} />
-                        <AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEdit(AXES.Y)} />
-                        <AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEdit(AXES.Z)} />
-                        <AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEdit(AXES.θ)} />
-                    </div>
-                    <div className="DisplayContainer">
-                        <div className="Display">
-                            <img src={palletizerImage} />
-                        </div>
-                    </div>
-                </div>
-            </ContentItem>
-        );
+	return (
+	    <ContentItem {...contentItemProps}>
+		<DriveSummary {...driveSummaryProps} />
+	    </ContentItem>
+	);
+	
     } else {
         contentItemProps.instruction = "Configure drives for " + axisString(currentAxis) + " axis";
 
@@ -498,7 +520,5 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
         );
     };
 };
-
-
 
 export default Drives;

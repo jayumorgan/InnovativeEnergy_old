@@ -2,10 +2,28 @@ import axios, { AxiosResponse } from "axios";
 
 import { ConfigItem, ConfigState } from "../types/Types";
 
+import {SavedMachineConfiguration} from "../parts/MachineConfig";
 
 function get_url(url: string): string {
     return "" + url;
 }
+
+export function delete_config(id: number, is_machine: boolean) {
+    let url = get_url("/configs/delete");
+    return new Promise<boolean>((resolve, reject) => {
+	axios.post(url, {id, is_machine}).then((res: AxiosResponse) => {
+	    if (res.status === 200) {
+		resolve(true)
+	    } else {
+		reject(false);
+	    }
+	}).catch((e)=>{
+	    console.log("Error with axios delete", e);
+	    reject(e);
+	})
+    });
+};
+
 
 export function get_configs(callback: (a: ConfigState) => void) {
     let url = get_url("/configs");
@@ -20,6 +38,19 @@ export function get_configs(callback: (a: ConfigState) => void) {
         };
         callback(cState);
     });
+};
+
+export function get_machine_config(id: number) : Promise<SavedMachineConfiguration> {
+    let url = get_url("/configs" + "/getmachine");
+    return new Promise<SavedMachineConfiguration>((resolve, reject) => {
+	axios.post(url, { id }).then((res: any) => {
+	    let data = res.data as any;
+	    let config = JSON.parse(data.raw_json) as SavedMachineConfiguration;
+	    resolve(config);
+	}).catch((e:any)=>{
+	    reject(e);
+	});
+    });  
 };
 
 export async function get_config(id: number, machine: boolean) {
@@ -64,13 +95,3 @@ export function SaveMachineConfig(name: string, config: any, id: number | null) 
 
     axios.post(url, data);
 };
-
-// export {
-//     get_configs,
-//     get_config,
-//     post_config,
-//     set_config,
-//     get_state_config,
-//     SavePalletConfig,
-//     SaveMachineConfig
-// };

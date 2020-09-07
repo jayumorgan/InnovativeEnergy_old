@@ -77,11 +77,20 @@
         @include flex-center();
         height: 100%;
         width: 100%;
-        @include flex-center();
 
-        img {
-            height: 90%;
-            width: auto;
+        .DisplayContainer {
+            height: 96%;
+            width: 97%;
+            @include flex-center();
+            border: $container-border;
+            border-radius: $border-radius;
+            background-color: $desert-storm;
+            margin: $margin;
+
+            img {
+                height: 90%;
+                width: auto;
+            }
         }
     }
 
