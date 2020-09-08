@@ -262,13 +262,11 @@ export class Engine {
             let ds = `${d.getFullYear()}/${d.getMonth()}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
             return ds;
         })(new Date());
-
         let info: Information = {
             Type: String(t),
             Description: description,
             DateString: date_string
         };
-
         this.informationLog = this.informationLog.splice(0, 9);
         this.informationLog = [info, ...this.informationLog];
         this.__handleSendInformation();
@@ -410,7 +408,7 @@ export class Engine {
         let my = this;
 
         if (my.machineConfig !== null && my.palletConfig !== null) {
-            let promises: Promise<vResponse>[] = [];
+            let promises: Promise<any>[] = [];
             let mms: MachineMotion[] = [];
 
             let { config } = my.machineConfig;
@@ -431,7 +429,19 @@ export class Engine {
                     handler("Estop message is irrelevant");
                 });
 
-                mms.push(new MachineMotion(mm_config));
+                let p = new Promise((resolve, reject) => {
+                    mm_controller.resetSystem().then(() => {
+                        return mm_controller.releaseEstop();
+                    }).then(() => {
+                        resolve();
+                    }).catch((e: vResponse) => {
+                        reject(e);
+                    });
+                });
+
+                promises.push(p);
+
+                mms.push(mm_controller);
             });
 
             my.mechanicalLayout.machines = mms;
