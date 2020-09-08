@@ -4,22 +4,23 @@ import Modal from "./Modal";
 
 import { SavePalletConfig } from "../requests/requests";
 
-import {ConfigItem} from "../types/Types";
+import { ConfigItem } from "../types/Types";
 
-import { PalletGeometry,
-	 BoxObject,
-	 Subtract3D,
-	 MultiplyScalar,
-	 Add3D,
-	 Norm,
-	 BoxCoordinates,
-	 BoxPositionObject
+import {
+    PalletGeometry,
+    BoxObject,
+    Subtract3D,
+    MultiplyScalar,
+    Add3D,
+    Norm,
+    BoxCoordinates,
+    BoxPositionObject
 } from "./teach/structures/Data";
 
 import { Fraction } from "./teach/CompletionDots";
 
 import Name from "./teach/Name";
-import MachineSelect, {MachineSelectProps} from "./teach/MachineSelect";
+import MachineSelect, { MachineSelectProps } from "./teach/MachineSelect";
 import BoxSize from "./teach/BoxSize";
 import PalletCorners from "./teach/Pallet";
 import Layout from "./teach/Layouts";
@@ -58,9 +59,9 @@ function newPalletConfiguration(name: string, machine_config_id: number) {
         name,
         boxes: [],
         pallets: [],
-	machine_config_id
+        machine_config_id
     } as PalletConfiguration;
-}
+};
 
 enum CONF_ACTION {
     SET_NAME,
@@ -86,9 +87,9 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
         case (CONF_ACTION.SET_PALLETS): {
             return { ...state, pallets: payload as PalletGeometry[] };
         };
-	case (CONF_ACTION.SET_MACHINE_CONFIG_ID) : {
-	    return {...state, machine_config_id: payload as number};
-	};
+        case (CONF_ACTION.SET_MACHINE_CONFIG_ID): {
+            return { ...state, machine_config_id: payload as number };
+        };
         default: {
             return state;
         };
@@ -120,7 +121,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let { box, position, rotated } = b;
                 let { pickLocation } = box;
                 let { x, y } = position; // These are fractions from the left of the pallet.
-		
+
                 let boxWidth = box.dimensions.width;
                 let boxLength = box.dimensions.length;
                 let temp = boxWidth;
@@ -133,20 +134,11 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let Ydirection = Subtract3D(corner1, corner2);
                 let Xdirection = Subtract3D(corner3, corner2);
 
-                console.log(Xdirection, Ydirection);
-
                 let x_pos = MultiplyScalar(Xdirection, x);
                 let y_pos = MultiplyScalar(Ydirection, 1 - y); // Due to top left -> bottom left coordinate shift on y-axis.
 
-                console.log("First X, Y pos", x_pos, y_pos);
-
                 let Xunit = MultiplyScalar(Xdirection, 1 / Norm(Xdirection));
                 let Yunit = MultiplyScalar(Ydirection, 1 / Norm(Ydirection));
-
-                console.log(Xunit, Yunit, "Unit Vectors");
-
-                console.log("Box Mids X,Y", boxXmid, boxYmid);
-
 
                 x_pos = Add3D(x_pos, MultiplyScalar(Xunit, boxXmid));
                 y_pos = Add3D(y_pos, MultiplyScalar(Yunit, -boxYmid)); // Again; top left -> bottom left coordinate shift.
@@ -168,7 +160,6 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
             });
         });
     });
-
     console.log("Final Box Coordinates ", boxCoordinates);
 
     let configuration = {
@@ -195,7 +186,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
-    let completionFraction = { n: 0, d: 5 } as Fraction;
+    let completionFraction = { n: 0, d: 6 } as Fraction;
 
     let ChildElement: ReactElement = (<></>);
 
@@ -212,7 +203,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
     };
 
     let setMachineConfigId = (id: number) => {
-	dispatchConfiguration({type: CONF_ACTION.SET_MACHINE_CONFIG_ID, payload: id as any});
+        dispatchConfiguration({ type: CONF_ACTION.SET_MACHINE_CONFIG_ID, payload: id as any });
     };
 
     let handleNext = () => {
@@ -250,10 +241,10 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
             ChildElement = (<></>);
             break;
         };
-	case (PalletTeachState.SELECT_MACHINE_CONFIG) : {	    
-	    ChildElement = (<MachineSelect machine_configs={machine_configs} setMachineConfigId={setMachineConfigId} {...controlProps} />)
-	    break;
-	};
+        case (PalletTeachState.SELECT_MACHINE_CONFIG): {
+            ChildElement = (<MachineSelect machine_configs={machine_configs} setMachineConfigId={setMachineConfigId} {...controlProps} />)
+            break;
+        };
         case (PalletTeachState.BOX_SIZE): {
             ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} {...controlProps} />);
             break;

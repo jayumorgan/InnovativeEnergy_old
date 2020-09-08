@@ -12,7 +12,6 @@ import plus_icon from "../teach/images/plus.svg";
 
 import "./css/Drives.scss";
 
-
 function changeVal(e: ChangeEvent): string {
     let val: string = (e.target as any).value;
     return val;
@@ -95,10 +94,10 @@ export function defaultAxesConfiguration() {
 
 export interface DriveSummaryProps {
     Axes: AxesConfiguration;
-    handleEditAxis: (a:AXES) => () => void;
+    handleEditAxis: (a: AXES) => () => void;
 };
 
-export function DriveSummary({Axes, handleEditAxis} : DriveSummaryProps) {
+export function DriveSummary({ Axes, handleEditAxis }: DriveSummaryProps) {
 
     interface AxisListingProps {
         drives: Drive[];
@@ -143,19 +142,19 @@ export function DriveSummary({Axes, handleEditAxis} : DriveSummaryProps) {
     };
 
     return (
-	<div className="AxesSummary">
+        <div className="AxesSummary">
             <div className="AxesScroll">
-		<AxisListing drives={Axes.X} title={"X"} handleEdit={handleEditAxis(AXES.X)} />
-		<AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEditAxis(AXES.Y)} />
-		<AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEditAxis(AXES.Z)} />
-		<AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEditAxis(AXES.θ)} />
+                <AxisListing drives={Axes.X} title={"X"} handleEdit={handleEditAxis(AXES.X)} />
+                <AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEditAxis(AXES.Y)} />
+                <AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEditAxis(AXES.Z)} />
+                <AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEditAxis(AXES.θ)} />
             </div>
             <div className="DisplayContainer">
-		<div className="Display">
+                <div className="Display">
                     <img src={palletizerImage} />
-		</div>
+                </div>
             </div>
-	</div>
+        </div>
     );
 };
 
@@ -313,17 +312,17 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
 
     if (summaryScreen) {
 
-	let driveSummaryProps : DriveSummaryProps = {
-	    Axes,
-	    handleEditAxis: handleEdit
-	};
+        let driveSummaryProps: DriveSummaryProps = {
+            Axes,
+            handleEditAxis: handleEdit
+        };
 
-	return (
-	    <ContentItem {...contentItemProps}>
-		<DriveSummary {...driveSummaryProps} />
-	    </ContentItem>
-	);
-	
+        return (
+            <ContentItem {...contentItemProps}>
+                <DriveSummary {...driveSummaryProps} />
+            </ContentItem>
+        );
+
     } else {
         contentItemProps.instruction = "Configure drives for " + axisString(currentAxis) + " axis";
 

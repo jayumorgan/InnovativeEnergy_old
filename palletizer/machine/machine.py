@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from time import sleep
 import json
 import pathlib
@@ -318,15 +317,12 @@ class Palletizer(pc.PalletizerControl):
         # Intialize state+controls (PalletizerControl)
         print("PRe Init")
         super().__init__()
-
         print("Starting Palletizer")
-
         self.start(4)
 
     def start(self, count):
 
         self.machine = Machine()
-
         self.total_box_count = self.machine.box_count
         self.update({
             "status": "Waiting" if self.state["cycle"] == 0 else "Complete",
@@ -335,15 +331,12 @@ class Palletizer(pc.PalletizerControl):
             "time": 0,
             "current_box": count
         })
-
         self.control_checks(interrupted=True)
         self.increment_cycle()
         self.update({"status": "Running"})
-
         self.update_information("Status", "Machine starting")
         self.update_information("Status", "Air pressure detected.")
         self.update_information("Status", "System is homing.")
-
         self.machine.home()
         self.control_checks()
         self.move_to_pick(count)
@@ -354,19 +347,13 @@ class Palletizer(pc.PalletizerControl):
             "current_box": count,
             "time": round((self.total_box_count - count) * 1 / 3)
         })
-        # self.update_information("Warning", "Box not detected at pick location. Check for box presence")
         if (count < self.machine.box_count):
             self.machine.move_to_pick(count)
             warn_string = "No box detected at pick location. Trying again."
             fail_string = "No box available at pick location. Operator assistance required."
-            # self.warning_loop(self.machine.detect_box, warn_string, fail_string)
-
             self.machine.start_pressure()
             warn_string = "Box pick failed. Trying again."
             fail_string = "Unable to pick box. Operator assistance required."
-
-            # self.warning_loop(self.machine.check_for_pick, warn_string, fail_string, operation=self.machine.start_pressure)
-
             self.move_to_drop(count)
         else:
             print("Motion completed, wait on restart..")
@@ -379,15 +366,10 @@ class Palletizer(pc.PalletizerControl):
     def move_to_drop(self, count):
         self.control_checks()
         self.machine.move_to_drop(count)
-
         self.machine.stop_pressure()
         sleep(0.4)
-
         fail_string = "Unable to drop box. Operator asssistance required"
         warn_string = "Unable to drop box. Retrying"
-
-        # self.warning_loop(self.machine.check_for_pick, warn_string, fail_string,operation=self.machine.stop_pressure, limit=2)
-
         self.move_to_pick(count + 1)
 
     def warning_loop(self,
@@ -424,9 +406,7 @@ class Palletizer(pc.PalletizerControl):
                 print("Unhandled status for command", command)
             self.update(status)
 
-    # ie. handle play, pause, stop.
     def control_checks(self, interrupted=False):
-        # Use walrus operator if python 3.8
         while True:
             sleep(0.3)
             command = self.get_command()

@@ -25,7 +25,6 @@ function ConfigHub(props: any) {
         });
     }, []);
 
-
     return (
         <ConfigContext.Provider value={state}>
             {props.children}

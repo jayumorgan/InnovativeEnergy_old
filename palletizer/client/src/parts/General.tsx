@@ -26,24 +26,20 @@ import { ReactComponent as BellImage } from "./images/bell.svg";
 import { ReactComponent as ExclamationImage } from "./images/exclamation-circle.svg";
 import { ReactComponent as InfoImage } from "./images/info-circle.svg";
 import { ReactComponent as CircleImage } from "./images/circle.svg";
-
+import { ContentItemProps } from './teach/ContentItem';
 
 var control = MQTTControl();
 
-
 // Support Functions:
 function make_time_string(hours: number, minute: number): string {
-
     let hour_string = String(hours);
     let minute_string = minute < 10 ? `0${minute}` : String(minute);
     return hour_string + ":" + minute_string;
 }
 
 function make_date_string(day: number, month: number, year: number) {
-    month += 1;
-
     let day_string = day < 10 ? `0${day}` : String(day);
-    let month_string = month < 10 ? `0${month}` : String(month);
+    let month_string = month < 10 ? `0${month}` : String(month + 1);
     let year_string = String(year);
     return year_string + "/" + month_string + "/" + day_string;
 }
@@ -51,11 +47,9 @@ function make_date_string(day: number, month: number, year: number) {
 interface ExecuteProps {
     current_box: number;
     status: string;
-}
-
+};
 
 function ConfigCell({ title, children }: StackProps) {
-
     return (
         <div className="ConfigCell">
             <div className="ConfigTitle">
@@ -64,8 +58,7 @@ function ConfigCell({ title, children }: StackProps) {
             {children}
         </div>
     );
-}
-
+};
 
 
 function ExecutePane({ current_box, status }: ExecuteProps) {
@@ -122,7 +115,6 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
             set_pallet_current_config(id);
         }
     };
-
 
     return (
         <div className="ExecuteGrid">

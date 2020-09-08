@@ -1,8 +1,11 @@
 import mqtt from "mqtt";
+
 import { v4 as uuidv4 } from 'uuid';
 
 import MachineMotion, { defaultMqttClient, vResponse, AXES, DIRECTION } from "mm-js-api";
+
 import { DatabaseHandler } from "../database/db";
+
 import {
     SavedMachineConfiguration,
     MachineConfiguration,
@@ -15,6 +18,7 @@ import {
     Drive,
     Coordinate
 } from "./config";
+
 import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
 import { rejects } from "assert";
 
@@ -27,11 +31,9 @@ async function safePromise(p: Promise<any>) {
     return x;
 };
 
-
 //---------------Network Parameters---------------
 const HOSTNAME = "127.0.0.1";
 const MQTTPORT = 1883;
-
 //---------------Topics---------------
 const PALLETIZER_TOPIC = "palletizer/";
 const STATE_TOPIC = PALLETIZER_TOPIC + "state";
@@ -50,7 +52,6 @@ interface TopicStruct {
 enum PALLETIZER_STATUS {
     SLEEP = "Sleep",
     PAUSED = "Paused",
-    WAITING = "Waiting",
     COMPLETE = "Complete",
     ERROR = "Error",
     STOPPED = "Stopped",
@@ -124,13 +125,26 @@ function defaultMechanicalLayout(): MechanicalLayout {
     } as MechanicalLayout;
 };
 
+enum CYCLE_STATE {
+    NONE,
+    HOMEING,
+    PICK,
+    DETECT_IO,
+    PICK_IO,
+    DROP,
+    DROP_IO
+};
+
+type Action = () => Promise<any>;
+
+
 
 export class Engine {
     mqttClient: mqtt.Client;
     databaseHandler: DatabaseHandler;
     subscribeTopics: { [key: string]: TopicStruct } = {};
     palletizerState: PalletizerState = {
-        status: PALLETIZER_STATUS.WAITING,
+        status: PALLETIZER_STATUS.SLEEP,
         cycle: 0,
         current_box: 0,
         total_box: 0,
@@ -143,6 +157,7 @@ export class Engine {
     machineConfig: SavedMachineConfiguration | null = null;
     palletConfig: SavedPalletConfiguration | null = null;
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
+    cycleState: CYCLE_STATE = CYCLE_STATE.NONE;
 
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
@@ -255,7 +270,7 @@ export class Engine {
         this.informationLog = this.informationLog.splice(0, 9);
         this.informationLog = [info, ...this.informationLog];
         this.__handleSendInformation();
-    }
+    };
 
     __handleControl(m: string) {
         if ((/start/mi).test(m)) {
@@ -270,7 +285,16 @@ export class Engine {
     };
 
     __handleEstop(m: string) {
-
+        this.__updateStatus(PALLETIZER_STATUS.STOPPED);
+        this.__handleInformation(INFO_TYPE.ERROR, "Emergency stop triggered");
+        let { machines } = this.mechanicalLayout;
+        machines.forEach((m: MachineMotion) => {
+            m.triggerEstop().then(() => {
+                console.log("Estop triggered for machine at ip: ", m.machineIP);
+            }).catch((e) => {
+                console.log("Trigger estop failed ", e);
+            });
+        });
     };
 
     __loadMachine(smc: SavedMachineConfiguration | null, id: number) {
@@ -285,6 +309,7 @@ export class Engine {
 
     __loadPallet(spc: any | null, id: number) {
         this.palletConfig = spc;
+        this.palletizerState.palletConfig = spc;
         this.palletConfigId = id;
         let is_null = this.palletConfig === null;
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
@@ -347,8 +372,16 @@ export class Engine {
 
     handleStart() {
         let my = this;
-        // start from box command? 
         let { status } = my.palletizerState;
+
+        if (status === PALLETIZER_STATUS.RUNNING) {
+            return;
+        }
+
+        if (status === PALLETIZER_STATUS.PAUSED) {
+            my.__updateStatus(PALLETIZER_STATUS.RUNNING);
+        }
+
         let start_box = 0;
 
         this.loadConfigurations().then(() => {
@@ -364,10 +397,11 @@ export class Engine {
     };
 
     handlePause() {
+        this.__updateStatus(PALLETIZER_STATUS.PAUSED);
     };
 
     handleStop() {
-
+        this.__updateStatus(PALLETIZER_STATUS.STOPPED);
     };
 
     //-------Mechanical Configuration-------
@@ -388,12 +422,20 @@ export class Engine {
                     serverPort: 8000,
                     mqttPort: 1883,
                 };
+
+                let mm_controller: MachineMotion = new MachineMotion(mm_config);
+
+                mm_controller.bindEstopEvent(() => {
+                    let handler = my.__handleEstop.bind(my);
+                    handler("Estop message is irrelevant");
+                });
+
                 mms.push(new MachineMotion(mm_config));
             });
 
             my.mechanicalLayout.machines = mms;
-
             let ax = axes as any;
+
             Object.keys(ax).forEach((axis: string) => {
                 let drives = ax[axis] as Drive[];
                 drives.forEach((d: Drive) => {
@@ -449,6 +491,7 @@ export class Engine {
 
     async executeHomingSequence() {
         let my = this;
+        my.cycleState = CYCLE_STATE.HOMEING;
         return my.homeVertialAxis().then(() => {
             return my.homeAllAxes();
         });
@@ -456,6 +499,7 @@ export class Engine {
 
     async executePickSequence(box_index: number) {
         let my = this;
+        my.cycleState = CYCLE_STATE.PICK;
         if (my.palletConfig !== null) {
             let coordinate: Coordinate = my.palletConfig.boxCoordinates[box_index].pickLocation;
             return my.__moveToCoordinate(coordinate).then(() => {
@@ -472,6 +516,7 @@ export class Engine {
 
     async executeDropSequence(box_index: number) {
         let my = this;
+        my.cycleState = CYCLE_STATE.DROP;
         if (my.palletConfig !== null) {
             let coordinate: Coordinate = my.palletConfig.boxCoordinates[box_index].dropLocation;
             return my.__moveToCoordinate(coordinate).then(() => {
@@ -508,7 +553,6 @@ export class Engine {
         });
     };
 
-
     homeAllAxes() {
         let my = this;
         return new Promise((resolve, reject) => {
@@ -528,11 +572,12 @@ export class Engine {
     // Bit of a mess -- problem is an arbitrary number of drives on an arbitrary number of machine motions.
     __moveVertical(c: Coordinate): Promise<any> {
         let z_point = c.z;
-        // get Z coordinates;
+
         let my = this;
         let mm_group = {} as { [key: number]: any };
         let { machines, axes } = my.mechanicalLayout;
         let z_axes = axes.Z;
+
         z_axes.forEach((d: Drive) => {
             let { MachineMotionIndex, DriveNumber } = d;
             if (!(MachineMotionIndex in mm_group)) {
@@ -542,7 +587,7 @@ export class Engine {
         });
 
         let mm_ids = Object.keys(mm_group) as string[];
-        let promises: Promise<any>[] = [];
+        let actions: Action[] = [];
 
         mm_ids.forEach((ids: string) => {
             let id: number = +(ids);
@@ -551,26 +596,32 @@ export class Engine {
             let axes: AXES[] = Object.keys(pairing) as AXES[];
             let positions: number[] = Object.values(pairing);
 
-            let p = mm.emitCombinedAxesAbsoluteMove(axes, positions).then(() => {
+            let move_action = () => {
+                return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+            };
+            let wait_action = () => {
                 return mm.waitForMotionCompletion();
-            });
+            };
 
-            promises.push(p);
+            actions.push(move_action);
+            actions.push(wait_action);
         });
 
-        return Promise.all(promises);
+        // How do we resume at a nice pace
+        return my.__controlSequence(actions);
     };
 
     __movePlanar(c: Coordinate): Promise<any> { // Move X, Y, θ.
+        let my = this;
+
         let x_point: number = c.x;
         let y_point: number = c.y;
         let θ_point: boolean = c.θ;
 
-        let my = this;
-
         let mm_group = {} as { [key: number]: any };
 
         let { machines, axes } = my.mechanicalLayout;
+
         let x_axes = axes.X;
         let y_axes = axes.Y;
         let θ_axes = axes.θ;
@@ -593,7 +644,8 @@ export class Engine {
         }
 
         let mm_ids = Object.keys(mm_group) as string[];
-        let promises = [] as Promise<any>[];
+
+        let actions: Action[] = [];
 
         for (let i = 0; i < mm_ids.length; i++) {
             let id: number = +(mm_ids[i]);
@@ -601,18 +653,24 @@ export class Engine {
             let pairing = mm_group[id];
             let axes: AXES[] = Object.keys(pairing) as AXES[];
             let positions: number[] = Object.values(pairing);
-            let p = mm.emitCombinedAxesAbsoluteMove(axes, positions).then(() => {
-                return mm.waitForMotionCompletion();
-            });
-            promises.push(p);
+
+            let move_action = () => {
+                return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+            };
+
+            let wait_action = () => {
+                mm.waitForMotionCompletion();
+            };
+
+            actions.push(move_action);
+            actions.push(wait_action);
         };
 
-        return Promise.all(promises);
+        return my.__controlSequence(actions);
     };
 
     __moveToCoordinate(c: Coordinate): Promise<any> {
         let my = this;
-
         // zero_z is a minimized height to clear everything inside the cage. Default z = 0 (top).
         let zero_z: Coordinate = {
             x: 0,
@@ -628,24 +686,68 @@ export class Engine {
         });
     };
 
-
     __pickIO() {
+        let my = this;
+        my.cycleState = CYCLE_STATE.PICK_IO;
         return new Promise((resolve, reject) => {
             resolve(true);
         })
     };
 
     __dropIO() {
+        let my = this;
+        my.cycleState = CYCLE_STATE.DROP_IO;
         return new Promise((resolve, reject) => {
             resolve(true);
         });
     };
 
     __detectIO() {
+        let my = this;
+        my.cycleState = CYCLE_STATE.DETECT_IO;
         return new Promise((resolve, reject) => {
             resolve(true);
         });
     };
+
+    // will repeat sequence starting from top on run.
+    __controlSequence(actions: Action[]) {
+        if (actions.length === 0) {
+            return new Promise((resolve, _) => {
+                resolve();
+            });
+        } else {
+            let my = this;
+            let { status } = my.palletizerState;
+            if (status === PALLETIZER_STATUS.RUNNING) {
+                let first = actions.shift();
+                return new Promise((resolve, reject) => {
+                    first().then(() => {
+                        return my.__controlSequence(actions);
+                    }).then(() => {
+                        resolve();
+                    }).catch((e) => {
+                        reject(e);
+                    });
+                });
+            } else if (status === PALLETIZER_STATUS.PAUSED) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        my.__controlSequence(actions).then(() => {
+                            resolve();
+                        }).catch((e) => {
+                            reject(e);
+                        });
+                    }, 500);
+                });
+            } else {
+                return new Promise((_, reject) => {
+                    reject("Palletizer is not in run state ", status);
+                })
+            }
+        }
+    };
+
 };
 
 

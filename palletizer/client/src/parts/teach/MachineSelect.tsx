@@ -56,7 +56,7 @@ export default function MachineSelect({instructionNumber, handleNext, handleBack
 	let value: number = +(e.target as any).value;
 	for (let i = 0; i< machine_configs.length; i++) {
 	    let ci : ConfigItem = machine_configs[i];
-	    if (ci.id == value) {
+	    if (ci.id === value) {
 		setSelectedMachine(ci);
 		break;
 	    }
