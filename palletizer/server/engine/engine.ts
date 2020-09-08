@@ -370,8 +370,6 @@ export class Engine {
     };
 
     //-------Engine Controls-------
-    // NOTE:  When you return something from a then() callback, it's a bit magic. If you return a value, the next then() is called with that value. However, if you return something promise-like, the next then() waits on it, and is only called when that promise settles (succeeds/fails).
-
     handleStart() {
         let my = this;
         let { status } = my.palletizerState;
