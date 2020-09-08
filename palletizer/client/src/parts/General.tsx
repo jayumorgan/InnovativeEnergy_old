@@ -109,10 +109,18 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
     let handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
         let id: number = +((e.target as any).value);
         set_config(id, machine); // server request.
-        if (machine) {
-            set_machine_current_config(id);
-        } else {
+        if (!machine) { // Do nothing for machine.
+            let machine_id: number = machine_current_config;
+            for (let i = 0; i < pallet_configs.length; i++) {
+                let ci: ConfigItem = pallet_configs[i];
+                if (ci.id === id) {
+                    machine_id = ci.machine_config_id as number;
+                    break;
+                }
+            }
             set_pallet_current_config(id);
+            console.log("Setting machine config id", machine_id);
+            set_machine_current_config(machine_id);
         }
     };
 

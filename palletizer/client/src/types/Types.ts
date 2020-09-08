@@ -35,6 +35,7 @@ export type PartialState = {
 export interface ConfigItem {
     id: number;
     name: string;
+    machine_config_id?: number;
 }
 
 export type ConfigState = {

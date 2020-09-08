@@ -34,7 +34,7 @@ FOREIGN KEY(machine_config_id) REFERENCES machine_configs(id)
 
 //---------------Select Queries---------------
 const SELECT_ALL_MACHINE_CONFIGS = `SELECT id, name FROM machine_configs;`
-const SELECT_ALL_PALLET_CONFIGS = `SELECT id, name FROM pallet_configs`;
+const SELECT_ALL_PALLET_CONFIGS = `SELECT id, name, machine_config_id FROM pallet_configs;`;
 const SELECT_MACHINE_CONFIG_ID = `SELECT raw_json FROM machine_configs WHERE id = ?`;
 const SELECT_PALLET_CONFIG_ID = `SELECT raw_json FROM pallet_configs WHERE id = ?`;
 const SELECT_CURRENT_MACHINE_CONFIG = `SELECT id, name, raw_json FROM machine_configs WHERE selected = 1`;
@@ -133,7 +133,7 @@ export class DatabaseHandler {
     };
 
     addPalletConfig(name: string, data: any) {
-	let machine_config_id = data.config.machine_config_id;
+        let machine_config_id = data.config.machine_config_id;
         let data_string = JSON.stringify(data, null, "\t");
         return this.db.run(INSERT_PALLET_CONFIG, [name, data_string, machine_config_id]);
     };
@@ -149,16 +149,16 @@ export class DatabaseHandler {
     };
 
     updatePalletConfig(name: string, data: any, id: number) {
-	let machine_config_id = data.config.machine_config_id;
+        let machine_config_id = data.config.machine_config_id;
         let data_string = JSON.stringify(data, null, "\t");
         return this.db.run(UPDATE_PALLET_CONFIG, [name, data_string, machine_config_id, id]);
     };
 
-    deleteMachineConfig(id: number) {
-	let my = this;
-	return my.db.run(DELETE_PALLET_BY_MACHINE,[id]).then(()=>{
-	    return my.db.run(DELETE_MACHINE_CONFIG, [id]);
-	});
+    async deleteMachineConfig(id: number) {
+        let my = this;
+        return my.db.run(DELETE_PALLET_BY_MACHINE, [id]).then(() => {
+            return my.db.run(DELETE_MACHINE_CONFIG, [id]);
+        });
     };
 
     deletePalletConfig(id: number) {

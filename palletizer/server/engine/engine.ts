@@ -316,7 +316,6 @@ export class Engine {
         let is_null = this.palletConfig === null;
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
         let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig!.config.name;
-
         this.__handleInformation(info_status, info_description);
     };
 
@@ -359,7 +358,6 @@ export class Engine {
     };
 
     //-------Palletizer State Reducer-------
-
     __updateStatus(status: PALLETIZER_STATUS) {
         this.__stateReducer({ status });
     };
@@ -386,8 +384,12 @@ export class Engine {
         this.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
+            my.__stateReducer({
+                cycle: my.palletizerState.cycle + 1
+            });
             return my.startPalletizer(start_box);
         }).then(() => {
+            // Icrement the cycle count.
 
         }).catch((e) => {
             my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
@@ -466,7 +468,10 @@ export class Engine {
         my.__updateStatus(PALLETIZER_STATUS.RUNNING);
 
         if (my.palletConfig !== null) {
-            my.__stateReducer({ current_box: box_index + 1, total_box: my.palletConfig.boxCoordinates.length });
+            my.__stateReducer({
+                current_box: box_index + 1,
+                total_box: my.palletConfig.boxCoordinates.length
+            });
         }
 
         return my.runPalletizerSequence(box_index).then(() => {

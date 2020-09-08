@@ -87,13 +87,10 @@ export default function SolidArrow({ size, rotation, longer }: ArrowProps) {
 
     points.forEach((p: point) => {
         let pt = rotate(p, center, rot * Math.PI / 2);
-        console.log(p, pt, rot);
         polygon.points += percentage(pt.x, svgProps.width);
         polygon.points += "," + percentage(pt.y, svgProps.height);
         polygon.points += " ";
     });
-
-
 
     let g_props = {
         transform: `scale(1,1)`

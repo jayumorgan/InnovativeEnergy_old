@@ -28,9 +28,9 @@ export function delete_config(id: number, is_machine: boolean) {
 export function get_configs(callback: (a: ConfigState) => void) {
     let url = get_url("/configs");
     axios.get(url).then((res: AxiosResponse) => {
-
         let { current, configs } = res.data;
         console.log(current, "Current configs");
+        console.log(configs, "configs");
         let cState: ConfigState = {
             machine_configs: configs.machine as ConfigItem[],
             pallet_configs: configs.pallet as ConfigItem[],

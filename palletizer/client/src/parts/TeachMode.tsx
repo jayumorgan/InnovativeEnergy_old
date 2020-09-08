@@ -235,6 +235,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     let allBoxes = configuration.boxes;
     let allPallets = configuration.pallets;
+    let machineConfigId = configuration.machine_config_id;
 
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
@@ -242,7 +243,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
             break;
         };
         case (PalletTeachState.SELECT_MACHINE_CONFIG): {
-            ChildElement = (<MachineSelect machine_configs={machine_configs} setMachineConfigId={setMachineConfigId} {...controlProps} />)
+            ChildElement = (<MachineSelect machine_configs={machine_configs} machineConfigId={machineConfigId} setMachineConfigId={setMachineConfigId} {...controlProps} />)
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
