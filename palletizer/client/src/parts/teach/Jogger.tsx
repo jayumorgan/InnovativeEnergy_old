@@ -1,15 +1,21 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 
+import JogController from "../../jogger/Jogger";
+
+// ---Remove this shortly.
 import { TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
 
 import SolidArrow, { ROTATION } from "./SolidArrow";
 
+import { get_machine_config } from "../../requests/requests";
 
-import "./css/Jogger.scss";
 import { Coordinate } from './structures/Data';
 
+//---------------Styles + Images---------------
+import "./css/Jogger.scss";
 import clockwise from "./images/clockwise.svg";
 import counterclockwise from "./images/counterclockwise.svg";
+import { SavedMachineConfiguration } from '../MachineConfig';
 
 let TEMP_JOGGER_INDEX = 0;
 
@@ -98,15 +104,30 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
 interface JoggerProps {
     selectAction: (c: Coordinate) => void;
     updateName: (s: string) => void;
+    machineConfigId: number;
     name: string;
 }
 
 
-function Jogger({ selectAction, updateName, name }: JoggerProps) {
-    // Get Machine Configuration for Setup.
+function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
 
     let [speed, setSpeed] = useState<number>(400);
     let [distance, setDistance] = useState<number>(300);
+
+    let jogController: JogController | null = null;
+
+    useEffect(() => {
+        get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
+	    
+	    let {axes, machines} = mc.config;
+            jogController = new JogController();
+	    
+        }).catch((e:any) => {
+	    console.log("Error get_machine_config", e);
+        });
+    }, [machineConfigId]);
+
+
 
     let networkConfig1 = {
         mode: NETWORK_MODE.static,

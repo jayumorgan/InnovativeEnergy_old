@@ -1,13 +1,15 @@
 import axios, { AxiosResponse } from "axios";
 
-import { ConfigItem, ConfigState } from "../types/Types";
+import {
+    ConfigItem,
+    ConfigState
+} from "../types/Types";
 
 import { SavedMachineConfiguration } from "../parts/MachineConfig";
 
 function get_url(url: string): string {
     return "" + url;
 };
-
 
 export function delete_config(id: number, is_machine: boolean) {
     let url = get_url("/configs/delete");

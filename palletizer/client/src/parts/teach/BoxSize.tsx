@@ -2,7 +2,6 @@ import React, { useState, ChangeEvent } from 'react';
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
-
 import Jogger from "./Jogger";
 
 // 3D display of box.
@@ -106,18 +105,18 @@ function CoordinateItem({ name, value, setter }: CoordinateItemProps) {
             </div>
         </div>
     );
-    /* <input type="number" value={value} /> */
 };
 
 interface CreateNewBoxProps {
     box: BoxObject;
+    machineConfigId: number;
     LeftButton: ButtonProps;
     RightButton: ButtonProps;
     updateBox: (b: BoxObject) => void;
     instructionNumber: number;
 };
 
-function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
+function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
 
     let updateName = (name: string) => {
         updateBox({ ...box, name });
@@ -136,7 +135,6 @@ function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateB
 
     let selectAction = (c: Coordinate) => {
         console.log("Selected Pick Location....", c);
-
         updateBox({ ...box, pickLocation: c });
     };
 
@@ -146,14 +144,13 @@ function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateB
         <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
             <div className="NewBoxGrid">
                 <div className="BoxSetup">
-                    <Jogger selectAction={selectAction} name={box.name} updateName={updateName} />
+                    <Jogger machineConfigId={machineConfigId} selectAction={selectAction} name={box.name} updateName={updateName} />
                     <div className="BoxConfigurator">
                         <Box {...box.dimensions} />
                         <div className="CoordinateDisplay">
                             <CoordinateItem name={"Width"} value={box.dimensions.width} setter={updateCoordinate("width")} />
                             <CoordinateItem name={"Length"} value={box.dimensions.length} setter={updateCoordinate("length")} />
                             <CoordinateItem name={"Height"} value={box.dimensions.height} setter={updateCoordinate("height")} />
-
                         </div>
                     </div>
                 </div>
@@ -162,19 +159,18 @@ function CreateNewBox({ instructionNumber, box, LeftButton, RightButton, updateB
     );
 };
 
+
 interface BoxSizeProps {
     allBoxes: BoxObject[];
     setBoxes: (boxes: BoxObject[]) => void;
     instructionNumber: number,
+    machineConfigId: number;
     handleBack: () => void;
     handleNext: () => void;
+};
 
-}
+export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext, machineConfigId }: BoxSizeProps) {
 
-// How will we update this? 
-
-function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext }: BoxSizeProps) {
-    // Must have fixed width.
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
 
     let box: BoxObject = {
@@ -275,12 +271,14 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
             </ContentItem>
         );
     } else {
+
         let createBoxProps: CreateNewBoxProps = {
             box: editingBox,
             LeftButton,
             RightButton,
             updateBox: setEditingBox,
-            instructionNumber
+            instructionNumber,
+            machineConfigId
         };
 
         return (
@@ -290,7 +288,5 @@ function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext
 };
 
 
-
-export default BoxSize;
 
 

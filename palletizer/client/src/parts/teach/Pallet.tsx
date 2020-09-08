@@ -105,40 +105,15 @@ function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
     );
 }
 
-/* interface NewPalletCellProps {
- *     startEdit: () => void;
- * }
- * 
- * function NewPalletCell({ startEdit }: NewPalletCellProps) {
- *     let iconSize = {
- *         height: 50,
- *         width: 50
- *     } as IconProps;
- * 
- *     return (
- *         <div className="BoxCellContainer">
- *             <div className="NewBoxCell" onClick={startEdit}>
- *                 <div className="Icon">
- *                     <PlusIcon {...iconSize} />
- *                 </div>
- *                 <div className="BoxName">
- *                     <span>
- *                         {"Add A New Pallet"}
- *                     </span>
- *                 </div>
- *             </div>
- *         </div>
- *     );
- * };
- *  */
+
 interface PalletCornerProps {
-    //    allPallets =
     allPallets: PalletGeometry[];
+    machineConfigId: number;
     handleNext: () => void;
     handleBack: () => void;
     setPallets: (pallets: PalletGeometry[]) => void;
     instructionNumber: number;
-}
+};
 
 
 function defaultPallet(index: number): PalletGeometry {
@@ -166,7 +141,7 @@ function defaultPallet(index: number): PalletGeometry {
     return p;
 }
 
-function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, setPallets }: PalletCornerProps) {
+function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, setPallets, machineConfigId }: PalletCornerProps) {
     let [summaryScreen, setSummaryScreen] = useState<boolean>(allPallets.length > 0);
 
     let [cornerNumber, setCornerNumber] = useState<PALLETCORNERS>(PALLETCORNERS.TOP_LEFT); // ()
@@ -333,7 +308,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
             <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="CornerGrid">
                     <div className="PickLocationGrid">
-                        <Jogger selectAction={addCorner} name={editingPallet.name} updateName={setPalletName} />
+                        <Jogger machineConfigId={machineConfigId} selectAction={addCorner} name={editingPallet.name} updateName={setPalletName} />
                         <div className="PalletContainer">
                             <div className="PalletMount">
                                 <PalletModel size={size} pallet={defaultPallet(-2)} corner={cornerNumber} />

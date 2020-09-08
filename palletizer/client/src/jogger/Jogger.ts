@@ -33,11 +33,14 @@ export default class Jogger {
     eStopped: boolean = true;
     isMoving: boolean = false;
 
+    positionHandler: (positions: any) => void;
+
     jogIncrement: number = 50; //mm
     jogSpeed: number = 100; // mm/s
 
-    constructor(machines: MachineMotion[], Axes: AxesConfiguration) {
+    constructor(machines: MachineMotion[], Axes: AxesConfiguration, onPositionUpdate: (positions: any) => void) {
         this.axesConfiguration = Axes;
+        this.positionHandler = onPositionUpdate;
 
         let my = this;
 

@@ -247,11 +247,11 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
-            ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} {...controlProps} />);
+            ChildElement = (<BoxSize allBoxes={allBoxes} setBoxes={setBoxes} machineConfigId={machineConfigId} {...controlProps} />);
             break;
         };
         case (PalletTeachState.PALLET_CORNERS): {
-            ChildElement = (<PalletCorners allPallets={allPallets} setPallets={setPallets} {...controlProps} />);
+            ChildElement = (<PalletCorners allPallets={allPallets} setPallets={setPallets} machineConfigId={machineConfigId} {...controlProps} />);
             break;
         };
         case (PalletTeachState.LAYER_SETUP): {
