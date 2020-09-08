@@ -88,7 +88,16 @@ function MQTTControl() {
         client.publish(topic, pause_command);
     };
 
-    return { start, stop, pause };
+    let update_start_box = (box_number: number) => {
+        client.publish(topic, "BOX NUMBER:" + String(box_number));
+    };
+
+    return {
+        start,
+        stop,
+        pause,
+        update_start_box
+    };
 }
 
 

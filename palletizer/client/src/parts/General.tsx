@@ -64,7 +64,7 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
 
     let { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
 
-    let [start_box, set_start_box] = useState(current_box);
+    let [start_box, set_start_box] = useState(0);
     let [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
     let [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);
 
@@ -73,8 +73,15 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
         set_pallet_current_config(pallet_index);
     }, [machine_index, pallet_index]);
 
+    useEffect(() => {
+        let { update_start_box } = control;
+        update_start_box(start_box);
+    }, []);
+
     let handle_input = (e: ChangeEvent) => {
-        let value = Number((e.target as HTMLInputElement).value);
+        let value: number = +(e.target as HTMLInputElement).value;
+        let { update_start_box } = control;
+        update_start_box(value);
         set_start_box(value);
     };
 
@@ -149,7 +156,7 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
             </ConfigCell>
             <ConfigCell title={box_title}>
                 <div className="BoxStartItem">
-                    <input type="text" name={box_title} onChange={handle_input} value={current_box} />
+                    <input type="text" name={box_title} onChange={handle_input} value={start_box} />
                 </div>
             </ConfigCell>
             <div className="ButtonGrid">

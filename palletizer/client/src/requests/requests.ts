@@ -8,6 +8,7 @@ function get_url(url: string): string {
     return "" + url;
 };
 
+
 export function delete_config(id: number, is_machine: boolean) {
     let url = get_url("/configs/delete");
     return new Promise<boolean>((resolve, reject) => {

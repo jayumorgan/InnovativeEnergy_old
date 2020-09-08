@@ -159,6 +159,7 @@ export class Engine {
     palletConfig: SavedPalletConfiguration | null = null;
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
     cycleState: CYCLE_STATE = CYCLE_STATE.NONE;
+    startBox: number = 0;
 
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
@@ -277,6 +278,8 @@ export class Engine {
             this.handlePause();
         } else if ((/stop/mi).test(m)) {
             this.handleStop();
+        } else if ((/box number:/mi).test(m)) {
+            this.handleStartBox(m);
         } else {
             handleCatch("Unhandled control command " + m);
         }
@@ -378,7 +381,6 @@ export class Engine {
             return;
         }
 
-        let start_box = 0;
 
         this.loadConfigurations().then(() => {
             return my.configureMachine();
@@ -386,15 +388,21 @@ export class Engine {
             my.__stateReducer({
                 cycle: my.palletizerState.cycle + 1
             });
-            return my.startPalletizer(start_box);
+            return my.startPalletizer(my.startBox);
         }).then(() => {
 
         }).catch((e) => {
-            my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid.");
 
-            my.__updateStatus(PALLETIZER_STATUS.ERROR);
+            if (my.palletizerState.status == PALLETIZER_STATUS.STOPPED) {
+                console.log("Palletizer has stopped.");
+                //		my.__updateStatus(PALLETIZER_STATUS.STOPPED);
+                my.__handleInformation(INFO_TYPE.STATUS, "Palletizer stopped.");
 
-            console.log("Failed in handle start", e);
+            } else {
+                my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid.");
+                my.__updateStatus(PALLETIZER_STATUS.ERROR);
+                console.log("Failed in handle start", e);
+            }
         });
     };
 
@@ -405,6 +413,15 @@ export class Engine {
     handleStop() {
         this.__updateStatus(PALLETIZER_STATUS.STOPPED);
     };
+
+    handleStartBox(m: string) {
+        let r: RegExp = /box number:([\d]+)/mi;
+        let matches = r.exec(m);
+        if (matches !== null) {
+            let match: number = +(matches[1]);
+            this.startBox = match;
+        }
+    }
 
     //-------Mechanical Configuration-------
     configureMachine(): Promise<boolean> {
