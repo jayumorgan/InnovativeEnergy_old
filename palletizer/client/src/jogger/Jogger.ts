@@ -4,6 +4,8 @@ import MM, { MachineMotionConfig, DRIVE, DRIVES, DIRECTION, vResponse } from "mm
 
 import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
+import { resolve } from "dns";
+import { CoordinateRot } from "../parts/teach/structures/Data";
 
 // Note:
 // MM is the controller, MachineMotion is the configuration parameters from MachineConfig (just info, no methods)
@@ -30,22 +32,22 @@ function driveNumberToDRIVE(driveNumber: number): DRIVE {
 
 
 function axisNumbertoAxisString(axisNumber: number | AXES): string {
-    switch(axisNumber) {
-	case (0) : {
-	    return "X";
-	};
-	case (1) : {
-	    return "Y";
-	};
-	case (2): {
-	    return "Z";
-	};
-	case (3): {
-	    return "W";
-	};
-	default: {
-	    return "Z";
-	};
+    switch (axisNumber) {
+        case (0): {
+            return "X";
+        };
+        case (1): {
+            return "Y";
+        };
+        case (2): {
+            return "Z";
+        };
+        case (3): {
+            return "W";
+        };
+        default: {
+            return "Z";
+        };
     };
 }
 
@@ -69,7 +71,10 @@ export default class Jogger {
         let my = this;
 
         machines.forEach((m: MachineMotion) => {
-            let mqtt_uri = "ws://" + m.ipAddress + ":" + String(9001);
+            let machine_ip = true ? "127.0.0.1" : m.ipAddress;
+
+
+            let mqtt_uri = "ws://" + machine_ip + ":" + String(9001);
 
             let options: any = {
                 clientId: "BrowserMachineMotion-" + uuidv4()
@@ -78,7 +83,7 @@ export default class Jogger {
             let mqttClient: mqtt.Client = mqtt.connect(mqtt_uri, options);
 
             let config: MachineMotionConfig = {
-                machineIP: "127.0.0.1",
+                machineIP: machine_ip,
                 serverPort: 8000,
                 mqttPort: 9001,
                 mqttClient
@@ -91,10 +96,14 @@ export default class Jogger {
             my.machineMotions.push(mm);
         });
 
-        my.configureAxes().then(() => {
+
+        my.prepareSystem().then(() => {
+            return my.configureAxes();
+        }).then(() => {
             return my.setJogSpeed(my.jogSpeed);
         }).then(() => {
-            console.log("Jogger configured");
+            my.getPosition();
+            console.log("Jogger initialized");
         }).catch((e: any) => {
             console.log("Error setting up jogger", e);
         });
@@ -129,6 +138,7 @@ export default class Jogger {
             promises.push(p);
         });
 
+        my.getPosition();
         return Promise.all(promises);
     };
 
@@ -183,9 +193,7 @@ export default class Jogger {
     startJog(axis: AXES, direction: number | DIRECTION) {
         let my = this;
         if (my.isMoving) {
-            return new Promise((_, reject) => {
-                reject("Already in motion");
-            })
+            return Promise.reject("Already in motion");
         } else {
             my.isMoving = true;
         }
@@ -194,7 +202,7 @@ export default class Jogger {
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
         let axes_values: Drive[][] = Object.values(my.axesConfiguration);
 
-	
+
         let axis_index = axes_keys.indexOf(axisNumbertoAxisString(axis));
         let ds: Drive[] = axes_values[axis_index];
         ds.forEach((d: Drive) => {
@@ -228,13 +236,52 @@ export default class Jogger {
 
         return new Promise((resolve, reject) => {
             Promise.all(promises).then(() => {
+                my.getPosition();
                 my.isMoving = false;
                 resolve();
             }).catch((e: any) => {
+                my.getPosition();
                 my.isMoving = false;
                 reject(e);
             });
         });
+    };
+
+    getPosition() {
+        // This assumes only a single drive per axis. If we want to run multiple drives per axis, we need to deal with:
+        // (A) synchronization of drive motion.
+        // (B) higher-dimensional recording of taught positions and box coordinates. I have left some space to do this (change all coordinate to arrays of coordinates, organize by drive index).
+
+        let my = this;
+        let { X, Y, Z, θ } = my.axesConfiguration;
+
+        // here is where we assume a single drive;
+        let x_drive: Drive = X[0];
+        let y_drive: Drive = Y[0];
+        let z_drive: Drive = Z[0];
+        let θ_drive: Drive = θ[0];
+
+        let x_prom = my.machineMotions[x_drive.MachineMotionIndex].getCurrentPositions();
+        let y_prom = my.machineMotions[y_drive.MachineMotionIndex].getCurrentPositions();
+        let z_prom = my.machineMotions[z_drive.MachineMotionIndex].getCurrentPositions();
+        let θ_prom = my.machineMotions[θ_drive.MachineMotionIndex].getCurrentPositions();
+
+        Promise.all([x_prom, y_prom, z_prom, θ_prom]).then((res: vResponse[]) => {
+            // likely unreliable
+            let position: CoordinateRot = {
+                x: (res[0].result as any)[axisNumbertoAxisString(x_drive.DriveNumber)] as number,
+                y: (res[1].result as any)[axisNumbertoAxisString(y_drive.DriveNumber)] as number,
+                z: (res[2].result as any)[axisNumbertoAxisString(z_drive.DriveNumber)] as number,
+                θ: ((res[3].result as any)[axisNumbertoAxisString(θ_drive.DriveNumber)] as number === 0) as boolean
+            };
+            my.positionHandler(position as any);
+        }).catch((e: any) => {
+            console.log("Error get position", e);
+        })
+    };
+
+    __getDrivePosition() {
+
     };
 
     triggerEstop() {

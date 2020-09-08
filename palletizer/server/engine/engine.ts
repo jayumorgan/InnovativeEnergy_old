@@ -199,7 +199,6 @@ export class Engine {
         let my = this;
 
         client.on("message", (topic: string, message_buffer: Buffer) => {
-            console.log("Got message ", topic, message_buffer.toString());
             let message: string;
             try {
                 message = JSON.parse(message_buffer.toString());
@@ -277,13 +276,13 @@ export class Engine {
     };
 
     __handleControl(m: string) {
-        if ((/start/mi).test(m)) {
+        if ((/^start$/mi).test(m)) {
             this.handleStart();
-        } else if ((/pause/mi).test(m)) {
+        } else if ((/^pause$/mi).test(m)) {
             this.handlePause();
-        } else if ((/stop/mi).test(m)) {
+        } else if ((/^stop$/mi).test(m)) {
             this.handleStop();
-        } else if ((/box number:/mi).test(m)) {
+        } else if ((/^box number:/mi).test(m)) {
             this.handleStartBox(m);
         } else {
             handleCatch("Unhandled control command " + m);

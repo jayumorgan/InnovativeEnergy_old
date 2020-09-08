@@ -185,7 +185,6 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
     let startEdit = (index: number) => () => {
         if (index >= 0) {
-            console.log(index, "Setting editing index");
             setEditingBox(allBoxes[index]);
             setEditingIndex(index);
         } else {

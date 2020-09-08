@@ -11,7 +11,7 @@ import SolidArrow, { ROTATION } from "./SolidArrow";
 
 import { get_machine_config } from "../../requests/requests";
 
-import { Coordinate } from './structures/Data';
+import { Coordinate, CoordinateRot } from './structures/Data';
 
 //---------------Styles + Images---------------
 import "./css/Jogger.scss";
@@ -114,20 +114,19 @@ interface JoggerProps {
 }
 
 function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
-
-    let [speed, setSpeed] = useState<number>(400);
-    let [distance, setDistance] = useState<number>(300);
-    let [currentPosition, setCurrentPosition] = useState<Coordinate>({ x: 0, y: 0, z: 0 });
-
-    let jogController: JogController | null = null;
+    let [speed, setSpeed] = useState<number>(50);
+    let [distance, setDistance] = useState<number>(50);
+    let [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: false });
+    let [jogController, setJogController] = useState<JogController|null>(null);
 
     useEffect(() => {
         get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
             let { axes, machines } = mc.config;
-            jogController = new JogController(machines, axes, (p: any) => {
-                let position = p as Coordinate;
+	    let jc = new JogController(machines, axes, (p: any) => {
+                let position = p as CoordinateRot;
                 setCurrentPosition(position);
             });
+	    setJogController(jc);
         }).catch((e: any) => {
             console.log("Error get_machine_config", e);
         });
