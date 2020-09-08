@@ -104,7 +104,7 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
 };
 
 interface JoggerProps {
-    selectAction: (c: Coordinate) => void;
+    selectAction: (c: CoordinateRot) => void;
     updateName: (s: string) => void;
     machineConfigId: number;
     name: string;
@@ -114,16 +114,16 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
     let [speed, setSpeed] = useState<number>(50);
     let [distance, setDistance] = useState<number>(50);
     let [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: false });
-    let [jogController, setJogController] = useState<JogController|null>(null);
+    let [jogController, setJogController] = useState<JogController | null>(null);
 
     useEffect(() => {
         get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
             let { axes, machines } = mc.config;
-	    let jc = new JogController(machines, axes, (p: any) => {
+            let jc = new JogController(machines, axes, (p: any) => {
                 let position = p as CoordinateRot;
                 setCurrentPosition(position);
             });
-	    setJogController(jc);
+            setJogController(jc);
         }).catch((e: any) => {
             console.log("Error get_machine_config", e);
         });
@@ -208,8 +208,8 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
         console.log("Handle Selec...t");
         let pos = {
-            x: 0, y: 0, z: 0
-        } as Coordinate;
+            x: 0, y: 0, z: 0, θ: false
+        } as CoordinateRot;
         let tmp = TEMP_JOGGER_INDEX % 3;
         if (tmp === 0) {
             pos.y = 1003;
@@ -245,7 +245,15 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
     let arrowSize = 120;
 
-    let { x, y, z } = currentPosition;
+    let { x, y, z, θ } = currentPosition;
+
+    let handleRotate = () => {
+        if (jogController !== null) {
+            jogController.startRotation(!θ).catch((e: any) => {
+                console.log("Error rotate ", e);
+            });
+        }
+    };
 
     return (
         <div className="Jogger">
@@ -270,6 +278,9 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
                         </div>
                         <div className="PositionValue">
                             <span> {"z : " + String(z)} </span>
+                        </div>
+                        <div className="PositionValue">
+                            <span> {"θ : " + (θ ? "90°" : "0°")} </span>
                         </div>
                     </div>
                 </div>
@@ -296,8 +307,8 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
                             <div className="Left" onClick={handleMove(Directions.LEFT)}>
                                 <SolidArrow rotation={ROTATION.LEFT} size={arrowSize} />
                             </div>
-                            <div className="Rotate" onClick={() => { console.log("Handle Rotate") }}>
-                                <img src={clockwise} />
+                            <div className="Rotate" onClick={handleRotate}>
+                                <img src={θ ? clockwise : counterclockwise} />
                             </div>
                         </div>
                     </div>

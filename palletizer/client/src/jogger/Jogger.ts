@@ -4,7 +4,6 @@ import MM, { MachineMotionConfig, DRIVE, DRIVES, DIRECTION, vResponse } from "mm
 
 import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
-import { resolve } from "dns";
 import { CoordinateRot } from "../parts/teach/structures/Data";
 
 // Note:
@@ -30,7 +29,6 @@ function driveNumberToDRIVE(driveNumber: number): DRIVE {
     };
 };
 
-
 function axisNumbertoAxisString(axisNumber: number | AXES): string {
     switch (axisNumber) {
         case (0): {
@@ -50,7 +48,6 @@ function axisNumbertoAxisString(axisNumber: number | AXES): string {
         };
     };
 }
-
 
 export default class Jogger {
 
@@ -127,6 +124,46 @@ export default class Jogger {
         });
 
         return Promise.all(promises);
+    };
+
+    startRotation(rotate: boolean) {
+
+        let my = this;
+
+        if (my.isMoving) {
+            return Promise.reject("Already in motion");
+        } else {
+            my.isMoving = true;
+
+            let { θ } = my.axesConfiguration;
+            let promises: Promise<any>[] = [];
+
+            θ.forEach((d: Drive) => {
+                let { MachineMotionIndex, DriveNumber } = d;
+                let p = new Promise((resolve, reject) => {
+                    my.machineMotions[MachineMotionIndex].emitAbsoluteMove(driveNumberToDRIVE(DriveNumber), rotate ? 90 : 0).then(() => {
+                        return my.machineMotions[MachineMotionIndex].waitForMotionCompletion();
+                    }).then(() => {
+                        my.getPosition();
+                        resolve();
+                    }).catch((e: any) => {
+                        my.getPosition();
+                        reject(e);
+                    })
+                });
+                promises.push(p);
+            });
+
+            return new Promise((resolve, reject) => {
+                Promise.all(promises).then(() => {
+                    my.isMoving = false;
+                    resolve();
+                }).catch((e: any) => {
+                    my.isMoving = false;
+                    reject(e);
+                });
+            });
+        }
     };
 
     stopMotion() {

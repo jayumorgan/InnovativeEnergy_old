@@ -8,9 +8,10 @@ import Jogger from "./Jogger";
 import Box from "./3D/BoxRender";
 // import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
-import { BoxObject, BoxDimensions, Coordinate } from "./structures/Data";
+import { BoxObject, BoxDimensions, CoordinateRot } from "./structures/Data";
 
 import "./css/BoxSize.scss";
+
 
 //---------------Box Size---------------
 
@@ -133,7 +134,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         updateBox({ ...box, dimensions: dims as BoxDimensions });
     };
 
-    let selectAction = (c: Coordinate) => {
+    let selectAction = (c: CoordinateRot) => {
         console.log("Selected Pick Location....", c);
         updateBox({ ...box, pickLocation: c });
     };
@@ -176,7 +177,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
         dimensions: { length: 235, height: 267, width: 330 },
-        pickLocation: { x: 0, y: 0, z: 0 }
+        pickLocation: { x: 0, y: 0, z: 0, θ: false }
     };
 
     let [editingBox, setEditingBox] = useState<BoxObject>(box);

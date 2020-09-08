@@ -64,7 +64,7 @@ function Norm2D(v: Coordinate2D) {
 export interface BoxObject {
     name: string;
     dimensions: BoxDimensions;
-    pickLocation: Coordinate;
+    pickLocation: CoordinateRot;
 };
 
 export interface PalletGeometry {
