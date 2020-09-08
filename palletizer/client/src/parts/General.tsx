@@ -119,7 +119,6 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
                 }
             }
             set_pallet_current_config(id);
-            console.log("Setting machine config id", machine_id);
             set_machine_current_config(machine_id);
         }
     };

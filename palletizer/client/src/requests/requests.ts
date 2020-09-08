@@ -24,7 +24,6 @@ export function delete_config(id: number, is_machine: boolean) {
     });
 };
 
-
 export function get_configs(callback: (a: ConfigState) => void) {
     let url = get_url("/configs");
     axios.get(url).then((res: AxiosResponse) => {
@@ -69,8 +68,7 @@ export function set_config(id: number, machine: boolean) {
     } as any;
 
     axios.post(url, data);
-}
-
+};
 
 export function SavePalletConfig(name: string, config: any, id: number | null) {
     let url = get_url("/configs/savepallet");
@@ -83,7 +81,6 @@ export function SavePalletConfig(name: string, config: any, id: number | null) {
 
     axios.post(url, data);
 };
-
 
 export function SaveMachineConfig(name: string, config: any, id: number | null) {
     let url = get_url("/configs/savemachine");
