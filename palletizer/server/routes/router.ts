@@ -29,19 +29,11 @@ router.use(express.json());
 router.post("/configs/set", (req: Request, res: Response) => {
     let handler = req.databaseHandler;
 
-    let { id, is_machine } = req.body;
+    let { id } = req.body;
 
-    let updater: (i: number) => Promise<any>;
-
-    if (is_machine) {
-        updater = handler.setCurrentMachineConfig;
-    } else {
-        updater = handler.setCurrentPalletConfig;
-    }
-    updater = updater.bind(handler);
-    updater(id).then((d) => {
+    handler.setCurrentPalletConfig(id).then(() => {
         res.sendStatus(200);
-    }).catch(handleCatch(res));
+    }).catch(handleCatch(res))
 });
 
 router.post("/configs/savepallet", (req: Request, res: Response) => {
@@ -108,14 +100,14 @@ router.get("/configs", (req: Request, res: Response) => {
 
 router.post("/configs/delete", (req: Request, res: Response) => {
     let handler = req.databaseHandler;
-    let {id, is_machine } = req.body;
-    let handleFn : (id: number) => Promise<any> = is_machine ? handler.deleteMachineConfig.bind(handler) : handler.deletePalletConfig.bind(handler);
+    let { id, is_machine } = req.body;
+    let handleFn: (id: number) => Promise<any> = is_machine ? handler.deleteMachineConfig.bind(handler) : handler.deletePalletConfig.bind(handler);
 
-    handleFn(id).then(()=>{
-	res.sendStatus(200);
-    }).catch((e)=>{
-	console.log("Error configs/delete", e);
-	res.sendStatus(500);
+    handleFn(id).then(() => {
+        res.sendStatus(200);
+    }).catch((e) => {
+        console.log("Error configs/delete", e);
+        res.sendStatus(500);
     });
 });
 

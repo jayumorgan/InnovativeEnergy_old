@@ -1,4 +1,4 @@
-import React, { useContext, ChangeEvent, useState, ReactElement } from 'react';
+import React, { useContext, ChangeEvent, useState, ReactElement, useEffect } from 'react';
 
 // MQTT
 import { MQTTControl } from "../mqtt/MQTT";
@@ -35,14 +35,14 @@ function make_time_string(hours: number, minute: number): string {
     let hour_string = String(hours);
     let minute_string = minute < 10 ? `0${minute}` : String(minute);
     return hour_string + ":" + minute_string;
-}
+};
 
 function make_date_string(day: number, month: number, year: number) {
     let day_string = day < 10 ? `0${day}` : String(day);
     let month_string = month < 10 ? `0${month}` : String(month + 1);
     let year_string = String(year);
     return year_string + "/" + month_string + "/" + day_string;
-}
+};
 
 interface ExecuteProps {
     current_box: number;
@@ -60,17 +60,18 @@ function ConfigCell({ title, children }: StackProps) {
     );
 };
 
-
 function ExecutePane({ current_box, status }: ExecuteProps) {
-    let config_context = useContext(ConfigContext);
 
-
-    let { machine_configs, pallet_configs, machine_index, pallet_index } = config_context as ConfigState;
+    let { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
 
     let [start_box, set_start_box] = useState(current_box);
     let [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
     let [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);
 
+    useEffect(() => {
+        set_machine_current_config(machine_index);
+        set_pallet_current_config(pallet_index);
+    }, [machine_index, pallet_index]);
 
     let handle_input = (e: ChangeEvent) => {
         let value = Number((e.target as HTMLInputElement).value);
@@ -108,18 +109,21 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
 
     let handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
         let id: number = +((e.target as any).value);
-        set_config(id, machine); // server request.
-        if (!machine) { // Do nothing for machine.
-            let machine_id: number = machine_current_config;
-            for (let i = 0; i < pallet_configs.length; i++) {
-                let ci: ConfigItem = pallet_configs[i];
-                if (ci.id === id) {
-                    machine_id = ci.machine_config_id as number;
-                    break;
+        if (!machine) {
+            set_config(id).then(() => {
+                let machine_id: number = machine_current_config;
+                for (let i = 0; i < pallet_configs.length; i++) {
+                    let ci: ConfigItem = pallet_configs[i];
+                    if (ci.id === id) {
+                        machine_id = ci.machine_config_id as number;
+                        break;
+                    }
                 }
-            }
-            set_pallet_current_config(id);
-            set_machine_current_config(machine_id);
+                set_pallet_current_config(id);
+                set_machine_current_config(machine_id);
+            }).catch((e) => {
+                console.log("error set_config ", e);
+            });
         }
     };
 
@@ -174,25 +178,27 @@ interface StatusBarProps {
 function circle_image_style(value: string): any {
     let color: string = "gray";
     switch (value) {
-
         case "Running": {
             color = "rgb(91,196,126)";
             break;
-        }
+        };
         case "Paused": {
-            color = "rgb(250, 234, 47)"
+            color = "rgb(250, 234, 47)";
             break;
-        }
+        };
         case "Stopped": {
             color = "red";
             break;
-        }
+        };
+        case "Error": {
+            color = "red";
+            break;
+        };
         default: {
             color = "grey";
             break;
-        }
-
-    }
+        };
+    };
 
     return { fill: color };
 }
@@ -297,21 +303,18 @@ function InformationLogContainer() {
             })}
         </div>
     );
-}
-
-
+};
 
 interface StackProps {
     title: string;
     children: ReactElement;
-}
-
+};
 
 interface LegendProps {
     title: string;
     image: ReactElement,
     color: string;
-}
+};
 
 function LegendItem({ title, image, color }: LegendProps) {
     let style = {
@@ -350,8 +353,6 @@ function IStackContainer({ title, children }: StackProps) {
 
     let items: LegendProps[] = [info_item, warning_item, error_item];
 
-
-
     return (
         <div className="StackContainer">
             <div className="StackTitle">
@@ -381,12 +382,12 @@ function StackContainer({ title, children }: StackProps) {
             {children}
         </div>
     );
-}
+};
 
 interface StatusItem {
     title: string;
     value: any;
-}
+};
 
 function General() {
 
@@ -451,9 +452,7 @@ function General() {
             </div>
         </div>
     );
-
-}
-
+};
 
 export default General;
 

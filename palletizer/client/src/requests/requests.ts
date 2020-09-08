@@ -28,8 +28,6 @@ export function get_configs(callback: (a: ConfigState) => void) {
     let url = get_url("/configs");
     axios.get(url).then((res: AxiosResponse) => {
         let { current, configs } = res.data;
-        console.log(current, "Current configs");
-        console.log(configs, "configs");
         let cState: ConfigState = {
             machine_configs: configs.machine as ConfigItem[],
             pallet_configs: configs.pallet as ConfigItem[],
@@ -59,15 +57,22 @@ export async function get_config(id: number, machine: boolean) {
     return res.data;
 };
 
-export function set_config(id: number, machine: boolean) {
+export function set_config(id: number) {
     let url = get_url("/configs/set");
 
     let data = {
-        id,
-        is_machine: machine
+        id
     } as any;
 
-    axios.post(url, data);
+    return new Promise((resolve, reject) => {
+        axios.post(url, data).then((res: AxiosResponse) => {
+            if (res.status === 200) {
+                resolve();
+            } else {
+                reject("Axios request failed: " + url);
+            }
+        }).catch(e => reject(e));
+    });
 };
 
 export function SavePalletConfig(name: string, config: any, id: number | null) {

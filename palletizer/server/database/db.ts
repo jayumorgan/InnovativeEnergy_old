@@ -19,8 +19,7 @@ const CREATE_MACHINE_CONFIGS: string = `
 CREATE TABLE IF NOT EXISTS machine_configs (
 id INTEGER PRIMARY KEY NOT NULL UNIQUE,
 name TEXT,
-raw_json BLOB,
-selected INTEGER NOT NULL DEFAULT 0
+raw_json BLOB
 );`;
 const CREATE_PALLET_CONFIGS: string = `
 CREATE TABLE IF NOT EXISTS pallet_configs (
@@ -35,10 +34,9 @@ FOREIGN KEY(machine_config_id) REFERENCES machine_configs(id)
 //---------------Select Queries---------------
 const SELECT_ALL_MACHINE_CONFIGS = `SELECT id, name FROM machine_configs;`
 const SELECT_ALL_PALLET_CONFIGS = `SELECT id, name, machine_config_id FROM pallet_configs;`;
-const SELECT_MACHINE_CONFIG_ID = `SELECT raw_json FROM machine_configs WHERE id = ?`;
-const SELECT_PALLET_CONFIG_ID = `SELECT raw_json FROM pallet_configs WHERE id = ?`;
-const SELECT_CURRENT_MACHINE_CONFIG = `SELECT id, name, raw_json FROM machine_configs WHERE selected = 1`;
-const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json FROM pallet_configs WHERE selected = 1;`;
+const SELECT_MACHINE_CONFIG_ID = `SELECT id, name, raw_json FROM machine_configs WHERE id = ?`;
+const SELECT_PALLET_CONFIG_ID = `SELECT is, name, raw_json FROM pallet_configs WHERE id = ?`;
+const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json, machine_config_id FROM pallet_configs WHERE selected = 1;`;
 
 //---------------Write Queries---------------
 const UPDATE_CURRENT_PALLET = `UPDATE pallet_configs SET selected = (CASE WHEN id = ? THEN 1 ELSE 0 END) WHERE id > 0;`;
@@ -54,9 +52,7 @@ const DELETE_PALLET_BY_MACHINE = `DELETE FROM pallet_configs WHERE machine_confi
 const DELETE_PALLET_CONFIG = `DELETE FROM pallet_configs WHERE id = ?;`;
 
 //---------------Current Config Checks---------------
-const DEFAULT_CURRENT_MACHINE_CONFIG = `UPDATE machine_configs SET selected = (CASE WHEN EXISTS(SELECT 1 FROM machine_configs WHERE selected = 1 LIMIT 1) THEN selected ELSE 1 END) WHERE id IN (SELECT MIN(id) FROM machine_configs);`
 const DEFAULT_CURRENT_PALLET_CONFIG = `UPDATE pallet_configs SET selected = (CASE WHEN EXISTS(SELECT 1 FROM pallet_configs WHERE selected = 1 LIMIT 1) = 1 THEN selected ELSE 1 END) WHERE id IN (SELECT MIN(id) FROM pallet_configs);`
-
 
 export class DatabaseHandler {
     db: sqliteDB;
@@ -69,10 +65,10 @@ export class DatabaseHandler {
         let my = this;
         return new Promise((resolve, reject) => {
             my.db.run(DEFAULT_CURRENT_PALLET_CONFIG).then(() => {
-                return my.db.run(DEFAULT_CURRENT_MACHINE_CONFIG)
-            }).then(() => {
                 resolve();
-            }).catch(e => reject(e));
+            }).catch((e: any) => {
+                reject(e);
+            });
         });
     };
 
@@ -88,11 +84,11 @@ export class DatabaseHandler {
         let my = this;
         return new Promise((resolve, reject) => {
             my.__checkCurrentConfigs().then(() => {
-                my.getMachineConfigs().then((mc: any) => {
-                    my.getPalletConfigs().then((pc: any) => {
+                my.getMachineConfigs().then((machine: any) => {
+                    my.getPalletConfigs().then((pallet: any) => {
                         resolve({
-                            pallet: pc,
-                            machine: mc
+                            pallet,
+                            machine
                         });
                     }).catch(e => reject(e));
                 }).catch(e => reject(e));
@@ -112,8 +108,9 @@ export class DatabaseHandler {
         let my = this;
         return new Promise((resolve, reject) => {
             my.__checkCurrentConfigs().then(() => {
-                my.db.get(SELECT_CURRENT_MACHINE_CONFIG).then((machine: any) => {
-                    my.db.get(SELECT_CURRENT_PALLET_CONFIG).then((pallet: any) => {
+                my.db.get(SELECT_CURRENT_PALLET_CONFIG).then((pallet: any) => {
+                    let { machine_config_id } = pallet;
+                    my.getMachineConfig(machine_config_id).then((machine: any) => {
                         resolve({
                             machine,
                             pallet
@@ -125,11 +122,8 @@ export class DatabaseHandler {
     };
 
     setCurrentPalletConfig(id: number) {
+        // Current machine configuration is inferred from the pallet configuration.
         return this.db.run(UPDATE_CURRENT_PALLET, [id]);
-    };
-
-    setCurrentMachineConfig(id: number) {
-        return this.db.run(UPDATE_CURRENT_MACHINE, [id]);
     };
 
     addPalletConfig(name: string, data: any) {

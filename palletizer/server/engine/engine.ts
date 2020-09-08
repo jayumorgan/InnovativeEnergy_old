@@ -39,7 +39,8 @@ const STATE_TOPIC = PALLETIZER_TOPIC + "state";
 const INFORMATION_TOPIC = PALLETIZER_TOPIC + "information";
 const REQUEST_TOPIC = PALLETIZER_TOPIC + "request";
 const CONTROL_TOPIC = PALLETIZER_TOPIC + "control";
-const ESTOP_TOPIC = "estop/trigger/request";
+// Trigger machine scale estop (stop all machines).
+const ESTOP_TOPIC = PALLETIZER_TOPIC + "trigger/estop";
 
 interface TopicStruct {
     handler: (m: string) => void;
@@ -47,7 +48,6 @@ interface TopicStruct {
 };
 
 //---------------Palletizer Control---------------
-
 enum PALLETIZER_STATUS {
     SLEEP = "Sleep",
     PAUSED = "Paused",
@@ -139,9 +139,8 @@ enum CYCLE_STATE {
 
 type Action = () => Promise<any>;
 
-
-
 export class Engine {
+
     mqttClient: mqtt.Client;
     databaseHandler: DatabaseHandler;
     subscribeTopics: { [key: string]: TopicStruct } = {};
@@ -172,20 +171,18 @@ export class Engine {
         };
         this.subscribeTopics[ESTOP_TOPIC] = {
             handler: this.__handleEstop,
-            regex: /estop\/trigger\/request/
+            regex: /palletizer\/trigger\/estop/
         };
     };
 
     constructor(handler: DatabaseHandler) {
         this.__initTopics();
         this.databaseHandler = handler;
-
         let mqtt_uri = "mqtt://" + HOSTNAME + ":" + String(MQTTPORT);
         let options: any = {
             clientId: "PalletizerEngine-" + uuidv4()
         };
         let client: mqtt.Client = mqtt.connect(mqtt_uri, options);
-
         let subscribe = () => {
             client.subscribe(Object.keys(this.subscribeTopics), () => {
                 console.log("Client " + options.clientId + " subscribed to palletizer topics.");
@@ -194,7 +191,9 @@ export class Engine {
         client.on("connect", subscribe);
 
         let my = this;
+
         client.on("message", (topic: string, message_buffer: Buffer) => {
+            console.log("Got message ", topic, message_buffer.toString());
             let message: string;
             try {
                 message = JSON.parse(message_buffer.toString());
@@ -203,7 +202,6 @@ export class Engine {
             }
             let topics: string[] = Object.keys(my.subscribeTopics);
             let handler: undefined | ((m: string) => void) = undefined;
-
             // for speed -- it necessary, just use for loop.
             if (my.subscribeTopics.hasOwnProperty(topic)) {
                 handler = my.subscribeTopics[topic].handler.bind(my);
@@ -285,9 +283,12 @@ export class Engine {
     };
 
     __handleEstop(m: string) {
+        // don't want an infinite loop. How do we avoid this? but also want all machines to be stopped? 
         this.__updateStatus(PALLETIZER_STATUS.STOPPED);
-        this.__handleInformation(INFO_TYPE.ERROR, "Emergency stop triggered");
+        this.__handleInformation(INFO_TYPE.ERROR, "Emergency stop triggered.");
         let { machines } = this.mechanicalLayout;
+        // will still call itselt recursively.
+        // How do we stop this? 
         machines.forEach((m: MachineMotion) => {
             m.triggerEstop().then(() => {
                 console.log("Estop triggered for machine at ip: ", m.machineIP);
@@ -426,7 +427,13 @@ export class Engine {
 
                 let mm_controller: MachineMotion = new MachineMotion(mm_config);
 
+                // NB: estop will recursively call estop, so unbind the estop action on first call.
+                console.log("Setting bound event");
                 mm_controller.bindEstopEvent(() => {
+                    console.log("Calling bound event");
+                    mm_controller.bindEstopEvent(() => {
+                        console.log("Estop already triggered");
+                    });
                     let handler = my.__handleEstop.bind(my);
                     handler("Estop message is irrelevant");
                 });
