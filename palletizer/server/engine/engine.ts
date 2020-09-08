@@ -387,10 +387,12 @@ export class Engine {
             });
             return my.startPalletizer(start_box);
         }).then(() => {
-            // Icrement the cycle count.
 
         }).catch((e) => {
-            my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid");
+            my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid.");
+
+            my.__updateStatus(PALLETIZER_STATUS.ERROR);
+
             console.log("Failed in handle start", e);
         });
     };
