@@ -2,7 +2,7 @@ import mqtt from "mqtt";
 
 import { v4 as uuidv4 } from 'uuid';
 
-import MachineMotion, { defaultMqttClient, vResponse, AXES, DIRECTION } from "mm-js-api";
+import MachineMotion, { defaultMqttClient, vResponse, AXES, DIRECTION, DRIVES, DRIVE } from "mm-js-api";
 
 import { DatabaseHandler } from "../database/db";
 
@@ -23,7 +23,6 @@ import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
 import { rejects } from "assert";
 
 const TESTING = true;
-
 
 //---------------Support Functions---------------
 async function safePromise(p: Promise<any>) {
@@ -84,20 +83,23 @@ function handleCatch(e: any) {
     console.log("Engine error: ", e);
 };
 
-function numberToDrive(n: number): AXES {
+function numberToDrive(n: number): DRIVE {
     switch (n) {
+        case (0): {
+            return DRIVES.ONE;
+        };
         case (1): {
-            return AXES.X;
+            return DRIVES.TWO;
         };
         case (2): {
-            return AXES.Y;
-        }
+            return DRIVES.THREE;
+        };
         case (3): {
-            return AXES.Z;
-        }
+            return DRIVES.FOUR;
+        };
         default: {
-            return AXES.Z;
-        }
+            return DRIVES.THREE;
+        };
     }
 };
 
@@ -275,7 +277,7 @@ export class Engine {
     __handleControl(m: string) {
         if ((/start/mi).test(m)) {
             this.handleStart();
-        } else if ((/pause/.test(m))) {
+        } else if ((/pause/mi).test(m)) {
             this.handlePause();
         } else if ((/stop/mi).test(m)) {
             this.handleStop();
@@ -376,10 +378,9 @@ export class Engine {
 
         if (status === PALLETIZER_STATUS.RUNNING) {
             return;
-        }
-
-        if (status === PALLETIZER_STATUS.PAUSED) {
+        } else if (status === PALLETIZER_STATUS.PAUSED) {
             my.__updateStatus(PALLETIZER_STATUS.RUNNING);
+            return;
         }
 
         let start_box = 0;
@@ -659,7 +660,7 @@ export class Engine {
             };
 
             let wait_action = () => {
-                mm.waitForMotionCompletion();
+                return mm.waitForMotionCompletion();
             };
 
             actions.push(move_action);
@@ -720,15 +721,19 @@ export class Engine {
             let my = this;
             let { status } = my.palletizerState;
             if (status === PALLETIZER_STATUS.RUNNING) {
-                let first = actions.shift();
                 return new Promise((resolve, reject) => {
-                    first().then(() => {
-                        return my.__controlSequence(actions);
-                    }).then(() => {
+                    let first: Action | undefined = actions.shift();
+                    if (first) {
+                        first!().then(() => {
+                            return my.__controlSequence(actions);
+                        }).then(() => {
+                            resolve();
+                        }).catch((e: any) => {
+                            reject(e);
+                        });
+                    } else {
                         resolve();
-                    }).catch((e) => {
-                        reject(e);
-                    });
+                    }
                 });
             } else if (status === PALLETIZER_STATUS.PAUSED) {
                 return new Promise((resolve, reject) => {
@@ -742,7 +747,7 @@ export class Engine {
                 });
             } else {
                 return new Promise((_, reject) => {
-                    reject("Palletizer is not in run state ", status);
+                    reject("Palletizer is not in run state " + String(status));
                 })
             }
         }
