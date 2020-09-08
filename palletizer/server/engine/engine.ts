@@ -2,7 +2,14 @@ import mqtt from "mqtt";
 
 import { v4 as uuidv4 } from 'uuid';
 
-import MachineMotion, { defaultMqttClient, vResponse, AXES, DIRECTION, DRIVES, DRIVE } from "mm-js-api";
+import MachineMotion, {
+    vResponse,
+    AXES,
+    DIRECTION,
+    DRIVES,
+    DRIVE,
+    MachineMotionConfig
+} from "mm-js-api";
 
 import { DatabaseHandler } from "../database/db";
 
@@ -19,8 +26,6 @@ import {
     Coordinate
 } from "./config";
 
-import { MachineMotionConfig } from "mm-js-api/dist/MachineMotion";
-import { rejects } from "assert";
 
 const TESTING = true;
 
@@ -381,7 +386,6 @@ export class Engine {
             return;
         }
 
-
         this.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
@@ -456,8 +460,8 @@ export class Engine {
                 });
 
                 let p = new Promise((resolve, reject) => {
-                    mm_controller.resetSystem().then(() => {
-                        return mm_controller.releaseEstop();
+                    mm_controller.releaseEstop().then(() => {
+                        return mm_controller.resetSystem();
                     }).then(() => {
                         resolve();
                     }).catch((e: vResponse) => {
