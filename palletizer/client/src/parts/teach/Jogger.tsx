@@ -20,9 +20,7 @@ import counterclockwise from "./images/counterclockwise.svg";
 import { SavedMachineConfiguration } from '../MachineConfig';
 import { DIRECTION } from 'mm-js-api';
 
-
 let TEMP_JOGGER_INDEX = 0;
-
 
 enum Directions {
     UP = "Up",
@@ -53,7 +51,6 @@ interface AProps {
     dagger: boolean;
     handleMove: (dagger: boolean) => void;
 };
-
 
 function A({ dagger, handleMove }: AProps) {
     let stroke_color = "rgb(22,35,56)";
