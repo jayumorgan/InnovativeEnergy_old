@@ -1,3 +1,5 @@
+import mqtt from "mqtt";
+import { v4 as uuidv4 } from 'uuid';
 import MM, { MachineMotionConfig, DRIVE, DRIVES, DIRECTION, vResponse } from "mm-js-api";
 
 import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
@@ -26,6 +28,28 @@ function driveNumberToDRIVE(driveNumber: number): DRIVE {
     };
 };
 
+
+function axisNumbertoAxisString(axisNumber: number | AXES): string {
+    switch(axisNumber) {
+	case (0) : {
+	    return "X";
+	};
+	case (1) : {
+	    return "Y";
+	};
+	case (2): {
+	    return "Z";
+	};
+	case (3): {
+	    return "W";
+	};
+	default: {
+	    return "Z";
+	};
+    };
+}
+
+
 export default class Jogger {
 
     machineMotions: MM[] = [];
@@ -45,10 +69,19 @@ export default class Jogger {
         let my = this;
 
         machines.forEach((m: MachineMotion) => {
+            let mqtt_uri = "ws://" + m.ipAddress + ":" + String(9001);
+
+            let options: any = {
+                clientId: "BrowserMachineMotion-" + uuidv4()
+            };
+
+            let mqttClient: mqtt.Client = mqtt.connect(mqtt_uri, options);
+
             let config: MachineMotionConfig = {
-                machineIP: m.ipAddress,
+                machineIP: "127.0.0.1",
                 serverPort: 8000,
-                mqttPort: 9001
+                mqttPort: 9001,
+                mqttClient
             };
 
             // Check reminder.
@@ -69,6 +102,9 @@ export default class Jogger {
 
     setJogIncrement(increment: number) {
         this.jogIncrement = increment;
+        return new Promise((resolve, _) => {
+            resolve();
+        });
     };
 
     setJogSpeed(speed: number) {
@@ -144,7 +180,7 @@ export default class Jogger {
         return Promise.all(promises);
     };
 
-    startJog(axis: AXES | string, direction: number | DIRECTION) {
+    startJog(axis: AXES, direction: number | DIRECTION) {
         let my = this;
         if (my.isMoving) {
             return new Promise((_, reject) => {
@@ -157,9 +193,10 @@ export default class Jogger {
         let mm_group = {} as { [key: number]: DRIVE[] };
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
         let axes_values: Drive[][] = Object.values(my.axesConfiguration);
-        let axis_index = axes_keys.indexOf(String(axis));
-        let ds: Drive[] = axes_values[axis_index];
 
+	
+        let axis_index = axes_keys.indexOf(axisNumbertoAxisString(axis));
+        let ds: Drive[] = axes_values[axis_index];
         ds.forEach((d: Drive) => {
             let { MachineMotionIndex, DriveNumber } = d;
             if (!(MachineMotionIndex in mm_group)) {

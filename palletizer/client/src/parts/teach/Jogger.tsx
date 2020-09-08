@@ -2,8 +2,10 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 
 import JogController from "../../jogger/Jogger";
 
+import { AXES } from "../machine_config/Drives";
+
 // ---Remove this shortly.
-import { TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
+//import { TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
 
 import SolidArrow, { ROTATION } from "./SolidArrow";
 
@@ -16,8 +18,11 @@ import "./css/Jogger.scss";
 import clockwise from "./images/clockwise.svg";
 import counterclockwise from "./images/counterclockwise.svg";
 import { SavedMachineConfiguration } from '../MachineConfig';
+import { DIRECTION } from 'mm-js-api';
+
 
 let TEMP_JOGGER_INDEX = 0;
+
 
 enum Directions {
     UP = "Up",
@@ -99,7 +104,7 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
             </div>
         </div>
     );
-}
+};
 
 interface JoggerProps {
     selectAction: (c: Coordinate) => void;
@@ -108,185 +113,100 @@ interface JoggerProps {
     name: string;
 }
 
-
 function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
 
     let [speed, setSpeed] = useState<number>(400);
     let [distance, setDistance] = useState<number>(300);
+    let [currentPosition, setCurrentPosition] = useState<Coordinate>({ x: 0, y: 0, z: 0 });
 
     let jogController: JogController | null = null;
 
     useEffect(() => {
         get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
-	    
-	    let {axes, machines} = mc.config;
-            jogController = new JogController();
-	    
-        }).catch((e:any) => {
-	    console.log("Error get_machine_config", e);
+            let { axes, machines } = mc.config;
+            jogController = new JogController(machines, axes, (p: any) => {
+                let position = p as Coordinate;
+                setCurrentPosition(position);
+            });
+        }).catch((e: any) => {
+            console.log("Error get_machine_config", e);
         });
     }, [machineConfigId]);
 
-
-
-    let networkConfig1 = {
-        mode: NETWORK_MODE.static,
-        machineIp: "192.168.0.3",
-        machineNetmask: "255.255.255.0",
-        machineGateway: "192.168.0.1"
-    } as NetworkConfiguration;
-
-    let networkConfig2 = {
-        mode: NETWORK_MODE.static,
-        machineIp: "192.168.0.2",
-        machineNetmask: "255.255.255.0",
-        machineGateway: "192.168.0.1"
-    } as NetworkConfiguration;
-
-    // Machine 1, Machine 2;
-    let Controllers: TeachModeController[] = [];
-
-    Controllers.push(new TeachModeController(networkConfig1, speed, distance));
-    Controllers.push(new TeachModeController(networkConfig2, speed, distance));
-
-
-    let MotionConfig: any = {
-        "Z": {
-            "DRIVE": 1,
-            "MACHINE": 0,
-            "REVERSE": true,
-            "GAIN": 31.416
-        },
-        "X": {
-            "DRIVE": 1,
-            "MACHINE": 1,
-            "REVERSE": true,
-            "GAIN": 208
-        },
-        "Y": {
-            "DRIVE": 3,
-            "MACHINE": 0,
-            "REVERSE": true,
-            "GAIN": 208 //157.8
-        }
-    };
-
-    Object.keys(MotionConfig).forEach((axis: string) => {
-        let drive = MotionConfig[axis]["DRIVE"];
-        let machine = MotionConfig[axis]["MACHINE"];
-        let gain = MotionConfig[axis]["GAIN"];
-
-        Controllers[machine].mm.configAxis(drive, gain);
-    });
-
     let handleSpeed = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
-        Controllers.forEach((c: TeachModeController) => {
-            c.setSpeed(val);
-        })
-        setSpeed(val);
+        if (jogController !== null) {
+            jogController.setJogSpeed(val).then(() => {
+                setSpeed(val);
+            }).catch((e: any) => {
+                console.log(e);
+            });
+        }
     };
 
     let handleDistance = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
-        Controllers.forEach((c: TeachModeController) => {
-            c.setDistance(val);
-        })
-        setDistance(val);
+        if (jogController !== null) {
+            jogController.setJogIncrement(val).then(() => {
+                setDistance(val);
+            }).catch((e: any) => {
+                console.log(e);
+            });
+        }
     };
 
     let handleMove = (d: Directions) => () => {
-        switch (d) {
-            case Directions.UP: {
-                let controller_index = MotionConfig["Y"]["MACHINE"];
-                let drive_index = MotionConfig["Y"]["DRIVE"];
-                let reverse_bool = MotionConfig["Y"]["REVERSE"];
-                let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, true);
-                break;
+        if (jogController === null) {
+            console.log("Jog controller not initialized");
+            return;
+        } else {
+            switch (d) {
+                case Directions.UP: {
+                    jogController.startJog(AXES.Y, DIRECTION.NORMAL).then(() => {
+                    }).catch((e: any) => {
+                        console.log(e);
+                    });
+                    break;
+                };
+                case Directions.DOWN: {
+                    jogController.startJog(AXES.Y, DIRECTION.REVERSE).then(() => {
+                    }).catch((e: any) => {
+                        console.log(e);
+                    });
+                    break;
+                };
+                case Directions.RIGHT: {
+                    jogController.startJog(AXES.X, DIRECTION.NORMAL).then(() => {
+                    }).catch((e: any) => {
+                        console.log(e);
+                    });
+                    break;
+                };
+                case Directions.LEFT: {
+                    jogController.startJog(AXES.X, DIRECTION.REVERSE).then(() => {
+                    }).catch((e: any) => {
+                        console.log(e);
+                    });
+                    break;
+                };
             };
-            case Directions.DOWN: {
-                let controller_index = MotionConfig["Y"]["MACHINE"];
-                let drive_index = MotionConfig["Y"]["DRIVE"];
-                let reverse_bool = MotionConfig["Y"]["REVERSE"];
-                let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, false);
-                break;
-            }
-            case Directions.RIGHT: {
-                let controller_index = MotionConfig["X"]["MACHINE"];
-                let drive_index = MotionConfig["X"]["DRIVE"];
-                let reverse_bool = MotionConfig["X"]["REVERSE"];
-                let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, true);
-
-                break;
-            }
-            case Directions.LEFT: {
-                let controller_index = MotionConfig["X"]["MACHINE"];
-                let drive_index = MotionConfig["X"]["DRIVE"];
-                let reverse_bool = MotionConfig["X"]["REVERSE"];
-                let Controller = Controllers[controller_index];
-                Controller.Move(drive_index, false);
-                break;
-            }
         };
-
-        getPositions();
     };
 
     let handleAMove = (dagger: boolean) => {
-        let controller_index = MotionConfig["Z"]["MACHINE"];
-        let drive_index = MotionConfig["Z"]["DRIVE"];
-        let reverse_bool = MotionConfig["Z"]["REVERSE"];
-        let Controller = Controllers[controller_index];
-        Controller.Move(drive_index, !dagger);
-        getPositions();
+        if (jogController !== null) {
+            jogController.startJog(AXES.Z, dagger ? DIRECTION.NORMAL : DIRECTION.REVERSE).then(() => {
+
+            }).catch((e: any) => {
+                console.log(e);
+            });
+        }
     };
 
     let handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         updateName(newName);
     };
-
-    let [currentPosition, setCurrentPosition] = useState<Coordinate>({ x: 0, y: 0, z: 0 });
-
-    let getPositions = async () => {
-
-        let position1 = await Controllers[0].getPosition();
-
-        let position2 = await Controllers[1].getPosition();
-
-        let positions = [position1, position2];
-
-        let x_controller_index = MotionConfig["X"]["MACHINE"];
-        let x_drive_index = MotionConfig["X"]["DRIVE"];
-
-        let x_value = positions[x_controller_index][x_drive_index - 1];
-
-        let y_controller_index = MotionConfig["Y"]["MACHINE"];
-        let y_drive_index = MotionConfig["Y"]["DRIVE"];
-
-        let y_value = positions[y_controller_index][y_drive_index - 1];
-
-        let z_controller_index = MotionConfig["Z"]["MACHINE"];
-        let z_drive_index = MotionConfig["Z"]["DRIVE"];
-
-        let z_value = positions[z_controller_index][z_drive_index - 1];
-
-        console.log(`x ${x_value} y ${y_value} z ${z_value}`);
-
-
-        let position: Coordinate = {
-            x: x_value,
-            y: y_value,
-            z: z_value
-        };
-
-        setCurrentPosition(position);
-        return position;
-    };
-
 
     let handleSelect = async () => {
 
@@ -308,6 +228,8 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
         selectAction(pos);
         //let position = await getPositions();
         //console.log("Got Positions and seleted", position);
+        console.log("Disable hardcoded position on machine.... Jogger.tsx");
+        //	selectAction(currentPosition);
         //selectAction(position);
     };
 
@@ -327,13 +249,7 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
     let arrowSize = 120;
 
-    useEffect(() => {
-        getPositions();
-    }, []);
-
     let { x, y, z } = currentPosition;
-
-
 
     return (
         <div className="Jogger">
