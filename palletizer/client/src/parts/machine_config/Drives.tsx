@@ -153,8 +153,6 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
         }
     };
 
-
-
     let [button_string, button_action] = (() => {
         if (isMoving) {
             return ["Stop", stop_jog];
@@ -163,7 +161,7 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
         } else {
             return ["Home", home_jog];
         }
-    })();
+    })() as [string, ((s:string) => () => void)];
 
     let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
         return (

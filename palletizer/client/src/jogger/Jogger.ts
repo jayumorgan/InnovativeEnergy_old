@@ -1,6 +1,6 @@
 import mqtt from "mqtt";
 import { v4 as uuidv4 } from 'uuid';
-import MM, { MachineMotionConfig, DRIVE, DRIVES, DIRECTION, vResponse } from "mm-js-api";
+import MM, { MachineMotionConfig, DriveType, DRIVES, DIRECTION, vResponse } from "mm-js-api";
 
 import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
@@ -9,7 +9,8 @@ import { CoordinateRot } from "../parts/teach/structures/Data";
 // Note:
 // MM is the controller, MachineMotion is the configuration parameters from MachineConfig (just info, no methods)
 
-function driveNumberToDRIVE(driveNumber: number): DRIVE {
+// Machine Motion Specific
+function driveNumberToDRIVE(driveNumber: number): DriveType {
     switch (driveNumber) {
         case (0): {
             return DRIVES.ONE;
@@ -29,6 +30,8 @@ function driveNumberToDRIVE(driveNumber: number): DRIVE {
     };
 };
 
+
+// Machine Specific (for axesconfiguration)
 function axisNumbertoAxisString(axisNumber: number | AXES): string {
     switch (axisNumber) {
         case (0): {
@@ -296,8 +299,9 @@ export default class Jogger {
     };
 
     __getMMGroup(axis: PalletizerAxes | string) {
-
-        let mm_group = {} as { [key: number]: DRIVE[] };
+	let my = this;
+	
+        let mm_group = {} as { [key: number]: DriveType[] };
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
         let axes_values: Drive[][] = Object.values(my.axesConfiguration);
 
@@ -306,7 +310,7 @@ export default class Jogger {
         ds.forEach((d: Drive) => {
             let { MachineMotionIndex, DriveNumber } = d;
             if (!(MachineMotionIndex in mm_group)) {
-                mm_group[MachineMotionIndex] = [] as DRIVE[];
+                mm_group[MachineMotionIndex] = [] as DriveType[];
             }
             mm_group[MachineMotionIndex].push(driveNumberToDRIVE(DriveNumber));
         });
@@ -324,13 +328,12 @@ export default class Jogger {
         }
 
         let mm_group = my.__getMMGroup(axis);
-
         let mm_indices = Object.keys(mm_group) as string[];
         let promises: Promise<any>[] = [];
 
         mm_indices.forEach((is: string) => {
             let i: number = +is;
-            let drives: DRIVE[] = mm_group[i];
+            let drives: DriveType[] = mm_group[i];
             let mm: MM = my.machineMotions[i];
             let p = new Promise((resolve, reject) => {
                 let directions: DIRECTION[] = new Array(drives.length).fill(direction as DIRECTION);

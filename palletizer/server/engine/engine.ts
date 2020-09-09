@@ -7,7 +7,7 @@ import MachineMotion, {
     AXES,
     DIRECTION,
     DRIVES,
-    DRIVE,
+    DriveType,
     MachineMotionConfig
 } from "mm-js-api";
 
@@ -27,13 +27,17 @@ import {
 } from "./config";
 
 
-const TESTING = true;
 
-//---------------Support Functions---------------
-async function safePromise(p: Promise<any>) {
-    let x = p.then((v) => { return [v, null] }).catch((e) => { return [null, e] });
-    return x;
-};
+
+
+//--------------------TESTING ENVIRONMENT--------------------
+const TESTING = true;
+console.log("In testing environment");
+
+
+
+
+
 
 //---------------Network Parameters---------------
 const HOSTNAME = "127.0.0.1";
@@ -88,7 +92,7 @@ function handleCatch(e: any) {
     console.log("Engine error: ", e);
 };
 
-function numberToDrive(n: number): DRIVE {
+function numberToDrive(n: number): DriveType {
     switch (n) {
         case (0): {
             return DRIVES.ONE;

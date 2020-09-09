@@ -101,7 +101,6 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
 
     let [configuration, dispatch] = useReducer(MachineReducer, (() => {
         if (machineConfig) {
-            console.log(machineConfig, "REturning this values...");
             return machineConfig.config
         } else {
             return defaultConfiguration(index)
