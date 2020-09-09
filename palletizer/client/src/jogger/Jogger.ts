@@ -30,7 +30,6 @@ function driveNumberToDRIVE(driveNumber: number): DriveType {
     };
 };
 
-
 // Machine Specific (for axesconfiguration)
 function axisNumbertoAxisString(axisNumber: number | AXES): string {
     switch (axisNumber) {
@@ -299,8 +298,8 @@ export default class Jogger {
     };
 
     __getMMGroup(axis: PalletizerAxes | string) {
-	let my = this;
-	
+        let my = this;
+
         let mm_group = {} as { [key: number]: DriveType[] };
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
         let axes_values: Drive[][] = Object.values(my.axesConfiguration);
@@ -392,10 +391,6 @@ export default class Jogger {
         }).catch((e: any) => {
             console.log("Error get position", e);
         })
-    };
-
-    __getDrivePosition() {
-
     };
 
     triggerEstop() {
