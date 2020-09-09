@@ -230,12 +230,13 @@ export default class Jogger {
                 promises.push(p);
             });
         });
-
+	
         return Promise.all(promises);
     };
 
     startJog(axis: PalletizerAxes | string, direction: number | DIRECTION) {
         let my = this;
+	
         if (my.isMoving) {
             return Promise.reject("Already in motion");
         } else {

@@ -92,8 +92,6 @@ export function defaultAxesConfiguration() {
     } as AxesConfiguration;
 };
 
-
-
 export interface DriveSummaryProps {
     Axes: AxesConfiguration;
     Machines: MachineMotion[];
@@ -147,6 +145,13 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
                         <div className="ArrowLeft" onClick={handleMove(title, DIRECTION.REVERSE)}>
                             <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
                         </div>
+			<div className="ButtonCenter">
+			    <div className="Button">
+				<span>
+				    {"Home"}
+				</span>
+			    </div>
+			</div>
                         <div className="ArrowRight" onClick={handleMove(title, DIRECTION.NORMAL)}>
                             <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
                         </div>
