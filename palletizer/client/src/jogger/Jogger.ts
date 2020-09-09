@@ -47,7 +47,14 @@ function axisNumbertoAxisString(axisNumber: number | AXES): string {
             return "Z";
         };
     };
-}
+};
+
+export enum PalletizerAxes {
+    X = "X",
+    Y = "Y",
+    Z = "Z",
+    θ = "θ"
+};
 
 export default class Jogger {
 
@@ -227,7 +234,7 @@ export default class Jogger {
         return Promise.all(promises);
     };
 
-    startJog(axis: AXES, direction: number | DIRECTION) {
+    startJog(axis: PalletizerAxes | string, direction: number | DIRECTION) {
         let my = this;
         if (my.isMoving) {
             return Promise.reject("Already in motion");
@@ -239,8 +246,7 @@ export default class Jogger {
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
         let axes_values: Drive[][] = Object.values(my.axesConfiguration);
 
-
-        let axis_index = axes_keys.indexOf(axisNumbertoAxisString(axis));
+        let axis_index = axes_keys.indexOf(axis);
         let ds: Drive[] = axes_values[axis_index];
         ds.forEach((d: Drive) => {
             let { MachineMotionIndex, DriveNumber } = d;

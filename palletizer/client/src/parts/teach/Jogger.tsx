@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 
-import JogController from "../../jogger/Jogger";
+import JogController, {PalletizerAxes} from "../../jogger/Jogger";
 
 import { AXES } from "../machine_config/Drives";
 
@@ -158,28 +158,28 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
         } else {
             switch (d) {
                 case Directions.UP: {
-                    jogController.startJog(AXES.Y, DIRECTION.NORMAL).then(() => {
+                    jogController.startJog(PalletizerAxes.Y, DIRECTION.NORMAL).then(() => {
                     }).catch((e: any) => {
                         console.log(e);
                     });
                     break;
                 };
                 case Directions.DOWN: {
-                    jogController.startJog(AXES.Y, DIRECTION.REVERSE).then(() => {
+                    jogController.startJog(PalletizerAxes.Y, DIRECTION.REVERSE).then(() => {
                     }).catch((e: any) => {
                         console.log(e);
                     });
                     break;
                 };
                 case Directions.RIGHT: {
-                    jogController.startJog(AXES.X, DIRECTION.NORMAL).then(() => {
+                    jogController.startJog(PalletizerAxes.X, DIRECTION.NORMAL).then(() => {
                     }).catch((e: any) => {
                         console.log(e);
                     });
                     break;
                 };
                 case Directions.LEFT: {
-                    jogController.startJog(AXES.X, DIRECTION.REVERSE).then(() => {
+                    jogController.startJog(PalletizerAxes.X, DIRECTION.REVERSE).then(() => {
                     }).catch((e: any) => {
                         console.log(e);
                     });
@@ -191,8 +191,7 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
     let handleAMove = (dagger: boolean) => {
         if (jogController !== null) {
-            jogController.startJog(AXES.Z, dagger ? DIRECTION.NORMAL : DIRECTION.REVERSE).then(() => {
-
+            jogController.startJog(PalletizerAxes.Z, dagger ? DIRECTION.NORMAL : DIRECTION.REVERSE).then(() => {
             }).catch((e: any) => {
                 console.log(e);
             });
@@ -206,7 +205,6 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
     let handleSelect = async () => {
 
-        console.log("Handle Selec...t");
         let pos = {
             x: 0, y: 0, z: 0, θ: false
         } as CoordinateRot;
@@ -220,7 +218,6 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
         }
 
         TEMP_JOGGER_INDEX++;
-
         selectAction(pos);
         //let position = await getPositions();
         //console.log("Got Positions and seleted", position);

@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 
@@ -6,10 +6,12 @@ import { MachineMotion } from "./MachineMotions";
 
 import SolidArrow, { ROTATION } from "../teach/SolidArrow";
 
+import JogController from "../../jogger/Jogger";
+
+//---------------Images---------------
 import palletizerImage from "./images/palletizer.png";
-
 import plus_icon from "../teach/images/plus.svg";
-
+//---------------Styles---------------
 import "./css/Drives.scss";
 
 function changeVal(e: ChangeEvent): string {
@@ -94,10 +96,30 @@ export function defaultAxesConfiguration() {
 
 export interface DriveSummaryProps {
     Axes: AxesConfiguration;
+    Machines: MachineMotion[];
     handleEditAxis: (a: AXES) => () => void;
 };
 
-export function DriveSummary({ Axes, handleEditAxis }: DriveSummaryProps) {
+export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryProps) {
+
+    let [jogController, setJogController] = useState<JogController | null>(null);
+
+    useEffect(() => {
+        let jc = new JogController(Machines, Axes, (_: any) => { });
+        jc.setJogSpeed(50).catch(() => { });
+        jc.setJogIncrement(50).catch(() => { });
+        setJogController(jc);
+    }, [Axes, Machines]);
+
+    let handleMove = (axis_string: string, direction: DIRECTION) => () => {
+        if (jogController !== null) {
+            if (axis_string === "θ") {
+                jogController.startRotation(direction === DIRECTION.NORMAL).catch(() => { });
+            } else {
+		jogController.startJog(axis_string, direction).catch(() => { });
+	    }
+        }
+    };
 
     interface AxisListingProps {
         drives: Drive[];
@@ -122,10 +144,10 @@ export function DriveSummary({ Axes, handleEditAxis }: DriveSummaryProps) {
                         </div>
                     </div>
                     <div className="AxisJog">
-                        <div className="ArrowLeft">
+                        <div className="ArrowLeft" onClick={handleMove(title, DIRECTION.REVERSE)}>
                             <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
                         </div>
-                        <div className="ArrowRight">
+                        <div className="ArrowRight" onClick={handleMove(title, DIRECTION.NORMAL)}>
                             <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
                         </div>
                     </div>
@@ -314,6 +336,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
 
         let driveSummaryProps: DriveSummaryProps = {
             Axes,
+            Machines: allMachines,
             handleEditAxis: handleEdit
         };
 

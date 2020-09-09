@@ -13,16 +13,14 @@ interface ArrowProps {
     longer?: number;
 };
 
-
 function percentage(p: number, scale: number) {
     return String(p * scale / 100);
-}
-
+};
 
 interface point {
     x: number;
     y: number;
-}
+};
 
 function rotate(p: point, center: point, θ: number): point {
     let vec: number[] = [p.x, p.y];

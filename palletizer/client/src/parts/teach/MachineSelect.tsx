@@ -4,6 +4,8 @@ import { get_machine_config } from "../../requests/requests";
 
 import { SavedMachineConfiguration } from "../MachineConfig";
 
+import { MachineMotion } from "../machine_config/MachineMotions";
+
 import { DriveSummary, DriveSummaryProps, AxesConfiguration, AXES } from "../machine_config/Drives";
 
 import ContentItem, { ButtonProps } from "./ContentItem";
@@ -37,6 +39,7 @@ export default function MachineSelect({ instructionNumber, handleNext, handleBac
     })());
 
     let [Axes, setAxes] = useState<AxesConfiguration | null>(null);
+    let [Machines, setMachines] = useState<MachineMotion[] | null>(null);
 
     let instruction: string = "Select a machine configuration to use for this pallet configuration";
 
@@ -82,8 +85,9 @@ export default function MachineSelect({ instructionNumber, handleNext, handleBac
 
     useEffect(() => {
         get_machine_config(selectedMachine.id).then((c: SavedMachineConfiguration) => {
-            let { axes } = c.config;
+            let { axes, machines } = c.config;
             setAxes(axes);
+            setMachines(machines);
         }).catch((e) => {
             console.log("Error get machine configuration");
         });
@@ -106,13 +110,12 @@ export default function MachineSelect({ instructionNumber, handleNext, handleBac
                                     </option>
                                 );
                             })}
-
                         </select>
                     </div>
                 </div>
                 <div className="MainContent">
-                    {Axes !== null &&
-                        <DriveSummary Axes={Axes} handleEditAxis={handleEditAxis} />
+                    {(Axes !== null && Machines !== null) &&
+                        <DriveSummary Axes={Axes} Machines={Machines} handleEditAxis={handleEditAxis} />
                     }
                 </div>
             </div>
