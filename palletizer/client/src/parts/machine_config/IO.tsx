@@ -146,13 +146,18 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
     };
 
     //-------IO Cell-------
+
+    // Move this outside of the main function to preserve state... (creates a new machine motion each iteration.)
     let IOCell = ({ index, state }: IOCellProps) => {
 
         let [ioController, _] = useState<IOController>(new IOController(allMachines[state.MachineMotionIndex]));
+        let [currentMMIndex, setCurrentMMIndex] = useState<number>(state.MachineMotionIndex);
 
         useEffect(() => {
-            console.log("Use effect");
-            ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
+            if (currentMMIndex !== state.MachineMotionIndex) {
+                ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
+                setCurrentMMIndex(state.MachineMotionIndex);
+            }
         }, [state.MachineMotionIndex]);
 
         let [isTesting, setIsTesting] = useState<boolean>(false);
