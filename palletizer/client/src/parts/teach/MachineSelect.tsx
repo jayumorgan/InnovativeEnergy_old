@@ -115,7 +115,7 @@ export default function MachineSelect({ instructionNumber, handleNext, handleBac
                 </div>
                 <div className="MainContent">
                     {(Axes !== null && Machines !== null) &&
-                        <DriveSummary Axes={Axes} Machines={Machines} handleEditAxis={handleEditAxis} />
+                        <DriveSummary Axes={Axes} Machines={Machines} handleEditAxis={handleEditAxis} noEdit={true} />
                     }
                 </div>
             </div>

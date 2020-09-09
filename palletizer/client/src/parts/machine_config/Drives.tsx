@@ -96,9 +96,10 @@ export interface DriveSummaryProps {
     Axes: AxesConfiguration;
     Machines: MachineMotion[];
     handleEditAxis: (a: AXES) => () => void;
+    noEdit?: boolean;
 };
 
-export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryProps) {
+export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSummaryProps) {
 
     let [jogController, setJogController] = useState<JogController | null>(null);
 
@@ -119,13 +120,6 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
             } else {
                 jogController.startJog(axis_string, direction).catch(() => { });
             }
-        }
-    };
-
-    let handleHome = (axis_string: string) => () => {
-        if (jogController !== null) {
-
-
         }
     };
 
@@ -163,10 +157,19 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
         }
     })() as [string, ((s:string) => () => void)];
 
+    let showEdit : boolean = (()=>{
+	if (noEdit) {
+	    return false;
+	} else {
+	    return true;
+	}
+    })();
+    
+
     let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
         return (
             <div className="AxisListing">
-                <div className="AxisListingCell">
+                <div className={"AxisListingCell" + (showEdit ? "" : "NoEdit")}>
                     <div className="Title">
                         <span>
                             {title + " Axis"}
@@ -194,13 +197,14 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
                             <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
                         </div>
                     </div>
+		    { showEdit &&
                     <div className="Edit">
                         <div className="EditButton" onClick={handleEdit}>
                             <span>
                                 {"Edit"}
                             </span>
                         </div>
-                    </div>
+                    </div>}
                 </div>
             </div>
         );

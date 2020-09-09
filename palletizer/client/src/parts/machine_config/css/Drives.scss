@@ -219,129 +219,138 @@
         height: 100%;
         @include flex-center();
         flex-direction: column;
-        justify-content: space-around;
+        justify-content: space-between;
 
         .AxisListing {
-            padding-top: 1%;
+            padding-bottom: 0.2%;
             padding-left: 1%;
             width: 98%;
             height: $container-height / 8;
+        }
 
-            .AxisListingCell {
-                width: 99%;
-                height: 100%;
-                border: $container-border;
+        @mixin ListingCell() {
+            width: 99%;
+            height: 100%;
+            border: $container-border;
+            border-radius: $border-radius;
+            background-color: $desert-storm;
+            display: grid;
+        }
+
+        .AxisListingCell {
+            @include ListingCell();
+            grid-template-columns: 15% 15% 50% 20%;
+        }
+
+        .AxisListingCellNoEdit {
+            @include ListingCell();
+            grid-template-columns: 20% 20% 60%;
+        }
+
+        .Title {
+            width: 100%;
+            height: 100%;
+            @include flex-center();
+            justify-content: flex-start;
+
+            span {
+                padding-left: 20%;
+                font-size: $large-font;
+                font-weight: $bold-font;
+            }
+        }
+
+        .DetailsContainer {
+            width: 100%;
+            height: 100%;
+            @include flex-center();
+
+            .Details {
+                @include flex-center();
+                width: 80%;
+                height: 60%;
                 border-radius: $border-radius;
-                background-color: $desert-storm;
-                display: grid;
-                grid-template-columns: 20% 15% 45% 20%;
+                border: $container-border;
 
-                .Title {
-                    width: 100%;
-                    height: 100%;
+                span {
+                    font-size: $medium-font;
+                }
+            }
+        }
+
+        .AxisJog {
+
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 32.5% 35% 32.5%;
+
+            .ArrowLeft {
+                //                      padding-right: 10%;
+                width: 100%;
+                height: 100%;
+                @include flex-center();
+                justify-content: flex-end;
+                @include polygon();
+            }
+
+            .ButtonCenter {
+                width: 100%;
+                height: 100%;
+                @include flex-center();
+
+                .Button {
+                    cursor: pointer;
                     @include flex-center();
-                    justify-content: flex-start;
-
-                    span {
-                        padding-left: 10%;
-                        font-size: $large-font;
-                        font-weight: $bold-font;
-                    }
+                    width: 70%;
+                    height: 37%;
+                    border-radius: $border-radius;
+                    background-color: $medium-blue;
+                    color: white;
+                    font-size: $large-font;
                 }
 
-                .DetailsContainer {
-                    width: 100%;
-                    height: 100%;
-                    @include flex-center();
-
-                    .Details {
-                        @include flex-center();
-                        width: 80%;
-                        height: 60%;
-                        border-radius: $border-radius;
-                        border: $container-border;
-
-                        span {
-                            font-size: $medium-font;
-                        }
-                    }
+                .Button:hover {
+                    @include shadow();
+                    background-color: $green;
                 }
 
-                .AxisJog {
+            }
 
-                    width: 100%;
-                    height: 100%;
-                    display: grid;
-                    grid-template-columns: 30% 40% 30%;
+            .ArrowRight {
+                //                        padding-left: 10%;
+                width: 100%;
+                height: 100%;
+                @include flex-center();
+                justify-content: flex-start;
+                @include polygon();
+            }
 
-                    .ArrowLeft {
-                        padding-right: 10%;
-                        width: 100%;
-                        height: 100%;
-                        @include flex-center();
-                        justify-content: flex-end;
-                        @include polygon();
-                    }
+            /* @include flex-center(); */
+        }
 
-                    .ButtonCenter {
-                        width: 100%;
-                        height: 100%;
-                        @include flex-center();
+        .Edit {
+            width: 100%;
+            height: 100%;
+            @include flex-center();
+            justify-content: flex-end;
 
-                        .Button {
-                            cursor: pointer;
-                            @include flex-center();
-                            width: 70%;
-                            height: 37%;
-                            border-radius: $border-radius;
-                            background-color: $medium-blue;
-                            color: white;
-                            font-size: $large-font;
-                        }
+            .EditButton {
+                cursor: pointer;
+                width: 70%;
+                height: 37%;
+                @include flex-center();
+                border-radius: $border-radius;
+                background-color: $medium-blue;
+                color: white;
+                font-size: $large-font;
+                margin-left: 10%;
+                margin-right: 10%;
+            }
 
-                        .Button:hover {
-                            @include shadow();
-                            background-color: $green;
-                        }
-
-                    }
-
-                    .ArrowRight {
-                        padding-left: 10%;
-                        width: 100%;
-                        height: 100%;
-                        @include flex-center();
-                        justify-content: flex-start;
-                        @include polygon();
-                    }
-
-                    /* @include flex-center(); */
-                }
-
-                .Edit {
-                    width: 100%;
-                    height: 100%;
-                    @include flex-center();
-                    justify-content: flex-end;
-
-                    .EditButton {
-                        cursor: pointer;
-                        width: 100%;
-                        height: 55%;
-                        @include flex-center();
-                        border-radius: $border-radius;
-                        background-color: $medium-blue;
-                        color: white;
-                        font-size: $large-font;
-                        margin-left: 10%;
-                        margin-right: 10%;
-                    }
-
-                    .EditButton:hover {
-                        @include shadow();
-                        background-color: $green;
-                    }
-                }
+            .EditButton:hover {
+                @include shadow();
+                background-color: $green;
             }
         }
     }
