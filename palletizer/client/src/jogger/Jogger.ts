@@ -68,15 +68,35 @@ export default class Jogger {
     jogIncrement: number = 50; //mm
     jogSpeed: number = 100; // mm/s
 
-    constructor(machines: MachineMotion[], Axes: AxesConfiguration, onPositionUpdate: (positions: any) => void) {
+    onEstop: (b: boolean) => void = (_: boolean) => { };
+    onIsMoving: (b: boolean) => void = (_: boolean) => { };
+
+    __setIsMoving(b: boolean) {
+        this.isMoving = b;
+        this.onIsMoving(this.isMoving);
+    };
+
+    __setEstopped(b: boolean) {
+        this.eStopped = b;
+        this.onEstop(this.eStopped);
+    };
+
+    constructor(machines: MachineMotion[], Axes: AxesConfiguration, onPositionUpdate: (positions: any) => void, bindIsMoving?: (b: boolean) => void, bindEstopped?: (b: boolean) => void) {
         this.axesConfiguration = Axes;
         this.positionHandler = onPositionUpdate;
 
         let my = this;
 
+        if (bindIsMoving) {
+            my.onIsMoving = bindIsMoving;
+        }
+
+        if (bindEstopped) {
+            my.onEstop = bindEstopped;
+        }
+
         machines.forEach((m: MachineMotion) => {
             let machine_ip = true ? "127.0.0.1" : m.ipAddress;
-
 
             let mqtt_uri = "ws://" + machine_ip + ":" + String(9001);
 
@@ -99,7 +119,6 @@ export default class Jogger {
             let mm: MM = new MM(config);
             my.machineMotions.push(mm);
         });
-
 
         my.prepareSystem().then(() => {
             return my.configureAxes();
@@ -140,7 +159,7 @@ export default class Jogger {
         if (my.isMoving) {
             return Promise.reject("Already in motion");
         } else {
-            my.isMoving = true;
+            my.__setIsMoving(true);
 
             let { θ } = my.axesConfiguration;
             let promises: Promise<any>[] = [];
@@ -163,10 +182,10 @@ export default class Jogger {
 
             return new Promise((resolve, reject) => {
                 Promise.all(promises).then(() => {
-                    my.isMoving = false;
+                    my.__setIsMoving(false);
                     resolve();
                 }).catch((e: any) => {
-                    my.isMoving = false;
+                    my.__setIsMoving(false);
                     reject(e);
                 });
             });
@@ -206,15 +225,16 @@ export default class Jogger {
 
         return new Promise((resolve, reject) => {
             Promise.all(promises).then(() => {
-                my.eStopped = false;
+                my.__setIsMoving(false);
+                my.__setIsMoving(false);
                 resolve();
             }).catch((e: any) => {
-                my.eStopped = true;
+                my.__setIsMoving(false);
+                my.__setEstopped(false);
                 reject(e);
             });
         });
     };
-
 
     configureAxes() {
         let my = this;
@@ -230,18 +250,52 @@ export default class Jogger {
                 promises.push(p);
             });
         });
-	
+
         return Promise.all(promises);
     };
 
-    startJog(axis: PalletizerAxes | string, direction: number | DIRECTION) {
+    startHome(axis: PalletizerAxes | string) {
         let my = this;
-	
+
         if (my.isMoving) {
             return Promise.reject("Already in motion");
         } else {
-            my.isMoving = true;
+            my.__setIsMoving(true);
         }
+
+        let drives: Drive[] = (my.axesConfiguration as any)[axis as string];
+
+        let promises = [] as Promise<any>[];
+
+        drives.forEach((d: Drive) => {
+            let mm: MM = my.machineMotions[d.MachineMotionIndex];
+            let drive_index = driveNumberToDRIVE(d.DriveNumber);
+            let p = new Promise((resolve, reject) => {
+                mm.emitHome(drive_index).then(() => {
+                    return mm.waitForMotionCompletion();
+                }).then(() => {
+                    resolve();
+                }).catch((e: any) => {
+                    reject(e);
+                });
+            });
+            promises.push(p);
+        });
+
+        return new Promise((resolve, reject) => {
+            Promise.all(promises).then(() => {
+                my.getPosition();
+                my.__setIsMoving(false);
+                resolve();
+            }).catch((e: any) => {
+                my.getPosition();
+                my.__setIsMoving(false);
+                reject(e);
+            });
+        });
+    };
+
+    __getMMGroup(axis: PalletizerAxes | string) {
 
         let mm_group = {} as { [key: number]: DRIVE[] };
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
@@ -256,6 +310,20 @@ export default class Jogger {
             }
             mm_group[MachineMotionIndex].push(driveNumberToDRIVE(DriveNumber));
         });
+
+        return mm_group;
+    };
+
+    startJog(axis: PalletizerAxes | string, direction: number | DIRECTION) {
+        let my = this;
+
+        if (my.isMoving) {
+            return Promise.reject("Already in motion");
+        } else {
+            my.isMoving = true;
+        }
+
+        let mm_group = my.__getMMGroup(axis);
 
         let mm_indices = Object.keys(mm_group) as string[];
         let promises: Promise<any>[] = [];
@@ -295,7 +363,6 @@ export default class Jogger {
         // This assumes only a single drive per axis. If we want to run multiple drives per axis, we need to deal with:
         // (A) synchronization of drive motion.
         // (B) higher-dimensional recording of taught positions and box coordinates. I have left some space to do this (change all coordinate to arrays of coordinates, organize by drive index).
-
         let my = this;
         let { X, Y, Z, θ } = my.axesConfiguration;
 
@@ -338,7 +405,7 @@ export default class Jogger {
             });
         });
         // assuming it worked.
-        my.eStopped = true;
+        my.__setEstopped(true);
     };
 
 };

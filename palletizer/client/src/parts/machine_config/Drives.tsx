@@ -102,8 +102,11 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
 
     let [jogController, setJogController] = useState<JogController | null>(null);
 
+    let [isMoving, setIsMoving] = useState<boolean>(false);
+    let [isEstopped, setIsEstopped] = useState<boolean>(false);
+
     useEffect(() => {
-        let jc = new JogController(Machines, Axes, (_: any) => { });
+        let jc = new JogController(Machines, Axes, (_: any) => { }, setIsMoving, setIsEstopped);
         jc.setJogSpeed(50).catch(() => { });
         jc.setJogIncrement(50).catch(() => { });
         setJogController(jc);
@@ -114,8 +117,15 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
             if (axis_string === "θ") {
                 jogController.startRotation(direction === DIRECTION.NORMAL).catch(() => { });
             } else {
-		jogController.startJog(axis_string, direction).catch(() => { });
-	    }
+                jogController.startJog(axis_string, direction).catch(() => { });
+            }
+        }
+    };
+
+    let handleHome = (axis_string: string) => () => {
+        if (jogController !== null) {
+
+
         }
     };
 
@@ -124,6 +134,36 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
         title: string;
         handleEdit: () => void;
     };
+
+    let stop_jog = (_: string) => () => {
+        if (jogController !== null) {
+            jogController.stopMotion().catch(e => console.log(e));
+        }
+    };
+
+    let reset_jog = (_: string) => () => {
+        if (jogController !== null) {
+            jogController.prepareSystem().catch(e => console.log(e));
+        }
+    };
+
+    let home_jog = (axis: string) => () => {
+        if (jogController !== null) {
+            jogController.startHome(axis).catch(e => console.log(e));
+        }
+    };
+
+
+
+    let [button_string, button_action] = (() => {
+        if (isMoving) {
+            return ["Stop", stop_jog];
+        } else if (isEstopped) {
+            return ["Reset", reset_jog];
+        } else {
+            return ["Home", home_jog];
+        }
+    })();
 
     let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
         return (
@@ -145,13 +185,13 @@ export function DriveSummary({ Axes, handleEditAxis, Machines }: DriveSummaryPro
                         <div className="ArrowLeft" onClick={handleMove(title, DIRECTION.REVERSE)}>
                             <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
                         </div>
-			<div className="ButtonCenter">
-			    <div className="Button">
-				<span>
-				    {"Home"}
-				</span>
-			    </div>
-			</div>
+                        <div className="ButtonCenter">
+                            <div className="Button" onClick={button_action(title)}>
+                                <span>
+                                    {button_string}
+                                </span>
+                            </div>
+                        </div>
                         <div className="ArrowRight" onClick={handleMove(title, DIRECTION.NORMAL)}>
                             <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
                         </div>
