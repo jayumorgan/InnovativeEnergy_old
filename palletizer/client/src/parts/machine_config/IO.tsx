@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
+
 
 import { MachineMotion } from "./MachineMotions";
+
+import IOController from "../../jogger/IO";
+
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 
 import plus_icon from "../teach/images/plus.svg";
@@ -121,19 +125,54 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         state: IOState;
     };
 
-    let handleTest = (i: number) => () => {
-        let s: IOState = editingIOs[i];
-        console.log("Test io module ", s.MachineMotionIndex, s.NetworkId, s.Pins);
-    };
-
     let toggleSwitch = (i: number, j: number) => () => {
         let cp = [...editingIOs];
         cp[i].Pins[j] = !(cp[i].Pins[j]);
         setEditingIOs([...cp]);
     };
 
+    let handleSelectMachineMotion = (io_index: number) => (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        let cp = [...editingIOs];
+        cp[io_index].MachineMotionIndex = val;
+        setEditingIOs(cp);
+    };
+
+    let handleSelectNetworkId = (io_index: number) => (e: ChangeEvent) => {
+        let val: number = +(e.target as any).value;
+        let cp = [...editingIOs];
+        cp[io_index].NetworkId = val;
+        setEditingIOs(cp);
+    };
+
     //-------IO Cell-------
     let IOCell = ({ index, state }: IOCellProps) => {
+
+        let [ioController, _] = useState<IOController>(new IOController(allMachines[state.MachineMotionIndex]));
+
+        useEffect(() => {
+            console.log("Use effect");
+            ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
+        }, [state.MachineMotionIndex]);
+
+        let [isTesting, setIsTesting] = useState<boolean>(false);
+
+        let handleTest = () => {
+            ioController.triggerTest(state).then(() => {
+                setIsTesting(true);
+                console.log("Starting IO Test");
+            }).catch((e: any) => {
+                console.log("Error trigger test", e);
+            });
+        };
+
+        let handleStop = () => {
+            ioController.triggerStop().then(() => {
+                setIsTesting(false);
+            }).catch((e: any) => {
+                console.log("Error stopping io's", e);
+            });
+        };
 
         return (
             <div className="IOCellContainer">
@@ -145,7 +184,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                             </span>
                         </div>
                         <div className="DropDown">
-                            <select value={state.MachineMotionIndex}>
+                            <select value={state.MachineMotionIndex} onChange={handleSelectMachineMotion(index)}>
                                 {allMachines.map((mm: MachineMotion, i: number) => {
                                     return (
                                         <option value={i} key={i}>
@@ -163,7 +202,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                             </span>
                         </div>
                         <div className="DropDown">
-                            <select value={state.NetworkId}>
+                            <select value={state.NetworkId} onChange={handleSelectNetworkId(index)}>
                                 {ALL_NETWORK_IDS.map((v: number, i: number) => {
                                     return (
                                         <option value={v} key={i}>
@@ -206,9 +245,9 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                         );
                     })}
                     <div className="Test">
-                        <div className="TestButton" onClick={handleTest(index)}>
+                        <div className="TestButton" onClick={isTesting ? handleStop : handleTest}>
                             <span>
-                                {"Test"}
+                                {isTesting ? "Stop" : "Test"}
                             </span>
                         </div>
                     </div>
@@ -220,7 +259,6 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
             </div>
         );
     };
-
     return (
         <ContentItem {...contentItemProps}>
             <div className="IOConfig">
@@ -235,15 +273,4 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
             </div>
         </ContentItem>
     );
-}
-/*
- * <div className="NewIOCell">
- * <div className="NewIOCell">
- * <div className="AddButton" onClick={addIOState} >
- * <img src={plus_icon} />
- * <span>
- * {"Add Output Module"}
- * </span>
- * </div>
- * </div>
- * </div> */
+};
