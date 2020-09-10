@@ -120,7 +120,6 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
             if (axis_string === "θ") {
                 jogController.startRotation(direction === DIRECTION.NORMAL).catch(() => { });
             } else {
-                console.log("Direction", direction);
                 jogController.startJog(axis_string, direction).catch(() => { });
             }
         }

@@ -5,10 +5,14 @@ import { MachineMotion } from "../parts/machine_config/MachineMotions";
 import { IOState } from "../parts/machine_config/IO";
 
 
-function getMachineMotion(machine: MachineMotion): MM {
-    let machine_ip = true ? "127.0.0.1" : machine.ipAddress;
+const TESTING = false;
+console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
-    let mqtt_uri = "ws://" + machine_ip + ":" + String(9001);
+
+function getMachineMotion(machine: MachineMotion): MM {
+    let machine_ip = TESTING ? "127.0.0.1" : machine.ipAddress;
+
+    let mqtt_uri = "ws://" + machine_ip + ":" + String(9001) + "/";
 
     let options: any = {
         clientId: "BrowserIOProber-" + uuidv4()

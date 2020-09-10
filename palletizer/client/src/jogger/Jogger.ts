@@ -105,7 +105,7 @@ export default class Jogger {
         machines.forEach((m: MachineMotion) => {
             let machine_ip = TESTING ? "127.0.0.1" : m.ipAddress;
 
-            let mqtt_uri = "ws://" + machine_ip + ":" + String(9001);
+            let mqtt_uri = "ws://" + machine_ip + ":" + String(9001) + "/";
 
             let options: any = {
                 clientId: "BrowserMachineMotion-" + uuidv4()
@@ -214,21 +214,9 @@ export default class Jogger {
 
     prepareSystem() {
         let my = this;
-        let promises: Promise<any>[] = [];
-        for (let i = 0; i < my.machineMotions.length; i++) {
-            let m: MM = my.machineMotions[i];
-            let p = new Promise((resolve, reject) => {
-                m.releaseEstop().then(() => {
-                    return m.resetSystem();
-                }).then(() => {
-                    resolve();
-                }).catch((e: any) => {
-                    console.log("Failed to reset system", e);
-                    reject(e);
-                });
-            });
-            promises.push(p);
-        }
+        let promises: Promise<any>[] = my.machineMotions.map((mm: MM) => {
+            return mm.releaseAndReset();
+        });
 
         return new Promise((resolve, reject) => {
             Promise.all(promises).then(() => {

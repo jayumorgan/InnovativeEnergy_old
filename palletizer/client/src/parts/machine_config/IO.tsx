@@ -17,6 +17,7 @@ export interface IOState {
     Pins: [boolean, boolean, boolean, boolean];
 };
 
+// ALL_NETWORK_IDS
 const ALL_NETWORK_IDS: number[] = [0, 1, 2];
 
 export interface IO {
@@ -103,7 +104,7 @@ function IOCell({ index, ioController, state, handleSelectMachineMotion, handleS
                             {ALL_NETWORK_IDS.map((v: number, i: number) => {
                                 return (
                                     <option value={v} key={i}>
-                                        {"Module " + String(v)}
+                                        {"Module " + String(v + 1)}
                                     </option>
                                 );
                             })}
