@@ -399,7 +399,6 @@ export class Engine {
         }).then(() => {
 
         }).catch((e) => {
-
             if (my.palletizerState.status == PALLETIZER_STATUS.STOPPED) {
                 console.log("Palletizer has stopped.");
                 //		my.__updateStatus(PALLETIZER_STATUS.STOPPED);
@@ -604,14 +603,15 @@ export class Engine {
         let my = this;
         return new Promise((resolve, reject) => {
             let { machines } = my.mechanicalLayout;
-            let promises: Promise<any>[] = [];
-            machines.forEach((m: MachineMotion) => {
-                let p = m.emitHomeAll().then(() => {
+            Promise.all(machines.map((m: MachineMotion) => {
+                return m.emitHomeAll().then(() => {
                     return m.waitForMotionCompletion();
                 });
-                promises.push(p);
+            })).then(() => {
+                resolve();
+            }).catch((e: any) => {
+                reject(e);
             });
-            Promise.all(promises).then(resolve).catch(reject);
         });
     };
 
@@ -734,27 +734,31 @@ export class Engine {
     };
 
     __pickIO() {
-        let my = this;
-        my.cycleState = CYCLE_STATE.PICK_IO;
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        })
+        this.cycleState = CYCLE_STATE.PICK_IO;
+        let ios: IOState[] = this.mechanicalLayout.io.On;
+        return this.__writeIO(ios);
     };
 
     __dropIO() {
+        this.cycleState = CYCLE_STATE.DROP_IO;
+        let ios: IOState[] = this.mechanicalLayout.io.Off;
+        return this.__writeIO(ios);
+    };
+
+    __writeIO(ios: IOState[]) {
         let my = this;
-        my.cycleState = CYCLE_STATE.DROP_IO;
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        });
+        return Promise.all(ios.map((state: IOState) => {
+            let { MachineMotionIndex, NetworkId, Pins } = state;
+            return Promise.all(Pins.map((val: boolean, pin: number) => {
+                return my.mechanicalLayout.machines[MachineMotionIndex].digitalWrite(NetworkId, pin, val);
+            }));
+        }));
     };
 
     __detectIO() {
         let my = this;
         my.cycleState = CYCLE_STATE.DETECT_IO;
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        });
+        return Promise.resolve(true);
     };
 
     // will repeat sequence starting from top on run.
