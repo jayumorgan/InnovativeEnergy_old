@@ -1,4 +1,10 @@
-import React, { useContext, ChangeEvent, useState, ReactElement, useEffect } from 'react';
+import React, {
+    useContext,
+    ChangeEvent,
+    useState,
+    ReactElement,
+    useEffect
+} from 'react';
 
 // MQTT
 import { MQTTControl } from "../mqtt/MQTT";
