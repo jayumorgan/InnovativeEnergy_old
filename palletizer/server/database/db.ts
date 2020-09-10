@@ -108,13 +108,21 @@ export class DatabaseHandler {
         return new Promise((resolve, reject) => {
             my.__checkCurrentConfigs().then(() => {
                 my.db.get(SELECT_CURRENT_PALLET_CONFIG).then((pallet: any) => {
-                    let { machine_config_id } = pallet;
-                    my.getMachineConfig(machine_config_id).then((machine: any) => {
+                    if (pallet) {
+                        let { machine_config_id } = pallet;
+                        my.getMachineConfig(machine_config_id).then((machine: any) => {
+                            resolve({
+                                machine,
+                                pallet
+                            });
+                        }).catch(e => reject(e));
+                    } else {
+                        // No current configurations.
                         resolve({
-                            machine,
-                            pallet
-                        });
-                    }).catch(e => reject(e));
+                            machine: [] as any,
+                            pallet: [] as any
+                        })
+                    }
                 }).catch(e => reject(e));
             }).catch(e => reject(e));
         });

@@ -6,6 +6,8 @@ import { MachineMotion } from "./MachineMotions";
 
 import SolidArrow, { ROTATION } from "../teach/SolidArrow";
 
+import { DIRECTION } from "mm-js-api";
+
 import JogController from "../../jogger/Jogger";
 
 //---------------Images---------------
@@ -35,6 +37,11 @@ enum DRIVE {
 
 const ALL_DRIVES = [DRIVE.ONE, DRIVE.TWO, DRIVE.THREE, DRIVE.FOUR];
 
+enum NumericalDirection {
+    NORMAL = 1,
+    REVERSE = -1
+};
+
 enum MICRO_STEPS {
     ustep_full = 1,
     ustep_2 = 2,
@@ -45,12 +52,7 @@ enum MICRO_STEPS {
 
 const ALL_MICRO_STEPS = [MICRO_STEPS.ustep_full, MICRO_STEPS.ustep_2, MICRO_STEPS.ustep_4, MICRO_STEPS.ustep_8, MICRO_STEPS.ustep_16];
 
-enum DIRECTION {
-    NORMAL = 1,
-    REVERSE = -1
-};
-
-const ALL_DIRECTIONS = { "Normal": DIRECTION.NORMAL, "Reverse": DIRECTION.REVERSE } as { [key: string]: DIRECTION };
+const ALL_DIRECTIONS = { "Normal": NumericalDirection.NORMAL, "Reverse": NumericalDirection.REVERSE } as { [key: string]: NumericalDirection };
 
 const MECH_GAIN = {
     timing_belt_150mm_turn: [150, "Timing Belt"],
@@ -72,7 +74,7 @@ export interface Drive {
     MechGainKey: string;
     MechGainValue: number;
     MicroSteps: MICRO_STEPS;
-    Direction: DIRECTION
+    Direction: NumericalDirection;
 };
 
 //---------------Fix This To Avoid The Horrific Switch Statements---------------
@@ -118,6 +120,7 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
             if (axis_string === "θ") {
                 jogController.startRotation(direction === DIRECTION.NORMAL).catch(() => { });
             } else {
+                console.log("Direction", direction);
                 jogController.startJog(axis_string, direction).catch(() => { });
             }
         }
@@ -155,16 +158,16 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
         } else {
             return ["Home", home_jog];
         }
-    })() as [string, ((s:string) => () => void)];
+    })() as [string, ((s: string) => () => void)];
 
-    let showEdit : boolean = (()=>{
-	if (noEdit) {
-	    return false;
-	} else {
-	    return true;
-	}
+    let showEdit: boolean = (() => {
+        if (noEdit) {
+            return false;
+        } else {
+            return true;
+        }
     })();
-    
+
 
     let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
         return (
@@ -197,14 +200,14 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
                             <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
                         </div>
                     </div>
-		    { showEdit &&
-                    <div className="Edit">
-                        <div className="EditButton" onClick={handleEdit}>
-                            <span>
-                                {"Edit"}
-                            </span>
-                        </div>
-                    </div>}
+                    {showEdit &&
+                        <div className="Edit">
+                            <div className="EditButton" onClick={handleEdit}>
+                                <span>
+                                    {"Edit"}
+                                </span>
+                            </div>
+                        </div>}
                 </div>
             </div>
         );
@@ -241,7 +244,7 @@ function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
         MechGainKey: gain_key,
         MechGainValue: MECH_GAIN[gain_key][0],
         MicroSteps: MICRO_STEPS.ustep_8,
-        Direction: DIRECTION.NORMAL
+        Direction: NumericalDirection.NORMAL
     };
     return d;
 };
@@ -433,7 +436,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
             let selectDirection = (e: ChangeEvent) => {
                 let direction: number = +(changeVal(e));
                 let cp = [...editingDrives];
-                cp[index].Direction = direction as DIRECTION;
+                cp[index].Direction = direction as NumericalDirection;
                 setEditingDrives([...cp]);
             };
 

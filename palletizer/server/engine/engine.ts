@@ -31,9 +31,8 @@ import {
 
 
 //--------------------TESTING ENVIRONMENT--------------------
-const TESTING = true;
-console.log("In testing environment");
-
+const TESTING = false
+console.log((TESTING ? "In" : "Not in") + " Testing environment");
 
 
 

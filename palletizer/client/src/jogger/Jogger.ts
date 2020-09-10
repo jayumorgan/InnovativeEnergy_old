@@ -6,7 +6,12 @@ import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
 import { CoordinateRot } from "../parts/teach/structures/Data";
 
-// Note:
+
+const TESTING = false;
+console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
+
+
+
 // MM is the controller, MachineMotion is the configuration parameters from MachineConfig (just info, no methods)
 
 // Machine Motion Specific
@@ -98,9 +103,9 @@ export default class Jogger {
         }
 
         machines.forEach((m: MachineMotion) => {
-            let machine_ip = true ? "127.0.0.1" : m.ipAddress;
+            let machine_ip = TESTING ? "127.0.0.1" : m.ipAddress;
 
-            let mqtt_uri = "ws://" + machine_ip + ":" + String(9001);
+            let mqtt_uri = "ws://" + machine_ip + ":" + String(TESTING ? 9001 : 1883);
 
             let options: any = {
                 clientId: "BrowserMachineMotion-" + uuidv4()
@@ -248,7 +253,7 @@ export default class Jogger {
             ds.forEach((d: Drive) => {
                 let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
                 let mm: MM = my.machineMotions[MachineMotionIndex];
-                let p = mm.configAxis(driveNumberToDRIVE(DriveNumber), MicroSteps, MechGainValue, Direction);
+                let p = mm.configAxis(driveNumberToDRIVE(DriveNumber), MicroSteps, MechGainValue, (Direction > 0 ? DIRECTION.NORMAL : DIRECTION.REVERSE));
                 promises.push(p);
             });
         });
