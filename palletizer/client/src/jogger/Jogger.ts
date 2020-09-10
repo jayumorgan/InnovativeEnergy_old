@@ -105,7 +105,7 @@ export default class Jogger {
         machines.forEach((m: MachineMotion) => {
             let machine_ip = TESTING ? "127.0.0.1" : m.ipAddress;
 
-            let mqtt_uri = "ws://" + machine_ip + ":" + String(TESTING ? 9001 : 1883);
+            let mqtt_uri = "ws://" + machine_ip + ":" + String(9001);
 
             let options: any = {
                 clientId: "BrowserMachineMotion-" + uuidv4()
