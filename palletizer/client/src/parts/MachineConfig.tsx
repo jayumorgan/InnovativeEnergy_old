@@ -50,7 +50,8 @@ function defaultConfiguration(index: number): MachineConfiguration {
         name: "Machine Configuration " + String(index + 1),
         machines: [] as MachineMotion[],
         axes: defaultAxesConfiguration(),
-        io: defaultIO()
+        io: defaultIO(),
+        box_detection: [] as IOState[]
     } as MachineConfiguration;
 };
 
@@ -219,7 +220,9 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         case (MachineConfigState.BOX_DETECTION): {
             let props: DetectionProps = {
                 ...controlProps,
-                setDetection
+                setDetection,
+                box_detection: configuration.box_detection,
+                allMachines: configuration.machines
             };
             ChildElement = (<Detection {...props} />);
             break;

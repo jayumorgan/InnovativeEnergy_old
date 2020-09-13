@@ -1,3 +1,5 @@
+import { ChangeEvent } from "react";
+
 export interface ControlProps {
     handleBack: () => void;
     handleNext: () => void;
@@ -14,3 +16,15 @@ export enum COLORS {
     YELLOW_METAL = "#725932",
     CARDBOARD = "#AD8762"
 };
+
+export function changeEventToNumber(e: ChangeEvent): number {
+    let val: number = +(e.target as any).value;
+    return val;
+};
+
+
+export function changeEventToString(e: ChangeEvent): string {
+    let val: string = (e.target as any).value;
+    return String(val);
+};
+

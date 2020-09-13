@@ -19,11 +19,8 @@ import { ReactComponent as ExclamationImage } from "./images/exclamation-circle.
 import { ReactComponent as InfoImage } from "./images/info-circle.svg";
 import { ReactComponent as CircleImage } from "./images/circle.svg";
 
-
 //---------------Styles---------------
 import "./css/General.scss";
-
-
 
 var control = MQTTControl();
 

@@ -18,7 +18,7 @@ export interface IOState {
 };
 
 // ALL_NETWORK_IDS
-const ALL_NETWORK_IDS: number[] = [0, 1, 2];
+export const ALL_NETWORK_IDS: number[] = [0, 1, 2];
 
 export interface IO {
     On: IOState[];
@@ -32,7 +32,7 @@ export function defaultIO(): IO {
     };
 };
 
-function defaultIOState(): IOState {
+export function defaultIOState(): IOState {
     return {
         MachineMotionIndex: 0,
         NetworkId: 0, // 0, 1, 2? 
