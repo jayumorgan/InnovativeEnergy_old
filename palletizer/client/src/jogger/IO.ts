@@ -42,7 +42,7 @@ export default class IO {
 
     setMachineMotion(machine: MachineMotion) {
         this.machineMotion = getMachineMotion(machine);
-    }
+    };
 
     triggerTest(state: IOState) {
         let my = this;
@@ -55,6 +55,7 @@ export default class IO {
         return Promise.all(promises);
     };
 
+    // Trigger IO Stop -- not motion.
     triggerStop() {
         let my = this;
         let devices = [0, 1, 2];
@@ -69,6 +70,11 @@ export default class IO {
         });
 
         return Promise.all(promises);
+    };
+
+    //Io Detection.
+    detectInputState(networkId: number): Promise<vResponse> {
+        return this.machineMotion.digitalReadAll(networkId);
     };
 
 };

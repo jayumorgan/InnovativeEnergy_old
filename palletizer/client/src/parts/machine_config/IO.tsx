@@ -1,13 +1,8 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
-
-
 import { MachineMotion } from "./MachineMotions";
-
 import IOController from "../../jogger/IO";
-
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
-
-import plus_icon from "../teach/images/plus.svg";
+//import plus_icon from "../teach/images/plus.svg";
 
 import "./css/IO.scss";
 

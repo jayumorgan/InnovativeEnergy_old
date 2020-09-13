@@ -1,8 +1,11 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
+import { IODeviceState, vResponse } from "mm-js-api";
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 import { IOState, defaultIOState, ALL_NETWORK_IDS } from "./IO";
 import { ControlProps, changeEventToNumber } from "../shared/shared";
 import { MachineMotion } from "./MachineMotions";
+import IOController from "../../jogger/IO";
+
 
 //---------------Styles---------------
 import "./css/Detection.scss";
@@ -12,11 +15,28 @@ interface DetectionCellProps {
     updateState: (state: IOState) => void;
     state: IOState;
     allMachines: MachineMotion[];
+    ioController: IOController;
 };
 
-function DetectionCell({ state, updateState, allMachines }: DetectionCellProps) {
+function DetectionCell({ state, updateState, allMachines, ioController }: DetectionCellProps) {
 
-    const currentPinValues = [false, false, false, false]; // Values as read off of the machine.
+    const [currentPinValues, setCurrentPinValues] = useState<IODeviceState>([false, false, false, false]);
+
+    const handleIoValueUpdate = (device_id: number, s: IODeviceState) => {
+        if (device_id === state.NetworkId) {
+            setCurrentPinValues(s);
+        }
+    };
+
+    useEffect(() => {
+        ioController.machineMotion.setIoValueUpdateCallback(handleIoValueUpdate);
+        ioController.detectInputState(state.NetworkId).then((res: vResponse) => {
+            let s: IODeviceState = res.result as IODeviceState;
+            setCurrentPinValues(s);
+        }).catch((e: any) => {
+            console.log("Error retrieving device input state", e);
+        })
+    }, []);
 
     const updateNetworkId = (e: ChangeEvent) => {
         let NetworkId: number = changeEventToNumber(e);
@@ -33,7 +53,6 @@ function DetectionCell({ state, updateState, allMachines }: DetectionCellProps) 
         s.Pins[pin_index] = !(s.Pins[pin_index]);
         updateState(s);
     };
-
 
     // Need to get current values for this module.
     return (
@@ -116,7 +135,6 @@ function DetectionCell({ state, updateState, allMachines }: DetectionCellProps) 
 };
 
 
-// Could extend control props.
 export interface DetectionProps extends ControlProps {
     setDetection: (detection: IOState[]) => void;
     box_detection?: IOState[];
@@ -126,6 +144,15 @@ export interface DetectionProps extends ControlProps {
 export default function Detection({ handleNext, handleBack, instructionNumber, setDetection, box_detection, allMachines }: DetectionProps) {
 
     const [detectionArray, setDetectionArray] = useState<IOState[]>(box_detection ? box_detection : [] as IOState[]);
+
+    const [ioControllers, setioControllers] = useState<IOController[]>([]);
+
+    useEffect(() => {
+	let ios = allMachines.map((machine: MachineMotion) => {
+            return new IOController(machine);
+        });
+        setioControllers(ios);
+    }, []);
 
     const instruction: string = "Create an input profile for box detection or skip this step";
 
@@ -176,7 +203,8 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
                         const cellProps: DetectionCellProps = {
                             updateState: updateCellAtIndex(i),
                             state,
-                            allMachines
+                            allMachines,
+			    ioController: ioControllers[state.MachineMotionIndex]
                         };
                         return (
                             <DetectionCell  {...cellProps} />
