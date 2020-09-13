@@ -2,14 +2,16 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { MachineMotion } from "./MachineMotions";
 import IOController from "../../jogger/IO";
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
-//import plus_icon from "../teach/images/plus.svg";
+import { IODeviceState } from "mm-js-api";
+
+
 
 import "./css/IO.scss";
 
 export interface IOState {
     MachineMotionIndex: number;
     NetworkId: number;
-    Pins: [boolean, boolean, boolean, boolean];
+    Pins: IODeviceState;
 };
 
 // ALL_NETWORK_IDS
