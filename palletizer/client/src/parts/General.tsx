@@ -58,7 +58,7 @@ function ConfigCell({ title, children }: StackProps) {
 };
 
 function ExecutePane({ current_box, status }: ExecuteProps) {
-    let { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
+    const { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
     const [start_box, set_start_box] = useState(0);
     const [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
     const [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);

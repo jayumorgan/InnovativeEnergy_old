@@ -95,10 +95,7 @@ function Configuration() {
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
 
-    let config_context = useContext(ConfigContext);
-
-    let { machine_configs, pallet_configs } = config_context as ConfigState;
-
+    const { machine_configs, pallet_configs } = useContext(ConfigContext) as ConfigState;
     const [locked, set_locked] = useState<boolean>(false);
     const [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
     const [add_machine_config, set_add_machine_config] = useState<boolean>(false);
