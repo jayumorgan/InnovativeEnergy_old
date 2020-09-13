@@ -1,21 +1,18 @@
 import React from "react";
 import { MachineConfiguration } from "../MachineConfig";
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
-
 import { Drive } from "./Drives";
 import { IOState } from "./IO";
-
+import { ControlProps } from "../shared/shared";
 import palletizerImage from "./images/palletizer.png";
 
 //---------------Styles---------------
 import "./css/Summary.scss";
 import "./css/Drives.scss";
 
-export interface MachineSummaryProps {
+
+export interface MachineSummaryProps extends ControlProps {
     machineConfig: MachineConfiguration;
-    handleBack: () => void;
-    handleNext: () => void;
-    instructionNumber: number;
 };
 
 export default function MachineSummary({ machineConfig, handleBack, handleNext, instructionNumber }: MachineSummaryProps) {
@@ -44,8 +41,7 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
         RightButton,
     } as any;
 
-
-    let { axes, io, machines } = machineConfig;
+    let { axes, io, machines, box_detection } = machineConfig;
 
     return (
         <ContentItem {...contentItemProps} >
@@ -133,6 +129,11 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
                                         Edit
 				    </span>
                                 </div>
+                            </div>
+                            <div className="Content">
+                                <span>
+                                    {"Detect: " + String(box_detection.length) + " module" + (box_detection.length > 1 ? "s" : "")}
+                                </span>
                             </div>
                         </div>
                     </div>

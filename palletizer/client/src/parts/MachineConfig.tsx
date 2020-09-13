@@ -106,9 +106,9 @@ interface MachineConfiguratorProps {
 
 function MachineConfigurator({ close, index, machineConfig, id }: MachineConfiguratorProps) {
 
-    let completionFraction = { n: 0, d: 4 } as Fraction;
+    let completionFraction = { n: 0, d: 5 } as Fraction;
 
-    let [configuration, dispatch] = useReducer(MachineReducer, (() => {
+    const [configuration, dispatch] = useReducer(MachineReducer, (() => {
         if (machineConfig) {
             return machineConfig.config
         } else {
@@ -116,7 +116,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         }
     })());
 
-    let [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
+    const [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
 
     let setName = (s: string) => {
         dispatch({
@@ -155,7 +155,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
 
     let handleNext = () => {
         if (configState as number < completionFraction.d) {
-            setConfigState(++configState);
+            setConfigState(configState + 1);
         } else {
             let save: SavedMachineConfiguration = {
                 name: configuration.name,
@@ -168,7 +168,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
 
     let handleBack = () => {
         if (configState > 0) {
-            setConfigState(--configState);
+            setConfigState(configState - 1);
         } else {
             close();
         }
@@ -232,7 +232,6 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
                 machineConfig: configuration,
                 ...controlProps
             };
-
             ChildElement = (<MachineSummary {...props} />);
             break;
         };
