@@ -62,12 +62,10 @@
                         span {
                             font-size: $normal-font-size;
                             font-weight: $bold-font;
-                            //font-size: $large-font;
                         }
                     }
 
                     .DropDown {
-
                         @include flex-center();
                         width: 100%;
 
@@ -79,7 +77,6 @@
                         }
                     }
                 }
-
 
                 .SwitchContainer {
                     width: 100%;
@@ -95,7 +92,6 @@
                         span {
                             font-size: $normal-font-size;
                             font-weight: $bold-font;
-                            //font-size: $large-font;
                         }
                     }
 
@@ -107,16 +103,13 @@
                         span {
                             font-size: $large-font;
                             font-weight: $bold-font;
-                            //font-size: $large-font;
                         }
-
                     }
 
                     .Status {
                         @include flex-center();
                         height: 100%;
                         width: 100%;
-
 
                         .Switch {
                             width: 60%;
