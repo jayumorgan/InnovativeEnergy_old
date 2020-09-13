@@ -16,6 +16,8 @@ interface DetectionCellProps {
 
 function DetectionCell({ state, updateState, allMachines }: DetectionCellProps) {
 
+    const currentPinValues = [false, false, false, false]; // Values as read off of the machine.
+
     const updateNetworkId = (e: ChangeEvent) => {
         let NetworkId: number = changeEventToNumber(e);
         updateState({ ...state, NetworkId });
@@ -25,6 +27,13 @@ function DetectionCell({ state, updateState, allMachines }: DetectionCellProps) 
         let MachineMotionIndex: number = changeEventToNumber(e);
         updateState({ ...state, MachineMotionIndex });
     };
+
+    const togglePin = (pin_index: number) => () => {
+        let s = { ...state };
+        s.Pins[pin_index] = !(s.Pins[pin_index]);
+        updateState(s);
+    };
+
 
     // Need to get current values for this module.
     return (
@@ -66,6 +75,41 @@ function DetectionCell({ state, updateState, allMachines }: DetectionCellProps) 
                         </select>
                     </div>
                 </div>
+                {state.Pins.map((pin: boolean, i: number) => {
+                    return (
+                        <div className="SwitchContainer" key={i}>
+                            <div className="Name">
+                                <span>
+                                    {"Pin " + String(i)}
+                                </span>
+                            </div>
+                            <div className="Current">
+                                <span>
+                                    {currentPinValues[i] ? "1" : "0"}
+                                </span>
+                            </div>
+                            <div className="Status">
+                                <div className="Switch" onClick={togglePin(i)}>
+                                    {pin &&
+                                        <div className="NumberContainer">
+                                            <div className="Number">
+                                                <span> {"1"} </span>
+                                            </div>
+                                        </div>}
+                                    {pin && <div className="SwitchHandle"></div>}
+                                    {(!pin) && <div className="SwitchHandle"> </div>}
+                                    {(!pin) &&
+                                        <div className="NumberContainer">
+                                            <div className="Number">
+                                                <span> {"0"} </span>
+                                            </div>
+                                        </div>}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+
             </div>
         </div>
     );
@@ -95,6 +139,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
     const RightButton: ButtonProps = {
         name: "Next",
         action: () => {
+            setDetection(detectionArray);
             handleNext();
         },
         enabled: true
@@ -117,7 +162,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
         instructionNumber
     };
 
-    let updateCellAtIndex = (index: number) => (state: IOState) => {
+    const updateCellAtIndex = (index: number) => (state: IOState) => {
         let cp = [...detectionArray];
         cp[index] = state;
         setDetectionArray(cp);

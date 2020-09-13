@@ -22,7 +22,6 @@ export function changeEventToNumber(e: ChangeEvent): number {
     return val;
 };
 
-
 export function changeEventToString(e: ChangeEvent): string {
     let val: string = (e.target as any).value;
     return String(val);

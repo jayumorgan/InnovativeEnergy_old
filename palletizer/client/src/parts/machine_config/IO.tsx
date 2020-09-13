@@ -54,8 +54,7 @@ interface IOCellProps {
 function IOCell({ index, ioController, state, handleSelectMachineMotion, handleSelectNetworkId, toggleSwitch, removeOutput, allMachines }: IOCellProps) {
 
     const [isTesting, setIsTesting] = useState<boolean>(false);
-
-    let handleTest = () => {
+    const handleTest = () => {
         ioController.triggerTest(state).then(() => {
             setIsTesting(true);
             console.log("Starting IO Test");
@@ -63,8 +62,7 @@ function IOCell({ index, ioController, state, handleSelectMachineMotion, handleS
             console.log("Error trigger test", e);
         });
     };
-
-    let handleStop = () => {
+    const handleStop = () => {
         ioController.triggerStop().then(() => {
             setIsTesting(false);
         }).catch((e: any) => {
