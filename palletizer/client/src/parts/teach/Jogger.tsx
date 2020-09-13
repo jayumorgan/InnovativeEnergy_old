@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 
-import JogController, {PalletizerAxes} from "../../jogger/Jogger";
+import JogController, { PalletizerAxes } from "../../jogger/Jogger";
 
 import { AXES } from "../machine_config/Drives";
 
@@ -111,10 +111,10 @@ interface JoggerProps {
 }
 
 function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
-    let [speed, setSpeed] = useState<number>(50);
-    let [distance, setDistance] = useState<number>(50);
-    let [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: false });
-    let [jogController, setJogController] = useState<JogController | null>(null);
+    const [speed, setSpeed] = useState<number>(50);
+    const [distance, setDistance] = useState<number>(50);
+    const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: false });
+    const [jogController, setJogController] = useState<JogController | null>(null);
 
     useEffect(() => {
         get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {

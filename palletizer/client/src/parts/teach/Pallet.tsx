@@ -133,16 +133,11 @@ function defaultPallet(index: number): PalletGeometry {
 }
 
 function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, setPallets, machineConfigId }: PalletCornerProps) {
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(allPallets.length > 0);
-
-    let [cornerNumber, setCornerNumber] = useState<PALLETCORNERS>(PALLETCORNERS.TOP_LEFT); // ()
-
-    // Start with a default pallet for editing...
-    let [editingPallet, setEditingPallet] = useState<PalletGeometry>(defaultPallet(allPallets.length + 1));
-
-    let [editComplete, setEditComplete] = useState<boolean>(false);
-
-    let [editingIndex, setEditingIndex] = useState<number>(allPallets.length);
+    const [summaryScreen, setSummaryScreen] = useState<boolean>(allPallets.length > 0);
+    const [cornerNumber, setCornerNumber] = useState<PALLETCORNERS>(PALLETCORNERS.TOP_LEFT); // ()
+    const [editingPallet, setEditingPallet] = useState<PalletGeometry>(defaultPallet(allPallets.length + 1));
+    const [editComplete, setEditComplete] = useState<boolean>(false);
+    const [editingIndex, setEditingIndex] = useState<number>(allPallets.length);
 
     let LeftButton: ButtonProps = {
         name: "Back",

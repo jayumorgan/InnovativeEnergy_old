@@ -53,7 +53,7 @@ interface IOCellProps {
 
 function IOCell({ index, ioController, state, handleSelectMachineMotion, handleSelectNetworkId, toggleSwitch, removeOutput, allMachines }: IOCellProps) {
 
-    let [isTesting, setIsTesting] = useState<boolean>(false);
+    const [isTesting, setIsTesting] = useState<boolean>(false);
 
     let handleTest = () => {
         ioController.triggerTest(state).then(() => {
@@ -170,9 +170,8 @@ interface IOConfigProps {
 
 export default function IOConfig({ io, allMachines, setIO, handleBack, handleNext, instructionNumber }: IOConfigProps) {
 
-    let [currentStateStep, setCurrentStateStep] = useState<boolean>(false);
-
-    let [ioControllers, setioControllers] = useState<IOController[]>([]);
+    const [currentStateStep, setCurrentStateStep] = useState<boolean>(false);
+    const [ioControllers, setioControllers] = useState<IOController[]>([]);
 
     useEffect(() => {
         let ios = allMachines.map((machine: MachineMotion) => {
@@ -181,7 +180,7 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         setioControllers(ios);
     }, []);
 
-    let [editingIOs, setEditingIOs] = useState<IOState[]>((() => {
+    const [editingIOs, setEditingIOs] = useState<IOState[]>((() => {
         let curr: IOState[] = [];
         if (currentStateStep) {
             curr = [...io.On];

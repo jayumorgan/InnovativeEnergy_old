@@ -183,9 +183,9 @@ interface PalletConfiguratorProps {
 
 function PalletConfigurator({ close, index, palletConfig, id, machine_configs }: PalletConfiguratorProps) {
 
-    let [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1), machine_configs[0].id));
+    const [configuration, dispatchConfiguration] = useReducer(configurationReducer, palletConfig ? palletConfig.config : newPalletConfiguration("Pallet Configuration " + String(index + 1), machine_configs[0].id));
 
-    let [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
+    const [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
     let completionFraction = { n: 0, d: 6 } as Fraction;
 
@@ -214,13 +214,13 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
             SavePalletConfig(name, finalConfig, id);
             close();
         } else {
-            setTeachState(++teachState);
+            setTeachState(1 + teachState);
         }
     };
 
     let handleBack = () => {
         if (teachState > 0) {
-            setTeachState(--teachState);
+            setTeachState(-1 + teachState);
         } else {
             close();
         }

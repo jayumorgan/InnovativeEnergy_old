@@ -16,16 +16,18 @@ import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
 import Drives, { Drive, AxesConfiguration, defaultAxesConfiguration } from "./machine_config/Drives";
 import IOConfig, { IOState, IO, defaultIO } from "./machine_config/IO";
 import MachineSummary, { MachineSummaryProps } from "./machine_config/Summary";
+import Detection, { DetectionProps } from "./machine_config/Detection";
+
 
 //---------------Style---------------
 import "./css/TeachMode.scss";
-
 
 enum MachineConfigState {
     CONFIG_NAME,
     ADD_MACHINE_MOTIONS,
     AXES_CONFIG,
     IO_CONFIG,
+    BOX_DETECTION,
     SUMMARY
 };
 
@@ -34,6 +36,7 @@ export interface MachineConfiguration {
     machines: MachineMotion[]; // String of IP Addresses
     axes: AxesConfiguration;
     io: IO;
+    box_detection: IOState[];
 };
 
 
@@ -55,7 +58,8 @@ enum MACHINE_ACTION {
     NAME,
     MACHINES,
     AXES,
-    IO
+    IO,
+    DETECTION
 };
 
 interface ReducerAction {
@@ -81,6 +85,9 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
         }
         case (MACHINE_ACTION.IO): {
             return { ...state, io: action.payload as IO };
+        }
+        case (MACHINE_ACTION.DETECTION): {
+            return { ...state, box_detection: action.payload as IOState[] };
         }
         default: {
             return state;
@@ -135,6 +142,13 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         dispatch({
             type: MACHINE_ACTION.IO,
             payload: io as any
+        });
+    };
+
+    let setDetection = (detection: IOState[]) => {
+        dispatch({
+            type: MACHINE_ACTION.DETECTION,
+            payload: detection as any
         });
     };
 
@@ -200,6 +214,14 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
                 ...controlProps
             } as any;
             ChildElement = (<IOConfig {...props} />);
+            break;
+        };
+        case (MachineConfigState.BOX_DETECTION): {
+            let props: DetectionProps = {
+                ...controlProps,
+                setDetection
+            };
+            ChildElement = (<Detection {...props} />);
             break;
         };
         case (MachineConfigState.SUMMARY): {

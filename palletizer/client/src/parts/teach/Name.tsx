@@ -16,6 +16,7 @@ interface NameProps {
 export default function TeachModeName({ name, close, changeName, handleStart, existing, isPallet }: NameProps) {
 
     let icon_size = 25;
+
     let onChange = (e: ChangeEvent) => {
         let newName: string = (e.target as any).value;
         changeName(newName);

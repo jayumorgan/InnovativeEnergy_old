@@ -102,11 +102,9 @@ export interface DriveSummaryProps {
 };
 
 export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSummaryProps) {
-
-    let [jogController, setJogController] = useState<JogController | null>(null);
-
-    let [isMoving, setIsMoving] = useState<boolean>(false);
-    let [isEstopped, setIsEstopped] = useState<boolean>(false);
+    const [jogController, setJogController] = useState<JogController | null>(null);
+    const [isMoving, setIsMoving] = useState<boolean>(false);
+    const [isEstopped, setIsEstopped] = useState<boolean>(false);
 
     useEffect(() => {
         let jc = new JogController(Machines, Axes, (_: any) => { }, setIsMoving, setIsEstopped);
@@ -279,10 +277,10 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
         return nextDrive(Axes, allMachines);
     };
 
-    let [editingDrives, setEditingDrives] = useState<Drive[]>([getNextDrive()]);
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(haveAllDrives());
-    let [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
-    let [fromSummary, setFromSummary] = useState<boolean>(summaryScreen);
+    const [editingDrives, setEditingDrives] = useState<Drive[]>([getNextDrive()]);
+    const [summaryScreen, setSummaryScreen] = useState<boolean>(haveAllDrives());
+    const [currentAxis, setCurrentAxis] = useState<AXES>(AXES.X);
+    const [fromSummary, setFromSummary] = useState<boolean>(summaryScreen);
 
     let instruction: string = "Test palletizer X, Y, Z and θ axes by jogging the actuators";
 

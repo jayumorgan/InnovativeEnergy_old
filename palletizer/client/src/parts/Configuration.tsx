@@ -36,11 +36,11 @@ function ConfigCell({ name, id, start_editor, is_machine }: ConfigCellProps) {
     };
 
     let handle_delete = () => {
-	delete_config(id, is_machine).then(() =>{
-	    console.log("Successfully deleted config", id, is_machine);
-	}).catch((e: any) => {
-	    console.log("Error deleting configuration.", id, is_machine, e);
-	});
+        delete_config(id, is_machine).then(() => {
+            console.log("Successfully deleted config", id, is_machine);
+        }).catch((e: any) => {
+            console.log("Error deleting configuration.", id, is_machine, e);
+        });
     };
 
     return (
@@ -92,37 +92,34 @@ function ConfigContainer({ title, configs, start_editor, start_add_config, is_ma
 
 
 function Configuration() {
-    let config_context = useContext(ConfigContext);
-
-    let { machine_configs, pallet_configs } = config_context as ConfigState;
-    
-    let [locked, set_locked] = useState<boolean>(false);
-
-    // True for development
-    let [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
-    let [add_machine_config, set_add_machine_config] = useState<boolean>(false);
-
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
 
-    let [editPalletConfig, setEditPalletConfig] = useState<SavedPalletConfiguration | null>(null);
-    let [editMachineConfig, setEditMachineConfig] = useState<SavedMachineConfiguration | null>(null);
-    let [editPalletId, setEditPalletId] = useState<number | null>(null);
-    let [editMachineId, setEditMachineId] = useState<number | null>(null);
+    let config_context = useContext(ConfigContext);
+
+    let { machine_configs, pallet_configs } = config_context as ConfigState;
+
+    const [locked, set_locked] = useState<boolean>(false);
+    const [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
+    const [add_machine_config, set_add_machine_config] = useState<boolean>(false);
+    const [editPalletConfig, setEditPalletConfig] = useState<SavedPalletConfiguration | null>(null);
+    const [editMachineConfig, setEditMachineConfig] = useState<SavedMachineConfiguration | null>(null);
+    const [editPalletId, setEditPalletId] = useState<number | null>(null);
+    const [editMachineId, setEditMachineId] = useState<number | null>(null);
 
     let startPalletEditor = (id: number) => {
-	if (machine_configs.length > 0) {
+        if (machine_configs.length > 0) {
             let fetch_data = async () => {
-		let res_data = await get_config(id, false) as any;
-		let saved = JSON.parse(res_data.raw_json);
-		setEditPalletId(id);
-		setEditPalletConfig(saved);
-		set_add_pallet_config(true);
+                let res_data = await get_config(id, false) as any;
+                let saved = JSON.parse(res_data.raw_json);
+                setEditPalletId(id);
+                setEditPalletConfig(saved);
+                set_add_pallet_config(true);
             }
             fetch_data();
-	} else {
-	    console.log("Unable to start pallet configuration editor. No machine configurations available.");
-	}
+        } else {
+            console.log("Unable to start pallet configuration editor. No machine configurations available.");
+        }
     };
 
     let startMachineEditor = (id: number) => {
@@ -142,10 +139,10 @@ function Configuration() {
     }
 
     let new_pallet = (val: boolean) => () => {
-	if (machine_configs.length > 0 || !val) {
+        if (machine_configs.length > 0 || !val) {
             set_add_pallet_config(val);
             setEditPalletConfig(null);
-	}
+        }
     };
 
     let new_machine = (val: boolean) => () => {

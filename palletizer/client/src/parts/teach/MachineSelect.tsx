@@ -25,7 +25,7 @@ interface MachineSelectProps extends ControlProps {
 
 export default function MachineSelect({ instructionNumber, handleNext, handleBack, machine_configs, machineConfigId, setMachineConfigId }: MachineSelectProps) {
 
-    let [selectedMachine, setSelectedMachine] = useState<ConfigItem>((() => {
+    const [selectedMachine, setSelectedMachine] = useState<ConfigItem>((() => {
         let selected_index = 0;
         for (let i = 0; i < machine_configs.length; i++) {
             let ci: ConfigItem = machine_configs[i];
@@ -37,8 +37,8 @@ export default function MachineSelect({ instructionNumber, handleNext, handleBac
         return machine_configs[selected_index];
     })());
 
-    let [Axes, setAxes] = useState<AxesConfiguration | null>(null);
-    let [Machines, setMachines] = useState<MachineMotion[] | null>(null);
+    const [Axes, setAxes] = useState<AxesConfiguration | null>(null);
+    const [Machines, setMachines] = useState<MachineMotion[] | null>(null);
 
     let instruction: string = "Select a machine configuration to use for this pallet configuration";
 

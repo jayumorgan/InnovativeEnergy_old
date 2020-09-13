@@ -20,7 +20,6 @@ export interface MachineSummaryProps {
 
 export default function MachineSummary({ machineConfig, handleBack, handleNext, instructionNumber }: MachineSummaryProps) {
 
-
     let instruction = "Review Configuration";
 
     let RightButton: ButtonProps = {

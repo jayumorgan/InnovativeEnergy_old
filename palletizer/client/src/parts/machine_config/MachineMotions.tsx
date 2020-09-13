@@ -75,8 +75,8 @@ interface PropertyInputProps {
 
 function PropertyInput({ name, currentValue, handleChange, validator }: PropertyInputProps) {
 
-    let [valid, setValid] = useState<boolean>(validator(currentValue));
-    let [value, setValue] = useState<string>(currentValue);
+    const [valid, setValid] = useState<boolean>(validator(currentValue));
+    const [value, setValue] = useState<string>(currentValue);
 
     let onChange = (e: ChangeEvent) => {
         let s = (e.target as any).value;
@@ -179,12 +179,9 @@ function defaultMachine(index: number): MachineMotion {
 };
 
 function MachineMotions({ allMachines, setMachines, handleBack, handleNext, instructionNumber }: MachineMotionsProps) {
-
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(allMachines.length > 0);
-
-    let [editingIndex, setEditingIndex] = useState<number | null>(null);
-
-    let [editingMachine, setEditingMachine] = useState<MachineMotion>(defaultMachine(allMachines.length));
+    const [summaryScreen, setSummaryScreen] = useState<boolean>(allMachines.length > 0);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingMachine, setEditingMachine] = useState<MachineMotion>(defaultMachine(allMachines.length));
 
     let instruction = "Add Machine Motion Controllers";
 

@@ -24,11 +24,9 @@ interface BoxProps {
 };
 
 function BoxCell({ box, startEdit, editName }: BoxProps) {
-    // let placeholder = box.name;
 
     let { dimensions } = box;
     let { width, length, height } = dimensions;
-    // let { x, y, z } = box.pickLocation;
 
     let handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
@@ -170,7 +168,7 @@ interface BoxSizeProps extends ControlProps {
 
 export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext, machineConfigId }: BoxSizeProps) {
 
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
+    const [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
 
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
@@ -178,9 +176,9 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
         pickLocation: { x: 0, y: 0, z: 0, θ: false }
     };
 
-    let [editingBox, setEditingBox] = useState<BoxObject>(box);
+    const [editingBox, setEditingBox] = useState<BoxObject>(box);
 
-    let [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     let startEdit = (index: number) => () => {
         if (index >= 0) {

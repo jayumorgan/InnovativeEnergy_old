@@ -128,10 +128,8 @@ function lockCoordinateEdges(currentPosition: number, dimensionSize: number, ful
 };
 
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
-
-    let [rectangle, setRectangle] = useState<Rect>(rect);
-
-    let [active, setActive] = useState<boolean>(false);
+    const [rectangle, setRectangle] = useState<Rect>(rect);
+    const [active, setActive] = useState<boolean>(false);
 
     let setRectPosition = (r: Rect) => {
         updatePosition(index, r.x, r.y);
@@ -601,8 +599,7 @@ interface BoxCellProps {
 }
 
 function BoxCell({ box, index }: BoxCellProps) {
-
-    let [isRotated, setIsRotated] = useState<boolean>(false);
+    const [isRotated, setIsRotated] = useState<boolean>(false);
 
     let toggleRotate = () => {
         setIsRotated(!isRotated);
@@ -707,17 +704,12 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         }
     });
 
-    let [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
-
-    let [currentLayoutIndex, setCurrentLayoutIndex] = useState<number>(0);
-
-    let [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayout);
-
+    const [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
+    const [currentLayoutIndex, setCurrentLayoutIndex] = useState<number>(0);
+    const [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayout);
     let DisplayElement = useRef<HTMLDivElement>(null);
-
-    let [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
-
-    let [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
+    const [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
+    const [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
 
     // let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
 

@@ -1,15 +1,11 @@
 import React from "react";
-
 import { PalletGeometry, BoxObject } from "./structures/Data";
-
 import ContentItem, { ButtonProps } from "./ContentItem";
-
 import { SavedPalletConfiguration } from "../TeachMode";
-
 import Visualizer from "../Visualizer";
 
+//---------------Styles---------------
 import "./css/ConfigurationSummary.scss";
-
 
 interface SummaryCellProps {
     title: string;
@@ -17,9 +13,7 @@ interface SummaryCellProps {
     numberString: string;
 };
 
-
 function SummaryCell({ title, action, numberString }: SummaryCellProps) {
-
     return (
         <div className="Container">
             <div className="Cell">
@@ -45,7 +39,6 @@ function SummaryCell({ title, action, numberString }: SummaryCellProps) {
     );
 };
 
-
 interface StackProps {
     allPallets: PalletGeometry[];
     allBoxes: BoxObject[];
@@ -54,7 +47,6 @@ interface StackProps {
     handleNext: () => void;
     handleBack: () => void;
 };
-
 
 export default function ConfigurationSummary({ allPallets, allBoxes, handleNext, handleBack, instructionNumber, finalConfig }: StackProps) {
     let LeftButton: ButtonProps = {
@@ -130,9 +122,9 @@ export default function ConfigurationSummary({ allPallets, allBoxes, handleNext,
                     })}
                 </div>
                 <div className="RightSide">
-		    <div className="DisplayContainer">
-			<Visualizer palletConfig={finalConfig} currentBoxNumber={Infinity} />
-		    </div>
+                    <div className="DisplayContainer">
+                        <Visualizer palletConfig={finalConfig} currentBoxNumber={Infinity} />
+                    </div>
                     {/* <img src={RightImage} /> */}
                 </div>
             </div>

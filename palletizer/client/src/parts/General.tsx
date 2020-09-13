@@ -5,34 +5,25 @@ import React, {
     ReactElement,
     useEffect
 } from 'react';
-
-// MQTT
 import { MQTTControl } from "../mqtt/MQTT";
-
-// Context
 import { PalletizerContext } from "../context/PalletizerContext";
 import { ConfigContext } from "../context/ConfigContext";
-
-// Requests
 import { set_config } from "../requests/requests";
-
-// Types
 import { ConfigState, PalletizerState, ConfigItem } from "../types/Types";
-
-// Components
 import Visualizer from "./Visualizer";
 
-// Styles
-import "./css/General.scss";
-
-// Logo image
+//---------------Images---------------
 import logo from "../images/vention_logo.png";
-
 import { ReactComponent as BellImage } from "./images/bell.svg";
 import { ReactComponent as ExclamationImage } from "./images/exclamation-circle.svg";
 import { ReactComponent as InfoImage } from "./images/info-circle.svg";
 import { ReactComponent as CircleImage } from "./images/circle.svg";
-import { ContentItemProps } from './teach/ContentItem';
+
+
+//---------------Styles---------------
+import "./css/General.scss";
+
+
 
 var control = MQTTControl();
 
@@ -67,12 +58,10 @@ function ConfigCell({ title, children }: StackProps) {
 };
 
 function ExecutePane({ current_box, status }: ExecuteProps) {
-
     let { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
-
-    let [start_box, set_start_box] = useState(0);
-    let [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
-    let [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);
+    const [start_box, set_start_box] = useState(0);
+    const [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
+    const [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);
 
     useEffect(() => {
         set_machine_current_config(machine_index);
