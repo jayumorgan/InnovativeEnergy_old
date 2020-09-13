@@ -1,12 +1,8 @@
 import React, { ChangeEvent } from "react";
 
-
 import { XIcon } from "./PlusIcon";
 
-
 import "./css/Name.scss";
-
-
 
 interface NameProps {
     name: string;

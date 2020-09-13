@@ -1,4 +1,8 @@
-
+export interface ControlProps {
+    handleBack: () => void;
+    handleNext: () => void;
+    instructionNumber: number;
+};
 
 export enum COLORS {
     BOX = "rgb(89,69,50)",

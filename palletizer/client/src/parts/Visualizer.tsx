@@ -1,17 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-
-// 3D rendering
 import * as Three from "three";
-
-// Styles.
-import "./css/Visualizer.scss";
-
-import { COLORS } from "./teach/shared/Colors";
-
-// Interfaces / Functions For Pallet Configuration.
+import { COLORS } from "./shared/shared";
 import { PalletGeometry, getPalletDimensions, BoxCoordinates, getCenterOfPallet } from "./teach/structures/Data";
 import { SavedPalletConfiguration } from "./TeachMode";
 
+//---------------Styles---------------
+import "./css/Visualizer.scss";
 
 interface FrameDimensions {
     xl: number;
@@ -52,9 +46,8 @@ function FrameNorm(f: FrameDimensions) {
     return Math.sqrt(dx ** 2 + dy ** 2) / Math.sqrt(2);
 };
 
-
 function parseConfig(pallet: SavedPalletConfiguration) {
-    
+
     let usedPallets: PalletGeometry[] = (() => {
         let Ps = [] as PalletGeometry[];
         pallet.config.pallets.forEach((p: PalletGeometry) => {

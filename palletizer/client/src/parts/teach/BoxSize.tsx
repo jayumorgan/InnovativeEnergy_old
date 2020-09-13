@@ -10,6 +10,8 @@ import Box from "./3D/BoxRender";
 
 import { BoxObject, BoxDimensions, CoordinateRot } from "./structures/Data";
 
+import { ControlProps } from "../shared/shared";
+
 import "./css/BoxSize.scss";
 
 
@@ -160,14 +162,10 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
     );
 };
 
-
-interface BoxSizeProps {
+interface BoxSizeProps extends ControlProps {
     allBoxes: BoxObject[];
     setBoxes: (boxes: BoxObject[]) => void;
-    instructionNumber: number,
     machineConfigId: number;
-    handleBack: () => void;
-    handleNext: () => void;
 };
 
 export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleBack, handleNext, machineConfigId }: BoxSizeProps) {

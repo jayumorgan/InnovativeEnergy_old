@@ -8,7 +8,11 @@ import LayerImage from "./images/pallet-layers.png";
 
 import plus_icon from "./images/plus.svg";
 
+import { ControlProps } from "../shared/shared";
+
+//---------------Styles---------------
 import "./css/Stack.scss";
+
 
 interface PalletLayoutProps {
     pallet: PalletGeometry;
@@ -19,12 +23,10 @@ interface PalletLayoutProps {
 function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps) {
     let { name, Layouts, Stack } = pallet;
 
-
     let handleChange = (stackIndex: number) => (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         setLayoutOnLayer(stackIndex, val);
     };
-
 
     return (
         <div className="PalletLayout">
@@ -66,17 +68,14 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps)
     );
 };
 
-interface StackProps {
+
+interface StackProps extends ControlProps {
     allPallets: PalletGeometry[];
-    handleNext: () => void;
-    handleBack: () => void;
     setPallets: (p: PalletGeometry[]) => void;
-    instructionNumber: number;
 };
 
 
-function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNext }: StackProps) {
-    //    let haveStack = false;
+export default function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNext }: StackProps) {
 
     let checkForStack = () => {
         let haveStack = false;
@@ -159,8 +158,5 @@ function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNe
         </ContentItem>
     );
 };
-
-
-export default Stack;
 
 

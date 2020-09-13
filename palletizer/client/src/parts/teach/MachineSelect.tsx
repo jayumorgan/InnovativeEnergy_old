@@ -6,22 +6,21 @@ import { SavedMachineConfiguration } from "../MachineConfig";
 
 import { MachineMotion } from "../machine_config/MachineMotions";
 
-import { DriveSummary, DriveSummaryProps, AxesConfiguration, AXES } from "../machine_config/Drives";
+import { DriveSummary, AxesConfiguration, AXES } from "../machine_config/Drives";
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
 import { ConfigItem } from "../../types/Types";
 
+import { ControlProps } from "../shared/shared";
 //---------------Styles---------------
 import "./css/MachineSelect.scss";
 
-export interface MachineSelectProps {
+
+interface MachineSelectProps extends ControlProps {
     machine_configs: ConfigItem[];
-    instructionNumber: number;
     machineConfigId: number;
     setMachineConfigId: (id: number) => void;
-    handleNext: () => void;
-    handleBack: () => void;
 };
 
 export default function MachineSelect({ instructionNumber, handleNext, handleBack, machine_configs, machineConfigId, setMachineConfigId }: MachineSelectProps) {

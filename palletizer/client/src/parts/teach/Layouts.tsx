@@ -2,14 +2,13 @@ import React, { useRef, useState, DragEvent, ChangeEvent, Fragment } from 'react
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
-// import PlusIcon, { IconProps } from "./PlusIcon";
-
-import { COLORS } from "./shared/Colors";
+import { ControlProps, COLORS } from "../shared/shared";
 
 import Box from "./3D/BoxRender";
 
 import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPositionObject, Rect, BoxDimensions } from "./structures/Data";
 
+//---------------Styles---------------
 import "./css/Layouts.scss";
 
 
@@ -673,13 +672,10 @@ function BoxCell({ box, index }: BoxCellProps) {
 
 };
 
-interface LayoutProps {
+interface LayoutProps extends ControlProps {
     allBoxes: BoxObject[];
     allPallets: PalletGeometry[];
     setPallets: (pallets: PalletGeometry[]) => void;
-    handleNext: () => void;
-    handleBack: () => void;
-    instructionNumber: number;
 };
 
 function defaultLayout(index: number) {
@@ -691,10 +687,7 @@ function defaultLayout(index: number) {
     return l;
 };
 
-
-
-
-function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
+export default function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
 
     let modelSize = 620;
 
@@ -1015,5 +1008,3 @@ function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNex
     }
 };
 
-
-export default Layout;

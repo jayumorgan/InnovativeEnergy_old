@@ -4,13 +4,10 @@ import * as THREE from "three";
 
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
-
 import WoodTexture from "../../images/woodTexture.jpg";
 import { Object3D } from "three";
 
-
 let PalletModel = process.env.PUBLIC_URL + "/models/Pallet.glb";
-
 
 interface RenderProps {
     cornerNumber: number;
@@ -143,13 +140,10 @@ function PalletRender({ cornerNumber }: RenderProps) {
                     }
                 });
                 scene.add(model);
-
                 console.log(model.position);
-
                 let cone = getPyramid();
                 setPyramidPosition(cone, cornerNumber);
                 cone.name = "Pyramid"
-
                 scene.add(cone);
 
                 handleResize();

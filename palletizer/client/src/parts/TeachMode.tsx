@@ -18,9 +18,10 @@ import {
 } from "./teach/structures/Data";
 
 import { Fraction } from "./teach/CompletionDots";
+import { ControlProps } from "./shared/shared";
 
 import Name from "./teach/Name";
-import MachineSelect, { MachineSelectProps } from "./teach/MachineSelect";
+import MachineSelect from "./teach/MachineSelect";
 import BoxSize from "./teach/BoxSize";
 import PalletCorners from "./teach/Pallet";
 import Layout from "./teach/Layouts";
@@ -227,7 +228,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     completionFraction.n = teachState as number;
 
-    let controlProps: any = {
+    let controlProps: ControlProps = {
         handleNext,
         handleBack,
         instructionNumber: completionFraction.n

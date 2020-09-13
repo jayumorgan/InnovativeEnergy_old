@@ -4,19 +4,14 @@ import ContentItem, { ButtonProps } from "./ContentItem";
 
 import { getPalletDimensions, Coordinate, PalletGeometry } from "./structures/Data";
 
-//import { PalletGeometry, getPalletDimensions, Coordinate, PlaneDimensions } from "./structures/Data";
-
 import Jogger from "./Jogger";
-
-// import PalletRender from "./3D/PalletRender";
-//import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
 
 import { LayoutModel, PALLETCORNERS, IncreaseCorner, CornerNumber } from "./Layouts";
 
-// Styles for summary -- rename later.
+//---------------Styles---------------
 import "./css/BoxSize.scss";
-//import "../css/TeachMode.scss";
 import "./css/Pallet.scss";
+import { ControlProps } from '../shared/shared';
 
 
 //---------------Pallet Model---------------
@@ -24,8 +19,7 @@ interface PalletModelProps {
     pallet: PalletGeometry;
     size: number; // 650 for half content width;
     corner: PALLETCORNERS;
-}
-
+};
 
 function PalletModel({ pallet, size, corner }: PalletModelProps) {
     let s = size * 9 / 10;
@@ -103,16 +97,13 @@ function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
             </div>
         </div >
     );
-}
+};
 
 
-interface PalletCornerProps {
+interface PalletCornerProps extends ControlProps {
     allPallets: PalletGeometry[];
     machineConfigId: number;
-    handleNext: () => void;
-    handleBack: () => void;
     setPallets: (pallets: PalletGeometry[]) => void;
-    instructionNumber: number;
 };
 
 

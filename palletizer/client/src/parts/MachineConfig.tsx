@@ -7,6 +7,8 @@ import Modal from "./Modal";
 
 import { SaveMachineConfig } from "../requests/requests";
 
+import { ControlProps } from "./shared/shared";
+
 //---------------Configuration Steps---------------
 
 import Name from "./teach/Name";
@@ -16,7 +18,6 @@ import IOConfig, { IOState, IO, defaultIO } from "./machine_config/IO";
 import MachineSummary, { MachineSummaryProps } from "./machine_config/Summary";
 
 //---------------Style---------------
-
 import "./css/TeachMode.scss";
 
 
@@ -160,7 +161,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
 
     completionFraction.n = configState as number;
 
-    let controlProps: any = {
+    let controlProps: ControlProps = {
         handleNext,
         handleBack,
         instructionNumber: completionFraction.n
