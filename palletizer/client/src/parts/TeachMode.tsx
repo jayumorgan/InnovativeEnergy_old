@@ -153,7 +153,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 averagePosition.z = z_add;
 
                 let dropLocation: CoordinateRot = { ...averagePosition, θ: rotated };
-                let pathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
+                let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
                 boxCoordinates.push({
                     pickLocation,
@@ -161,7 +161,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                     dimensions: box.dimensions,
                     palletIndex,
                     stackIndex,
-                    pathDistance
+                    linearPathDistance
                 } as BoxCoordinates);
             });
         });
