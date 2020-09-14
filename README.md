@@ -1,8 +1,9 @@
 # MachineMotion Applications
 
+## Palletizer
 
-## `palletizer/`
+* `client/`
+* `server/`
 
-### `server/`
 
-## `client/`
+
