@@ -99,29 +99,26 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
 };
 
 export function GenerateFinalConfig(config: PalletConfiguration) {
-    let { pallets } = config;
+    const { pallets } = config;
     let boxCoordinates: BoxCoordinates[] = [];
 
     pallets.forEach((p: PalletGeometry, palletIndex: number) => {
-
-        let { Layouts, Stack } = p;
-
-        let { corner1, corner2, corner3 } = p;
-        let palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
+        const { Layouts, Stack, corner1, corner2, corner3 } = p;
+        const palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
 
         let currentHeightIncrement = palletHeight;
 
         Stack.forEach((n: number, stackIndex: number) => {
 
-            let { boxPositions, height } = Layouts[n];
+            const { boxPositions, height } = Layouts[n];
 
             // Change this to minus if Z-home is at the top of the machine.
             currentHeightIncrement -= height;
 
             boxPositions.forEach((b: BoxPositionObject) => {
-                let { box, position, rotated } = b;
-                let { pickLocation } = box;
-                let { x, y } = position; // These are fractions from the left of the pallet.
+                const { box, position, rotated } = b;
+                const { pickLocation } = box;
+                const { x, y } = position; // These are fractions from the left of the pallet.
 
                 let boxWidth = box.dimensions.width;
                 let boxLength = box.dimensions.length;

@@ -7,6 +7,9 @@ import { SavedPalletConfiguration } from "./TeachMode";
 //---------------Styles---------------
 import "./css/Visualizer.scss";
 
+
+//NB: Frame dimension code is quite stupid -- fix later.
+
 interface FrameDimensions {
     xl: number;
     xh: number;

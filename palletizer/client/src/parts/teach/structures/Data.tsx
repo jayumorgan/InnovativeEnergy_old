@@ -45,7 +45,6 @@ export function Add3D(c1: Coordinate, c2: Coordinate): Coordinate {
 }
 
 function Subtract2D(c1: Coordinate, c2: Coordinate): Coordinate2D {
-
     let x1 = c1.x;
     let y1 = c1.y;
     let x2 = c2.x;
@@ -124,7 +123,7 @@ export interface LayoutObject {
 };
 
 export interface BoxCoordinates {
-    pickLocation: Coordinate;
+    pickLocation: CoordinateRot;
     dropLocation: CoordinateRot;
     dimensions: BoxDimensions;
     palletIndex: number;

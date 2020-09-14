@@ -53,24 +53,44 @@ export interface SavedMachineConfiguration {
 //---------------Pallet Configuration---------------
 
 //NB: subset of elements.
-export interface Coordinate {
+
+export interface CartesianCoordinate {
     x: number;
     y: number;
     z: number;
+}
+
+export interface Coordinate extends CartesianCoordinate {
     θ: boolean; // rotated or not.
+};
+
+export interface BoxDimensions {
+    width: number;
+    length: number;
+    height: number;
 };
 
 export interface BoxCoordinate {
     pickLocation: Coordinate;
     dropLocation: Coordinate;
+    dimensions: BoxDimensions;
     palletIndex: number;
     stackIndex: number;
+    linearPathDistance: number;
+};
+
+export interface PalletGeometry {
+    corner1: Coordinate;
+    corner2: Coordinate;
+    corner3: Coordinate;
 };
 
 export interface PalletConfiguration {
     boxCoordinates: BoxCoordinate[];
     name: string;
+    pallets: PalletGeometry[];
 };
+
 // {
 //   config: {
 //     name: 'Pallet Configuration 2',
