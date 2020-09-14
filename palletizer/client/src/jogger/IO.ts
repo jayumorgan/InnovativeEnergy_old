@@ -55,14 +55,9 @@ export default class IO {
         let my = this;
         let devices = [0, 1, 2];
         let pins: IODeviceState = [false, false, false, false];
-        let promises: Promise<vResponse>[] = [];
-
-        devices.forEach((device: number) => {
-            let p = my.machineMotion.digitalWriteAll(device, pins);
-            promises.push(p);
-        });
-
-        return Promise.all(promises);
+        return Promise.all(devices.map((device: number) => {
+            return my.machineMotion.digitalWriteAll(device, pins);
+        }));
     };
 
     //Io Detection.
