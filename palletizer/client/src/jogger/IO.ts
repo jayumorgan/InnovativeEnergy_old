@@ -50,7 +50,6 @@ export default class IO {
         return my.machineMotion.digitalWriteAll(NetworkId, Pins);
     };
 
-
     triggerStop() {
         let my = this;
         let devices = [0, 1, 2];
