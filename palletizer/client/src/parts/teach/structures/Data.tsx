@@ -129,6 +129,7 @@ export interface BoxCoordinates {
     dimensions: BoxDimensions;
     palletIndex: number;
     stackIndex: number;
+    pathDistance: number;
 };
 
 export interface Rect {
