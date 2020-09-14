@@ -7,7 +7,9 @@ import {
     Coordinate,
     PalletConfiguration,
     CartesianCoordinate,
-    PalletGeometry
+    PalletGeometry,
+    SavedMachineConfiguration,
+    SavedPalletConfiguration
 } from "../engine/config";
 
 
@@ -77,12 +79,14 @@ function getPalletXYCircle(pallet: PalletGeometry): XYCircle {
     } as XYCircle;
 };
 
-function getBoxBottomXYCircle(box: BoxCoordinate): XYCircle { // at start of path.
+function getBoxBottomXYCircle(box: BoxCoordinate, positionCoordinate?: Coordinate): XYCircle { // at start of path.
     const { dimensions, pickLocation } = box;
     const { width, length, height } = dimensions;
 
+    const basePosition: Coordinate = positionCoordinate ? positionCoordinate : pickLocation;
+
     let radius: number = variableNorm(width, length) / 2;
-    let center = Add3D(pickLocation, { x: 0, y: 0, z: height }); // add because 0 = z_home;
+    let center = Add3D(basePosition, { x: 0, y: 0, z: height }); // add because 0 = z_home;
 
     return {
         ...center,
@@ -90,8 +94,9 @@ function getBoxBottomXYCircle(box: BoxCoordinate): XYCircle { // at start of pat
     } as XYCircle;
 };
 
+//not quite correct
 function getBoxTopXYCircle(box: BoxCoordinate): XYCircle {
-    let { x, y, z, radius } = getBoxBottomXYCircle(box);
+    let { x, y, z, radius } = getBoxBottomXYCircle(box, box.dropLocation);
 
     z -= box.dimensions.height;  // minus because 0=z_home.
     return {
@@ -102,15 +107,46 @@ function getBoxTopXYCircle(box: BoxCoordinate): XYCircle {
     } as XYCircle;
 };
 
+// Get line function.
 
 
-export function generatePathSequence(pallet_config: PalletConfiguration) {
-    const { boxCoordinates, pallets } = pallet_config;
+// return type?
+function generatePathForCoordinate(coordinate: BoxCoordinate, constraintCircles: XYCircle[]) {
+    // line from bottom to bottom.
+    let bottomXY: XYCircle = getBoxBottomXYCircle(coordinate);
 
-    // Initialize the contraint array with the pallets. -- will add boxes into here as they are dropped.
+};
+
+
+
+export function generatePathSequence(pallet_config: SavedPalletConfiguration) {
+    const { boxCoordinates, config } = pallet_config;
+    const { pallets } = config;
+
+    let stack_indices: number[] = [];
+
+    // Initialize contrain circles for pallets;
     let xy_constraint_circles: XYCircle[] = pallets.map((p: PalletGeometry) => {
+        stack_indices.push(0); // init stack index to zero.
         return getPalletXYCircle(p);
     });
 
+    let complete_flag = false;
 
+    while (!complete_flag) {
+        // get the box coordinates under consideration. // flatMap unavailable? -- use if works.
+        // Note on flatMap: add flag in tsconfig: https://stackoverflow.com/questions/53556409/typescript-flatmap-flat-flatten-doesnt-exist-on-type-any -- can machine motion handle? 
+        let consideration_box_coordinates: BoxCoordinate[] = boxCoordinates.filter((coord: BoxCoordinate) => {
+            return (coord.stackIndex === stack_indices[coord.palletIndex]);
+        }).map((coord: BoxCoordinate) => {
+            return coord;
+        }).sort((a: BoxCoordinate, b: BoxCoordinate) => {
+            return b.linearPathDistance - a.linearPathDistance;
+        });
+
+        consideration_box_coordinates.forEach((boxCoordinate: BoxCoordinate) => {
+
+
+        });
+    }
 };

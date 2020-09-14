@@ -45,14 +45,10 @@ export interface MachineConfiguration {
 export interface SavedMachineConfiguration {
     name: string;
     config: MachineConfiguration;
-    //    config: 
 };
 
 
-
 //---------------Pallet Configuration---------------
-
-//NB: subset of elements.
 
 export interface CartesianCoordinate {
     x: number;
@@ -86,36 +82,13 @@ export interface PalletGeometry {
 };
 
 export interface PalletConfiguration {
-    boxCoordinates: BoxCoordinate[];
     name: string;
     pallets: PalletGeometry[];
 };
 
-// {
-//   config: {
-//     name: 'Pallet Configuration 2',
-//     boxes: [ [Object] ],
-//     pallets: [ [Object] ]
-//   },
-//   boxCoordinates: [
-//     {
-//       pickLocation: [Object],
-//       dropLocation: [Object],
-//       dimensions: [Object],
-//       palletIndex: 0
-//     }
-//   ]
-// }
-
-interface PalletConf {
-    name: string;
-    boxes: any[];
-    pallets: any[];
-}
-
 export interface SavedPalletConfiguration {
     boxCoordinates: BoxCoordinate[];
-    config: PalletConf;
+    config: PalletConfiguration;
 };
 
 

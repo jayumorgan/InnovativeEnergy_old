@@ -123,6 +123,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let boxWidth = box.dimensions.width;
                 let boxLength = box.dimensions.length;
                 let temp = boxWidth;
+
                 boxWidth = rotated ? boxLength : boxWidth;
                 boxLength = rotated ? temp : boxLength;
 

@@ -1,4 +1,4 @@
-import MM, { MachineMotionConfig, vResponse } from "mm-js-api";
+import MM, { MachineMotionConfig, vResponse, IODeviceState } from "mm-js-api";
 import { v4 as uuidv4 } from 'uuid';
 import mqtt from "mqtt";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
@@ -47,26 +47,19 @@ export default class IO {
     triggerTest(state: IOState) {
         let my = this;
         let { NetworkId, Pins } = state;
-        let promises: Promise<vResponse>[] = [];
-        Pins.forEach((pin: boolean, index: number) => {
-            let p = my.machineMotion.digitalWrite(NetworkId, index, pin);
-            promises.push(p);
-        });
-        return Promise.all(promises);
+        return my.machineMotion.digitalWriteAll(NetworkId, Pins);
     };
 
-    // Trigger IO Stop -- not motion.
+
     triggerStop() {
         let my = this;
         let devices = [0, 1, 2];
-        let pins = [false, false, false, false];
+        let pins: IODeviceState = [false, false, false, false];
         let promises: Promise<vResponse>[] = [];
 
         devices.forEach((device: number) => {
-            pins.forEach((pin: boolean, index: number) => {
-                let p = my.machineMotion.digitalWrite(device, index, pin);
-                promises.push(p);
-            });
+            let p = my.machineMotion.digitalWriteAll(device, pins);
+            promises.push(p);
         });
 
         return Promise.all(promises);
