@@ -105,12 +105,12 @@ export default function Stack({ instructionNumber, allPallets, setPallets, handl
         setPallets(newPallets);
     };
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: handleBack
     };
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: "Next",
         action: () => {
             handleNext()

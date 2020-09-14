@@ -1,18 +1,10 @@
-export interface BoxDimensions {
-    length: number;
-    height: number;
-    width: number;
-};
-
-export interface Coordinate {
-    x: number;
-    y: number;
-    z: number
-};
-
 export interface PlaneDimensions {
     width: number;
     length: number;
+};
+
+export interface BoxDimensions extends PlaneDimensions {
+    height: number;
 };
 
 export interface Coordinate2D {
@@ -20,7 +12,15 @@ export interface Coordinate2D {
     y: number;
 };
 
-export function Subtract3D(c1: Coordinate, c2: Coordinate) {
+export interface Coordinate extends Coordinate2D {
+    z: number
+};
+
+export interface CoordinateRot extends Coordinate {
+    θ: boolean
+};
+
+export function Subtract3D(c1: Coordinate, c2: Coordinate): Coordinate {
     return {
         x: c1.x - c2.x,
         y: c1.y - c2.y,
@@ -28,7 +28,7 @@ export function Subtract3D(c1: Coordinate, c2: Coordinate) {
     } as Coordinate;
 }
 
-export function MultiplyScalar(c1: Coordinate, alpha: number) {
+export function MultiplyScalar(c1: Coordinate, alpha: number): Coordinate {
     return {
         x: c1.x * alpha,
         y: c1.y * alpha,
@@ -36,15 +36,15 @@ export function MultiplyScalar(c1: Coordinate, alpha: number) {
     } as Coordinate;
 }
 
-export function Norm(c: Coordinate) {
+export function Norm(c: Coordinate): number {
     return Math.sqrt(c.x ** 2 + c.y ** 2 + c.z ** 2);
 }
 
-export function Add3D(c1: Coordinate, c2: Coordinate) {
+export function Add3D(c1: Coordinate, c2: Coordinate): Coordinate {
     return Subtract3D(c1, MultiplyScalar(c2, -1));
 }
 
-function Subtract2D(c1: Coordinate, c2: Coordinate) {
+function Subtract2D(c1: Coordinate, c2: Coordinate): Coordinate2D {
 
     let x1 = c1.x;
     let y1 = c1.y;
@@ -57,7 +57,7 @@ function Subtract2D(c1: Coordinate, c2: Coordinate) {
     } as Coordinate2D;
 };
 
-function Norm2D(v: Coordinate2D) {
+function Norm2D(v: Coordinate2D): number {
     return Math.sqrt(v.x ** 2 + v.y ** 2);
 }
 
@@ -76,7 +76,7 @@ export interface PalletGeometry {
     Stack: number[];
 };
 
-export function getPalletDimensions(pallet: PalletGeometry) {
+export function getPalletDimensions(pallet: PalletGeometry): PlaneDimensions {
     let { corner1, corner2, corner3 } = pallet;
     let length_vector = Subtract2D(corner1, corner2);
     let width_vector = Subtract2D(corner3, corner2);
@@ -90,22 +90,20 @@ export function getPalletDimensions(pallet: PalletGeometry) {
 };
 
 
-export function getCenterOfPallet(p: PalletGeometry) {
+export function getCenterOfPallet(p: PalletGeometry): Coordinate {
     let { corner1, corner2, corner3 } = p;
 
     let v1 = Subtract3D(corner1, corner2);
     let v2 = Subtract3D(corner3, corner2);
 
     return Add3D(MultiplyScalar(v1, 0.5), MultiplyScalar(v2, 0.5));
-}
-
+};
 
 
 export interface BoxPosition2D {
     position: Coordinate2D;
     box: BoxObject
 };
-
 
 export interface SVGPosition {
     x: number;
@@ -121,17 +119,8 @@ export interface BoxPositionObject {
 
 export interface LayoutObject {
     name: string;
-    // pallet: PalletGeometry;
     boxPositions: BoxPositionObject[];
     height: number
-};
-
-
-export interface CoordinateRot {
-    x: number,
-    y: number,
-    z: number,
-    θ: boolean
 };
 
 export interface BoxCoordinates {
@@ -139,9 +128,8 @@ export interface BoxCoordinates {
     dropLocation: CoordinateRot;
     dimensions: BoxDimensions;
     palletIndex: number;
+    stackIndex: number;
 };
-
-
 
 export interface Rect {
     x: number;
@@ -154,6 +142,3 @@ export interface Rect {
     offset?: any;
     transform?: string;
 };
-
-
-// And then finally, the stack will be a collection of layers incremented by box height. 

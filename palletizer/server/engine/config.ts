@@ -63,6 +63,8 @@ export interface Coordinate {
 export interface BoxCoordinate {
     pickLocation: Coordinate;
     dropLocation: Coordinate;
+    palletIndex: number;
+    stackIndex: number;
 };
 
 export interface PalletConfiguration {

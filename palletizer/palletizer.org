@@ -1,0 +1,22 @@
+PALLETIZER -*- mode: org -*-
+#+STARTUP: showall
+
+
+* Palletizer
+** Visualizer
+   - Handle multiple pallets
+   - Deal with the strange offset on pallet configuration 2 (locally)
+** Path Otimization
+   - Add lip height to pick point configuration.
+   - Appropriate location for optimizations.
+   - Triangulation about lip height.
+** Machine Configuration
+   - Allow extra drive for V2. 
+** Pallet Configuration
+   - Rotation should become a coordinate / not boolean -- drive must be rotary actuator with degree coordinates.
+** Layout Generator
+   - Implement UI of v1 prototype. Figure out which inputs are necessary.
+** Production
+   - Implement logging.
+   - Proper deploy instructions.
+   - Integration with existing server.

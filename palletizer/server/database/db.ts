@@ -117,7 +117,6 @@ export class DatabaseHandler {
                             });
                         }).catch(e => reject(e));
                     } else {
-                        // No current configurations.
                         resolve({
                             machine: [] as any,
                             pallet: [] as any

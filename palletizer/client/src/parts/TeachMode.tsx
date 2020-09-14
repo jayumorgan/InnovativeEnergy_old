@@ -14,7 +14,8 @@ import {
     Add3D,
     Norm,
     BoxCoordinates,
-    BoxPositionObject
+    BoxPositionObject,
+    CoordinateRot
 } from "./teach/structures/Data";
 
 import { Fraction } from "./teach/CompletionDots";
@@ -99,7 +100,6 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
 
 export function GenerateFinalConfig(config: PalletConfiguration) {
     let { pallets } = config;
-    // We should also write the entire file.
     let boxCoordinates: BoxCoordinates[] = [];
 
     pallets.forEach((p: PalletGeometry, palletIndex: number) => {
@@ -111,7 +111,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
         let currentHeightIncrement = palletHeight;
 
-        Stack.forEach((n: number, index: number) => {
+        Stack.forEach((n: number, stackIndex: number) => {
 
             let { boxPositions, height } = Layouts[n];
 
@@ -152,11 +152,16 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 averagePosition.z = z_add;
 
+                let dropLocation: CoordinateRot = { ...averagePosition, θ: rotated };
+
+                let linear_path_distance: number = Norm(Subtract3D(pickLocation, dropLocation));
+
                 boxCoordinates.push({
                     pickLocation,
-                    dropLocation: { ...averagePosition, θ: rotated },
+                    dropLocation,
                     dimensions: box.dimensions,
-                    palletIndex
+                    palletIndex,
+                    stackIndex
                 } as BoxCoordinates);
             });
         });
