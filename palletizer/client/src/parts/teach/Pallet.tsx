@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent } from 'react';
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
-import { getPalletDimensions, Coordinate, PalletGeometry } from "./structures/Data";
+import { getPalletDimensions, Coordinate, PalletGeometry } from "../../geometry/geometry";
 
 import Jogger from "./Jogger";
 

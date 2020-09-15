@@ -4,7 +4,8 @@ import MM, { MachineMotionConfig, DriveType, DRIVES, DIRECTION, vResponse } from
 
 import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
-import { CoordinateRot } from "../parts/teach/structures/Data";
+import { CoordinateRot } from "../geometry/geometry";
+
 
 
 const TESTING = true;
@@ -377,7 +378,7 @@ export default class Jogger {
                 x: (res[0].result as any)[axisNumbertoAxisString(x_drive.DriveNumber)] as number,
                 y: (res[1].result as any)[axisNumbertoAxisString(y_drive.DriveNumber)] as number,
                 z: (res[2].result as any)[axisNumbertoAxisString(z_drive.DriveNumber)] as number,
-                θ: ((res[3].result as any)[axisNumbertoAxisString(θ_drive.DriveNumber)] as number === 0) as boolean
+                θ: (res[3].result as any)[axisNumbertoAxisString(θ_drive.DriveNumber)] as number
             };
             my.positionHandler(position as any);
         }).catch((e: any) => {

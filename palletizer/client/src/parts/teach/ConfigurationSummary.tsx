@@ -1,5 +1,5 @@
 import React from "react";
-import { PalletGeometry, BoxObject } from "./structures/Data";
+import { PalletGeometry, BoxObject } from "../../geometry/geometry";
 import ContentItem, { ButtonProps } from "./ContentItem";
 import { SavedPalletConfiguration } from "../TeachMode";
 import Visualizer from "../Visualizer";

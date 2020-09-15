@@ -1,22 +1,13 @@
 import React, { useState, ChangeEvent } from 'react';
-
 import ContentItem, { ButtonProps } from "./ContentItem";
-
 import Jogger from "./Jogger";
-
-// 3D display of box.
 import Box from "./3D/BoxRender";
-// import PlusIcon, { IconProps, XIcon } from "./PlusIcon";
-
-import { BoxObject, BoxDimensions, CoordinateRot } from "./structures/Data";
-
+import { BoxObject, BoxDimensions, CoordinateRot } from "../../geometry/geometry";
 import { ControlProps } from "../shared/shared";
 
 import "./css/BoxSize.scss";
 
-
 //---------------Box Size---------------
-
 interface BoxProps {
     box: BoxObject;
     startEdit: () => void;
@@ -173,7 +164,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
         dimensions: { length: 100, height: 100, width: 100 },
-        pickLocation: { x: 0, y: 0, z: 500, θ: false }
+        pickLocation: { x: 0, y: 0, z: 500, θ: 0 }
     };
 
     const [editingBox, setEditingBox] = useState<BoxObject>(box);

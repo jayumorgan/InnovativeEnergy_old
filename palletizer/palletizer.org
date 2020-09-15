@@ -1,25 +1,39 @@
 PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
-
+#+TODO: TODO IN-PROGRESS WAITING DONE
 
 * Palletizer
-** Visualizer
+** TODO Teach Mode 
+   - Compute rotational angle of pallet. 
+** TODO Visualizer
    - Handle multiple pallets
    - Deal with the strange offset on pallet configuration 2 (locally)
    - Update to deal with optimized coordinates.
-** Execution Control
+   - Deal with new coordinate format.
+** TODO Execution Control
    - Toggle optimization, optimization errors -- which shouldn't exist for valid pallet configuration.
-** Path Otimization
+** TODO Path Otimization
    - Add lip height to pick point configuration.
    - Appropriate location for optimizations.
    - Triangulation about lip height.
-** Machine Configuration
+** TODO Machine Configuration
    - Allow extra drive for V2. 
-** Pallet Configuration
-   -θ coordinate must be numerical -- account for pallet rotation. and offset pick.
-** Layout Generator
+** DONE Pallet Configuration
+   -θ coordinate must be numerical
+** TODO Layout Generator
    - Implement UI of v1 prototype. Figure out which inputs are necessary.
-** Production
+** TODO Production
    - Implement logging.
    - Proper deploy instructions.
-   - Integration with existing server.
+** TODO Engine
+   - Implement action path throughout.
+   - Detection action at path segement.
+   
+
+
+** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
+   
+** TODO 
+
+
+

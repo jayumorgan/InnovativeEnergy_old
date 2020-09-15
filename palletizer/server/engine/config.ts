@@ -57,7 +57,7 @@ export interface CartesianCoordinate {
 }
 
 export interface Coordinate extends CartesianCoordinate {
-    θ: boolean; // rotated or not.
+    θ: number;
 };
 
 export interface BoxDimensions {

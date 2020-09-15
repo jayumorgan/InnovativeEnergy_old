@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as Three from "three";
-import { BoxDimensions } from "../structures/Data";
+import { BoxDimensions } from "../../../geometry/geometry";
 import { COLORS } from "../../shared/shared";
 
 interface Animation {

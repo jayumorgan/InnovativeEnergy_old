@@ -16,7 +16,7 @@ import {
     BoxCoordinates,
     BoxPositionObject,
     CoordinateRot
-} from "./teach/structures/Data";
+} from "../geometry/geometry";
 
 import { Fraction } from "./teach/CompletionDots";
 import { ControlProps } from "./shared/shared";
@@ -150,7 +150,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 averagePosition.z = z_add;
 
-                let dropLocation: CoordinateRot = { ...averagePosition, θ: rotated };
+                let dropLocation: CoordinateRot = { ...averagePosition, θ: 0 };
                 let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
                 boxCoordinates.push({

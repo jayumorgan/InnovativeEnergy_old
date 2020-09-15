@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from "react";
 
-import { PalletGeometry, LayoutObject } from "./structures/Data";
+import { PalletGeometry, LayoutObject } from "../../geometry/geometry";
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 

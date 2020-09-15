@@ -1,3 +1,5 @@
+// Rename this file.
+
 export interface PlaneDimensions {
     width: number;
     length: number;
@@ -13,11 +15,11 @@ export interface Coordinate2D {
 };
 
 export interface Coordinate extends Coordinate2D {
-    z: number
+    z: number;
 };
 
 export interface CoordinateRot extends Coordinate {
-    θ: boolean
+    θ: number;
 };
 
 export function Subtract3D(c1: Coordinate, c2: Coordinate): Coordinate {

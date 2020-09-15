@@ -6,7 +6,16 @@ import { ControlProps, COLORS } from "../shared/shared";
 
 import Box from "./3D/BoxRender";
 
-import { PalletGeometry, getPalletDimensions, PlaneDimensions, BoxObject, LayoutObject, BoxPositionObject, Rect, BoxDimensions } from "./structures/Data";
+import {
+    PalletGeometry,
+    getPalletDimensions,
+    PlaneDimensions,
+    BoxObject,
+    LayoutObject,
+    BoxPositionObject,
+    Rect,
+    BoxDimensions
+} from "../../geometry/geometry";
 
 //---------------Styles---------------
 import "./css/Layouts.scss";

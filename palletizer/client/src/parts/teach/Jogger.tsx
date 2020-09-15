@@ -2,16 +2,11 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 
 import JogController, { PalletizerAxes } from "../../jogger/Jogger";
 
-import { AXES } from "../machine_config/Drives";
-
-// ---Remove this shortly.
-//import { TeachModeController, NetworkConfiguration, NETWORK_MODE } from "../../MachineMotion/MachineMotion";
-
 import SolidArrow, { ROTATION } from "./SolidArrow";
 
 import { get_machine_config } from "../../requests/requests";
 
-import { Coordinate, CoordinateRot } from './structures/Data';
+import { CoordinateRot } from "../../geometry/geometry";
 
 //---------------Styles + Images---------------
 import "./css/Jogger.scss";
@@ -113,7 +108,7 @@ interface JoggerProps {
 function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
-    const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: false });
+    const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(null);
 
     useEffect(() => {
@@ -204,9 +199,8 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
     };
 
     let handleSelect = async () => {
-
         let pos = {
-            x: 2000, y: 2000, z: 1000, θ: false
+            x: 2000, y: 2000, z: 1000, θ: 0
         } as CoordinateRot;
         let tmp = TEMP_JOGGER_INDEX % 3;
         if (tmp === 0) {

@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Three from "three";
 import { COLORS } from "./shared/shared";
-import { PalletGeometry, getPalletDimensions, BoxCoordinates, getCenterOfPallet } from "./teach/structures/Data";
+import {
+    PalletGeometry,
+    getPalletDimensions,
+    BoxCoordinates,
+    getCenterOfPallet
+} from "../geometry/geometry";
 import { SavedPalletConfiguration } from "./TeachMode";
 
 //---------------Styles---------------
