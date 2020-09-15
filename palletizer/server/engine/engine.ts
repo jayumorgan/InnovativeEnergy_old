@@ -26,11 +26,10 @@ import {
     Coordinate
 } from "./config";
 
-import {
-    generatePathSequence,
-    BoxPath
-} from "../optimizer/path";
-
+import { generateStandardPath } from "../optimizer/standard";
+import { BoxPath, ActionCoordinate, ActionTypes } from "../optimizer/optimized";
+import { resolve } from "dns";
+import { rejects } from "assert";
 
 //--------------------TESTING ENVIRONMENT--------------------
 const TESTING = true;
@@ -167,6 +166,7 @@ export class Engine {
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
     cycleState: CYCLE_STATE = CYCLE_STATE.NONE;
     startBox: number = 0;
+    boxPathsForPallet: BoxPath[] = [];
 
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
@@ -231,8 +231,6 @@ export class Engine {
         this.configureMachine = this.configureMachine.bind(this);
         this.runPalletizerSequence = this.runPalletizerSequence.bind(this);
         this.executeHomingSequence = this.executeHomingSequence.bind(this);
-        this.executePickSequence = this.executePickSequence.bind(this);
-        this.executeDropSequence = this.executeDropSequence.bind(this);
     };
 
 
@@ -322,12 +320,13 @@ export class Engine {
         this.palletizerState.palletConfig = spc;
         this.palletConfigId = id;
         let is_null = this.palletConfig === null;
+        if (!is_null) {
+            let paths: BoxPath[] = generateStandardPath(spc);
+            this.boxPathsForPallet = paths;
+        }
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
         let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig!.config.name;
         this.__handleInformation(info_status, info_description);
-
-        //        let paths: BoxPath[] = generatePathSequence(spc);
-        //      console.log(paths);
     };
 
     // Should return a promise on success.
@@ -390,7 +389,7 @@ export class Engine {
             return;
         }
 
-        this.loadConfigurations().then(() => {
+        my.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
             my.__stateReducer({
@@ -452,7 +451,7 @@ export class Engine {
                 let mm_controller: MachineMotion = new MachineMotion(mm_config);
 
                 // NB: estop will recursively call estop, so unbind the estop action on first call.
-                console.log("Setting bound event");
+
                 mm_controller.bindEstopEvent(() => {
                     console.log("Calling bound event");
                     mm_controller.bindEstopEvent(() => {
@@ -513,13 +512,13 @@ export class Engine {
         if (my.palletConfig !== null) {
             my.__stateReducer({
                 current_box: box_index + 1,
-                total_box: my.palletConfig.boxCoordinates.length
+                total_box: my.boxPathsForPallet.length
             });
         }
 
         return my.runPalletizerSequence(box_index).then(() => {
             let next_box_index = box_index + 1;
-            if (my.palletConfig !== null && my.palletConfig.boxCoordinates.length > next_box_index) {
+            if (my.palletConfig !== null && my.boxPathsForPallet.length > next_box_index) {
                 return my.startPalletizer(next_box_index);
             } else {
                 my.__updateStatus(PALLETIZER_STATUS.COMPLETE);
@@ -529,14 +528,58 @@ export class Engine {
         });
     };
 
-    async runPalletizerSequence(box_index: number) {
+
+    // run palletizer sequence should run through the path. then continue;
+    async runPalletizerSequence(box_index: number): Promise<any> {
         let my = this;
-        return my.executePickSequence(box_index).then(() => {
-            return my.executeDropSequence(box_index);
+
+        const homeIfZero = () => {
+            if (box_index === 0) {
+                return my.executeHomingSequence();
+            } else {
+                return Promise.resolve();
+            }
+        };
+
+        return homeIfZero().then(() => {
+            return my.executePathSequence(box_index, 0);
         });
     };
 
-    async executeHomingSequence() {
+    executePathSequence(box_index: number, path_index: number): Promise<any> {
+        let my = this;
+        if (box_index >= my.boxPathsForPallet.length) {
+            return Promise.resolve();
+        } else {
+            let path: BoxPath = my.boxPathsForPallet[box_index];
+            if (path_index >= path.length) {
+                return Promise.resolve();
+            } else {
+                let action_coordinate: ActionCoordinate = path[path_index];
+                return my.__move(action_coordinate).then((_: any) => {
+                    return my.executeAction(action_coordinate.action);
+                }).then(() => {
+                    let next_path_index = path_index + 1;
+                    return my.executePathSequence(box_index, next_path_index);
+                });
+            }
+        }
+    };
+
+    executeAction(action?: ActionTypes): Promise<any> {
+        let my = this;
+        if (action) {
+            if (action === ActionTypes.PICK) {
+                return my.__pickIO()
+            }
+            if (action === ActionTypes.DROP) {
+                return my.__dropIO();
+            }
+        }
+        return Promise.resolve();
+    };
+
+    async executeHomingSequence(): Promise<any> {
         let my = this;
         my.cycleState = CYCLE_STATE.HOMEING;
         return my.homeVertialAxis().then(() => {
@@ -544,39 +587,7 @@ export class Engine {
         });
     };
 
-    async executePickSequence(box_index: number) {
-        let my = this;
-        my.cycleState = CYCLE_STATE.PICK;
-        if (my.palletConfig !== null) {
-            let coordinate: Coordinate = my.palletConfig.boxCoordinates[box_index].pickLocation;
-            return my.__moveToCoordinate(coordinate).then(() => {
-                return my.__detectIO();
-            }).then(() => {
-                return my.__pickIO();
-            });
-        } else {
-            return new Promise((resolve, reject) => {
-                reject("Error with pallet configuration. Verify that the pallet configuration is valid.");
-            });
-        }
-    };
-
-    async executeDropSequence(box_index: number) {
-        let my = this;
-        my.cycleState = CYCLE_STATE.DROP;
-        if (my.palletConfig !== null) {
-            let coordinate: Coordinate = my.palletConfig.boxCoordinates[box_index].dropLocation;
-            return my.__moveToCoordinate(coordinate).then(() => {
-                return my.__dropIO();
-            });
-        } else {
-            return new Promise((resolve, reject) => {
-                reject("Error with pallet configuration. Verify that the pallet configuration is valid.");
-            });
-        }
-    };
-
-    homeVertialAxis() {
+    homeVertialAxis(): Promise<any> {
         let my = this;
         let { axes } = this.mechanicalLayout;
         let { Z } = axes;
@@ -600,7 +611,7 @@ export class Engine {
         });
     };
 
-    homeAllAxes() {
+    homeAllAxes(): Promise<any> {
         let my = this;
         return new Promise((resolve, reject) => {
             let { machines } = my.mechanicalLayout;
@@ -616,72 +627,20 @@ export class Engine {
         });
     };
 
-
-    // Bit of a mess -- problem is an arbitrary number of drives on an arbitrary number of machine motions.
-    __moveVertical(c: Coordinate): Promise<any> {
-        let z_point = c.z;
+    __move(coordinate: ActionCoordinate): Promise<any> {
+        console.log(coordinate);
 
         let my = this;
         let mm_group = {} as { [key: number]: any };
         let { machines, axes } = my.mechanicalLayout;
-        let z_axes = axes.Z;
-
-        z_axes.forEach((d: Drive) => {
-            let { MachineMotionIndex, DriveNumber } = d;
-            if (!(MachineMotionIndex in mm_group)) {
-                mm_group[MachineMotionIndex] = {}
-            }
-            mm_group[MachineMotionIndex][numberToDrive(DriveNumber) as string] = z_point;
-        });
-
-        let mm_ids = Object.keys(mm_group) as string[];
-        let actions: Action[] = [];
-
-        mm_ids.forEach((ids: string) => {
-            let id: number = +(ids);
-            let mm: MachineMotion = machines[id];
-            let pairing = mm_group[id];
-            let axes: AXES[] = Object.keys(pairing) as AXES[];
-            let positions: number[] = Object.values(pairing);
-
-            let move_action = () => {
-                return mm.emitCombinedAxesAbsoluteMove(axes, positions);
-            };
-            let wait_action = () => {
-                return mm.waitForMotionCompletion();
-            };
-
-            actions.push(move_action);
-            actions.push(wait_action);
-        });
-
-        // How do we resume at a nice pace
-        return my.__controlSequence(actions);
-    };
-
-    __movePlanar(c: Coordinate): Promise<any> { // Move X, Y, θ.
-        let my = this;
-
-        let x_point: number = c.x;
-        let y_point: number = c.y;
-        let θ_point: boolean = c.θ;
-
-        let mm_group = {} as { [key: number]: any };
-
-        let { machines, axes } = my.mechanicalLayout;
-
-        let x_axes = axes.X;
-        let y_axes = axes.Y;
-        let θ_axes = axes.θ;
-
         let tagged: [Drive[], number][] = [];
 
-        tagged.push([x_axes, x_point]);
-        tagged.push([y_axes, y_point]);
-        tagged.push([θ_axes, θ_point ? 90 : 0]);
-
-        for (let i = 0; i < tagged.length; i++) {
-            let [drives, position] = tagged[i];
+        tagged.push([axes.Z, coordinate.z]);
+        tagged.push([axes.Y, coordinate.y]);
+        tagged.push([axes.X, coordinate.x]);
+        tagged.push([axes.θ, coordinate.θ ? 90 : 0]);
+        tagged.forEach((t: [Drive[], number], i: number) => {
+            let [drives, position] = t;
             drives.forEach((d: Drive) => {
                 let { MachineMotionIndex, DriveNumber } = d;
                 if (!(MachineMotionIndex in mm_group)) {
@@ -689,10 +648,8 @@ export class Engine {
                 }
                 mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = position;
             });
-        }
-
+        });
         let mm_ids = Object.keys(mm_group) as string[];
-
         let actions: Action[] = [];
 
         for (let i = 0; i < mm_ids.length; i++) {
@@ -715,23 +672,6 @@ export class Engine {
         };
 
         return my.__controlSequence(actions);
-    };
-
-    __moveToCoordinate(c: Coordinate): Promise<any> {
-        let my = this;
-        // zero_z is a minimized height to clear everything inside the cage. Default z = 0 (top).
-        let zero_z: Coordinate = {
-            x: 0,
-            y: 0,
-            z: 0,
-            θ: false
-        };
-
-        return my.__moveVertical(zero_z).then(() => {
-            return my.__movePlanar(c);
-        }).then(() => {
-            return my.__moveVertical(c);
-        });
     };
 
     __pickIO() {
@@ -763,49 +703,45 @@ export class Engine {
     };
 
     // will repeat sequence starting from top on run.
-    __controlSequence(actions: Action[]) {
+    __controlSequence(actions: Action[]): Promise<any> {
         if (actions.length === 0) {
             return new Promise((resolve, _) => {
                 resolve();
-            });
-        } else {
-            let my = this;
-            let { status } = my.palletizerState;
-            if (status === PALLETIZER_STATUS.RUNNING) {
-                return new Promise((resolve, reject) => {
-                    let first: Action | undefined = actions.shift();
-                    if (first) {
-                        first!().then(() => {
-                            return my.__controlSequence(actions);
-                        }).then(() => {
-                            resolve();
-                        }).catch((e: any) => {
-                            reject(e);
-                        });
-                    } else {
-                        resolve();
-                    }
-                });
-            } else if (status === PALLETIZER_STATUS.PAUSED) {
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        my.__controlSequence(actions).then(() => {
-                            resolve();
-                        }).catch((e) => {
-                            reject(e);
-                        });
-                    }, 500);
-                });
-            } else {
-                return new Promise((_, reject) => {
-                    reject("Palletizer is not in run state " + String(status));
-                })
-            }
+            })
         }
+
+        let my = this;
+        let { status } = my.palletizerState;
+
+        if (status === PALLETIZER_STATUS.RUNNING) {
+            let first: Action | undefined = actions.shift();
+            if (first) {
+                return first().then((_: any) => {
+                    return my.__controlSequence(actions);
+                });
+            }
+            return new Promise((resolve, _) => {
+                resolve();
+            })
+        }
+
+        if (status === PALLETIZER_STATUS.PAUSED) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    my.__controlSequence(actions).then(() => {
+                        resolve();
+                    }).catch((e) => {
+                        reject(e);
+                    });
+                }, 500);
+            });
+        }
+
+        return new Promise((_, reject) => {
+            reject("Palletizer is not in run state " + String(status));
+        });
     };
-
 };
-
 
 function safeAwait(promise: Promise<any>) {
     return promise.then(data => {

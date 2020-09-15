@@ -206,15 +206,15 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
     let handleSelect = async () => {
 
         let pos = {
-            x: 0, y: 0, z: 0, θ: false
+            x: 2000, y: 2000, z: 1000, θ: false
         } as CoordinateRot;
         let tmp = TEMP_JOGGER_INDEX % 3;
         if (tmp === 0) {
-            pos.y = 1003;
+            pos.y = 3000;
         } else if (tmp === 1) {
 
         } else {
-            pos.x = 1003;
+            pos.x = 3000;
         }
 
         TEMP_JOGGER_INDEX++;

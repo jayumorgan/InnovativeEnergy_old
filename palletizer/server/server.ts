@@ -23,6 +23,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 
+//import { generatePathSequence } from "./optimizer/path";
 
 initDatabaseHandler().then((handler: DatabaseHandler) => {
 
@@ -35,6 +36,15 @@ initDatabaseHandler().then((handler: DatabaseHandler) => {
 
     app.use(attachDatabaseHandler);
     app.use(router);
+
+    // handler.getCurrentConfigs().then((configs: any) => {
+    //     let { machine, pallet } = configs;
+    //     machine = JSON.parse(machine.raw_json);
+    //     pallet = JSON.parse(pallet.raw_json);
+    //     let p = generatePathSequence(pallet);
+    //     console.log(p);
+    // });
+
 
     let server = app.listen(PORT, HOSTNAME, () => {
         let address = server.address() as AddressInfo;

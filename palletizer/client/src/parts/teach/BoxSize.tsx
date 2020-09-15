@@ -172,8 +172,8 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
-        dimensions: { length: 235, height: 267, width: 330 },
-        pickLocation: { x: 0, y: 0, z: 0, θ: false }
+        dimensions: { length: 100, height: 100, width: 100 },
+        pickLocation: { x: 0, y: 0, z: 500, θ: false }
     };
 
     const [editingBox, setEditingBox] = useState<BoxObject>(box);

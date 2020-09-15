@@ -11,7 +11,6 @@ const TESTING = true;
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
 
-
 // MM is the controller, MachineMotion is the configuration parameters from MachineConfig (just info, no methods)
 
 // Machine Motion Specific

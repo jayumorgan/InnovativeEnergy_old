@@ -1,4 +1,5 @@
-//---------------Path Optimizer---------------
+//---------------Path Optimizer: Attempt 1---------------
+
 
 // In: (pallet_config) -> Out: (list of coordinates, raise location, etc.
 
@@ -14,8 +15,21 @@ import {
 
 
 //---------------Types---------------
-export type BoxPath = Coordinate[]; // first coordinate is pick location, last is drop location.
-type Segment = [Coordinate, Coordinate];
+
+export enum ActionTypes {
+    NONE,
+    PICK,
+    DROP
+};
+
+export interface ActionCoordinate extends Coordinate {
+    action?: ActionTypes;
+};
+
+export type BoxPath = ActionCoordinate[];
+
+
+export type Segment = [Coordinate, Coordinate];
 interface XYCircle extends CartesianCoordinate {
     radius: number;
 };
