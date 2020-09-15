@@ -5,7 +5,7 @@ import { MachineMotion } from "../parts/machine_config/MachineMotions";
 import { IOState } from "../parts/machine_config/IO";
 
 
-const TESTING = false;
+const TESTING = true;
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
 

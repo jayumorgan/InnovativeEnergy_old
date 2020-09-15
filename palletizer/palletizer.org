@@ -6,6 +6,9 @@ PALLETIZER -*- mode: org -*-
 ** Visualizer
    - Handle multiple pallets
    - Deal with the strange offset on pallet configuration 2 (locally)
+   - Update to deal with optimized coordinates.
+** Execution Control
+   - Toggle optimization, optimization errors -- which shouldn't exist for valid pallet configuration.
 ** Path Otimization
    - Add lip height to pick point configuration.
    - Appropriate location for optimizations.
@@ -13,7 +16,7 @@ PALLETIZER -*- mode: org -*-
 ** Machine Configuration
    - Allow extra drive for V2. 
 ** Pallet Configuration
-   - Rotation should become a coordinate / not boolean -- drive must be rotary actuator with degree coordinates.
+   -θ coordinate must be numerical -- account for pallet rotation. and offset pick.
 ** Layout Generator
    - Implement UI of v1 prototype. Figure out which inputs are necessary.
 ** Production

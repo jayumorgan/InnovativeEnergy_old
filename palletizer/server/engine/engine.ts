@@ -26,16 +26,15 @@ import {
     Coordinate
 } from "./config";
 
-
-
+import {
+    generatePathSequence,
+    BoxPath
+} from "../optimizer/path";
 
 
 //--------------------TESTING ENVIRONMENT--------------------
-const TESTING = false
+const TESTING = true;
 console.log((TESTING ? "In" : "Not in") + " Testing environment");
-
-
-
 
 
 //---------------Network Parameters---------------
@@ -326,6 +325,9 @@ export class Engine {
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
         let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig!.config.name;
         this.__handleInformation(info_status, info_description);
+
+        //        let paths: BoxPath[] = generatePathSequence(spc);
+        //      console.log(paths);
     };
 
     // Should return a promise on success.

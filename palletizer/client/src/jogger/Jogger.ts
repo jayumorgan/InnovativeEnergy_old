@@ -7,7 +7,7 @@ import { MachineMotion } from "../parts/machine_config/MachineMotions";
 import { CoordinateRot } from "../parts/teach/structures/Data";
 
 
-const TESTING = false;
+const TESTING = true;
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
 
