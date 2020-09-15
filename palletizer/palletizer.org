@@ -1,6 +1,5 @@
 PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
-#+TODO: TODO IN-PROGRESS WAITING DONE
 
 * Palletizer
 ** TODO Teach Mode 
@@ -29,11 +28,10 @@ PALLETIZER -*- mode: org -*-
    - Implement action path throughout.
    - Detection action at path segement.
    
-
-
+** TODO Delete Boxes.
+** TODO Rotational coordinates in all visualizations.
 ** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
-   
-** TODO 
+
 
 
 

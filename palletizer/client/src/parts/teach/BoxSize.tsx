@@ -12,9 +12,10 @@ interface BoxProps {
     box: BoxObject;
     startEdit: () => void;
     editName: (newName: string) => void;
+    handleDelete: () => void;
 };
 
-function BoxCell({ box, startEdit, editName }: BoxProps) {
+function BoxCell({ box, startEdit, editName, handleDelete }: BoxProps) {
 
     let { dimensions } = box;
     let { width, length, height } = dimensions;
@@ -60,7 +61,7 @@ function BoxCell({ box, startEdit, editName }: BoxProps) {
                     </div>
                 </div>
             </div>
-            <div className="Trash">
+            <div className="Trash" onClick={handleDelete} >
                 <span className="icon-delete">
                 </span>
             </div>
@@ -190,7 +191,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
     let instruction: string;
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             if (summaryScreen) {
@@ -205,8 +206,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
         }
     };
 
-    // Only allow the box to be increment
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
@@ -223,23 +223,29 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
                 setSummaryScreen(true);
             }
         },
-        enabled: true
+        enabled: allBoxes.length > 0
     };
 
     if (summaryScreen) {
         instruction = "Create and edit boxes";
 
-        let AddButton: ButtonProps = {
+        const AddButton: ButtonProps = {
             name: "Add new box",
             action: startEdit(-1)
         };
 
-        let contentItemProps = {
+        const contentItemProps = {
             instruction,
             instructionNumber,
             LeftButton,
             RightButton,
             AddButton
+        };
+
+        const removeBox = (index: number) => () => {
+            let cp = [...allBoxes];
+            cp.splice(index, 1);
+            setBoxes(cp);
         };
 
         return (
@@ -248,8 +254,14 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
                             {allBoxes.map((val: BoxObject, index: number) => {
+                                let boxCellProps: BoxProps = {
+                                    box: val,
+                                    startEdit: startEdit(index),
+                                    editName: editName(index),
+                                    handleDelete: removeBox(index)
+                                };
                                 return (
-                                    <BoxCell box={val} key={index} startEdit={startEdit(index)} editName={editName(index)} />
+                                    <BoxCell {...boxCellProps} key={index} />
                                 )
                             })}
                         </div>

@@ -192,8 +192,8 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     callback(fullMesh, fullHeight);
 };
 
-interface VisualizerProps {
-    palletConfig: SavedPalletConfiguration;
+export interface VisualizerProps {
+    palletConfig?: SavedPalletConfiguration;
     currentBoxNumber: number;
 };
 

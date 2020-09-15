@@ -10,7 +10,7 @@ import { PalletizerContext } from "../context/PalletizerContext";
 import { ConfigContext } from "../context/ConfigContext";
 import { set_config } from "../requests/requests";
 import { ConfigState, PalletizerState, ConfigItem } from "../types/Types";
-import Visualizer from "./Visualizer";
+import Visualizer, { VisualizerProps } from "./Visualizer";
 
 //---------------Images---------------
 import logo from "../images/vention_logo.png";
@@ -390,9 +390,14 @@ interface StatusItem {
 
 function General() {
 
-    let palletizer_context = useContext(PalletizerContext);
-
-    let { status, cycle, total_box, current_box, time } = palletizer_context as PalletizerState;
+    const {
+        status,
+        cycle,
+        total_box,
+        current_box,
+        time,
+        palletConfig
+    } = useContext(PalletizerContext) as PalletizerState;
 
     let items = [] as StatusItem[];
 
@@ -413,14 +418,10 @@ function General() {
         value: `${time} Minutes`
     });
 
-
-    let { palletConfig } = palletizer_context;
-
-
-    let visualizerProps: any = {
+    const visualizerProps: VisualizerProps = {
         currentBoxNumber: current_box,
         palletConfig
-    }
+    };
 
     return (
         <div className="GeneralGrid">

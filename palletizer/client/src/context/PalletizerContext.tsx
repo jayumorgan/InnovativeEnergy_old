@@ -1,8 +1,11 @@
 import React, { createContext, useReducer, useEffect } from 'react';
 import { MQTTSubscriber, RequestState } from "../mqtt/MQTT";
-// For server sent events -- see server.js for further details.
-
-import { PalletizerState, PalletizerInformation, PartialState, ReducerAction } from "../types/Types";
+import {
+    PalletizerState,
+    PalletizerInformation,
+    PartialState,
+    ReducerAction
+} from "../types/Types";
 
 
 // "Partial State" is an egregious violation of principles. Fix when we get to error handling.

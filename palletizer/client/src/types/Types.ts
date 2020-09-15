@@ -1,10 +1,10 @@
 import { SavedPalletConfiguration } from "../parts/TeachMode";
+import { CoordinateRot } from "../geometry/geometry";
 
 export type ReducerAction = {
     type_of: string;
     payload: any;
 };
-
 
 export type PalletizerInformation = {
     DateString: string;
@@ -12,25 +12,19 @@ export type PalletizerInformation = {
     Type: string;
 };
 
-export type PalletizerState = {
+export interface PartialState {
     status: string;
     cycle: number;
     current_box: number;
     total_box: number;
     time: number; // hours? 
+    palletConfig?: SavedPalletConfiguration;
+    dropCoordinates?: CoordinateRot[];
+};
+
+export interface PalletizerState extends PartialState {
     information: PalletizerInformation[];
-    palletConfig?: SavedPalletConfiguration;
 };
-
-export type PartialState = {
-    status: string;
-    cycle: number;
-    current_box: number;
-    total_box: number;
-    time: number; // hours? 
-    palletConfig?: SavedPalletConfiguration;
-};
-
 
 export interface ConfigItem {
     id: number;
@@ -43,5 +37,5 @@ export type ConfigState = {
     pallet_configs: ConfigItem[];
     machine_index: number;
     pallet_index: number;
-}
+};
 
