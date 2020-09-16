@@ -2,8 +2,11 @@ PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
 
 * Palletizer
-** TODO Teach Mode 
+** DONE Teach Mode 
    - Compute rotational angle of pallet. 
+** TODO Non-agnostic angle for computation.
+   - Make sure that φ_pallet has the correct sign.
+** TODO Rotation jogger shouldn't be discrete 90 degrees.
 ** TODO Visualizer
    - Handle multiple pallets
    - Deal with the strange offset on pallet configuration 2 (locally)
@@ -24,11 +27,11 @@ PALLETIZER -*- mode: org -*-
 ** TODO Production
    - Implement logging.
    - Proper deploy instructions.
-** TODO Engine
+** DONE Engine
    - Implement action path throughout.
    - Detection action at path segement.
    
-** TODO Delete Boxes.
+** DONE Delete Boxes.
 ** TODO Rotational coordinates in all visualizations.
 ** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
 

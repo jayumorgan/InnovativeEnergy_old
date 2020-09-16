@@ -291,7 +291,7 @@ function InformationLog({ DateString, Description, Type }: InformationLogProps) 
 
 function InformationLogContainer() {
 
-    let palletizer_context = useContext(PalletizerContext);
+    const palletizer_context = useContext(PalletizerContext);
 
     let { information } = palletizer_context as PalletizerState;
 
@@ -389,14 +389,14 @@ interface StatusItem {
 };
 
 function General() {
-
     const {
         status,
         cycle,
         total_box,
         current_box,
         time,
-        palletConfig
+        palletConfig,
+        dropCoordinates
     } = useContext(PalletizerContext) as PalletizerState;
 
     let items = [] as StatusItem[];
@@ -405,14 +405,17 @@ function General() {
         title: "Status",
         value: status
     });
+
     items.push({
         title: "Cycle",
         value: String(cycle)
     });
+
     items.push({
         title: "Current Box",
         value: `${current_box} of ${total_box}`
     });
+
     items.push({
         title: "Time Remaining",
         value: `${time} Minutes`
@@ -420,7 +423,8 @@ function General() {
 
     const visualizerProps: VisualizerProps = {
         currentBoxNumber: current_box,
-        palletConfig
+        palletConfig,
+        dropCoordinates
     };
 
     return (

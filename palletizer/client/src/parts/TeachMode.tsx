@@ -106,6 +106,12 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
         const { Layouts, Stack, corner1, corner2, corner3 } = p;
         const palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
 
+        const Ydirection = Subtract3D(corner1, corner2);
+        const Xdirection = Subtract3D(corner3, corner2);
+
+        // Pallet angle rotation.
+        const φ_pallet = -1 * Math.atan(Xdirection.y / Xdirection.x);
+
         let currentHeightIncrement = palletHeight;
 
         Stack.forEach((n: number, stackIndex: number) => {
@@ -130,9 +136,6 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let boxXmid = boxWidth / 2;
                 let boxYmid = boxLength / 2;
 
-                let Ydirection = Subtract3D(corner1, corner2);
-                let Xdirection = Subtract3D(corner3, corner2);
-
                 let x_pos = MultiplyScalar(Xdirection, x);
                 let y_pos = MultiplyScalar(Ydirection, 1 - y); // Due to top left -> bottom left coordinate shift on y-axis.
 
@@ -150,7 +153,8 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 averagePosition.z = z_add;
 
-                let dropLocation: CoordinateRot = { ...averagePosition, θ: 0 };
+                let θ_drop: number = (rotated ? 90 : 0) + φ_pallet;
+                let dropLocation: CoordinateRot = { ...averagePosition, θ: θ_drop };
                 let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
                 boxCoordinates.push({

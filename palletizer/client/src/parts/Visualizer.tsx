@@ -1,13 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import * as Three from "three";
 import { COLORS } from "./shared/shared";
 import {
     PalletGeometry,
     getPalletDimensions,
     BoxCoordinates,
-    getCenterOfPallet
+    getCenterOfPallet,
+    CoordinateRot
 } from "../geometry/geometry";
 import { SavedPalletConfiguration } from "./TeachMode";
+import { PalletizerContext } from "../context/PalletizerContext";
 
 //---------------Styles---------------
 import "./css/Visualizer.scss";
@@ -194,15 +196,16 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
 
 export interface VisualizerProps {
     palletConfig?: SavedPalletConfiguration;
+    dropCoordinates?: CoordinateRot[];
     currentBoxNumber: number;
 };
 
 // Set the scene.
-function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
-    let mount = useRef<HTMLDivElement>(null);
+export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordinates }: VisualizerProps) {
 
+    let current_box = currentBoxNumber;
+    let mount = useRef<HTMLDivElement>(null);
     let controls = useRef<VisualizerControls | null>(null);
-    //    let box_positions = useRef<Coordinate[] | null>(null);
 
     let [boxNames, setBoxNames] = useState<string[]>([]);
     let [palletNames, setPalletNames] = useState<string[]>([]);
@@ -249,14 +252,21 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
         groundMesh.position.set(0, -1, 0);
         scene.add(groundMesh);
 
-        /* var axesHelper = new Three.AxesHelper(5);
-	 * scene.add(axesHelper);
-	 */
+        var axesHelper = new Three.AxesHelper(5);
+        scene.add(axesHelper);
+
         let camera = getCamera(width, height);
         let distance = 1.2
-        camera.position.set(- distance * 2, distance + 0.5, 0.5);
+        //        camera.position.set(- distance * 2, distance + 0.5, 0.5);
+
         //camera.rotateY(Math.PI / 2);
-        camera.lookAt(-0.5, 0.25, 0.5);
+        //        camera.lookAt(-0.5, 0.25, 0.5);
+
+        camera.up.set(0, 0, 1);
+        camera.position.set(-3, -3, 5);
+
+        //camera.rotateX(Math.PI / 2);
+        camera.lookAt(0.5, 0.5, 0.5);
 
         let render_scene = () => {
             renderer.render(scene, camera);
@@ -297,22 +307,19 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
     }, []);
 
     useEffect(() => {
-        if (palletConfig && palletConfig !== null && controls.current) {
+        if (palletConfig && current_box && palletConfig !== null && controls.current) {
 
             let frameDims = parseConfig(palletConfig);
             let frameNorm = FrameNorm(frameDims);
-
             let newPalletNames = [] as string[];
 
             palletNames.forEach((pn: string) => {
                 controls.current?.remove_mesh(pn);
             });
 
-
-            // Loop through the things and get them all
             palletConfig.config.pallets.forEach((p: PalletGeometry, palletIndex: number) => {
-                let { width, length } = getPalletDimensions(p);
 
+                let { width, length } = getPalletDimensions(p);
                 let height = 5;
 
                 width /= frameNorm;
@@ -355,7 +362,7 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
             });
 
             palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
-                if (i < currentBoxNumber) {
+                if (i < current_box) {
 
                     let BoxName = "BOXNAME-" + String(i);
 
@@ -389,11 +396,9 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
                     z += delta_z - height / 2;
 
                     box.position.set(x, z, y);
-
                     if (dropLocation.θ) {
                         box.rotateY(Math.PI / 2);
                     }
-
                     controls.current?.add_mesh(box);
                 }
             });
@@ -403,6 +408,6 @@ function Visualizer({ palletConfig, currentBoxNumber }: VisualizerProps) {
     }, [palletConfig]);
 
     return (<div className="Visualizer" ref={mount} />);
-}
-export default Visualizer;
+};
+
 

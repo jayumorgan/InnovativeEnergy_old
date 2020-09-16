@@ -8,7 +8,8 @@ import MachineMotion, {
     DIRECTION,
     DRIVES,
     DriveType,
-    MachineMotionConfig
+    MachineMotionConfig,
+    IODeviceState
 } from "mm-js-api";
 
 import { DatabaseHandler } from "../database/db";
@@ -27,9 +28,13 @@ import {
 } from "./config";
 
 import { generateStandardPath } from "../optimizer/standard";
-import { BoxPath, ActionCoordinate, ActionTypes } from "../optimizer/optimized";
-import { resolve } from "dns";
-import { rejects } from "assert";
+
+import {
+    BoxPath,
+    ActionCoordinate,
+    ActionTypes
+} from "../optimizer/optimized";
+
 
 //--------------------TESTING ENVIRONMENT--------------------
 const TESTING = true;
@@ -75,6 +80,7 @@ interface Information {
     DateString: string;
 };
 
+
 interface PalletizerState {
     status: PALLETIZER_STATUS,
     cycle: number;
@@ -82,8 +88,28 @@ interface PalletizerState {
     total_box: number;
     time: number;
     palletConfig: any;
+    dropCoordinates: Coordinate[]
 };
 
+
+interface MechanicalLayout {
+    config_id: number;
+    machines: MachineMotion[];
+    axes: Axes;
+    io: IO;
+    box_detection: IOState[];
+};
+
+function compareIODeviceStates(io1: IODeviceState, io2: IODeviceState): boolean {
+    let equal: boolean = false;
+    for (let i = 0; i < io1.length; i++) {
+        equal = io1[i] === io2[i];
+        if (!equal) {
+            break;
+        }
+    }
+    return equal;
+}
 
 function handleCatch(e: any) {
     console.log("Engine error: ", e);
@@ -109,12 +135,14 @@ function numberToDrive(n: number): DriveType {
     }
 };
 
-interface MechanicalLayout {
-    config_id: number;
-    machines: MachineMotion[];
-    axes: Axes;
-    io: IO;
+async function safeAwait(promise: Promise<any>) {
+    return promise.then(data => {
+        return [undefined, data];
+    }).catch((e) => {
+        return [e];
+    });
 };
+
 
 function defaultMechanicalLayout(): MechanicalLayout {
     return {
@@ -129,7 +157,8 @@ function defaultMechanicalLayout(): MechanicalLayout {
         io: {
             On: [],
             Off: []
-        }
+        },
+        box_detection: []
     } as MechanicalLayout;
 };
 
@@ -156,7 +185,8 @@ export class Engine {
         current_box: 0,
         total_box: 0,
         time: 0,
-        palletConfig: null
+        palletConfig: null,
+        dropCoordinates: []
     };
     machineConfigId: number = 0;
     palletConfigId: number = 0;
@@ -323,6 +353,15 @@ export class Engine {
         if (!is_null) {
             let paths: BoxPath[] = generateStandardPath(spc);
             this.boxPathsForPallet = paths;
+            let drop_coords: Coordinate[] = [];
+            paths.forEach((bp: BoxPath) => {
+                bp.forEach((ac: ActionCoordinate) => {
+                    if (ac.action && ac.action === ActionTypes.DROP) {
+                        drop_coords.push(ac as Coordinate);
+                    }
+                });
+            });
+            this.palletizerState.dropCoordinates = drop_coords;
         }
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
         let info_description = (is_null) ? "No pallet configuration found. Navigate to the Configuration tab and create a pallet configuration before use" : "Successfully loaded pallet configuration: " + this.palletConfig!.config.name;
@@ -437,8 +476,8 @@ export class Engine {
             let promises: Promise<any>[] = [];
             let mms: MachineMotion[] = [];
 
-            let { config } = my.machineConfig;
-            let { machines, io, axes } = config;
+            const { config } = my.machineConfig;
+            const { machines, io, axes, box_detection } = config;
 
             machines.forEach((mm: MachineMotionInfo) => {
                 let { ipAddress } = mm;
@@ -491,6 +530,7 @@ export class Engine {
 
             my.mechanicalLayout.axes = axes;
             my.mechanicalLayout.io = io;
+            my.mechanicalLayout.box_detection = box_detection;
 
             return new Promise((resolve, reject) => {
                 Promise.all(promises).then(() => { resolve(true) }).catch(e => reject(e));
@@ -546,7 +586,7 @@ export class Engine {
         });
     };
 
-    executePathSequence(box_index: number, path_index: number): Promise<any> {
+    async executePathSequence(box_index: number, path_index: number): Promise<any> {
         let my = this;
         if (box_index >= my.boxPathsForPallet.length) {
             return Promise.resolve();
@@ -566,14 +606,21 @@ export class Engine {
         }
     };
 
-    executeAction(action?: ActionTypes): Promise<any> {
+    async executeAction(action?: ActionTypes): Promise<any> {
         let my = this;
         if (action) {
             if (action === ActionTypes.PICK) {
                 return my.__pickIO()
             }
             if (action === ActionTypes.DROP) {
-                return my.__dropIO();
+                // detect box first.
+                return my.handleDetect().then((detected: boolean) => {
+                    if (detected) {
+                        return my.__dropIO();
+                    } else {
+                        return Promise.reject("Unable to detect box. Operator assistance required");
+                    }
+                });
             }
         }
         return Promise.resolve();
@@ -690,20 +737,69 @@ export class Engine {
         let my = this;
         return Promise.all(ios.map((state: IOState) => {
             let { MachineMotionIndex, NetworkId, Pins } = state;
-            return Promise.all(Pins.map((val: boolean, pin: number) => {
-                return my.mechanicalLayout.machines[MachineMotionIndex].digitalWrite(NetworkId, pin, val);
-            }));
+            return my.mechanicalLayout.machines[MachineMotionIndex].digitalWriteAll(NetworkId, Pins);
         }));
     };
 
-    __detectIO() {
+    handleDetect(retry_index: number = 0): Promise<boolean> {
+        let my = this;
+
+        return new Promise<boolean>((resolve, reject) => {
+            my.__detectBox().then((detected: boolean) => {
+                if (detected) {
+                    resolve(detected); // has been detected.
+                } else if (retry_index < 5) {
+                    setTimeout(() => {
+                        my.handleDetect(retry_index + 1).then((d: boolean) => {
+                            resolve(d);
+                        }).catch((e: any) => {
+                            reject(e);
+                        });
+                    }, 500);
+                } else {
+                    resolve(detected);
+                }
+            }).catch((e: any) => {
+                reject(e);
+            });
+        });
+    }
+
+    __detectBox(): Promise<boolean> {
         let my = this;
         my.cycleState = CYCLE_STATE.DETECT_IO;
-        return Promise.resolve(true);
+        const { box_detection } = my.mechanicalLayout;
+        if (box_detection.length > 0) {
+            return new Promise<boolean>((resolve, reject) => {
+                Promise.all(box_detection.map((state: IOState) => {
+                    const { MachineMotionIndex, NetworkId, Pins } = state;
+                    return my.mechanicalLayout.machines[MachineMotionIndex].digitalReadAll(NetworkId);
+                })).then((res: vResponse[]) => {
+                    let detect: boolean = false;
+                    for (let i = 0; i < res.length; i++) {
+                        const vRes: vResponse = res[i];
+                        if (vRes.success) {
+                            const read_vals: IODeviceState = vRes.result as IODeviceState;
+                            detect = compareIODeviceStates(read_vals, box_detection[i].Pins);
+                        } else {
+                            detect = false;
+                        }
+                        if (!detect) {
+                            break;
+                        }
+                    }
+                    resolve(detect);
+                }).catch((e: any) => {
+                    reject(e);
+                });
+            });
+        } else {
+            return Promise.resolve(true);
+        }
     };
 
     // will repeat sequence starting from top on run.
-    __controlSequence(actions: Action[]): Promise<any> {
+    async __controlSequence(actions: Action[]): Promise<any> {
         if (actions.length === 0) {
             return new Promise((resolve, _) => {
                 resolve();
@@ -742,14 +838,3 @@ export class Engine {
         });
     };
 };
-
-function safeAwait(promise: Promise<any>) {
-    return promise.then(data => {
-        return [undefined, data];
-    }).catch((e) => {
-        return [e];
-    });
-};
-
-
-

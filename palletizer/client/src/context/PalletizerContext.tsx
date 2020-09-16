@@ -3,12 +3,10 @@ import { MQTTSubscriber, RequestState } from "../mqtt/MQTT";
 import {
     PalletizerState,
     PalletizerInformation,
-    PartialState,
     ReducerAction
 } from "../types/Types";
+import { CoordinateRot } from '../geometry/geometry';
 
-
-// "Partial State" is an egregious violation of principles. Fix when we get to error handling.
 function PalletizerReducer(state: PalletizerState, action: ReducerAction) {
     switch (action.type_of) {
         case "INFORMATION": {
@@ -16,13 +14,13 @@ function PalletizerReducer(state: PalletizerState, action: ReducerAction) {
             return { ...state, information };
         }
         case "STATE": {
-            return { information: state.information, ...(action.payload as PartialState) } as PalletizerState;
+            return { information: state.information, ...action.payload } as PalletizerState;
         }
         default: {
             return state
         }
     }
-}
+};
 
 const PalletizerContext = createContext<Partial<PalletizerState>>({});
 
@@ -37,6 +35,7 @@ function PalletizerHub(props: any) {
         total_box: 0,
         time: 0,
         information: [] as PalletizerInformation[],
+        dropCoordinates: [] as CoordinateRot[]
     };
 
     const [state, dispatch] = useReducer(PalletizerReducer, initial_state);

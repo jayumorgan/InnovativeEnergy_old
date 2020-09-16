@@ -12,17 +12,14 @@ export type PalletizerInformation = {
     Type: string;
 };
 
-export interface PartialState {
+export interface PalletizerState {
     status: string;
     cycle: number;
     current_box: number;
     total_box: number;
     time: number; // hours? 
     palletConfig?: SavedPalletConfiguration;
-    dropCoordinates?: CoordinateRot[];
-};
-
-export interface PalletizerState extends PartialState {
+    dropCoordinates: CoordinateRot[];
     information: PalletizerInformation[];
 };
 

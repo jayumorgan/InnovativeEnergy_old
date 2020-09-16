@@ -39,6 +39,7 @@ export interface MachineConfiguration {
     machines: MachineMotionInfo[];
     axes: Axes;
     io: IO;
+    box_detection: IOState[];
 };
 
 
