@@ -223,11 +223,11 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         //        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
 
         let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
-        hemiLight.position.set(0, 50, 0);
+        hemiLight.position.set(0, -20, 50);
         scene.add(hemiLight);
 
         let dirLight = new Three.DirectionalLight(0xffffff);
-        dirLight.position.set(2, 2, 0.5);
+        dirLight.position.set(-5, -5, 3);
         dirLight.castShadow = true;
         dirLight.shadow.camera.top = 10;
         dirLight.shadow.camera.bottom = - 10;
@@ -250,9 +250,9 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         groundMesh.receiveShadow = true;
         groundMesh.position.set(0, -1, 0);
         scene.add(groundMesh);
-
-        var axesHelper = new Three.AxesHelper(5);
-        scene.add(axesHelper);
+	/* 
+	 *         var axesHelper = new Three.AxesHelper(5);
+	 *         scene.add(axesHelper); */
 
         let camera = getCamera(width, height);
         let distance = 1.2
@@ -262,7 +262,7 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         //        camera.lookAt(-0.5, 0.25, 0.5);
 
         camera.up.set(0, 0, 1);
-        let back = -4
+        let back = -2
         camera.position.set(back, back, -1 * back);
 
         //camera.rotateX(Math.PI / 2);
