@@ -6,7 +6,9 @@ import {
     getPalletDimensions,
     BoxCoordinates,
     getCenterOfPallet,
-    CoordinateRot
+    CoordinateRot,
+    Subtract3D,
+    Add3D
 } from "../geometry/geometry";
 import { SavedPalletConfiguration } from "./TeachMode";
 import { PalletizerContext } from "../context/PalletizerContext";
@@ -109,12 +111,11 @@ function getCamera(width: number, height: number): Three.PerspectiveCamera {
 }
 
 export function getCardboardBox(width: number, height: number, length: number): Three.Mesh {
-    let geometry = new Three.BoxGeometry(width, height, length);
+    let geometry = new Three.BoxGeometry(width, length, height);
     let material = new Three.MeshPhongMaterial({ color: String(COLORS.BOX) });
     let edgeGeometry = new Three.EdgesGeometry(geometry);
     let edgeMaterial = new Three.LineBasicMaterial({ color: String(COLORS.LOG), linewidth: 1 });
     let edges = new Three.LineSegments(edgeGeometry, edgeMaterial);
-
     let box = new Three.Mesh(geometry, material);
     box.add(edges);
     return box;
@@ -132,14 +133,13 @@ interface VisualizerControls {
 };
 
 function getPlank(w: number, h: number, l: number) {
-    let g = new Three.BoxGeometry(w, h, l);
+    let g = new Three.BoxGeometry(w, l, h);
     let m = new Three.MeshPhongMaterial({ color: String(COLORS.PLANK) });
     let p = new Three.Mesh(g, m);
     return p;
-}
+};
 
-
-function GetPalletMesh(width: number, height: number, length: number, callback: (pallet: Three.Mesh, fheight: number) => void) {
+function GetPalletMesh(width: number, length: number, height: number, callback: (pallet: Three.Mesh, fheight: number) => void) {
 
     let singleGeometry = new Three.Geometry();
 
@@ -156,14 +156,14 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     let plank1 = getPlank(plankLength, plankHeight, plankWidth);
     let plank2 = plank1.clone();
 
-    plank1.position.set(zeroX + width / 2, zeroZ + plankHeight / 2, zeroY + length - plankWidth / 2);
-    plank2.position.set(zeroX + width / 2, zeroZ + plankHeight / 2, zeroY + plankWidth / 2);
+    plank1.position.set(zeroX + width / 2, zeroY + length - plankWidth / 2, zeroZ + plankHeight / 2);
+    plank2.position.set(zeroX + width / 2, zeroY + plankWidth / 2, zeroZ + plankHeight / 2);
 
     let crossPlank1 = getPlank(plankWidth, plankHeight, length - plankWidth);
     let crossPlank2 = crossPlank1.clone();
 
-    crossPlank1.position.set(zeroX + plankWidth / 2, zeroZ + plankHeight / 2, zeroY + (length - plankWidth) / 2);
-    crossPlank2.position.set(zeroX + width - plankWidth / 2, zeroZ + plankHeight / 2, zeroY + (length - plankWidth) / 2);
+    crossPlank1.position.set(zeroX + plankWidth / 2, zeroY + (length - plankWidth) / 2, zeroZ + plankHeight / 2);
+    crossPlank2.position.set(zeroX + width - plankWidth / 2, zeroY + (length - plankWidth) / 2, zeroZ + plankHeight / 2);
 
     singleGeometry.mergeMesh(crossPlank1);
     singleGeometry.mergeMesh(crossPlank2);
@@ -176,11 +176,10 @@ function GetPalletMesh(width: number, height: number, length: number, callback: 
     let startX = (boardWidth / 2);
     let incrementX = (width - boardNumber * boardWidth) / (boardNumber - 1) + boardWidth;
 
-
     let board1 = getPlank(boardWidth, boardHeight, length);
     for (let i = 0; i < boardNumber; i++) {
         let b = board1.clone();
-        b.position.set(zeroX + startX + i * incrementX, zeroZ + fullHeight - boardHeight / 2, zeroY + length / 2);
+        b.position.set(zeroX + startX + i * incrementX, zeroY + length / 2, zeroZ + fullHeight - boardHeight / 2);
         singleGeometry.mergeMesh(b);
     }
 
@@ -263,10 +262,11 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         //        camera.lookAt(-0.5, 0.25, 0.5);
 
         camera.up.set(0, 0, 1);
-        camera.position.set(-3, -3, 5);
+        let back = -4
+        camera.position.set(back, back, -1 * back);
 
         //camera.rotateX(Math.PI / 2);
-        camera.lookAt(0.5, 0.5, 0.5);
+        camera.lookAt(1, 1, 0.5);
 
         let render_scene = () => {
             renderer.render(scene, camera);
@@ -326,9 +326,10 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                 height /= frameNorm;
                 length /= frameNorm;
 
-                let { x, y, z } = getCenterOfPallet(p);
+                const pallet_center = getCenterOfPallet(p);
+                let { x, y, z } = pallet_center;
 
-                x /= frameNorm * -1;
+                x /= frameNorm;
                 y /= frameNorm;
                 z /= frameNorm;
                 z = -1 * height;
@@ -336,17 +337,15 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                 let palletName = "PALLET-" + String(palletIndex);
                 newPalletNames.push(palletName);
 
-                GetPalletMesh(width, height, length, (palletMesh: Three.Mesh, fheight: number) => {
+                GetPalletMesh(width, length, height, (palletMesh: Three.Mesh, fheight: number) => {
                     z = -fheight / 2;
-                    palletMesh.position.set(x, z, y);
+                    palletMesh.position.set(x, y, z);
                     palletMesh.name = palletName;
                     controls.current?.add_mesh(palletMesh);
                 });
             });
 
             setPalletNames([...newPalletNames]);
-
-            let zHome = 1; // (-1 for bottom);
 
             let getPalletHeight = (p: PalletGeometry) => {
                 let { corner1, corner2, corner3 } = p;
@@ -366,13 +365,9 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
 
                     let BoxName = "BOXNAME-" + String(i);
 
-
-                    let { dropLocation, dimensions, palletIndex } = b;
-
-                    let pallet = palletConfig.config.pallets[palletIndex];
-
-                    let palletHeight = getPalletHeight(pallet);
-
+                    const { dropLocation, dimensions, palletIndex } = b;
+                    const pallet = palletConfig.config.pallets[palletIndex];
+                    const palletHeight = getPalletHeight(pallet);
 
                     let { width, height, length } = dimensions;
 
@@ -381,21 +376,19 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                     length /= frameNorm;
 
                     let box = getCardboardBox(width, height, length);
-                    box.name = BoxName;
 
+                    box.name = BoxName;
                     newBoxNames.push(BoxName);
 
-                    let { x, y, z } = dropLocation;
+                    let { x, y, z } = Subtract3D(dropLocation, pallet.corner2);
 
-                    let delta_z = palletHeight - z;
+                    let delta_z = palletHeight - dropLocation.z;
                     delta_z /= frameNorm;
-
-                    x /= frameNorm * -1;
+                    x /= frameNorm;
                     y /= frameNorm;
                     z = 0;
                     z += delta_z - height / 2;
-
-                    box.position.set(x, z, y);
+                    box.position.set(x, y, z);
                     if (dropLocation.θ) {
                         box.rotateY(Math.PI / 2);
                     }
