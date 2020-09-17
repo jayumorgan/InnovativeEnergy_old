@@ -15,9 +15,12 @@ def generate_plots_for_path(d, ax):
     zs = []
     max_h = 0
     for point in d:
+
         x = point["x"]
         y = point["y"]
         z = point["z"]
+
+        print(x, y, z)
         if z > max_h:
             max_h = z
 

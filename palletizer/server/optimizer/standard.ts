@@ -9,7 +9,7 @@ function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
     return { ...coord, z: z_top };
 };
 
-function addActionForCoordinate(coord: Coordinate, action: ActionTypes): ActionCoordinate {
+export function addActionForCoordinate(coord: Coordinate, action: ActionTypes): ActionCoordinate {
     return { ...coord, action };
 };
 

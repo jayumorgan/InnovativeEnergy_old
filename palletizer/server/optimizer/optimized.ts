@@ -14,11 +14,11 @@ import {
     SavedMachineConfiguration,
     SavedPalletConfiguration
 } from "../engine/config";
+import { addActionForCoordinate } from "./standard";
 
 export function main() {
     console.log("Running file");
 }
-
 
 
 //---------------Types---------------
@@ -44,7 +44,6 @@ interface XYCircle extends CartesianCoordinate {
 
 
 //-------Algebra-------
-
 function Subtract3D(c1: CartesianCoordinate, c2: CartesianCoordinate): CartesianCoordinate {
     return {
         x: c1.x - c2.x,
@@ -76,33 +75,6 @@ function Norm2D(c1: PlaneCoordinate): number {
 
 function DotProduct(x: CartesianCoordinate, y: CartesianCoordinate): number {
     return x.x * y.x + x.y * y.y + x.z * y.z;
-};
-
-function DotProduct2D(x: CartesianCoordinate, y: CartesianCoordinate): number {
-    let x2 = { ...x };
-    let y2 = { ...y };
-    x2.z = 0;
-    y2.z = 0;
-    return DotProduct(x2, y2);
-};
-
-
-function UnitVector(v: CartesianCoordinate): CartesianCoordinate {
-    return MultiplyScalar(v, 1 / Norm(v));
-};
-
-function getPathDirectionUnitVector(a: CartesianCoordinate, b: CartesianCoordinate): CartesianCoordinate {
-    let diff: CartesianCoordinate = Subtract3D(b, a);
-    return UnitVector(diff);
-};
-
-function getPlaneCoordinate(c1: CartesianCoordinate): PlaneCoordinate { // return {xy-projection, z} as y;
-    let xy = Norm2D(c1);
-    let z = c1.z
-    return {
-        x: xy,
-        y: z
-    } as PlaneCoordinate;
 };
 
 function variableNorm(...args: number[]): number {
@@ -241,31 +213,6 @@ function computeNearestEdgePoint(constraint: XYCircle, point: CartesianCoordinat
 };
 
 
-function demo() {
-    let constraint: XYCircle = {
-        x: 0,
-        y: 0,
-        z: 1,
-        radius: 1
-    };
-
-    let point: CartesianCoordinate = {
-        x: 3,
-        y: 0,
-        z: 0
-    };
-
-    let edge = computeNearestEdgePoint(constraint, point, 0)[0]!;
-
-
-    return edge;
-
-};
-
-console.log("Compute neareste Edge", demo());
-
-
-
 function getSafePointForConstraint(point: Coordinate, constraint: XYCircle, box_radius: number): CartesianCoordinate | null {
     let [nearest_edge, radius] = computeNearestEdgePoint(constraint, point, box_radius);
     if (nearest_edge === null) {
@@ -314,13 +261,8 @@ function resolveByTriangularAddition(i: number, points: BoxPath, constraint: XYC
 
 // shift first point up to clear constraint.
 function resolveByUpshift(i: number, points: BoxPath, constraint: XYCircle, box_radius: number): Coordinate {
-    console.log("Resolve by upshift\n\n\n\n\n");
-
     let safe = resolveByTriangularAddition(i, points, constraint, box_radius);
-
-
     return safe;
-
 };
 
 
@@ -358,33 +300,29 @@ function shiftZ(p: any, h: number): any {
 };
 
 
-function generatePath(box: BoxCoordinate, constraints: XYCircle[]): BoxPath {
+function generatePath(box: BoxCoordinate, constraints: XYCircle[], isReturn: boolean = false): BoxPath {
     let points: BoxPath = [];
     const height: number = box.dimensions.height;
     const self_constraint: XYCircle = getBoxBottomXYCircle(box);
 
-    points.push(shiftZ(box.pickLocation, height));
+    points.push(addActionForCoordinate(shiftZ(box.pickLocation, height), isReturn ? ActionTypes.NONE : ActionTypes.PICK));
 
     let above_drop: CartesianCoordinate = Add3D(box.dropLocation, { x: 0, y: 0, z: -height * 1.1 });
-
     points.push(shiftZ({ ...above_drop, θ: box.dropLocation.θ }, height));
-    points.push(shiftZ(box.dropLocation, height));
+
+    points.push(addActionForCoordinate(shiftZ(box.dropLocation, height), isReturn ? ActionTypes.NONE : ActionTypes.DROP));
+
     constraints.unshift(self_constraint); // Pick location constraint. -- will need to modify.
 
     for (let j = 0; j < constraints.length; j++) {
         let constraint = constraints[j];
-
         let i: number = 0;
-
         while (i < points.length - 1) {
             let s: Segment = [points[i], points[i + 1]];
-
             if (doesViolateConstraint(s, constraint, self_constraint.radius)) {
                 points = resolveConstraint(i, points, constraint, self_constraint.radius);
-
                 // don't increment to double check. for now.
             }
-
             i++;
         };
     }
@@ -411,6 +349,10 @@ export function generateOptimizedPaths(pallet_config: SavedPalletConfiguration):
 
 
     let paths: BoxPath[] = [];
+    let returnPaths: BoxPath[] = [];
+
+    let previousPath: BoxPath | undefined = undefined;
+
 
     while (true) {
 
@@ -437,8 +379,21 @@ export function generateOptimizedPaths(pallet_config: SavedPalletConfiguration):
                 let box = consideration_boxes[i];
                 let path: BoxPath = generatePath(box, constraints);
                 paths.push(path);
+
                 let new_constraint = getBoxTopXYCircle(box);
                 constraints.push(new_constraint);
+
+                if (previousPath !== undefined) {
+                    let arm_box = { ...box };
+                    arm_box.pickLocation = { ...previousPath[previousPath.length - 1] };
+                    arm_box.dropLocation = { ...box.pickLocation };
+
+                    let return_path: BoxPath = generatePath(arm_box, constraints, true); // path to get from last drop to next pick location.
+
+                    returnPaths.push(return_path);
+                }
+                previousPath = [...path];
+
 
             }
 
@@ -449,19 +404,29 @@ export function generateOptimizedPaths(pallet_config: SavedPalletConfiguration):
         }
     }
 
+    // join paths. -- also add homin path.
+    if (previousPath != undefined) {
+        let final_drop = { ...previousPath[previousPath.length - 1] };
+        let rest_poition = shiftZ(final_drop, -final_drop.z);
+        let end_path: BoxPath = [final_drop, rest_poition];
+        returnPaths.push(end_path);
+    }
 
-    generatePlottableCoordinates(paths);
-    console.log("\n\n Final Paths ", paths);
 
-    return paths;
+    let finalPaths: BoxPath[] = [];
+
+    for (let i = 0; i < paths.length; i++) {
+        finalPaths.push(paths[i]);
+        finalPaths.push(returnPaths[i]);
+    }
+
+    generatePlottableCoordinates(finalPaths);
+
+    return finalPaths;
 };
 
 function generatePlottableCoordinates(paths: BoxPath[]) {
-
-
-
     let coords: PlaneCoordinate[][] = [];
-
     paths.forEach((path: BoxPath) => {
         let p: PlaneCoordinate[] = [];
         path.forEach((c: Coordinate) => {
@@ -471,11 +436,9 @@ function generatePlottableCoordinates(paths: BoxPath[]) {
         });
         coords.push(p);
     });
-
     fs.writeFileSync("data.json", JSON.stringify(coords, null, "\t"));
     fs.writeFileSync("data3d.json", JSON.stringify(paths, null, "\t"));
-}
-
+};
 
 export function test() {
     initDatabaseHandler().then((handler: DatabaseHandler) => {
