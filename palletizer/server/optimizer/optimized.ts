@@ -164,11 +164,34 @@ function getBoxTopXYCircle(box: BoxCoordinate): XYCircle {
 
 function doesViolateConstraint(segment: Segment, constraint: XYCircle, box_radius: number): boolean {
     const [a, b] = segment;
-    let distance: number = pointLineDistance2D(a, b, constraint);
-    let radius: number = Math.max(box_radius, constraint.radius);
-    let min_path_z: number = Math.max(a.z, b.z);
 
-    return (distance <= radius && constraint.z <= min_path_z); // if they cross over and constraint is above min_path.
+    let min_path_z: number = Math.max(a.z, b.z);
+    if (min_path_z >= constraint.z) {
+        return false;
+    };
+
+    let radius: number = Math.max(box_radius, constraint.radius);
+    let distance: number = pointLineDistance2D(a, b, constraint);
+    if (distance > radius) {
+        return false;
+    }
+
+    let δ = Subtract3D(b, a);
+    let pass_time = (constraint.z - a.z) / δ.z;
+
+    if (Math.abs(pass_time) === Infinity) {
+        return false;
+    }
+
+    let pass_pt = Subtract3D(Add3D(MultiplyScalar(δ, pass_time), a), constraint);
+    let distance_at_pass = variableNorm(pass_pt.x, pass_pt.y);
+
+    console.log(distance_at_pass, "distance at pass");
+    if (distance_at_pass > radius) {
+        return false;
+    }
+
+    return true;
 };
 
 function getErrorRadius(r1: number, r2: number): number {
@@ -298,8 +321,6 @@ function resolveConstraint(i: number, points: BoxPath, constraint: XYCircle, box
             return path;
         } else {
             console.log("Error with first point, resolve this somehow.");
-
-
             return [] as BoxPath;
         }
     } else {
@@ -308,6 +329,7 @@ function resolveConstraint(i: number, points: BoxPath, constraint: XYCircle, box
             path[i] = upshift_coord;
             return path;
         } else {
+            console.log("Unshift coordinate");
             let triangle_pt: Coordinate = resolveByTriangularAddition(i, points, constraint, box_radius);
             path.splice(i + 1, 0, triangle_pt);
             return path;
@@ -324,23 +346,26 @@ function generatePath(box: BoxCoordinate, constraints: XYCircle[]): BoxPath {
     points.push(box.dropLocation);
     constraints.unshift(self_constraint); // Pick location constraint. -- will need to modify.
 
-    constraints.forEach((constraint: XYCircle) => {
+    for (let j = 0; j < constraints.length; j++) {
+        let constraint = constraints[j];
+
         let i: number = 0;
+
         while (i < points.length - 1) {
             let s: Segment = [points[i], points[i + 1]];
-            if (doesViolateConstraint(s, constraint, self_constraint.radius)) {
-                console.log("Violated Contraint", constraint, s, i);
 
+            if (doesViolateConstraint(s, constraint, self_constraint.radius)) {
+                console.log("\n\n\n\nViolated Contraint", constraint, s, i);
                 points = resolveConstraint(i, points, constraint, self_constraint.radius);
 
-                console.log("New Points ", points);
-                i++;
                 // don't increment to double check. for now.
-            } else {
-                i++;
             }
+
+            i++;
         };
-    });
+        console.log("New Points ", points);
+    }
+
     return points;
 };
 
@@ -424,8 +449,6 @@ function generatePlottableCoordinates(paths: BoxPath[]) {
     });
 
     fs.writeFileSync("data.json", JSON.stringify(coords, null, "\t"));
-
-    console.log("Coordinates", coords);
 }
 
 

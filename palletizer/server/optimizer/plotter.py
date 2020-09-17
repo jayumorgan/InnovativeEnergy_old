@@ -12,9 +12,12 @@ def generate_plots_for_path(d):
     ys = []
 
     for point in d:
-        print(point)
-        xs.append(point["x"])
-        ys.append(point["y"])
+
+        x = point["x"]
+        y = point["y"]
+
+        xs.append(x)
+        ys.append(y)
 
     plt.scatter(xs, ys)
 
