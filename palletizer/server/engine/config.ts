@@ -51,9 +51,12 @@ export interface SavedMachineConfiguration {
 
 //---------------Pallet Configuration---------------
 
-export interface CartesianCoordinate {
+export interface PlaneCoordinate {
     x: number;
     y: number;
+};
+
+export interface CartesianCoordinate extends PlaneCoordinate {
     z: number;
 }
 

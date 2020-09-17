@@ -8,6 +8,7 @@ import {
     BoxCoordinate,
     Coordinate,
     PalletConfiguration,
+    PlaneCoordinate,
     CartesianCoordinate,
     PalletGeometry,
     SavedMachineConfiguration,
@@ -21,12 +22,6 @@ export function main() {
 
 
 //---------------Types---------------
-interface PlaneCoordinate {
-    x: number;
-    y: number;
-};
-
-
 export enum ActionTypes {
     NONE,
     PICK,
@@ -39,17 +34,17 @@ export interface ActionCoordinate extends Coordinate {
 
 export type BoxPath = ActionCoordinate[];
 
-
 export type Segment = [Coordinate, Coordinate];
+
 interface XYCircle extends CartesianCoordinate {
     radius: number;
 };
 
-
 //---------------Functions---------------
 
+
 //-------Algebra-------
-// NB: copied + modified from client/src/parts/teach/structures/Data.tsx
+
 function Subtract3D(c1: CartesianCoordinate, c2: CartesianCoordinate): CartesianCoordinate {
     return {
         x: c1.x - c2.x,
@@ -70,21 +65,13 @@ function Add3D(c1: CartesianCoordinate, c2: CartesianCoordinate): CartesianCoord
     return Subtract3D(c1, MultiplyScalar(c2, -1));
 };
 
-function variableNorm(...args: number[]): number {
-    let squares: number = 0;
-    args.forEach((a: number) => {
-        squares += a ** 2;
-    });
-    return Math.sqrt(squares);
-};
-
 function Norm(c: CartesianCoordinate): number {
     const { x, y, z } = c;
     return variableNorm(x, y, z);
 };
 
-function UnitVector(v: CartesianCoordinate): CartesianCoordinate {
-    return MultiplyScalar(v, 1 / Norm(v));
+function Norm2D(c1: PlaneCoordinate): number {
+    return variableNorm(c1.x, c1.y);
 };
 
 function DotProduct(x: CartesianCoordinate, y: CartesianCoordinate): number {
@@ -99,16 +86,46 @@ function DotProduct2D(x: CartesianCoordinate, y: CartesianCoordinate): number {
     return DotProduct(x2, y2);
 };
 
+
+function UnitVector(v: CartesianCoordinate): CartesianCoordinate {
+    return MultiplyScalar(v, 1 / Norm(v));
+};
+
+function getPathDirectionUnitVector(a: CartesianCoordinate, b: CartesianCoordinate): CartesianCoordinate {
+    let diff: CartesianCoordinate = Subtract3D(b, a);
+    return UnitVector(diff);
+};
+
+function getPlaneCoordinate(c1: CartesianCoordinate): PlaneCoordinate { // return {xy-projection, z} as y;
+    let xy = Norm2D(c1);
+    let z = c1.z
+    return {
+        x: xy,
+        y: z
+    } as PlaneCoordinate;
+};
+
+function variableNorm(...args: number[]): number {
+    let squares: number = 0;
+    args.forEach((a: number) => {
+        squares += a ** 2;
+    });
+    return Math.sqrt(squares);
+};
+
 // line is l = (b-a)t + a, point is x. -- assuming 2d.
 function pointLineDistance2D(a: CartesianCoordinate, b: CartesianCoordinate, x: CartesianCoordinate): number {
     const a_minus_x = Subtract3D(a, x);
     const b_minus_a = Subtract3D(b, a);
-    const squared_norm = DotProduct2D(b_minus_a, b_minus_a);
-    const dot_ax_ba = DotProduct2D(a_minus_x, b_minus_a);
+    const squared_norm = DotProduct(b_minus_a, b_minus_a);
+    const dot_ax_ba = DotProduct(a_minus_x, b_minus_a);
     const t_min: number = -1 * dot_ax_ba / squared_norm;
-    return t_min;
+    // Now compute the distance.
+    let point = Add3D(MultiplyScalar(Subtract3D(b, a), t_min), a);
+    let diff = Subtract3D(point, x);
+    let norm: number = Norm2D(diff);
+    return norm;
 };
-
 
 //-------Constraints-------
 function getPalletXYCircle(pallet: PalletGeometry): XYCircle {
@@ -166,13 +183,16 @@ function doesViolateConstraint(segment: Segment, constraint: XYCircle, box_radiu
     const [a, b] = segment;
 
     let min_path_z: number = Math.max(a.z, b.z);
-    if (min_path_z >= constraint.z) {
+
+    if (min_path_z <= constraint.z) {
         return false;
     };
 
     let radius: number = Math.max(box_radius, constraint.radius);
     let distance: number = pointLineDistance2D(a, b, constraint);
-    if (distance > radius) {
+
+
+    if (distance > radius) { // crossing distance greater than radius
         return false;
     }
 
@@ -183,11 +203,11 @@ function doesViolateConstraint(segment: Segment, constraint: XYCircle, box_radiu
         return false;
     }
 
-    let pass_pt = Subtract3D(Add3D(MultiplyScalar(δ, pass_time), a), constraint);
-    let distance_at_pass = variableNorm(pass_pt.x, pass_pt.y);
+    let pass_pt: CartesianCoordinate = Add3D(MultiplyScalar(δ, pass_time), a);
 
-    console.log(distance_at_pass, "distance at pass");
-    if (distance_at_pass > radius) {
+    let plane_distance_from_constraint: number = Norm2D(Subtract3D(pass_pt, constraint));
+
+    if (plane_distance_from_constraint > radius) {
         return false;
     }
 
@@ -252,15 +272,9 @@ function getSafePointForConstraint(point: Coordinate, constraint: XYCircle, box_
         // constraint is at point, raise.
         return null;
     } else {
-        console.log("For Point", point);
-
         nearest_edge = Subtract3D(nearest_edge!, point);
 
-
         let z_shift = (nearest_edge!.z / variableNorm(nearest_edge.x, nearest_edge.y)) * (nearest_edge.x + radius);
-
-        console.log("z_shift", z_shift, nearest_edge);
-
         return {
             ...constraint,
             z: constraint.z - z_shift
@@ -315,7 +329,7 @@ function resolveConstraint(i: number, points: BoxPath, constraint: XYCircle, box
 
     if (i === 0) {
         let triangle_pt: Coordinate = resolveByTriangularAddition(i, points, constraint, box_radius);
-        console.log("Triangle Point", triangle_pt);
+
         if (triangle_pt.z >= 0) { // ie. it is not out of range.
             path.splice(i + 1, 0, triangle_pt);
             return path;
@@ -329,7 +343,6 @@ function resolveConstraint(i: number, points: BoxPath, constraint: XYCircle, box
             path[i] = upshift_coord;
             return path;
         } else {
-            console.log("Unshift coordinate");
             let triangle_pt: Coordinate = resolveByTriangularAddition(i, points, constraint, box_radius);
             path.splice(i + 1, 0, triangle_pt);
             return path;
@@ -337,13 +350,25 @@ function resolveConstraint(i: number, points: BoxPath, constraint: XYCircle, box
     }
 };
 
+
+function shiftZ(p: any, h: number): any {
+    let c = { ...p };
+    c.z += h;
+    return c;
+};
+
+
 function generatePath(box: BoxCoordinate, constraints: XYCircle[]): BoxPath {
     let points: BoxPath = [];
+    const height: number = box.dimensions.height;
     const self_constraint: XYCircle = getBoxBottomXYCircle(box);
-    points.push(box.pickLocation);
-    let above_drop: CartesianCoordinate = Add3D(box.dropLocation, { x: 0, y: 0, z: -box.dimensions.height * 1.1 });
-    points.push({ ...above_drop, θ: box.dropLocation.θ });
-    points.push(box.dropLocation);
+
+    points.push(shiftZ(box.pickLocation, height));
+
+    let above_drop: CartesianCoordinate = Add3D(box.dropLocation, { x: 0, y: 0, z: -height * 1.1 });
+
+    points.push(shiftZ({ ...above_drop, θ: box.dropLocation.θ }, height));
+    points.push(shiftZ(box.dropLocation, height));
     constraints.unshift(self_constraint); // Pick location constraint. -- will need to modify.
 
     for (let j = 0; j < constraints.length; j++) {
@@ -355,7 +380,6 @@ function generatePath(box: BoxCoordinate, constraints: XYCircle[]): BoxPath {
             let s: Segment = [points[i], points[i + 1]];
 
             if (doesViolateConstraint(s, constraint, self_constraint.radius)) {
-                console.log("\n\n\n\nViolated Contraint", constraint, s, i);
                 points = resolveConstraint(i, points, constraint, self_constraint.radius);
 
                 // don't increment to double check. for now.
@@ -363,14 +387,17 @@ function generatePath(box: BoxCoordinate, constraints: XYCircle[]): BoxPath {
 
             i++;
         };
-        console.log("New Points ", points);
     }
+
+    points = points.map((p: ActionCoordinate) => {
+        return shiftZ(p, -1 * height);
+    });
 
     return points;
 };
 
 
-export function generateOptimizedPath(pallet_config: SavedPalletConfiguration): BoxPath[] {
+export function generateOptimizedPaths(pallet_config: SavedPalletConfiguration): BoxPath[] {
     const { boxCoordinates, config } = pallet_config;
     const { pallets } = config;
 
@@ -397,12 +424,6 @@ export function generateOptimizedPath(pallet_config: SavedPalletConfiguration): 
             return b.linearPathDistance - a.linearPathDistance;
         });
 
-        consideration_boxes.forEach((b: BoxCoordinate) => {
-            console.log("path", b.linearPathDistance);
-        })
-
-        console.log(consideration_boxes, "Starting coordiantes");
-
 
         if (consideration_boxes.length === 0) {
             break;
@@ -412,12 +433,11 @@ export function generateOptimizedPath(pallet_config: SavedPalletConfiguration): 
             });
             // let box = consideration_boxes[0];
             // paths.push(generatePath(box, constraints));
-            for (let i = 0; i < consideration_boxes.length; i++) {
+            for (let i = 0; i < Math.min(consideration_boxes.length, consideration_boxes.length); i++) {
                 let box = consideration_boxes[i];
                 let path: BoxPath = generatePath(box, constraints);
                 paths.push(path);
                 let new_constraint = getBoxTopXYCircle(box);
-                console.log(new_constraint, "New constraint");
                 constraints.push(new_constraint);
 
             }
@@ -429,13 +449,17 @@ export function generateOptimizedPath(pallet_config: SavedPalletConfiguration): 
         }
     }
 
-    console.log(paths);
+
     generatePlottableCoordinates(paths);
+    console.log("\n\n Final Paths ", paths);
 
     return paths;
 };
 
 function generatePlottableCoordinates(paths: BoxPath[]) {
+
+
+
     let coords: PlaneCoordinate[][] = [];
 
     paths.forEach((path: BoxPath) => {
@@ -449,6 +473,7 @@ function generatePlottableCoordinates(paths: BoxPath[]) {
     });
 
     fs.writeFileSync("data.json", JSON.stringify(coords, null, "\t"));
+    fs.writeFileSync("data3d.json", JSON.stringify(paths, null, "\t"));
 }
 
 
@@ -456,7 +481,7 @@ export function test() {
     initDatabaseHandler().then((handler: DatabaseHandler) => {
         handler.getPalletConfig(1).then((config: any) => {
             let spc: SavedPalletConfiguration = JSON.parse(config.raw_json);
-            generateOptimizedPath(spc);
+            generateOptimizedPaths(spc);
         });
     });
 };

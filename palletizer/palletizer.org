@@ -1,7 +1,6 @@
 PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
 
-* Palletizer
 ** DONE Teach Mode 
    - Compute rotational angle of pallet. 
 ** TODO Non-agnostic angle for computation.
@@ -32,11 +31,13 @@ PALLETIZER -*- mode: org -*-
 ** DONE Engine
    - Implement action path throughout.
    - Detection action at path segement.
-   
-
+** TODO Limit on stack height -- must be able to clear boxes.   
+** TODO Detect good pick -- accidental drop.
 ** DONE Delete Boxes.
 ** TODO Rotational coordinates in all visualizations.
 ** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
+** TODO Clean up the optimizer.
+
 
 
 
