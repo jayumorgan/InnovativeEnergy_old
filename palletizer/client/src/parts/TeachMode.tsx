@@ -15,7 +15,8 @@ import {
     Norm,
     BoxCoordinates,
     BoxPositionObject,
-    CoordinateRot
+    CoordinateRot,
+    getXAxisAngle
 } from "../geometry/geometry";
 
 import { Fraction } from "./teach/CompletionDots";
@@ -110,7 +111,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
         const Xdirection = Subtract3D(corner3, corner2);
 
         // Pallet angle rotation.
-        const φ_pallet = -1 * Math.atan(Xdirection.y / Xdirection.x);
+        const φ_pallet = getXAxisAngle(Xdirection);
 
         let currentHeightIncrement = palletHeight;
 

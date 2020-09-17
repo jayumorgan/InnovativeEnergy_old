@@ -90,6 +90,9 @@ export function getPalletDimensions(pallet: PalletGeometry): PlaneDimensions {
     return planar_dimensions;
 };
 
+export function getXAxisAngle(v: Coordinate): number {
+    return Math.atan(v.y / v.x);
+}
 
 export function getCenterOfPallet(p: PalletGeometry): Coordinate {
     let { corner1, corner2, corner3 } = p;

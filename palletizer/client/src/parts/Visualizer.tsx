@@ -8,7 +8,8 @@ import {
     getCenterOfPallet,
     CoordinateRot,
     Subtract3D,
-    Add3D
+    Add3D,
+    getXAxisAngle
 } from "../geometry/geometry";
 import { SavedPalletConfiguration } from "./TeachMode";
 import { PalletizerContext } from "../context/PalletizerContext";
@@ -360,14 +361,18 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                 controls.current?.remove_mesh(bn);
             });
 
-            palletConfig.boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
-                if (i < current_box) {
+            const boxCoordinates = palletConfig.boxCoordinates.sort((a: BoxCoordinates, b: BoxCoordinates) => {
+                return b.linearPathDistance - a.linearPathDistance;
+            });
 
-                    let BoxName = "BOXNAME-" + String(i);
+            boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
+                if (i < current_box) {
+                    const BoxName = "BOXNAME-" + String(i);
 
                     const { dropLocation, dimensions, palletIndex } = b;
                     const pallet = palletConfig.config.pallets[palletIndex];
                     const palletHeight = getPalletHeight(pallet);
+                    const φ_pallet = getXAxisAngle(Subtract3D(pallet.corner3, pallet.corner2));
 
                     let { width, height, length } = dimensions;
 
@@ -389,9 +394,7 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                     z = 0;
                     z += delta_z - height / 2;
                     box.position.set(x, y, z);
-                    if (dropLocation.θ) {
-                        box.rotateY(Math.PI / 2);
-                    }
+                    box.rotateY(dropLocation.θ - φ_pallet);
                     controls.current?.add_mesh(box);
                 }
             });

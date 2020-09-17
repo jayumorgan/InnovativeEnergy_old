@@ -7,7 +7,9 @@ PALLETIZER -*- mode: org -*-
 ** TODO Non-agnostic angle for computation.
    - Make sure that φ_pallet has the correct sign.
 ** TODO Rotation jogger shouldn't be discrete 90 degrees.
-** TODO Visualizer
+** DONE Visualizer: Frame + coordinates + axes 
+** TODO Visualizer -- drop locations in order.
+** TODO Visualizer -- partial rotations of pallet + boxes.
    - Handle multiple pallets
    - Deal with the strange offset on pallet configuration 2 (locally)
    - Update to deal with optimized coordinates.
@@ -31,6 +33,7 @@ PALLETIZER -*- mode: org -*-
    - Implement action path throughout.
    - Detection action at path segement.
    
+
 ** DONE Delete Boxes.
 ** TODO Rotational coordinates in all visualizations.
 ** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
