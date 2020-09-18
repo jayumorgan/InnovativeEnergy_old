@@ -331,7 +331,6 @@ function computeInternals(a: CartesianCoordinate, b: CartesianCoordinate, c: XYC
 
 // just try to raise it.
 
-
 function computeRaiseCoordinate(a: CartesianCoordinate, b: CartesianCoordinate, c: XYCircle, box_radius: number, box_height: number): CartesianCoordinate | null {
     let internals: Internals | null = computeInternals(a, b, c, box_radius, false, box_height);
 
@@ -463,7 +462,7 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
 
 }
 
-function optimizePaths(pallet_config: SavedPalletConfiguration): CartesianCoordinate[][] {
+function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoordinate[][], XYCircle[]] {
 
     const { boxCoordinates, config } = pallet_config;
     const { pallets } = config;
@@ -479,6 +478,11 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): CartesianCoordi
     let paths: CartesianCoordinate[][] = [];
 
     let return_paths: CartesianCoordinate[][] = [];
+
+    // for plotting
+    let initial_constraints = [...constraints];
+
+    let add_constraints: XYCircle[] = [];
 
     while (true) {
         let consideration_boxes: BoxCoordinate[] = boxCoordinates.filter((coord: BoxCoordinate) => {
@@ -547,7 +551,7 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): CartesianCoordi
     console.log(return_paths, "retiurn");
     console.log(last_return);
 
-    return final_paths;
+    return [final_paths, initial_constraints];
 };
 
 
@@ -603,18 +607,17 @@ function testConstraint() {
 
 
 
-function generatePlottableCoordinates(paths: CartesianCoordinate[][], i: number) {
-    let coords: PlaneCoordinate[][] = [];
-    paths.forEach((path: CartesianCoordinate[]) => {
-        let p: PlaneCoordinate[] = [];
-        path.forEach((c: CartesianCoordinate) => {
-            let x = variableNorm(c.x, c.y);
-            let y = c.z * -1;
-            p.push({ x, y } as PlaneCoordinate);
-        });
-        coords.push(p);
-    });
-    fs.writeFileSync(String(i) + "data3d.json", JSON.stringify(paths, null, "\t"));
+function generatePlottableCoordinates(paths: CartesianCoordinate[][], constraints: XYCircle[], i: number) {
+
+    console.log("\n\n\ni", i);
+    console.log("cons", constraints);
+
+    let data: any = {
+        paths,
+        constraints
+    }
+
+    fs.writeFileSync(String(i) + "data3d.json", JSON.stringify(data, null, "\t"));
 };
 
 
@@ -624,8 +627,8 @@ function test() {
         let generator = (i: number) => {
             handler.getPalletConfig(i).then((config: any) => {
                 let spc: SavedPalletConfiguration = JSON.parse(config.raw_json);
-                let p = optimizePaths(spc);
-                generatePlottableCoordinates(p, i);
+                let [p, c] = optimizePaths(spc);
+                generatePlottableCoordinates(p, c, i);
             });
         }
 

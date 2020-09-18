@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.animation as animation
 import json
+from matplotlib.patches import Circle
 import sys
 
 import numpy as np
@@ -20,6 +22,8 @@ def generate_plots_for_path(data, ax):
     max_h = 0
 
     for d in data:
+        if d == None:
+            continue
         for point in d:
             x = point["x"]
             y = point["y"]
@@ -36,7 +40,12 @@ if __name__ == "__main__":
     id = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
     print(id)
-    data = load_data(id)
+    loaded = load_data(id)
+
+    data = loaded["paths"]
+    print("Paths", data)
+    constraints = loaded["constraints"]
+
     fig = plt.figure()
 
     ax = fig.add_subplot(111, projection='3d')
@@ -75,6 +84,19 @@ if __name__ == "__main__":
                                         interval=time_interval,
                                         blit=False,
                                         repeat=False)
+    for c in constraints:
+        x = c["x"]
+        y = c["y"]
+        z = c["z"]
+        z *= -1  # reverse for top.
+        r = c["radius"]
+        p = Circle((x, y), r, alpha=0.5, fc="red", ec="black")
+        ax.add_patch(p)
+        art3d.pathpatch_2d_to_3d(p, z=z, zdir="z")
+
+    # p = Circle((100, 100), 100)
+    # ax.add_patch(p)
+    # art3d.pathpatch_2d_to_3d(p, z=100, zdir="z")
 
     graph, = ax.plot(xs, ys, zs)
 
