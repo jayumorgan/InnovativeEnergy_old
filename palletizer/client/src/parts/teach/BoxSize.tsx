@@ -164,8 +164,8 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
-        dimensions: { length: 100, height: 100, width: 100 },
-        pickLocation: { x: 0, y: 0, z: 500, θ: 0 }
+        dimensions: { length: 500, height: 100, width: 500 },
+        pickLocation: { x: 0, y: 0, z: 1500, θ: 0 }
     };
 
     const [editingBox, setEditingBox] = useState<BoxObject>(box);
@@ -223,7 +223,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
                 setSummaryScreen(true);
             }
         },
-        enabled: allBoxes.length > 0
+        enabled: summaryScreen ? allBoxes.length > 0 : true
     };
 
     if (summaryScreen) {

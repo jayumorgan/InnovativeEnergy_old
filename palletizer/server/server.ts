@@ -30,30 +30,26 @@ app.use(morgan('dev'));
 main();
 
 
+if (false) {
+    initDatabaseHandler().then((handler: DatabaseHandler) => {
 
+        let attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+            req.databaseHandler = handler;
+            next();
+        };
 
-// initDatabaseHandler().then((handler: DatabaseHandler) => {
+        let engine = new Engine(handler);
 
-//     let attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-//         req.databaseHandler = handler;
-//         next();
-//     };
+        app.use(attachDatabaseHandler);
+        app.use(router);
 
-//     let engine = new Engine(handler);
+        let server = app.listen(PORT, HOSTNAME, () => {
+            let address = server.address() as AddressInfo;
+            let address_string = "http://" + address.address + ":" + address.port;
+            console.log(`Server running at ${address_string}.`);
+        });
 
-//     app.use(attachDatabaseHandler);
-//     app.use(router);
-
-//     let server = app.listen(PORT, HOSTNAME, () => {
-//         let address = server.address() as AddressInfo;
-//         let address_string = "http://" + address.address + ":" + address.port;
-//         console.log(`Server running at ${address_string}.`);
-//     });
-
-// }).catch((e) => {
-//     console.log("Error initializing database handler", e);
-// });
-
-
-
-
+    }).catch((e) => {
+        console.log("Error initializing database handler", e);
+    });
+}
