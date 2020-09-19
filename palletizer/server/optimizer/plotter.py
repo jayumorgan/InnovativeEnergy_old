@@ -19,19 +19,28 @@ def generate_plots_for_path(data, ax):
     xs = []
     ys = []
     zs = []
-    max_h = 0
+
+    count = 0
 
     for d in data:
-        if d == None:
-            continue
-        for point in d:
-            x = point["x"]
-            y = point["y"]
-            z = point["z"]
-            xs.append(x)
-            ys.append(y)
-            zs.append(z)
 
+        # if count < 8:
+        #     count += 1
+        #     cont# inue
+        if count % 2 == 50:
+            pass
+        else:
+            if d == None:
+                continue
+            for point in d:
+                x = point["x"]
+                y = point["y"]
+                z = point["z"]
+                xs.append(x)
+                ys.append(y)
+                zs.append(z)
+
+        count += 1
     return [xs, ys, zs]
 
 
@@ -39,11 +48,10 @@ if __name__ == "__main__":
     print(sys.argv)
     id = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
-    print(id)
+    print(f"Plotting coordinate for pallet configuration {id}")
     loaded = load_data(id)
 
     data = loaded["paths"]
-    print("Paths", data)
     constraints = loaded["constraints"]
 
     fig = plt.figure()
@@ -62,12 +70,12 @@ if __name__ == "__main__":
 
     count = len(xs)
 
-    print("Plotting Path Coordinates")
+    print(xs)
 
     def update_graph(num):
-        new_x = xs[0:num]
-        new_y = ys[0:num]
-        new_z = zs[0:num]
+        new_x = xs[0:num + 1]
+        new_y = ys[0:num + 1]
+        new_z = zs[0:num + 1]
         index = len(new_x) - 1
         if index >= 0:
             print(
@@ -76,27 +84,32 @@ if __name__ == "__main__":
         graph.set_data(new_x, new_y)
         graph.set_3d_properties(new_z)
 
+        if num < len(constraints):
+            add_constraint(num)
+
     time_interval = 200
 
     animation = animation.FuncAnimation(fig,
                                         update_graph,
-                                        len(xs) + 1,
+                                        len(xs),
                                         interval=time_interval,
                                         blit=False,
                                         repeat=False)
-    for c in constraints:
+
+    def add_constraint(num):
+        c = constraints[num]
         x = c["x"]
         y = c["y"]
         z = c["z"]
         z *= -1  # reverse for top.
         r = c["radius"]
         p = Circle((x, y), r, alpha=0.5, fc="red", ec="black")
-        ax.add_patch(p)
-        art3d.pathpatch_2d_to_3d(p, z=z, zdir="z")
+#        ax.add_patch(p)
+#       art3d.pathpatch_2d_to_3d(p, z=z, zdir="z")
 
-    # p = Circle((100, 100), 100)
-    # ax.add_patch(p)
-    # art3d.pathpatch_2d_to_3d(p, z=100, zdir="z")
+# p = Circle((100, 100), 100)
+# ax.add_patch(p)
+# art3d.pathpatch_2d_to_3d(p, z=100, zdir="z")
 
     graph, = ax.plot(xs, ys, zs)
 
