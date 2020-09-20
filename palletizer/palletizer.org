@@ -7,8 +7,9 @@ PALLETIZER -*- mode: org -*-
    - Make sure that φ_pallet has the correct sign.
 ** TODO Rotation jogger shouldn't be discrete 90 degrees.
 ** DONE Visualizer: Frame + coordinates + axes 
-** TODO Visualizer -- drop locations in order.
-** TODO Visualizer -- partial rotations of pallet + boxes.
+** DONE Visualizer -- drop locations in order.
+** DONE Visualizer -- partial rotations of pallet + boxes.
+** TODO Test visualizer with partial rotation of pallet etc.
    - Handle multiple pallets
    - Deal with the strange offset on pallet configuration 2 (locally)
    - Update to deal with optimized coordinates.
@@ -31,14 +32,20 @@ PALLETIZER -*- mode: org -*-
 ** DONE Engine
    - Implement action path throughout.
    - Detection action at path segement.
-** TODO Limit on stack height -- must be able to clear boxes.   
+** TODO Limit on stack height -- must be able to clear boxes (inside configuration)   
 ** TODO Detect good pick -- accidental drop.
 ** DONE Delete Boxes.
 ** TODO Rotational coordinates in all visualizations.
 ** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
-** TODO Clean up the optimizer.
 
-
-
-
-
+** TODO Optimizer:
+*** DONE Path Triangulation.
+*** DONE Return paths.
+*** DONE Level Paths.
+*** TODO Add Action Coordinates for pick and drop.
+*** TODO Plugin to server.
+*** TODO Handle errors and default to standard.
+*** TODO UI Button toggle. 
+*** TODO Add lip height constraint to path.
+*** TODO Use Line class.
+*** TODO Top and bottom of box constraint.
