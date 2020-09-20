@@ -504,10 +504,10 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
         while (j < points.length - 1) { // don't adjust last coordinate;
 
             let [a, b]: [CartesianCoordinate, CartesianCoordinate] = [points[j], points[j + 1]];
-            let effective_constraint = computeEffectiveConstraint(a, b, c, self_constraint.radius); // get constraint along the path (2-D)
+            let effective_constraint = computeEffectiveConstraint(a, b, c, box_radius); // get constraint along the path (2-D)
 
             if (effective_constraint !== null) {
-                box_radius = 0;
+                //   box_radius = 0;
                 let arr: CartesianCoordinate[] = computePathArray(a, b, c, box_radius, box.dimensions.height, j !== 0);
                 points.splice(j, 2, ...arr);
                 if (arr.length == 1) {
