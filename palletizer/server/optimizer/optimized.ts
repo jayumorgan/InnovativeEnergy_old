@@ -93,19 +93,46 @@ function variableNorm(...args: number[]): number {
     return Math.sqrt(squares);
 };
 
-// line is l = (b-a)t + a, point is x. -- assuming 2d.
-function pointLineDistance2D(a: CartesianCoordinate, b: CartesianCoordinate, x: CartesianCoordinate): number {
-    const a_minus_x = Subtract3D(a, x);
-    const b_minus_a = Subtract3D(b, a);
-    const squared_norm = DotProduct(b_minus_a, b_minus_a);
-    const dot_ax_ba = DotProduct(a_minus_x, b_minus_a);
-    const t_min: number = -1 * dot_ax_ba / squared_norm;
-    // Now compute the distance.
-    let point = Add3D(MultiplyScalar(Subtract3D(b, a), t_min), a);
-    let diff = Subtract3D(point, x);
-    let norm: number = Norm2D(diff);
-    return norm;
+// Use for all segments.
+class Line {
+    a: CartesianCoordinate;
+    b: CartesianCoordinate;
+
+
+    constructor(a: CartesianCoordinate, b: CartesianCoordinate) {
+        this.a = a;
+        this.b = b;
+    }
+
+    Delta(): CartesianCoordinate { // b - a
+        return Subtract3D(this.b, this.a);
+    }
+
+    valueAtTime(t: number): CartesianCoordinate {
+        return Add3D(MultiplyScalar(this.Delta(), t), this.a);
+    }
+
+    zIntersectionTime(z_val: number): number | null { // point at which the line crosses the z axis.
+        let delta: CartesianCoordinate = this.Delta();
+
+        if (delta.z === 0) {
+            return null;
+        }
+        // solve time.
+        return (z_val - this.a.z) / delta.z;
+    }
+
+    zIntersectionPoint(z_val: number): CartesianCoordinate | null {
+        let t_int: number | null = this.zIntersectionTime(z_val);
+        if (t_int === null) {
+            return null;
+        }
+        return this.valueAtTime(t_int);
+    }
+
 };
+
+
 
 //-------Constraints-------
 function getPalletXYCircle(pallet: PalletGeometry): XYCircle {
@@ -471,15 +498,49 @@ function computePathArray(a: CartesianCoordinate, b: CartesianCoordinate, c: XYC
         return [a, triangle, b];
     }
 
-    // return [a, b];
-    // console.log("Square path constraint", a, b, c);
+    // Brute force, should be untouched.
     let square: CartesianCoordinate[] = computeSquarePath(a, b, box_height, allow_up);
-    // console.log("Square", square);
     return square;
-
-    //    return computeSquarePath(a, b, box_height, allow_up); // highly undesireable.
 };
 
+function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[] {
+
+    let cross_point: CartesianCoordinate | null = null;
+    let cross_index: number | null = null;
+    let uncross_point: CartesianCoordinate | null = null;
+    let uncross_index: number | null = null;
+
+    let i: number = 0;
+
+    while (i < points.length - 1) {
+        // assuming that the first point is not above.
+        let a: CartesianCoordinate = points[i];
+        let b: CartesianCoordinate = points[i + 1];
+
+        let line: Line = new Line(a, b);
+        let z_time: number | null = line.zIntersectionTime(0); // find the point it crosses 0.
+
+        if (z_time !== null && z_time >= 0 && z_time <= 1) { // crosses z along path.
+            if (cross_point === null) { // no cross point yet. 
+                cross_point = line.zIntersectionPoint(0);
+                cross_index = i + 1;
+            } else { // last uncross point.
+                uncross_point = line.zIntersectionPoint(0);
+                uncross_index = i + 1;
+            }
+        }
+        i++;
+    }
+
+    if (cross_point !== null && cross_index !== null) {
+        if (uncross_point !== null && uncross_index !== null) {
+            points.splice(cross_index, uncross_index - cross_index + 1, ...[cross_point, uncross_point]);
+        } else {
+            // Make standard square path.
+        }
+    }
+    return points;
+};
 
 
 function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): CartesianCoordinate[] {
@@ -496,6 +557,7 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
     constraints.unshift(self_constraint);
 
     let box_radius: number = self_constraint.radius;
+    //    box_radius = 0;
 
     for (let i = 0; i < constraints.length; i++) {
 
@@ -528,8 +590,10 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
         return moveZ(c, -box.dimensions.height);
     });
 
-    return points;
+    // Now, loop through and sort out z = 0 crossings.
+    let final_points: CartesianCoordinate[] = computeLeveledPath(points);
 
+    return final_points;
 }
 
 function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoordinate[][], XYCircle[]] {
