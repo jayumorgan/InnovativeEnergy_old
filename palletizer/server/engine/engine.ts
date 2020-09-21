@@ -1,7 +1,6 @@
+import * as dotenv from "dotenv";
 import mqtt from "mqtt";
-
 import { v4 as uuidv4 } from 'uuid';
-
 import MachineMotion, {
     vResponse,
     AXES,
@@ -11,9 +10,7 @@ import MachineMotion, {
     MachineMotionConfig,
     IODeviceState
 } from "mm-js-api";
-
 import { DatabaseHandler } from "../database/db";
-
 import {
     SavedMachineConfiguration,
     MachineConfiguration,
@@ -26,10 +23,8 @@ import {
     Drive,
     Coordinate
 } from "./config";
-
 import { generateStandardPath } from "../optimizer/standard";
 import { generateOptimizedPath } from "../optimizer/optimized";
-
 import {
     BoxPath,
     ActionCoordinate,
@@ -37,9 +32,22 @@ import {
 } from "../optimizer/optimized";
 
 
-//--------------------TESTING ENVIRONMENT--------------------
-const TESTING = true;
+
+//---------------Environment Setup---------------
+dotenv.config();
+
+var TESTING: boolean = true;
+// False if all machine motion ip addresses should be 127.0.0.1.
+if (process.env.ENVIRONMENT === "PRODUCTION") {
+    TESTING = false;
+}
 console.log((TESTING ? "In" : "Not in") + " Testing environment");
+// This will eventually be a control side flag (sent in with start signal)
+var OPTIMIZE_PATHS: boolean = true;
+if (process.env.PATH_TYPE === "STANDARD") {
+    OPTIMIZE_PATHS = false;
+}
+console.log(OPTIMIZE_PATHS ? "Using path optimization." : "Using standard paths.");
 
 
 //---------------Network Parameters---------------
@@ -352,10 +360,12 @@ export class Engine {
         this.palletConfigId = id;
         let is_null = this.palletConfig === null;
         if (!is_null) {
-
-            let paths: BoxPath[] = generateOptimizedPath(spc);
-            //            let paths: BoxPath[] = generateStandardPath(spc);
-
+            let paths: BoxPath[];
+            if (OPTIMIZE_PATHS) { // Again, this will be a flag from control at some point.
+                paths = generateOptimizedPath(spc);
+            } else {
+                paths = generateStandardPath(spc);
+            }
             this.boxPathsForPallet = paths;
             let drop_coords: Coordinate[] = [];
             paths.forEach((bp: BoxPath) => {

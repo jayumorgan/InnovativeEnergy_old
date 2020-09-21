@@ -1,17 +1,16 @@
 import mqtt from "mqtt";
 import { v4 as uuidv4 } from 'uuid';
 import MM, { MachineMotionConfig, DriveType, DRIVES, DIRECTION, vResponse } from "mm-js-api";
-
 import { AxesConfiguration, Drive, AXES } from "../parts/machine_config/Drives";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
 import { CoordinateRot } from "../geometry/geometry";
 
 
-
-const TESTING = true;
+var TESTING = false;
+if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
+    TESTING = true;
+}
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
-
-
 // MM is the controller, MachineMotion is the configuration parameters from MachineConfig (just info, no methods)
 
 // Machine Motion Specific

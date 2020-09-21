@@ -4,10 +4,11 @@ import mqtt from "mqtt";
 import { MachineMotion } from "../parts/machine_config/MachineMotions";
 import { IOState } from "../parts/machine_config/IO";
 
-
-const TESTING = true;
+var TESTING = false;
+if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
+    TESTING = true;
+}
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
-
 
 function getMachineMotion(machine: MachineMotion): MM {
     let machine_ip = TESTING ? "127.0.0.1" : machine.ipAddress;

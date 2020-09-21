@@ -872,7 +872,7 @@ function test() {
         let generator = (i: number) => {
             handler.getPalletConfig(i).then((config: any) => {
                 let spc: SavedPalletConfiguration = JSON.parse(config.raw_json);
-                let p = generatePathOptimization(spc);
+                let p = generateOptimizedPath(spc);
                 //                console.log(p)
                 // console.log("Box coordinate length", spc.boxCoordinates.length);
 
