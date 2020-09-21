@@ -127,6 +127,8 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
     };
 
     let selectAction = (c: CoordinateRot) => {
+
+	
         console.log("Selected Pick Location....", c);
         updateBox({ ...box, pickLocation: c });
     };

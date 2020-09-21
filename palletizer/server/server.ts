@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // To run the path optimization test.
-//main();
+main();
 
 if (true) { // for testing.
     initDatabaseHandler().then((handler: DatabaseHandler) => {

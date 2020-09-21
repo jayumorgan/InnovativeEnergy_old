@@ -916,7 +916,7 @@ function test() {
         }
 
         // Array of pallet_config_ids (sqlite3)
-        [3].forEach((i: number) => {
+        [1].forEach((i: number) => {
             generator(i);
         });
     });

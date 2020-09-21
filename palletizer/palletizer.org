@@ -53,6 +53,7 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Configuration Page:
 *** TODO Reload configs on create (so that they show up immidiately).
+*** TODO Default to configuration page when there are no configurations.
 
 ** TODO Visualizer:
 *** DONE Visualizer: Frame + coordinates + axes 
