@@ -1,18 +1,10 @@
 // Express
 import express, { Request, Response } from "express";
-
-
-
 // File Handling
-import fs, { BaseEncodingOptions, Dirent } from "fs";
+import fs from "fs";
 import path from "path";
 
-// Python process.
-import { spawn } from "child_process";
-
 let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'client', 'build');
-let PYTHON_PATH: fs.PathLike = path.join(__dirname, '..', '..', '..', 'machine', 'machine.py');
-
 
 function handleCatch(res: Response) {
     return (e: any) => {
@@ -118,28 +110,5 @@ router.use(express.static(BUILD_PATH));
 router.get("/*", (req: express.Request, res: express.Response) => {
     res.sendFile(path.join(BUILD_PATH.toString(), "index.html").toString());
 });
-
-function start_machine() {
-    let file_path = PYTHON_PATH.toString();
-
-    console.log("Python path: " + file_path);
-
-    let python_process = spawn("python3", [file_path]);
-
-    // Does this work?
-    python_process.stdout.on('data', (chunk: any) => {
-        console.log("machine.py: " + chunk.toString('utf-8'));
-    });
-    python_process.stderr.on("data", (chunk: any) => {
-
-        console.log("machine.py: " + chunk.toString('utf-8'));
-    });
-    python_process.on("close", () => {
-        console.log("machine.py closed.");
-    });
-}
-
-
-export { start_machine };
 
 export default router;

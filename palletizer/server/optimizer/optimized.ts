@@ -738,9 +738,9 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
                 return_box.dropLocation = { ...box.pickLocation };
                 return_box.dimensions.height *= 1 / 2; // 1/3rd the height of a normal box.
 
-                console.log("Return path", return_box.dimensions.height);
+                console.log("Return path");
+                //                console.log("Return path", return_box.dimensions.height);
                 let next_box_constraint: XYCircle = getBoxTopPickLocationCircle(box);
-                console.log("Next box constraint", next_box_constraint);
                 // Temp constaitns to include top of next box
                 let temp_constraints: XYCircle[] = [next_box_constraint, ...constraints];
                 temp_constraints.sort((a: XYCircle, b: XYCircle) => {
