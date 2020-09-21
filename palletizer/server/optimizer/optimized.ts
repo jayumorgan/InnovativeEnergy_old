@@ -1,5 +1,7 @@
 import fs from "fs";
 
+// Reduce the number of loops in this.
+
 import { initDatabaseHandler, DatabaseHandler } from "../database/db";
 
 // In: (pallet_config) -> Out: (list of coordinates, raise location, etc.
@@ -14,12 +16,8 @@ import {
     SavedMachineConfiguration,
     SavedPalletConfiguration
 } from "../engine/config";
-import { addActionForCoordinate } from "./standard";
+import { addActionToCoordinate, raiseOverCoordinate } from "./standard";
 
-
-export function main() {
-    console.log("Running file");
-}
 
 
 //---------------Types---------------
@@ -44,6 +42,56 @@ interface XYCircle extends CartesianCoordinate {
 //---------------Functions---------------
 
 //-------Algebra-------
+
+function attachAngle(x: CartesianCoordinate, θ: number): Coordinate {
+    return {
+        ...x,
+        θ
+    };
+}
+
+function cartesianCoordinate(x: number, y: number, z: number): CartesianCoordinate {
+    return {
+        x,
+        y,
+        z
+    };
+}
+
+
+function quadratic(a: number, b: number, c: number, positive_root: boolean): number {
+    let first: number = - b;
+    let second: number = (b ** 2 - 4 * a * c) ** (1 / 2);
+    let result = first;
+    result += (positive_root ? second : -1 * second);
+    return result / (2 * a);
+};
+
+function vectorRound(x: CartesianCoordinate): CartesianCoordinate {
+    return {
+        x: Math.round(x.x),
+        y: Math.round(x.y),
+        z: Math.round(x.z)
+    };
+}
+
+function vectorEquals(x: CartesianCoordinate, y: CartesianCoordinate, tolerance: number): boolean {
+    let dx = Math.abs(x.x - y.x);
+    if (dx >= tolerance) {
+        return false;
+    }
+    let dy = Math.abs(x.y - y.y);
+    if (dy >= tolerance) {
+        return false;
+    }
+
+    let dz = Math.abs(x.z - y.z);
+    if (dz >= tolerance) {
+        return false;
+    }
+
+    return true;
+};
 
 function moveZ(c: CartesianCoordinate, h: number): CartesianCoordinate {
     return {
@@ -128,8 +176,32 @@ class Line {
             return null;
         }
         return this.valueAtTime(t_int);
-    }
+    };
 
+    computeConstraintIntersectionTimes(constraint: XYCircle, box_radius: number): [number, number] | null {
+        let x: CartesianCoordinate = this.a;
+        let y: CartesianCoordinate = this.b;
+        let delta: CartesianCoordinate = this.Delta();
+
+        let a: number = DotProduct2D(delta, delta);
+        let b: number = 2 * DotProduct2D(delta, Subtract3D(x, constraint));
+        let c: number = DotProduct2D(Subtract3D(x, constraint), Subtract3D(x, constraint)) - (box_radius + constraint.radius) ** 2;
+
+        if (a === 0) {
+            return null;
+        }
+
+        let second: number = (b ** 2 - 4 * a * c);
+
+        if (second <= 0) { // Only complex or single solution.
+            return null;
+        }
+
+        let t_0: number = quadratic(a, b, c, a < 0); // last argument is positive -- a is always positive anyways.
+        let t_1: number = quadratic(a, b, c, a > 0);
+
+        return [t_0, t_1];
+    }
 };
 
 
@@ -214,24 +286,12 @@ function DotProduct2D(a: CartesianCoordinate, b: CartesianCoordinate): number {
     return a.x * b.x + a.y * b.y;
 };
 
-function quadratic(a: number, b: number, c: number, positive_root: boolean): number {
-    let first: number = - b;
-    let second: number = (b ** 2 - 4 * a * c) ** (1 / 2);
-    let result = first;
-    result += (positive_root ? second : -1 * second);
-    return result / (2 * a);
-};
 
 
 function computeEffectiveConstraint(x: CartesianCoordinate, y: CartesianCoordinate, constraint: XYCircle, box_radius: number): XYCircle | null {
-
+    // deal with same height as constraint.
     let delta_z: number = y.z - x.z;
     let is_rising: boolean = delta_z * -1 >= 0; // line is upwards.
-
-    // What about if they are the same height as the constraint.
-    // if (delta_z === 0) {
-    //     return null;
-    // }
 
     let min_z: number = Math.max(x.z, y.z);
 
@@ -246,37 +306,25 @@ function computeEffectiveConstraint(x: CartesianCoordinate, y: CartesianCoordina
         return null;
     }
 
-    let a: number = DotProduct2D(Subtract3D(y, x), Subtract3D(y, x));
-    let b: number = 2 * DotProduct2D(Subtract3D(y, x), Subtract3D(x, constraint));
-    let c: number = DotProduct2D(Subtract3D(x, constraint), Subtract3D(x, constraint)) - (box_radius + constraint.radius) ** 2;
+    let line = new Line(x, y);
 
-    if (a === 0) {
-        return null; // no line.
-    }
+    let intersection_time: [number, number] | null = line.computeConstraintIntersectionTimes(constraint, box_radius);
 
-    let second: number = (b ** 2 - 4 * a * c);
-
-    if (second <= 0) { // does no intersect, or intersects at a point.
+    if (intersection_time === null) {
         return null;
     }
 
-    // this ensures that t_0 <= t_1
-    // also ensure that it does not pass over.
-    let t_0: number = quadratic(a, b, c, a < 0); // last argument is positive -- a is always positive anyways.
-    let t_1: number = quadratic(a, b, c, a > 0);
+    let [t_0, t_1]: [number, number] = intersection_time;
 
-    const compute_point = (t: number) => {
-        return Add3D(MultiplyScalar(Subtract3D(y, x), t), x);
-    };
-
-    const compute_distance = (time_1: number, time_2: number) => {
-        let v1: CartesianCoordinate = compute_point(time_1);
-        let v2: CartesianCoordinate = compute_point(time_2);
+    const compute_distance_2d = (time_1: number, time_2: number) => {
+        let v1: CartesianCoordinate = line.valueAtTime(time_1);
+        let v2: CartesianCoordinate = line.valueAtTime(time_2);
         let diff: CartesianCoordinate = Subtract3D(v2, v1);
         return Norm2D(diff);
     };
 
-    let lower_point: CartesianCoordinate = compute_point(is_rising ? t_0 : t_1);
+    let lower_point: CartesianCoordinate = line.valueAtTime(is_rising ? t_0 : t_1);
+
     if (lower_point.z < constraint.z) {
         return null;
     }
@@ -288,31 +336,17 @@ function computeEffectiveConstraint(x: CartesianCoordinate, y: CartesianCoordina
     let t_y: number = 1;
     let t_int: number = delta_z === 0 ? t_y : (constraint.z - x.z) / delta_z;
 
-    let c_eff: CartesianCoordinate = compute_point(t_int); // point that it intersects.
+    let c_eff: CartesianCoordinate = line.valueAtTime(t_int);
+    let r_eff: number = compute_distance_2d(t_int, is_rising ? t_0 : t_1);
 
-    let r_eff: number = compute_distance(t_int, is_rising ? t_0 : t_1);
-    //    console.log("t_int", t_int, "other", is_rising ? t_0 : t_1);
+    if (r_eff < (0.1 * (box_radius + constraint.radius))) { // within error, ignore.
+        return null;
+    }
 
     return {
         ...c_eff,
         radius: r_eff
     } as XYCircle;
-
-
-    // let l_0 = compute_point(t_0);
-    // let l_1 = compute_point(t_1);
-
-    // let distance = Subtract3D(l_1, l_0);
-    // let mid = Add3D(l_0, MultiplyScalar(distance, 1 / 2));
-    // let effective_radius: number = (1 / 2) * DotProduct2D(distance, distance) ** (1 / 2);
-    // let effective_center = {
-    //     x: mid.x,
-    //     y: mid.y,
-    //     z: constraint.z,
-    //     radius: effective_radius
-    // } as XYCircle;
-
-    // return effective_center;
 };
 
 
@@ -326,7 +360,7 @@ interface Internals {
 };
 
 
-function computeInternals(a: CartesianCoordinate, b: CartesianCoordinate, c: XYCircle, box_radius: number, triangle: boolean, box_height: number): Internals | null {
+function computeInternals(a: CartesianCoordinate, b: CartesianCoordinate, c: XYCircle, box_radius: number): Internals | null {
     let effective_constraint: XYCircle | null = computeEffectiveConstraint(a, b, c, box_radius); // get constraint along the path (2-D)
 
     if (effective_constraint === null) {
@@ -363,7 +397,6 @@ function computeInternals(a: CartesianCoordinate, b: CartesianCoordinate, c: XYC
     let α: number;
     let α_diff: number; // they should be in the same direction
 
-
     if (Δ.x === 0) {
         if (Δ.y === 0) {
             return null;
@@ -379,19 +412,6 @@ function computeInternals(a: CartesianCoordinate, b: CartesianCoordinate, c: XYC
 
     let shift: CartesianCoordinate = MultiplyScalar(Δ, α);
     let absolute: CartesianCoordinate = Add3D(base, shift);
-    // Dont sort out zero, instead interpolate later.
-
-    // if (triangle) {
-    //     if (absolute.z < box_height) {
-    //         let t_zero: number = (-1 * base.z + box_height) / Δ.z;
-    //         shift = MultiplyScalar(Δ, t_zero);
-    //         absolute = Add3D(base, shift);
-    //     }
-    // }
-
-    // if (absolute.z < box_height) {
-    //     return null;
-    // }
 
     return {
         shift,
@@ -401,10 +421,8 @@ function computeInternals(a: CartesianCoordinate, b: CartesianCoordinate, c: XYC
     } as Internals;
 };
 
-
-
 function computeRaiseCoordinate(a: CartesianCoordinate, b: CartesianCoordinate, c: XYCircle, box_radius: number, box_height: number): CartesianCoordinate | null {
-    let internals: Internals | null = computeInternals(a, b, c, box_radius, false, box_height);
+    let internals: Internals | null = computeInternals(a, b, c, box_radius);
 
     if (internals === null) {
         return null;
@@ -436,7 +454,7 @@ function computeRaiseCoordinate(a: CartesianCoordinate, b: CartesianCoordinate, 
 
 
 function computeTriangleCoordinate(a: CartesianCoordinate, b: CartesianCoordinate, c: XYCircle, box_radius: number, box_height: number): CartesianCoordinate | null {
-    let internals: Internals | null = computeInternals(a, b, c, box_radius, true, box_height);
+    let internals: Internals | null = computeInternals(a, b, c, box_radius);
 
     if (internals === null) {
         return null;
@@ -444,7 +462,6 @@ function computeTriangleCoordinate(a: CartesianCoordinate, b: CartesianCoordinat
 
     return internals.absolute;
 };
-
 
 
 function computeSquarePath(a: CartesianCoordinate, b: CartesianCoordinate, box_height: number, allow_up: boolean): CartesianCoordinate[] {
@@ -477,6 +494,7 @@ function computePureUpshift(a: CartesianCoordinate, b: CartesianCoordinate): Car
 };
 
 
+// Return the points that should replace a.
 function computePathArray(a: CartesianCoordinate, b: CartesianCoordinate, c: XYCircle, box_radius: number, box_height: number, allow_up: boolean): CartesianCoordinate[] { // allow up for first coordinate;
     if (allow_up) {
         let up: CartesianCoordinate | null = computeRaiseCoordinate(a, b, c, box_radius, box_height);
@@ -489,13 +507,13 @@ function computePathArray(a: CartesianCoordinate, b: CartesianCoordinate, c: XYC
     let pureShift: CartesianCoordinate | null = computePureUpshift(a, b);
 
     if (pureShift !== null) {
-        return [pureShift];
+        return [];
     }
 
     let triangle: CartesianCoordinate | null = computeTriangleCoordinate(a, b, c, box_radius, box_height);
 
     if (triangle !== null) {
-        return [a, triangle, b];
+        return [a, triangle];
     }
 
     // Brute force, should be untouched.
@@ -509,11 +527,42 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
     let cross_index: number | null = null;
     let uncross_point: CartesianCoordinate | null = null;
     let uncross_index: number | null = null;
+    // Remove duplicates from path. if there are any.
 
     let i: number = 0;
 
     while (i < points.length - 1) {
-        // assuming that the first point is not above.
+        let a: CartesianCoordinate = points[i];
+        let b: CartesianCoordinate = points[i + 1];
+
+        let tolerance: number = 1 / 1000; // in mmiliimeters.
+
+        if (vectorEquals(a, b, tolerance)) {
+            points.splice(i, 1);
+            continue;
+        }
+        if (i < points.length - 2) { // This handles cases where three points are on the same z line. // could be generatlized to all along the same line in general.
+            let c: CartesianCoordinate = points[i + 2];
+            let d1: CartesianCoordinate = Subtract3D(a, b);
+            let d2: CartesianCoordinate = Subtract3D(b, c);
+            d1.z = 0;
+            d2.z = 0;
+            let diff: CartesianCoordinate = Subtract3D(d1, d2);
+            let dx: number = Math.abs(diff.x);
+            let dy: number = Math.abs(diff.y);
+
+            if (Math.max(dx, dy) < tolerance) { // If only change is in the z direction.
+                points.splice(i + 1, 1); // remove b. --
+                continue;
+            }
+        }
+        i++;
+    }
+
+    // Second loop.
+
+    i = 0;
+    while (i < points.length - 1) {
         let a: CartesianCoordinate = points[i];
         let b: CartesianCoordinate = points[i + 1];
 
@@ -534,9 +583,13 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
 
     if (cross_point !== null && cross_index !== null) {
         if (uncross_point !== null && uncross_index !== null) {
-            points.splice(cross_index, uncross_index - cross_index + 1, ...[cross_point, uncross_point]);
+            console.log("Splicing path", points)
+
+            points.splice(cross_index, uncross_index - cross_index, ...[cross_point, uncross_point]);
+
+            console.log("After splice", points);
         } else {
-            // Make standard square path.
+            console.log("Cross but does not uncross", points);
         }
     }
     return points;
@@ -545,7 +598,6 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
 
 function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): CartesianCoordinate[] {
     let constraints: XYCircle[] = [...input_constraints];
-
     const self_constraint: XYCircle = getBoxBottomXYCircle(box);
     let points: CartesianCoordinate[] = [];
 
@@ -557,7 +609,7 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
     constraints.unshift(self_constraint);
 
     let box_radius: number = self_constraint.radius;
-    //    box_radius = 0;
+    box_radius = 0;
 
     for (let i = 0; i < constraints.length; i++) {
 
@@ -571,8 +623,10 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
             if (effective_constraint !== null) {
                 //   box_radius = 0;
                 let arr: CartesianCoordinate[] = computePathArray(a, b, c, box_radius, box.dimensions.height, j !== 0);
-                points.splice(j, 2, ...arr);
-                if (arr.length == 1) {
+
+                points.splice(j === 0 ? j + 1 : j, j === 0 && arr.length === 1 ? 0 : 1, ...arr);
+
+                if (j !== 0 && arr.length == 1) {
                     j += 0;
                 } else {
                     j += 1;
@@ -580,7 +634,6 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
                 // j += arr.length - 1;
                 continue;
             }
-
             j += 1;
         }
     }
@@ -590,14 +643,26 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
         return moveZ(c, -box.dimensions.height);
     });
 
-    // Now, loop through and sort out z = 0 crossings.
-    let final_points: CartesianCoordinate[] = computeLeveledPath(points);
-
-    return final_points;
+    return computeLeveledPath(points);
 }
 
-function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoordinate[][], XYCircle[]] {
 
+function computeInitialPath(first_point: CartesianCoordinate): CartesianCoordinate[] {
+    let points: CartesianCoordinate[] = [];
+    points.push(cartesianCoordinate(0, 0, 0));
+    let cp: CartesianCoordinate = { ...first_point };
+    cp.z = 0;
+    points.push(cp);
+    points.push(first_point);
+    return points;
+};
+
+function addInitialPath(paths: CartesianCoordinate[][]): CartesianCoordinate[][] {
+    paths.unshift(computeInitialPath(paths[0][0])); // create a path to the first
+    return paths;
+};
+
+function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoordinate[][], XYCircle[]] {
     const { boxCoordinates, config } = pallet_config;
     const { pallets } = config;
 
@@ -608,6 +673,8 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
         stack_indices.push(0); // init stack index to zero.
         return getPalletXYCircle(p);
     });
+
+    let initial_constraints = [...constraints];
 
     let paths: CartesianCoordinate[][] = [];
 
@@ -663,19 +730,13 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
             console.log("Other path");
             let path: CartesianCoordinate[] = computePathForBox(box, constraints);
             paths.push(path);
-
             let new_constraint = getBoxTopXYCircle(box);
             new_constraints.push(new_constraint);
         }
-        //        break;
-
 
         stack_indices = stack_indices.map((val: number) => {
             return (val + 1);
         });
-
-
-
     }
 
     let last_return = (() => {
@@ -685,6 +746,7 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
             let final_pt = last_path[last_path.length - 1];
             p.push(final_pt);
             p.push(moveZ(final_pt, -final_pt.z));
+            p.push(cartesianCoordinate(0, 0, 0));
         }
         return p;
     })();
@@ -702,21 +764,81 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
         return p;
     })();
 
-    //    console.log(final_paths);
+    final_paths = addInitialPath(final_paths);
 
-    // console.log(paths);
-    // console.log(return_paths, "retiurn");
-    // console.log(last_return);
+    return [final_paths, initial_constraints];
+};
 
-    return [final_paths, constraints];
+
+// Publicly exposed path optimization function.
+function generatePathOptimization(spc: SavedPalletConfiguration): BoxPath[] {
+
+    const { boxCoordinates } = spc;
+
+    let [paths, constraints]: [CartesianCoordinate[][], XYCircle[]] = optimizePaths(spc);
+
+    generatePlottableCoordinates(paths, constraints, 9);
+
+    let boxPath: BoxPath[] = [];
+
+    // Make coordinates for plot.
+    let prev_angle: number = 0;
+
+    for (let i = 0; i < boxCoordinates.length; i++) {
+        let path: BoxPath = [];
+
+        let box_coord: BoxCoordinate = boxCoordinates[i];
+        let pick_path: CartesianCoordinate[] = paths[2 * i];
+        let drop_path: CartesianCoordinate[] = paths[2 * i + 1];
+        let pick_angle_index: number = pick_path.length === 2 ? 1 : 2; // assuming no path is 0 length;
+        let drop_angle_index: number = drop_path.length === 2 ? 1 : 2;
+
+        let pick_path_action: BoxPath = pick_path.map((p: CartesianCoordinate, index: number) => {
+            return attachAngle(vectorRound(p), index >= pick_angle_index ? box_coord.pickLocation.θ : prev_angle);
+        }).map((p: Coordinate, index: number) => {
+            return addActionToCoordinate(p, index == pick_path.length - 1 ? ActionTypes.PICK : ActionTypes.NONE);
+        });
+
+        prev_angle = box_coord.pickLocation.θ;
+
+        let drop_path_action: BoxPath = drop_path.map((p: CartesianCoordinate, index: number) => {
+            return attachAngle(vectorRound(p), index >= drop_angle_index ? box_coord.dropLocation.θ : prev_angle);
+        }).map((p: Coordinate, index: number) => {
+            return addActionToCoordinate(p, index === drop_path.length - 1 ? ActionTypes.DROP : ActionTypes.NONE);
+        });
+
+        prev_angle = box_coord.dropLocation.θ;
+
+        let x = drop_path_action.shift(); // Remove duplicate first element.
+        //        console.log("Shifting", x, "prev", pick_path_action[pick_path_action.length - 1], "before that ", pick_path_action);
+
+        path = path.concat(pick_path_action);
+        path = path.concat(drop_path_action);
+
+        boxPath.push(path);
+    }
+
+    // Now, handle the final coordinate;
+
+    let last = paths[paths.length - 1];
+
+    let last_path: BoxPath = last.map((p: CartesianCoordinate, index: number) => {
+        return attachAngle(p, index > 0 ? 0 : prev_angle);
+    }).map((p: Coordinate) => {
+        return addActionToCoordinate(p, ActionTypes.NONE);
+    });
+
+    boxPath.push(last_path);
+
+    generatePlottableCoordinates(boxPath, constraints, 0);
+
+    return boxPath;
 };
 
 
 
 
 //---------------TESTS---------------
-
-
 function generateVector(x: number, y: number, z: number): Coordinate {
     return {
         x,
@@ -737,42 +859,14 @@ function generateConstraint(x: number, y: number, z: number, r: number): XYCircl
 };
 
 
-function testArc() {
-    let a = generateVector(0, 0, 0);
-    let b = generateVector(5, 0, 0);
-    let cons = generateConstraint(2, 0, 0, 1);
-
-    let effect = computeEffectiveConstraint(a, b, cons, 0);
-    console.log(effect);
-};
 
 
-function testConstraint() {
-    let cons = generateConstraint(0, 0, 1600, 700);
-    let a = generateVector(0, 0, 1600);
-    let b = generateVector(2750, 2500, 890);
-
-    let eff = computeEffectiveConstraint(a, b, cons, 0);
-    console.log("effective", eff);
-
-    let near = computeNearestEdge(b, cons, 0);
-    console.log(near, "near");
-
-    let safe = computeTriangleCoordinate(a, b, cons, 0, 100);
-    console.log(safe, "safe");
-};
-
-
-
+//---------------Test Functions---------------
 function generatePlottableCoordinates(paths: CartesianCoordinate[][], constraints: XYCircle[], i: number) {
-
-    // console.log("\n\n\ni", i);
-    // console.log("cons", constraints);
-
     let data: any = {
         paths,
         constraints
-    }
+    };
 
     fs.writeFileSync(String(i) + "data3d.json", JSON.stringify(data, null, "\t"));
 };
@@ -784,8 +878,13 @@ function test() {
         let generator = (i: number) => {
             handler.getPalletConfig(i).then((config: any) => {
                 let spc: SavedPalletConfiguration = JSON.parse(config.raw_json);
-                let [p, c] = optimizePaths(spc);
-                generatePlottableCoordinates(p, c, i);
+                let p = generatePathOptimization(spc);
+                //                console.log(p)
+                // console.log("Box coordinate length", spc.boxCoordinates.length);
+
+                // let [p, c] = optimizePaths(spc);
+                // console.log("optimized path length", p.length);
+                // generatePlottableCoordinates(p, c, i);
             });
         }
 
@@ -796,10 +895,17 @@ function test() {
 };
 
 
-
 function run_test() {
     //    testArc();
     //testConstraint();
     test();
 }
-run_test();
+
+
+// For Testing.
+export function main() {
+    console.log("Running file");
+    run_test();
+}
+
+

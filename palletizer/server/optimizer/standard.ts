@@ -5,28 +5,28 @@ import { BoxPath, ActionCoordinate, ActionTypes } from "./optimized";
 import { SavedPalletConfiguration, BoxCoordinate, Coordinate, PalletGeometry } from "../engine/config";
 
 
-function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
+export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
     return { ...coord, z: z_top };
 };
 
-export function addActionForCoordinate(coord: Coordinate, action: ActionTypes): ActionCoordinate {
+export function addActionToCoordinate(coord: Coordinate, action: ActionTypes): ActionCoordinate {
     return { ...coord, action };
 };
 
 function generatePathForBox(box: BoxCoordinate): BoxPath {
     let path: BoxPath = [];
 
-    path.push(addActionForCoordinate(raiseOverCoordinate(box.pickLocation), ActionTypes.NONE));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation), ActionTypes.NONE));
 
-    path.push(addActionForCoordinate(box.pickLocation, ActionTypes.PICK));
+    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK));
 
-    path.push(addActionForCoordinate(raiseOverCoordinate(box.pickLocation), ActionTypes.NONE));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation), ActionTypes.NONE));
 
-    path.push(addActionForCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
 
-    path.push(addActionForCoordinate(box.dropLocation, ActionTypes.DROP));
+    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
 
-    path.push(addActionForCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
 
     return path;
 };

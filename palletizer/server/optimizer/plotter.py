@@ -5,7 +5,6 @@ import matplotlib.animation as animation
 import json
 from matplotlib.patches import Circle
 import sys
-
 import numpy as np
 
 
@@ -42,6 +41,10 @@ def get_point_from_path(path, path_index):
 def join_return_paths(data):
     index = 0
     new_data = []
+    print(len(data))
+    if len(data) > 0:
+        new_data.append(data[0])
+        index += 1
     while index < len(data) - 1:
         forward = data[index]
         backward = data[index + 1]
@@ -57,6 +60,7 @@ def main(id):
     print(f"Plotting coordinate for pallet configuration {id}")
     loaded = load_data(id)
     data = join_return_paths(loaded["paths"])
+    print(loaded["paths"])
     constraints = loaded["constraints"]
     [xs, ys, zs] = generate_plots_for_path(data)
     xs = np.array(xs)
@@ -99,6 +103,7 @@ def main(id):
                 z_points = np.array([])
         if data_count < len(data):
             [x, y, z] = get_point_from_path(data[data_count], path_count)
+
             print(f"index={num}, ({x}, {y}, {z})")
             x_points = np.append(x_points, [x])
             y_points = np.append(y_points, [y])
@@ -118,16 +123,18 @@ def main(id):
                                        repeat=False)
 
     def add_constraint(num):
-        c = constraints[num]
-        x = c["x"]
-        y = c["y"]
-        z = c["z"]
-        z *= -1  # reverse for top.
-        r = c["radius"]
-        p = Circle((x, y), r, alpha=0.5, fc="red", ec="black")
 
-        ax.add_patch(p)
-        art3d.pathpatch_2d_to_3d(p, z=z, zdir="z")
+        if num == 0:
+            c = constraints[num]
+            x = c["x"]
+            y = c["y"]
+            z = c["z"]
+            z *= -1  # reverse for top.
+            r = c["radius"]
+            p = Circle((x, y), r, alpha=0.5, fc="red", ec="black")
+
+            ax.add_patch(p)
+            art3d.pathpatch_2d_to_3d(p, z=z, zdir="z")
 
     for k in range(len(constraints)):
         add_constraint(k)

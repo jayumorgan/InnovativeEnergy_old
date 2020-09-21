@@ -42,10 +42,27 @@ PALLETIZER -*- mode: org -*-
 *** DONE Path Triangulation.
 *** DONE Return paths.
 *** DONE Level Paths.
-*** TODO Add Action Coordinates for pick and drop.
+*** DONE Remove Point Duplicates.
+*** DONE Extend vertical paths.
+*** DONE Add Action Coordinates for pick and drop.
 *** TODO Plugin to server.
 *** TODO Handle errors and default to standard.
 *** TODO UI Button toggle. 
 *** TODO Add lip height constraint to path.
 *** TODO Use Line class.
 *** TODO Top and bottom of box constraint.
+*** TODO Limit the number of loops
+*** TODO Enfore loop convergence on constraint solver (default to square path.)
+
+** TODO TeachMode:
+*** TODO Jogger Rotation Display.
+*** TODO IO/Jog controller safety on use before initialization in subcomponents.
+*** TODO Limit Stack Height.
+*** TODO Something about setting box orientation.
+
+** TODO Execution:
+*** TODO Add toggle for path optimization.
+
+** TODO Production:
+*** TODO Logging.
+*** TODO Updater from git -- build from release image.
