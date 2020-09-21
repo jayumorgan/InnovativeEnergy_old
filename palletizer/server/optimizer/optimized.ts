@@ -594,7 +594,9 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
 
 function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): CartesianCoordinate[] {
     let constraints: XYCircle[] = [...input_constraints];
+    // Self constraint is the bottom.
     const self_constraint: XYCircle = getBoxBottomXYCircle(box);
+    // Will need to include the top as a constraint.
     let points: CartesianCoordinate[] = [];
 
     // initialize points.
