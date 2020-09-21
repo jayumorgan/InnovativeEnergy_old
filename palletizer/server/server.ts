@@ -25,7 +25,9 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 
-main();
+
+// To run the test.
+// main();
 
 
 if (true) { // for testing.
