@@ -246,6 +246,12 @@ function getBoxBottomXYCircle(box: BoxCoordinate, positionCoordinate?: Coordinat
     } as XYCircle;
 };
 
+function getBoxTopPickLocationCircle(box: BoxCoordinate): XYCircle {
+    let bottom = getBoxBottomXYCircle(box);
+    bottom.z -= box.dimensions.height;
+    return bottom;
+}
+
 function getBoxTopXYCircle(box: BoxCoordinate): XYCircle {
     let { x, y, z, radius } = getBoxBottomXYCircle(box, box.dropLocation);
     z -= box.dimensions.height;  // minus because 0=z_home.
@@ -679,11 +685,15 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
 
     let stack_indices: number[] = [];
 
-    // Initialize contrain circles for pallets;
+    // contraint circles for pallets;
     let constraints: XYCircle[] = pallets.map((p: PalletGeometry) => {
         stack_indices.push(0); // init stack index to zero.
         return getPalletXYCircle(p);
     });
+
+    // constraint circles for pick locations -- should only use boxes in use.
+
+
 
     let initial_constraints = [...constraints];
 
@@ -726,10 +736,20 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
                 let return_box: BoxCoordinate = previousBox;
                 return_box.pickLocation = { ...return_box.dropLocation };
                 return_box.dropLocation = { ...box.pickLocation };
-                return_box.dimensions.height *= 0;
-                console.log("Return path");
-                let return_path: CartesianCoordinate[] = computePathForBox(return_box, constraints);
+                return_box.dimensions.height *= 1 / 2; // 1/3rd the height of a normal box.
+
+                console.log("Return path", return_box.dimensions.height);
+                let next_box_constraint: XYCircle = getBoxTopPickLocationCircle(box);
+                console.log("Next box constraint", next_box_constraint);
+                // Temp constaitns to include top of next box
+                let temp_constraints: XYCircle[] = [next_box_constraint, ...constraints];
+                temp_constraints.sort((a: XYCircle, b: XYCircle) => {
+                    return (b.z - a.z) * -1; // * -1 because 0 is top.
+                });
+
+                let return_path: CartesianCoordinate[] = computePathForBox(return_box, temp_constraints);
                 return_paths.push(return_path);
+
                 if (i === 0) {
                     constraints = [...constraints, ...new_constraints];
                     constraintSort();
@@ -777,7 +797,7 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
 
     final_paths = addInitialPath(final_paths);
 
-    return [final_paths, initial_constraints];
+    return [final_paths, initial_constraints]; // inital_constraints is purely for plotting.
 };
 
 
@@ -855,8 +875,7 @@ function generateVector(x: number, y: number, z: number): Coordinate {
         z,
         θ: 0
     }
-}
-
+};
 
 function generateConstraint(x: number, y: number, z: number, r: number): XYCircle {
     let c = generateVector(x, y, z);
@@ -896,7 +915,8 @@ function test() {
             });
         }
 
-        [1].forEach((i: number) => {
+        // Array of pallet_config_ids (sqlite3)
+        [2].forEach((i: number) => {
             generator(i);
         });
     });

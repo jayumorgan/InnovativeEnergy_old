@@ -208,9 +208,9 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
     let handleSelect = async () => {
         if (TESTING) {
-            // This makes a 1000 x 1000 pallet. at 2500,2500.
+            // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
             let pos = {
-                x: 2000, y: 2000, z: 1000, θ: 0
+                x: 2000, y: 2000, z: 4000, θ: 0
             } as CoordinateRot;
             let tmp = TEMP_JOGGER_INDEX % 3;
             if (tmp === 0) {
