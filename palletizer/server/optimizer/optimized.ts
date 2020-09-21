@@ -287,7 +287,6 @@ function DotProduct2D(a: CartesianCoordinate, b: CartesianCoordinate): number {
 };
 
 
-
 function computeEffectiveConstraint(x: CartesianCoordinate, y: CartesianCoordinate, constraint: XYCircle, box_radius: number): XYCircle | null {
     // deal with same height as constraint.
     let delta_z: number = y.z - x.z;
@@ -295,7 +294,7 @@ function computeEffectiveConstraint(x: CartesianCoordinate, y: CartesianCoordina
 
     let min_z: number = Math.max(x.z, y.z);
 
-    if (min_z <= constraint.z) { // it is irrelevant.
+    if (min_z <= constraint.z) { // it is higher than the constraint.
         return null;
     }
 
@@ -607,13 +606,12 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
     points.push(moveZ(box.dropLocation, box.dimensions.height * (-1.1))); // Over drop location + 10% error
     points.push(box.dropLocation);
 
-    // points.push(moveZ(box.pickLocation, box.dimensions.height));
-    // points.push(moveZ(box.dropLocation, box.dimensions.height + (-1.1) * box.dimensions.height));
-    // points.push(moveZ(box.dropLocation, box.dimensions.height));
-    // constraints.unshift(self_constraint);
+    constraints.unshift(self_constraint);
 
     let box_radius: number = self_constraint.radius;
-    box_radius = 0;
+    // If you want to make a maximally close path -- set the box radius to zero.
+
+    //    box_radius = 0;
 
     for (let i = 0; i < constraints.length; i++) {
 
@@ -624,7 +622,7 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
 
             let [a, b]: [CartesianCoordinate, CartesianCoordinate] = [points[j], points[j + 1]];
             // compute shift;
-            let z_shift: number = (b.z - a.z) * -1 >= 0 ? box.dimensions.height : 0; // if moving upwards, use bottoms, else use top.
+            let z_shift: number = (b.z - a.z) * -1 <= 0 ? box.dimensions.height : 0; // if moving down, use bottom, else use top.
 
             a = moveZ(a, z_shift);
             b = moveZ(b, z_shift);
@@ -887,6 +885,8 @@ function test() {
             handler.getPalletConfig(i).then((config: any) => {
                 let spc: SavedPalletConfiguration = JSON.parse(config.raw_json);
                 let p = generateOptimizedPath(spc, i);
+
+                console.log("Done Handler ", i);
                 //                console.log(p)
                 // console.log("Box coordinate length", spc.boxCoordinates.length);
 
@@ -896,7 +896,7 @@ function test() {
             });
         }
 
-        [1, 2, 3].forEach((i: number) => {
+        [1].forEach((i: number) => {
             generator(i);
         });
     });

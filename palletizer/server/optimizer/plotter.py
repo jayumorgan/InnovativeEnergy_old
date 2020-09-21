@@ -9,7 +9,7 @@ import numpy as np
 
 
 def load_data(id):
-    with open(f"../{id}data3d.json") as reader:
+    with open(f"../path_data/{id}actiondata3d.json") as reader:
         return json.load(reader)
 
 

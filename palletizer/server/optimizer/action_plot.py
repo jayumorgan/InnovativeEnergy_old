@@ -65,7 +65,7 @@ def main(id):
                     x = xs[n]
                     y = ys[n]
                     z = zs[n]
-                    print(x, y, z)
+                    print(x, y, z, "Pick" if actions[n] == 1 else "Drop")
                     ax.plot([x], [y], [z],
                             markerfacecolor=color,
                             markeredgecolor=color,
