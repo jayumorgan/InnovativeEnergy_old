@@ -583,11 +583,7 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
 
     if (cross_point !== null && cross_index !== null) {
         if (uncross_point !== null && uncross_index !== null) {
-            console.log("Splicing path", points)
-
             points.splice(cross_index, uncross_index - cross_index, ...[cross_point, uncross_point]);
-
-            console.log("After splice", points);
         } else {
             console.log("Cross but does not uncross", points);
         }
@@ -771,7 +767,7 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
 
 
 // Publicly exposed path optimization function.
-function generatePathOptimization(spc: SavedPalletConfiguration): BoxPath[] {
+export function generateOptimizedPath(spc: SavedPalletConfiguration): BoxPath[] {
 
     const { boxCoordinates } = spc;
 
@@ -809,8 +805,7 @@ function generatePathOptimization(spc: SavedPalletConfiguration): BoxPath[] {
 
         prev_angle = box_coord.dropLocation.θ;
 
-        let x = drop_path_action.shift(); // Remove duplicate first element.
-        //        console.log("Shifting", x, "prev", pick_path_action[pick_path_action.length - 1], "before that ", pick_path_action);
+        drop_path_action.shift(); // Remove duplicate first element.
 
         path = path.concat(pick_path_action);
         path = path.concat(drop_path_action);
@@ -834,7 +829,6 @@ function generatePathOptimization(spc: SavedPalletConfiguration): BoxPath[] {
 
     return boxPath;
 };
-
 
 
 

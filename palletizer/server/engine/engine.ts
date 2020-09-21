@@ -28,6 +28,7 @@ import {
 } from "./config";
 
 import { generateStandardPath } from "../optimizer/standard";
+import { generateOptimizedPath } from "../optimizer/optimized";
 
 import {
     BoxPath,
@@ -351,7 +352,10 @@ export class Engine {
         this.palletConfigId = id;
         let is_null = this.palletConfig === null;
         if (!is_null) {
-            let paths: BoxPath[] = generateStandardPath(spc);
+
+            let paths: BoxPath[] = generateOptimizedPath(spc);
+            //            let paths: BoxPath[] = generateStandardPath(spc);
+
             this.boxPathsForPallet = paths;
             let drop_coords: Coordinate[] = [];
             paths.forEach((bp: BoxPath) => {

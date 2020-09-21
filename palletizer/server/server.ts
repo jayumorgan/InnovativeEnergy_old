@@ -27,10 +27,10 @@ app.use(morgan('dev'));
 
 //import { generatePathSequence } from "./optimizer/path";
 
-main();
+// main();
 
 
-if (false) {
+if (true) { // for testing.
     initDatabaseHandler().then((handler: DatabaseHandler) => {
 
         let attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
