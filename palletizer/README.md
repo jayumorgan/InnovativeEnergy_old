@@ -30,13 +30,11 @@ The first priority should be to make sure that the engine (server/engine/engine.
 
 To do this, you will need to run through an entire machine and pallet configuration from the user interface (see server/dist/db/Configurations.sqlite3 to view these after save). As of right now, the rotational component of the jogger is discrete (0 | 90) so partial rotation (+ relative rotation of box and pallet) should be avoided (90 degrees should work fine).
 
-The path optimizer has undergone somewhat extensive virtual testing (and not all known limititions have been dealt with) but it still not entirely production ready (details in palletizer.org). In particular, there are loops that may not converge. Also, it does not currently have a setting (which will be set in pallet configuration) for a lip height at pick location -- so if there is anything in the way of the box, it may get hit. It may also run into (pun intended) problems with downward motion.
-
-It also will not entirely deal with constraints in downward motion, this should be sorted out soon.
+The path optimizer has undergone somewhat extensive virtual testing (and not all known limititions have been dealt with) but it still not entirely production ready (details in palletizer.org). In particular, there are loops that may not converge. Also, it does not currently have a setting (which will be set in pallet configuration) for a lip height at pick location -- so if there is anything in the way of the box, it may get hit. It may also run into (pun intended) problems with downward motion -- should be fixed soon.
 
 You can plot the resulting optimized path by navigating to the server/optimizer and running either `python3 plotter.py 9` or `python3 action_plot 0`.
 
-**If path optimization is a headache** change the environemnt variables and use that (see step 4 above).
+**If path optimization is a headache** change the .env value STANDARD (see step 4 above).I would expect some problems with this on first test.
 
 
 
