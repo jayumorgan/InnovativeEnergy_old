@@ -45,6 +45,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Extend vertical paths.
 *** DONE Add Action Coordinates for pick and drop.
 *** DONE Plugin to server.
+*** TODO Make path avoid both top and bottom of box (crucial for downwards pick location).
 *** TODO Handle errors and default to standard.
 *** TODO UI Button toggle. 
 *** TODO Add lip height constraint to path.
