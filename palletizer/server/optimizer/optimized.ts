@@ -620,6 +620,7 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
         let c: XYCircle = constraints[i];
         let j: number = 0;
         while (j < points.length - 1) { // don't adjust last coordinate;
+            // The (potentially alternating z_shift allows for choosing the constraint using the top or bottom of the box.)
 
             let [a, b]: [CartesianCoordinate, CartesianCoordinate] = [points[j], points[j + 1]];
             // compute shift;
@@ -633,7 +634,7 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
             if (effective_constraint !== null) {
                 //   box_radius = 0;
                 let arr: CartesianCoordinate[] = computePathArray(a, b, c, box_radius, box.dimensions.height, j !== 0).map((point_coord: CartesianCoordinate) => {
-                    return moveZ(point_coord, -1 * z_shift);
+                    return moveZ(point_coord, -1 * z_shift); // Unshift the Z axis for append.
                 });
 
                 points.splice(j === 0 ? j + 1 : j, j === 0 && arr.length === 1 ? 0 : 1, ...arr);
