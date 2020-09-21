@@ -1,5 +1,5 @@
 import fs from "fs";
-
+import filePath from "path";
 // Reduce the number of loops in this.
 
 import { initDatabaseHandler, DatabaseHandler } from "../database/db";
@@ -767,13 +767,13 @@ function optimizePaths(pallet_config: SavedPalletConfiguration): [CartesianCoord
 
 
 // Publicly exposed path optimization function.
-export function generateOptimizedPath(spc: SavedPalletConfiguration): BoxPath[] {
+export function generateOptimizedPath(spc: SavedPalletConfiguration, id?: number): BoxPath[] {
 
     const { boxCoordinates } = spc;
 
     let [paths, constraints]: [CartesianCoordinate[][], XYCircle[]] = optimizePaths(spc);
 
-    generatePlottableCoordinates(paths, constraints, 9);
+    generatePlottableCoordinates(paths, constraints, id ? `id` : `0`);
 
     let boxPath: BoxPath[] = [];
 
@@ -825,7 +825,7 @@ export function generateOptimizedPath(spc: SavedPalletConfiguration): BoxPath[] 
 
     boxPath.push(last_path);
 
-    generatePlottableCoordinates(boxPath, constraints, 0);
+    generatePlottableCoordinates(boxPath, constraints, id ? `${id}action` : `0action`);
 
     return boxPath;
 };
@@ -853,18 +853,15 @@ function generateConstraint(x: number, y: number, z: number, r: number): XYCircl
 };
 
 
-
-
 //---------------Test Functions---------------
-function generatePlottableCoordinates(paths: CartesianCoordinate[][], constraints: XYCircle[], i: number) {
+function generatePlottableCoordinates(paths: CartesianCoordinate[][], constraints: XYCircle[], i: number | string) {
     let data: any = {
         paths,
         constraints
     };
-
-    fs.writeFileSync(String(i) + "data3d.json", JSON.stringify(data, null, "\t"));
+    let path = filePath.join(__dirname, "..", "..", "path_data", `${i}data3d.json`);
+    fs.writeFileSync(path.toString(), JSON.stringify(data, null, "\t"));
 };
-
 
 function test() {
     initDatabaseHandler().then((handler: DatabaseHandler) => {
@@ -872,7 +869,7 @@ function test() {
         let generator = (i: number) => {
             handler.getPalletConfig(i).then((config: any) => {
                 let spc: SavedPalletConfiguration = JSON.parse(config.raw_json);
-                let p = generateOptimizedPath(spc);
+                let p = generateOptimizedPath(spc, i);
                 //                console.log(p)
                 // console.log("Box coordinate length", spc.boxCoordinates.length);
 
@@ -882,7 +879,7 @@ function test() {
             });
         }
 
-        [3].forEach((i: number) => {
+        [1, 2, 3].forEach((i: number) => {
             generator(i);
         });
     });

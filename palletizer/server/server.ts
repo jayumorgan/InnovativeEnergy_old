@@ -25,9 +25,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 
-//import { generatePathSequence } from "./optimizer/path";
-
-// main();
+main();
 
 
 if (true) { // for testing.

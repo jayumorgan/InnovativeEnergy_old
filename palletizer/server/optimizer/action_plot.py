@@ -11,7 +11,7 @@ import numpy as np
 
 
 def load_data(id):
-    with open(f"../{id}data3d.json") as reader:
+    with open(f"../path_data/{id}actiondata3d.json") as reader:
         return json.load(reader)
 
 
@@ -62,15 +62,18 @@ def main(id):
             if n < len(actions):
                 if actions[n] != 0:
                     color = "r" if actions[n] > 1 else "g"
-
-                    ax.plot([xs[n]], [ys[n]], [zs[n]],
+                    x = xs[n]
+                    y = ys[n]
+                    z = zs[n]
+                    print(x, y, z)
+                    ax.plot([x], [y], [z],
                             markerfacecolor=color,
                             markeredgecolor=color,
                             marker='o',
                             markersize=7,
                             alpha=1)
 
-    time_interval = 50
+    time_interval = 200
     animator = animation.FuncAnimation(fig,
                                        update_graph,
                                        len(xs) + 1,
