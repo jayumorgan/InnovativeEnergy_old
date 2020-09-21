@@ -36,5 +36,9 @@ You can plot the resulting optimized path by navigating to the server/optimizer 
 
 **If path optimization is a headache** change the .env value STANDARD (see step 4 above).I would expect some problems with this on first test.
 
-
+## Machine Setup In Warehouse
+192.168.0.2 Drive 1 Z Normal Rack & Pinion 8
+192.168.0.2 Drive 3 Y Normal Enclosed Timing Belt 8
+192.168.0.3 Drive 1 X Reverse Enclosed Timing Belt 8
+192.168.0.3 Drive 3 θ Normal Rotary / V2 8
 

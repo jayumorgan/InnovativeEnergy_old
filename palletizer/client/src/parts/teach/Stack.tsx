@@ -77,7 +77,7 @@ interface StackProps extends ControlProps {
 
 export default function Stack({ instructionNumber, allPallets, setPallets, handleBack, handleNext }: StackProps) {
 
-    let checkForStack = () => {
+    const checkForStack = () => {
         let haveStack = false;
         allPallets.forEach((p: PalletGeometry) => {
             if (!haveStack && p.Stack.length > 0) {
@@ -87,8 +87,9 @@ export default function Stack({ instructionNumber, allPallets, setPallets, handl
         return haveStack;
     };
 
-    let addLayer = (palletIndex: number) => () => {
+    const addLayer = (palletIndex: number) => () => {
         let newPallets = [] as PalletGeometry[];
+
         allPallets.forEach((p: PalletGeometry, i: number) => {
             let t = { ...p };
             if (i === palletIndex) {
@@ -99,7 +100,7 @@ export default function Stack({ instructionNumber, allPallets, setPallets, handl
         setPallets(newPallets);
     };
 
-    let setLayoutOnLayer = (palletIndex: number) => (stackIndex: number, value: number) => {
+    const setLayoutOnLayer = (palletIndex: number) => (stackIndex: number, value: number) => {
         let newPallets = [...allPallets];
         newPallets[palletIndex].Stack[stackIndex] = value;
         setPallets(newPallets);

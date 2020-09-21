@@ -19,7 +19,6 @@ PALLETIZER -*- mode: org -*-
 *** TODO Clean up code and reduce total number of loops for speed.
 *** TODO Enfore loop convergence on constraint solver (default to square path.)
 
-
 ** TODO Machine Configuration:
 *** TODO Allow extra drive for V2. 
 

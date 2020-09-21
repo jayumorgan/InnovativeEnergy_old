@@ -916,24 +916,18 @@ function test() {
         }
 
         // Array of pallet_config_ids (sqlite3)
-        [2].forEach((i: number) => {
+        [3].forEach((i: number) => {
             generator(i);
         });
     });
 };
 
 
-function run_test() {
-    //    testArc();
-    //testConstraint();
-    test();
-}
-
-
 // For Testing.
 export function main() {
     console.log("Running file");
-    run_test();
+
+    test();
 }
 
 
