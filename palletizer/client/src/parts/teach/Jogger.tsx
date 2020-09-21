@@ -15,6 +15,14 @@ import counterclockwise from "./images/counterclockwise.svg";
 import { SavedMachineConfiguration } from '../MachineConfig';
 import { DIRECTION } from 'mm-js-api';
 
+
+var TESTING = false;
+if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
+    TESTING = true;
+}
+console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
+
+
 let TEMP_JOGGER_INDEX = 0;
 
 enum Directions {
@@ -199,25 +207,25 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
     };
 
     let handleSelect = async () => {
-        let pos = {
-            x: 2000, y: 2000, z: 1000, θ: 0
-        } as CoordinateRot;
-        let tmp = TEMP_JOGGER_INDEX % 3;
-        if (tmp === 0) {
-            pos.y = 3000;
-        } else if (tmp === 1) {
+        if (TESTING) {
+            // This makes a 1000 x 1000 pallet. at 2500,2500.
+            let pos = {
+                x: 2000, y: 2000, z: 1000, θ: 0
+            } as CoordinateRot;
+            let tmp = TEMP_JOGGER_INDEX % 3;
+            if (tmp === 0) {
+                pos.y = 3000;
+            } else if (tmp === 1) {
 
+            } else {
+                pos.x = 3000;
+            }
+            TEMP_JOGGER_INDEX++;
+            selectAction(pos);
         } else {
-            pos.x = 3000;
+            // Make sure this is valid -- should check again.
+            selectAction(currentPosition);
         }
-
-        TEMP_JOGGER_INDEX++;
-        selectAction(pos);
-        //let position = await getPositions();
-        //console.log("Got Positions and seleted", position);
-        console.log("Disable hardcoded position on machine.... Jogger.tsx");
-        //	selectAction(currentPosition);
-        //selectAction(position);
     };
 
     let distanceParams: JoggerParameterProps = {

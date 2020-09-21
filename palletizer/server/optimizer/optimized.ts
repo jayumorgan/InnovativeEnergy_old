@@ -594,17 +594,23 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
 
 function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): CartesianCoordinate[] {
     let constraints: XYCircle[] = [...input_constraints];
-    // Self constraint is the bottom.
+    // Self constraint starting at box bottom.
     const self_constraint: XYCircle = getBoxBottomXYCircle(box);
+
+    // Alternate point start at each interation.
     // Will need to include the top as a constraint.
+
     let points: CartesianCoordinate[] = [];
 
     // initialize points.
-    points.push(moveZ(box.pickLocation, box.dimensions.height));
-    points.push(moveZ(box.dropLocation, box.dimensions.height + (-1.1) * box.dimensions.height));
-    points.push(moveZ(box.dropLocation, box.dimensions.height));
+    points.push(box.pickLocation);
+    points.push(moveZ(box.dropLocation, box.dimensions.height * (-1.1))); // Over drop location + 10% error
+    points.push(box.dropLocation);
 
-    constraints.unshift(self_constraint);
+    // points.push(moveZ(box.pickLocation, box.dimensions.height));
+    // points.push(moveZ(box.dropLocation, box.dimensions.height + (-1.1) * box.dimensions.height));
+    // points.push(moveZ(box.dropLocation, box.dimensions.height));
+    // constraints.unshift(self_constraint);
 
     let box_radius: number = self_constraint.radius;
     box_radius = 0;
@@ -616,11 +622,19 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
         while (j < points.length - 1) { // don't adjust last coordinate;
 
             let [a, b]: [CartesianCoordinate, CartesianCoordinate] = [points[j], points[j + 1]];
+            // compute shift;
+            let z_shift: number = (b.z - a.z) * -1 >= 0 ? box.dimensions.height : 0; // if moving upwards, use bottoms, else use top.
+
+            a = moveZ(a, z_shift);
+            b = moveZ(b, z_shift);
+
             let effective_constraint = computeEffectiveConstraint(a, b, c, box_radius); // get constraint along the path (2-D)
 
             if (effective_constraint !== null) {
                 //   box_radius = 0;
-                let arr: CartesianCoordinate[] = computePathArray(a, b, c, box_radius, box.dimensions.height, j !== 0);
+                let arr: CartesianCoordinate[] = computePathArray(a, b, c, box_radius, box.dimensions.height, j !== 0).map((point_coord: CartesianCoordinate) => {
+                    return moveZ(point_coord, -1 * z_shift);
+                });
 
                 points.splice(j === 0 ? j + 1 : j, j === 0 && arr.length === 1 ? 0 : 1, ...arr);
 
@@ -636,10 +650,10 @@ function computePathForBox(box: BoxCoordinate, input_constraints: XYCircle[]): C
         }
     }
 
-    points = points.map((c: CartesianCoordinate) => {
-        // move Z, add actions.
-        return moveZ(c, -box.dimensions.height);
-    });
+    // points = points.map((c: CartesianCoordinate) => {
+    //     // move Z, add actions.
+    //     return moveZ(c, -box.dimensions.height);
+    // });
 
     return computeLeveledPath(points);
 }
