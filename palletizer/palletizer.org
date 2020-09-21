@@ -32,7 +32,6 @@ PALLETIZER -*- mode: org -*-
 ** DONE Engine
    - Implement action path throughout.
    - Detection action at path segement.
-** TODO Limit on stack height -- must be able to clear boxes (inside configuration)   
 ** TODO Detect good pick -- accidental drop.
 ** DONE Delete Boxes.
 ** TODO Rotational coordinates in all visualizations.
@@ -45,13 +44,13 @@ PALLETIZER -*- mode: org -*-
 *** DONE Remove Point Duplicates.
 *** DONE Extend vertical paths.
 *** DONE Add Action Coordinates for pick and drop.
-*** TODO Plugin to server.
+*** DONE Plugin to server.
 *** TODO Handle errors and default to standard.
 *** TODO UI Button toggle. 
 *** TODO Add lip height constraint to path.
-*** TODO Use Line class.
-*** TODO Top and bottom of box constraint.
-*** TODO Limit the number of loops
+*** DONE Use Line class.
+*** DONE Top and bottom of box constraint.
+*** TODO Clean up code and numeber loops for speed.
 *** TODO Enfore loop convergence on constraint solver (default to square path.)
 
 ** TODO TeachMode:
@@ -59,6 +58,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO IO/Jog controller safety on use before initialization in subcomponents.
 *** TODO Limit Stack Height.
 *** TODO Something about setting box orientation.
+*** TODO Add good pick detection in teach mode.
 
 ** TODO Execution:
 *** TODO Add toggle for path optimization.
@@ -66,3 +66,6 @@ PALLETIZER -*- mode: org -*-
 ** TODO Production:
 *** TODO Logging.
 *** TODO Updater from git -- build from release image.
+
+** TODO Engine:
+*** TODO Add good pick detection.
