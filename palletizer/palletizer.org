@@ -1,42 +1,6 @@
 PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
 
-** DONE Teach Mode 
-   - Compute rotational angle of pallet. 
-** TODO Non-agnostic angle for computation.
-   - Make sure that φ_pallet has the correct sign.
-** TODO Rotation jogger shouldn't be discrete 90 degrees.
-** DONE Visualizer: Frame + coordinates + axes 
-** DONE Visualizer -- drop locations in order.
-** DONE Visualizer -- partial rotations of pallet + boxes.
-** TODO Test visualizer with partial rotation of pallet etc.
-   - Handle multiple pallets
-   - Deal with the strange offset on pallet configuration 2 (locally)
-   - Update to deal with optimized coordinates.
-   - Deal with new coordinate format.
-** TODO Execution Control
-   - Toggle optimization, optimization errors -- which shouldn't exist for valid pallet configuration.
-** TODO Path Otimization
-   - Add lip height to pick point configuration.
-   - Appropriate location for optimizations.
-   - Triangulation about lip height.
-** TODO Machine Configuration
-   - Allow extra drive for V2. 
-** DONE Pallet Configuration
-   -θ coordinate must be numerical
-** TODO Layout Generator
-   - Implement UI of v1 prototype. Figure out which inputs are necessary.
-** TODO Production
-   - Implement logging.
-   - Proper deploy instructions.
-** DONE Engine
-   - Implement action path throughout.
-   - Detection action at path segement.
-** TODO Detect good pick -- accidental drop.
-** DONE Delete Boxes.
-** TODO Rotational coordinates in all visualizations.
-** TODO Live updating capabilities (from Git? -- this would be quite useful in prod.)
-
 ** TODO Optimizer:
 *** DONE Path Triangulation.
 *** DONE Return paths.
@@ -46,34 +10,53 @@ PALLETIZER -*- mode: org -*-
 *** DONE Add Action Coordinates for pick and drop.
 *** DONE Plugin to server.
 *** DONE Make path avoid both top and bottom of box.
-*** TODO Handle errors and default to standard.
+*** TODO Pick location lip height height: Vivian: "just use box height."
+*** TODO Handle errors and default to standard or ensure there are no errors.
 *** TODO UI Button toggle. 
 *** TODO Add lip height constraint to path.
 *** DONE Use Line class.
 *** DONE Top and bottom of box constraint.
-*** TODO Clean up code and numeber loops for speed.
+*** TODO Clean up code and reduce total number of loops for speed.
 *** TODO Enfore loop convergence on constraint solver (default to square path.)
 
+
+** TODO Machine Configuration:
+*** TODO Allow extra drive for V2. 
+
+** DONE Pallet Configuration:
+*** DONE θ coordinate must be numerical.
+
+** TODO Layout Generator:
+*** TODO Start this out.
+
 ** TODO TeachMode:
+*** DONE Compute rotation of pallet relative to box. (may not be relevant anymore.)
 *** TODO Jogger Rotation Display.
 *** TODO IO/Jog controller safety on use before initialization in subcomponents.
 *** TODO Limit Stack Height.
 *** TODO Something about setting box orientation.
 *** TODO Add good pick detection in teach mode.
+*** DONE θ coordinate numerical
 
-** TODO mm-js-api:
-*** TODO Use position from step counts. (Gain computation.) -- This is crucial for not causing giving strang positions when user jogs past end stops.
+** DONE mm-js-api:
+*** DONE Use position from step counts. (Gain computation.) -- This is crucial for not causing giving strang positions when user jogs past end stops.
 
 ** TODO Execution:
 *** TODO Add toggle for path optimization.
 
 ** TODO Production:
 *** TODO Logging.
-*** TODO Updater from git -- build from release image.
+*** TODO Update protocol -- git?
 
 ** TODO Engine:
-*** TODO Add good pick detection.
+*** TODO Add Good Pick Detection + Box Detection Actions.
 *** TODO Consistent error messaging to client. (see: catch blocks and information send)
 
 ** TODO Configuration Page:
 *** TODO Reload configs on create (so that they show up immidiately).
+
+** TODO Visualizer:
+*** DONE Visualizer: Frame + coordinates + axes 
+*** DONE Visualizer -- drop locations in order.
+*** DONE Visualizer -- partial rotations of pallet + boxe
+*** TODO Test multiple pallets.
