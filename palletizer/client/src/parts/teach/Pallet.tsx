@@ -44,7 +44,7 @@ interface PalletCellProps {
     pallet: PalletGeometry;
     startEdit: () => void;
     editName: (e: ChangeEvent) => void;
-}
+};
 
 function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
 
