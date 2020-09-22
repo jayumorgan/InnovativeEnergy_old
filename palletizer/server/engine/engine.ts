@@ -700,7 +700,7 @@ export class Engine {
         tagged.push([axes.Y, coordinate.y]);
         tagged.push([axes.X, coordinate.x]);
         tagged.push([axes.θ, coordinate.θ ? 90 : 0]);
-        tagged.forEach((t: [Drive[], number], i: number) => {
+        tagged.forEach((t: [Drive[], number], _: number) => {
             let [drives, position] = t;
             drives.forEach((d: Drive) => {
                 let { MachineMotionIndex, DriveNumber } = d;
@@ -711,7 +711,9 @@ export class Engine {
             });
         });
         let mm_ids = Object.keys(mm_group) as string[];
-        let actions: Action[] = [];
+
+        let move_actions: Action[] = [];
+        let wait_actions: Action[] = [];
 
         for (let i = 0; i < mm_ids.length; i++) {
             let id: number = +(mm_ids[i]);
@@ -728,11 +730,11 @@ export class Engine {
                 return mm.waitForMotionCompletion();
             };
 
-            actions.push(move_action);
-            actions.push(wait_action);
+            move_actions.push(move_action);
+            wait_actions.push(wait_action);
         };
 
-        return my.__controlSequence(actions);
+        return my.__controlSequence([...move_actions, ...wait_actions]);
     };
 
     __pickIO() {
