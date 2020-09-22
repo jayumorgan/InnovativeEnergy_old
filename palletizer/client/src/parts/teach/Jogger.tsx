@@ -106,6 +106,7 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
     );
 };
 
+
 interface JoggerProps {
     selectAction: (c: CoordinateRot) => void;
     updateName: (s: string) => void;
