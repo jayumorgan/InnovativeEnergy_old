@@ -158,6 +158,7 @@ export default class Jogger {
         return Promise.all(promises);
     };
 
+    //NOTE: In the future -- rotation will be a number (absolute position).
     startRotation(rotate: boolean) {
 
         let my = this;

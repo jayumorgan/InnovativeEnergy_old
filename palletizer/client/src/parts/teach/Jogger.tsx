@@ -111,7 +111,7 @@ interface JoggerProps {
     updateName: (s: string) => void;
     machineConfigId: number;
     name: string;
-}
+};
 
 function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
     const [speed, setSpeed] = useState<number>(50);
