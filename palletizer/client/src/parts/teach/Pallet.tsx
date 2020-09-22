@@ -73,12 +73,12 @@ function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
                     <div className="DimensionsGrid2">
                         <div className="Dimension">
                             <span>
-                                {"Width: " + String(width)}
+                                {"Width: " + String(Math.round(width))}
                             </span>
                         </div>
                         <div className="Dimension">
                             <span>
-                                {"Length: " + String(length)}
+                                {"Length: " + String(Math.round(length))}
                             </span>
                         </div>
                     </div>

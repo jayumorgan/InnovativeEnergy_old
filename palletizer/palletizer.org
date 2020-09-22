@@ -13,7 +13,6 @@ PALLETIZER -*- mode: org -*-
 *** TODO Pick location lip height height: Vivian: "just use box height."
 *** TODO Handle errors and default to standard or ensure there are no errors.
 *** TODO UI Button toggle. 
-*** TODO Add lip height constraint to path.
 *** DONE Use Line class.
 *** DONE Top and bottom of box constraint.
 *** TODO Clean up code and reduce total number of loops for speed.
@@ -36,6 +35,8 @@ PALLETIZER -*- mode: org -*-
 *** TODO Something about setting box orientation.
 *** TODO Add good pick detection in teach mode.
 *** DONE θ coordinate numerical
+*** DONE Round coordinates in the jogger.
+*** TODO Update jogger to use numberical rotation (UI piece for this as well.) Right now it is a boolean that probably doesnt work.
 
 ** DONE mm-js-api:
 *** DONE Use position from step counts. (Gain computation.) -- This is crucial for not causing giving strang positions when user jogs past end stops.

@@ -16,9 +16,10 @@ interface DetectionCellProps {
     state: IOState;
     allMachines: MachineMotion[];
     ioController: IOController;
+    removeDetectionCell: () => void;
 };
 
-function DetectionCell({ state, updateState, allMachines, ioController }: DetectionCellProps) {
+function DetectionCell({ state, updateState, allMachines, ioController, removeDetectionCell }: DetectionCellProps) {
 
     const [currentPinValues, setCurrentPinValues] = useState<IODeviceState>([false, false, false, false]);
 
@@ -54,6 +55,7 @@ function DetectionCell({ state, updateState, allMachines, ioController }: Detect
         updateState(s);
     };
 
+    // Make sure current values are read.
     // Need to get current values for this module.
     return (
         <div className="DetectionCellContainer">
@@ -130,6 +132,10 @@ function DetectionCell({ state, updateState, allMachines, ioController }: Detect
                 })}
 
             </div>
+            <div className="Trash">
+                <span className="icon-delete" onClick={removeDetectionCell}>
+                </span>
+            </div>
         </div>
     );
 };
@@ -148,7 +154,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
     const [ioControllers, setioControllers] = useState<IOController[]>([]);
 
     useEffect(() => {
-	let ios = allMachines.map((machine: MachineMotion) => {
+        let ios = allMachines.map((machine: MachineMotion) => {
             return new IOController(machine);
         });
         setioControllers(ios);
@@ -195,6 +201,12 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
         setDetectionArray(cp);
     };
 
+    const removeCell = (index: number) => () => {
+        let cp = [...detectionArray];
+        cp.splice(index, 1);
+        setDetectionArray(cp);
+    };
+
     return (
         <ContentItem {...contentItemProps} >
             <div className="Detection">
@@ -204,7 +216,8 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
                             updateState: updateCellAtIndex(i),
                             state,
                             allMachines,
-			    ioController: ioControllers[state.MachineMotionIndex]
+                            ioController: ioControllers[state.MachineMotionIndex],
+                            removeDetectionCell: removeCell(i)
                         };
                         return (
                             <DetectionCell  {...cellProps} />
