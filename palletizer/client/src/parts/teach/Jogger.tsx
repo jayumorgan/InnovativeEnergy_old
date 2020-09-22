@@ -245,10 +245,13 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
     let arrowSize = 120;
 
     let { x, y, z, θ } = currentPosition;
+    // Rotate will be finicky if jogger reloads.
 
     let handleRotate = () => {
         if (jogController !== null) {
-            jogController.startRotation(!θ).catch((e: any) => {
+            jogController.startRotation(θ <= 90).then(() => {
+                console.log("Rotate jogger -- test after type change.");
+            }).catch((e: any) => {
                 console.log("Error rotate ", e);
             });
         }
@@ -270,13 +273,13 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
                 <div className="Position">
                     <div className="PositionBox">
                         <div className="PositionValue">
-                            <span> {"x : " + String(x)} </span>
+                            <span> {"x : " + String(Math.round(x))} </span>
                         </div>
                         <div className="PositionValue">
-                            <span> {"y : " + String(y)} </span>
+                            <span> {"y : " + String(Math.round(y))} </span>
                         </div>
                         <div className="PositionValue">
-                            <span> {"z : " + String(z)} </span>
+                            <span> {"z : " + String(Math.round(z))} </span>
                         </div>
                         <div className="PositionValue">
                             <span> {"θ : " + (θ ? "90°" : "0°")} </span>
