@@ -241,7 +241,9 @@ export default class Jogger {
             ds.forEach((d: Drive) => {
                 let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
                 let mm: MM = my.machineMotions[MachineMotionIndex];
-                let p = mm.configAxis(driveNumberToDRIVE(DriveNumber), MicroSteps, MechGainValue, (Direction > 0 ? DIRECTION.NORMAL : DIRECTION.REVERSE));
+                let drive: string = driveNumberToDRIVE(DriveNumber);
+                // TODO: get this adjustment from a 'gearbox' property instead!
+                let p = mm.configAxis(drive, MicroSteps * (drive == 'X' && MachineMotionIndex == 1 ? 5 : 1), MechGainValue, (Direction > 0 ? DIRECTION.NORMAL : DIRECTION.REVERSE));
                 promises.push(p);
             });
         });

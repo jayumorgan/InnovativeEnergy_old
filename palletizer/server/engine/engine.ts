@@ -329,12 +329,12 @@ export class Engine {
     };
 
     __handleEstop(m: string) {
-        // don't want an infinite loop. How do we avoid this? but also want all machines to be stopped? 
+        // don't want an infinite loop. How do we avoid this? but also want all machines to be stopped?
         this.__updateStatus(PALLETIZER_STATUS.STOPPED);
         this.__handleInformation(INFO_TYPE.ERROR, "Emergency stop triggered.");
         let { machines } = this.mechanicalLayout;
         // will still call itselt recursively.
-        // How do we stop this? 
+        // How do we stop this?
         machines.forEach((m: MachineMotion) => {
             m.triggerEstop().then(() => {
                 console.log("Estop triggered for machine at ip: ", m.machineIP);
@@ -492,7 +492,6 @@ export class Engine {
 
             const { config } = my.machineConfig;
             const { machines, io, axes, box_detection } = config;
-
             machines.forEach((mm: MachineMotionInfo) => {
                 let { ipAddress } = mm;
                 let mm_config: MachineMotionConfig = {
@@ -537,7 +536,9 @@ export class Engine {
                 drives.forEach((d: Drive) => {
                     let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
                     let mm = my.mechanicalLayout.machines[MachineMotionIndex];
-                    let p = mm.configAxis(numberToDrive(DriveNumber), MicroSteps, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
+                    let drive = numberToDrive(DriveNumber);
+                    // TODO: get this adjustment from a 'gearbox' property instead!
+                    let p = mm.configAxis(drive, MicroSteps * ((drive == 'X' && MachineMotionIndex == 1) ? 5 : 1) /* gearbox */, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
                     promises.push(p);
                 });
             });
@@ -677,9 +678,10 @@ export class Engine {
         return new Promise((resolve, reject) => {
             let { machines } = my.mechanicalLayout;
             Promise.all(machines.map((m: MachineMotion) => {
-                return m.emitHomeAll().then(() => {
+                // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
+                return m.emitSpeed(220).then(() => { m.emitHomeAll().then(() => {
                     return m.waitForMotionCompletion();
-                });
+                })});
             })).then(() => {
                 resolve();
             }).catch((e: any) => {
