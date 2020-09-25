@@ -28,7 +28,8 @@ import { generateOptimizedPath } from "../optimizer/optimized";
 import {
     BoxPath,
     ActionCoordinate,
-    ActionTypes
+    ActionTypes,
+    SpeedTypes
 } from "../optimizer/optimized";
 
 
@@ -728,6 +729,13 @@ export class Engine {
             let axes: AXES[] = Object.keys(pairing) as AXES[];
             let positions: number[] = Object.values(pairing);
 
+            let speed_action = () => {
+                return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400);
+            };
+            let acceleration_action = () => {
+              return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 400 : 200);
+            };
+
             let move_action = () => {
                 return mm.emitCombinedAxesAbsoluteMove(axes, positions);
             };
@@ -736,6 +744,8 @@ export class Engine {
                 return mm.waitForMotionCompletion();
             };
 
+            move_actions.push(speed_action);
+            move_actions.push(acceleration_action);
             move_actions.push(move_action);
             wait_actions.push(wait_action);
         };
