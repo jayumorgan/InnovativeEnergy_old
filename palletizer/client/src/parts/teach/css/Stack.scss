@@ -35,7 +35,6 @@
                  overflow-y: scroll;
                  overflow-x: hidden;
 
-
                  .PalletLayout {
                      width: 100%;
                      // height: 20%;
@@ -44,10 +43,8 @@
                      justify-content: flex-start;
 
                      .Name {
-                         // width: 100%;
                          width: 95%;
                          padding-top: 5%;
-
                          padding-left: 5%;
                          font-size: 1.7em;
                          font-weight: $bold-font;
@@ -81,10 +78,7 @@
                              span {
                                  text-decoration: underline;
                              }
-
                          }
-
-
                      }
 
                      .Layer {
@@ -95,7 +89,20 @@
                          color: $dark-blue;
                          display: grid;
                          grid-template-rows: 100%;
-                         grid-template-columns: 15% 85%;
+                         grid-template-columns: 15% 75% 10%;
+
+			 .Trash {
+			     @include flex-center();
+			     span {
+				 cursor: pointer;
+				 font-size: $medium-font;
+				 color: $red;
+			     }
+			     
+			     span:hover {
+				 font-weight: $bold-font;
+			     }
+			 }
 
                          .LayerName {
                              @include flex-center();
@@ -111,7 +118,7 @@
 
                              select {
                                  @include select-style();
-                                 width: 80%;
+                                 width: 93%;
                              }
                          }
                      }

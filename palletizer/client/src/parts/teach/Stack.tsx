@@ -18,9 +18,10 @@ interface PalletLayoutProps {
     pallet: PalletGeometry;
     addLayer: () => void;
     setLayoutOnLayer: (stackIndex: number, layoutIndex: number) => void;
+    removeLayer: (stackIndex: number) => () => void;
 };
 
-function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps) {
+function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: PalletLayoutProps) {
     let { name, Layouts, Stack } = pallet;
 
     let handleChange = (stackIndex: number) => (e: ChangeEvent) => {
@@ -51,6 +52,10 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer }: PalletLayoutProps)
                                     )
                                 })}
                             </select>
+                        </div>
+                        <div className="Trash" onClick={removeLayer(i)}>
+                            <span className="icon-delete">
+                            </span>
                         </div>
                     </div>
                 )
@@ -100,6 +105,14 @@ export default function Stack({ instructionNumber, allPallets, setPallets, handl
         setPallets(newPallets);
     };
 
+    const removeLayer = (palletIndex: number) => (stackIndex: number) => () => {
+        let cp = [...allPallets];
+        if (cp[palletIndex].Stack.length > 1) {
+            cp[palletIndex].Stack.splice(stackIndex, 1);
+            setPallets(cp);
+        }
+    };
+
     const setLayoutOnLayer = (palletIndex: number) => (stackIndex: number, value: number) => {
         let newPallets = [...allPallets];
         newPallets[palletIndex].Stack[stackIndex] = value;
@@ -140,7 +153,7 @@ export default function Stack({ instructionNumber, allPallets, setPallets, handl
                             {allPallets.map((p: PalletGeometry, i: number) => {
                                 if (p.Layouts.length > 0) {
                                     return (
-                                        <PalletLayout key={i} pallet={p} addLayer={addLayer(i)} setLayoutOnLayer={setLayoutOnLayer(i)} />
+                                        <PalletLayout key={i} pallet={p} addLayer={addLayer(i)} setLayoutOnLayer={setLayoutOnLayer(i)} removeLayer={removeLayer(i)} />
                                     );
                                 }
                             })}
