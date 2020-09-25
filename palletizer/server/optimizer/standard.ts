@@ -16,17 +16,31 @@ export function addActionToCoordinate(coord: Coordinate, action: ActionTypes): A
 function generatePathForBox(box: BoxCoordinate): BoxPath {
     let path: BoxPath = [];
 
+    // Picking.
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation), ActionTypes.NONE));
-
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK));
-
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation), ActionTypes.NONE));
 
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
-
+    // Dropping.
+    // The lateral approach allows to pack boxes tighter.
+    // Implies an ordering that preserves clearance in +x and +y.
+    let lateralApproach: Coordinate = { ...box.dropLocation };
+    lateralApproach.x += 40;
+    lateralApproach.y += 40;
+    lateralApproach.z -= 50;
+    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach), ActionTypes.NONE));
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE));
+    lateralApproach.x -= 40;
+    lateralApproach.y -= 40;
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
-
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
+
+    /*
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
+    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
+    */
 
     return path;
 };
