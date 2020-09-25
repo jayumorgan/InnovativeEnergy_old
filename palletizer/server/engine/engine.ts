@@ -679,9 +679,13 @@ export class Engine {
             let { machines } = my.mechanicalLayout;
             Promise.all(machines.map((m: MachineMotion) => {
                 // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
-                return m.emitSpeed(220).then(() => { m.emitHomeAll().then(() => {
-                    return m.waitForMotionCompletion();
-                })});
+                return m.emitSpeed(220).then(
+                  () => { m.emitAcceleration(150).then(
+                    () => { m.emitHomeAll().then(
+                      () => { return m.waitForMotionCompletion(); }
+                    )
+                  })
+                });
             })).then(() => {
                 resolve();
             }).catch((e: any) => {
