@@ -1,7 +1,7 @@
 //---------------Generate Standard Pallet Paths---------------
 
 
-import { BoxPath, ActionCoordinate, ActionTypes } from "./optimized";
+import { BoxPath, ActionCoordinate, ActionTypes, SpeedTypes } from "./optimized";
 import { SavedPalletConfiguration, BoxCoordinate, Coordinate, PalletGeometry } from "../engine/config";
 
 
@@ -9,17 +9,17 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
     return { ...coord, z: z_top };
 };
 
-export function addActionToCoordinate(coord: Coordinate, action: ActionTypes): ActionCoordinate {
-    return { ...coord, action };
+export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW): ActionCoordinate {
+    return { ...coord, action, speed };
 };
 
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let path: BoxPath = [];
 
     // Picking.
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE));
-    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK));
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
+    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
 
     // Dropping.
     // The lateral approach allows to pack boxes tighter.
@@ -28,13 +28,13 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     lateralApproach.x += 40;
     lateralApproach.y += 40;
     lateralApproach.z -= 50;
-    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE));
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE));
+    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST));
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
     lateralApproach.x -= 40;
     lateralApproach.y -= 40;
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE));
-    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE));
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
 
     /*
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));

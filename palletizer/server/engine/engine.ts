@@ -28,7 +28,8 @@ import { generateOptimizedPath } from "../optimizer/optimized";
 import {
     BoxPath,
     ActionCoordinate,
-    ActionTypes
+    ActionTypes,
+    SpeedTypes
 } from "../optimizer/optimized";
 
 
@@ -679,8 +680,8 @@ export class Engine {
             let { machines } = my.mechanicalLayout;
             Promise.all(machines.map((m: MachineMotion) => {
                 // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
-                return m.emitSpeed(220).then(
-                  () => { m.emitAcceleration(150).then(
+                return m.emitSpeed(200).then(
+                  () => { m.emitAcceleration(100).then(
                     () => { m.emitHomeAll().then(
                       () => { return m.waitForMotionCompletion(); }
                     )
@@ -729,7 +730,11 @@ export class Engine {
             let positions: number[] = Object.values(pairing);
 
             let move_action = () => {
-                return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+                return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400).then(
+                    () => { return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 600 : 200).then(
+                        () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
+                    )}
+                )
             };
 
             let wait_action = () => {

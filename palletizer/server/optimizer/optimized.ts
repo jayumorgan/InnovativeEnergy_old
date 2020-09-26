@@ -26,9 +26,14 @@ export enum ActionTypes {
     PICK,
     DROP
 };
+export enum SpeedTypes {
+    FAST,
+    SLOW
+}
 
 export interface ActionCoordinate extends Coordinate {
     action?: ActionTypes;
+    speed?: SpeedTypes;
 };
 
 export type BoxPath = ActionCoordinate[];
@@ -575,7 +580,7 @@ function computeLeveledPath(points: CartesianCoordinate[]): CartesianCoordinate[
         let z_time: number | null = line.zIntersectionTime(0); // find the point it crosses 0.
 
         if (z_time !== null && z_time >= 0 && z_time <= 1) { // crosses z along path.
-            if (cross_point === null) { // no cross point yet. 
+            if (cross_point === null) { // no cross point yet.
                 cross_point = line.zIntersectionPoint(0);
                 cross_index = i + 1;
             } else { // last uncross point.
