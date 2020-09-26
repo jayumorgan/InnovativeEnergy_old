@@ -27,3 +27,15 @@ export function changeEventToString(e: ChangeEvent): string {
     return String(val);
 };
 
+export function wrapChangeEventString(fn: (s: string) => void): (e: ChangeEvent) => void {
+    return (e: ChangeEvent) => {
+        fn(changeEventToString(e));
+    };
+};
+
+export function wrapChangeEventNumber(fn: (n: number) => void): (e: ChangeEvent) => void {
+    return (e: ChangeEvent) => {
+        fn(changeEventToNumber(e));
+    }
+};
+

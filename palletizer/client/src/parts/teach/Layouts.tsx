@@ -2,7 +2,7 @@ import React, { useRef, useState, DragEvent, ChangeEvent, Fragment } from 'react
 
 import ContentItem, { ButtonProps } from "./ContentItem";
 
-import { ControlProps, COLORS } from "../shared/shared";
+import { ControlProps, COLORS, wrapChangeEventNumber, wrapChangeEventString } from "../shared/shared";
 
 import Box from "./3D/BoxRender";
 
@@ -14,7 +14,8 @@ import {
     LayoutObject,
     BoxPositionObject,
     Rect,
-    BoxDimensions
+    BoxDimensions,
+    SVGPosition
 } from "../../geometry/geometry";
 
 //---------------Styles---------------
@@ -401,7 +402,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         y: (outerHeight - size) / 2
     } as any;
 
-    let updateRectPosition = (index: number, nx: number, ny: number) => {
+    const updateRectPosition = (index: number, nx: number, ny: number) => {
         if (boxes && updateModelBox) {
             let [fractionX, fractionY] = getFractionalCoordinates(modelData, outerWidth, outerHeight, nx, ny);
             let box = boxes[index];
@@ -417,7 +418,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         }
     };
 
-    //    let [goodBoxes, setGoodBoxes] = useState<BoxPosition2D[]>([]);
     let BoxSVGs: Rect[] = [];
     if (boxes) {
         boxes.forEach((b: BoxPositionObject) => {
@@ -425,8 +425,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
 
             let x = w * position.x + topX + svg_props.x;
             let y = l * position.y + topY + svg_props.y;
-
-            let scaleSize = b.size;
 
             let { width, length } = box.dimensions;
 
@@ -549,7 +547,7 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
 
     let size = 100;
 
-    let model_props = {
+    const model_props = {
         pallet,
         size,
         outerWidth: size,
@@ -557,7 +555,7 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
         boxes: boxPositions
     } as LayoutModelProps;
 
-    let round = (n: number) => {
+    const round = (n: number) => {
         return Math.round(n * 10) / 10;
     };
 
@@ -598,8 +596,7 @@ function LayoutCell({ layout, pallet, startEdit, editName }: LayoutCellProps) {
             </div>
         </div>
     );
-
-}
+};
 
 interface BoxCellProps {
     box: BoxObject;
@@ -609,11 +606,11 @@ interface BoxCellProps {
 function BoxCell({ box, index }: BoxCellProps) {
     const [isRotated, setIsRotated] = useState<boolean>(false);
 
-    let toggleRotate = () => {
+    const toggleRotate = () => {
         setIsRotated(!isRotated);
     };
 
-    let dragStart = (ev: DragEvent) => {
+    const dragStart = (ev: DragEvent) => {
 
         let transferData = {
             index,
@@ -623,7 +620,7 @@ function BoxCell({ box, index }: BoxCellProps) {
         // setIsDragging(true);
     };
 
-    let dragEnd = () => {
+    const dragEnd = () => {
         // setIsDragging(false);
     };
 
@@ -719,6 +716,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
 
     let DisplayElement = useRef<HTMLDivElement>(null);
     const [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
+
     const [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
 
     // let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
@@ -737,32 +735,23 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     };
 
     const updateModelBox = (bpo: BoxPositionObject, index: number) => {
-        let newModels: BoxPositionObject[] = [];
-        modelBoxes.forEach((b: BoxPositionObject, i: number) => {
-            if (i === index) {
-                newModels.push(bpo)
-            } else {
-                newModels.push(b);
-            }
-        });
+        let newModels: BoxPositionObject[] = [...modelBoxes];
+        newModels[index] = bpo;
         setModelBoxes(newModels);
     };
 
-    const handleName = (e: ChangeEvent) => {
-        let name = (e.target as any).value;
+    const handleName = wrapChangeEventString((name: string) => {
         setEditingLayout({ ...editingLayout, name });
-    };
-
+    });
 
     const editName = (palletIndex: number, layoutIndex: number) => (e: ChangeEvent) => {
-        let newName = (e.target as any).value;
+        let newName: string = (e.target as any).value;
         let newPallets = [...allPallets];
         let newLayouts = [...allPallets[palletIndex].Layouts];
         newLayouts[layoutIndex].name = newName;
         newPallets[palletIndex].Layouts = newLayouts;
         setPallets(newPallets);
     };
-
 
     const RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
@@ -846,8 +835,6 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
             let modelData = getModelData(allPallets[currentPalletIndex], modelSize);
             let { clientX, clientY } = e;
             let { x, y } = DisplayElement.current.getBoundingClientRect();
-            //let prX = clientX - x;
-            // let prY = clientY - y;
 
             let transferData = e.dataTransfer.getData("BoxData");
 
@@ -947,8 +934,15 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
             showName: true
         } as any;
 
-        const startAutoLayout = () => {
-            setAutoLayout(true);
+        const handleAutoLayout = () => {
+            setAutoLayout(!autoLayout);
+        };
+
+        const updateLayout = (l: LayoutObject, pi: number) => {
+            setCurrentPalletIndex(pi);
+            setEditingLayout(l);
+            setModelBoxes(l.boxPositions);
+            setAutoLayout(false);
         };
 
         return (
@@ -979,10 +973,10 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                         <div className="LayoutContainer">
                             <div className="PalletSelect">
                                 <div className="LayoutButtons">
-                                    <div className="AutoLayout">
-                                        <div className="AutoButton" onClick={startAutoLayout}>
+                                    <div className="AutoLayoutButton">
+                                        <div className="AutoButton" onClick={handleAutoLayout}>
                                             <span>
-                                                {"Auto Layout"}
+                                                {autoLayout ? "Custom Layout" : "Auto Layout"}
                                             </span>
                                         </div>
                                     </div>
@@ -1013,9 +1007,13 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                                     </div>
                                 </div>
                             </div>
-                            <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
-                                <LayoutModel {...layoutModelProps} />
-                            </div>
+                            {autoLayout ?
+                                <AutoLayout allBoxes={allBoxes} allPallets={allPallets} modelSize={modelSize} updateLayout={updateLayout} name={editingLayout.name} />
+                                :
+                                <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
+                                    <LayoutModel {...layoutModelProps} />
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -1024,3 +1022,158 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     }
 };
 
+
+
+function calulateEfficientRotation(width: number, length: number, boxWidth: number, boxLength: number): boolean {
+    const not_rotated_columns: number = Math.floor(width / boxWidth);
+    const not_rotated_rows: number = Math.floor(length / boxLength);
+    const rotated_columns: number = Math.floor(length / boxWidth);
+    const rotated_rows: number = Math.floor(width / boxLength);
+
+    const not_rotated_total: number = not_rotated_columns * not_rotated_rows;
+    const rotated_total: number = rotated_columns * rotated_rows;
+
+    return rotated_total > not_rotated_total;
+};
+
+function generateAutoLayout(box: BoxObject, pallet: PalletGeometry, size: number): BoxPositionObject[] {
+    const palletDims = getPalletDimensions(pallet);
+    let boxWidth = box.dimensions.width;
+    let boxLength = box.dimensions.length;
+
+    const rotated: boolean = calulateEfficientRotation(palletDims.width, palletDims.length, box.dimensions.width, box.dimensions.length);
+
+    if (rotated) {
+        const temp = boxWidth;
+        boxWidth = boxLength;
+        boxLength = temp;
+    }
+
+    const normWidth: number = palletDims.width;
+    const normLength: number = palletDims.length;
+
+    const width: number = palletDims.width / normWidth;
+    const length: number = palletDims.length / normLength;
+
+    boxWidth /= normWidth;
+    boxLength /= normLength;
+
+    const total_columns: number = Math.floor(width / boxWidth);
+    const total_rows: number = Math.floor(length / boxLength);
+
+    let i: number = 0;
+
+    let positions: BoxPositionObject[] = [];
+
+    while (i < total_columns) {
+        let j: number = 0;
+        while (j < total_rows) {
+            const svg_pos: SVGPosition = {
+                x: i * boxWidth,
+                y: j * boxLength
+            };
+            const bpo: BoxPositionObject = {
+                size,
+                position: svg_pos,
+                rotated,
+                box
+            };
+
+            positions.push(bpo);
+            j++;
+        }
+        i++;
+    }
+
+    return positions;
+};
+
+interface AutoLayoutProps {
+    allBoxes: BoxObject[];
+    allPallets: PalletGeometry[];
+    modelSize: number;
+    name: string;
+    updateLayout: (l: LayoutObject, palletIndex: number) => void;
+};
+
+function AutoLayout({ allBoxes, allPallets, modelSize, name, updateLayout }: AutoLayoutProps) {
+    const [palletIndex, setPalletIndex] = useState<number>(0);
+    const [boxIndex, setBoxIndex] = useState<number>(0);
+
+    const handlePallet = wrapChangeEventNumber((n: number) => {
+        setPalletIndex(n);
+    });
+
+    const handleBox = wrapChangeEventNumber((n: number) => {
+        setBoxIndex(n);
+    });
+
+    const handleGenerate = () => {
+        const pallet = allPallets[palletIndex];
+        const box = allBoxes[boxIndex];
+
+        const boxPositions: BoxPositionObject[] = generateAutoLayout(box, pallet, modelSize);
+        // Then return the positions.
+        let layout_name: string = name.replace(/^Custom Layer/gmi, "Auto Layout");
+
+        const layout: LayoutObject = {
+            name: layout_name,
+            height: box.dimensions.height,
+            boxPositions
+        };
+
+        updateLayout(layout, palletIndex);
+    };
+
+    return (
+        <div className="AutoLayout">
+            <div className="ParamSelect">
+                <div className="ParamCell">
+                    <div className="Title">
+                        <span>
+                            {"Pallet: "}
+                        </span>
+                    </div>
+                    <div className="DropDown">
+                        <select value={palletIndex} onChange={handlePallet}>
+                            {allPallets.map((p: PalletGeometry, i: number) => {
+                                return (
+                                    <option key={i} value={i}>
+                                        {p.name}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div className="ParamSelect">
+                <div className="ParamCell">
+                    <div className="Title">
+                        <span>
+                            {"Box: "}
+                        </span>
+                    </div>
+                    <div className="DropDown">
+                        <select value={boxIndex} onChange={handleBox} >
+                            {allBoxes.map((b: BoxObject, i: number) => {
+                                return (
+                                    <option key={i} value={i}>
+                                        {b.name}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div className="GenerateButton">
+                <div className="Button" onClick={handleGenerate}>
+                    <span>
+                        {"Generate Layout"}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
