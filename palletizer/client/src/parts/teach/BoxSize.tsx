@@ -111,11 +111,11 @@ interface CreateNewBoxProps {
 
 function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
 
-    let updateName = (name: string) => {
+    const updateName = (name: string) => {
         updateBox({ ...box, name });
     };
 
-    let updateCoordinate = (dim: string) => (val: number) => {
+    const updateCoordinate = (dim: string) => (val: number) => {
         let { dimensions } = box;
         let dims = {
             width: dimensions.width,
@@ -126,10 +126,8 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         updateBox({ ...box, dimensions: dims as BoxDimensions });
     };
 
-    let selectAction = (c: CoordinateRot) => {
-
-	
-        console.log("Selected Pick Location....", c);
+    const selectAction = (c: CoordinateRot) => {
+        console.log("Selected Pick Location: ", c);
         updateBox({ ...box, pickLocation: c });
     };
 
@@ -174,7 +172,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-    let startEdit = (index: number) => () => {
+    const startEdit = (index: number) => () => {
         if (index >= 0) {
             setEditingBox(allBoxes[index]);
             setEditingIndex(index);
@@ -185,7 +183,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
         setSummaryScreen(false);
     };
 
-    let editName = (boxIndex: number) => (newName: string) => {
+    const editName = (boxIndex: number) => (newName: string) => {
         let newBoxes = [...allBoxes];
         newBoxes[boxIndex].name = newName;
         setBoxes(newBoxes);

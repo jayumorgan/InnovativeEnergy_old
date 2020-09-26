@@ -22,7 +22,6 @@ if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
 }
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
-
 let TEMP_JOGGER_INDEX = 0;
 
 enum Directions {
@@ -107,6 +106,57 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
 };
 
 
+interface ForceHomeProps {
+    skip: () => void;
+    jogController: JogController | null;
+};
+
+function ForceHome({ skip, jogController }: ForceHomeProps) {
+
+    const allAxes = [
+        PalletizerAxes.X,
+        PalletizerAxes.Y,
+        PalletizerAxes.Z,
+        PalletizerAxes.θ
+    ];
+
+    const handleHome = (axis: PalletizerAxes) => () => {
+        if (jogController !== null) {
+            jogController.startHome(axis).then(() => {
+
+            }).catch((e: any) => {
+                console.log("Error handle home", e);
+            })
+        }
+    };
+
+    return (
+        <div className="ForceHome">
+            <div className="Description">
+                <span>
+                    {"Home all axes before starting."}
+                </span>
+            </div>
+            <div className="HomeButtons">
+                {allAxes.map((axis: PalletizerAxes, index: number) => {
+                    return (
+                        <div className="HomeButton" key={index} onClick={handleHome(axis)} >
+                            <span>
+                                {"Home " + String(axis) + " Axis"}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+            <div className="SkipButton">
+                <div className="Skip" onClick={skip} >
+                    {"Done"}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 interface JoggerProps {
     selectAction: (c: CoordinateRot) => void;
     updateName: (s: string) => void;
@@ -115,6 +165,8 @@ interface JoggerProps {
 };
 
 function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
+
+    const [forcedHome, setForcedHome] = useState<boolean>(true);
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
@@ -258,6 +310,19 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
         }
     };
 
+    if (forcedHome) {
+        const skip = () => {
+            setForcedHome(false);
+        };
+        const forcedProps: ForceHomeProps = {
+            skip,
+            jogController
+        };
+        return (
+            <ForceHome {...forcedProps} />
+        );
+    }
+
     return (
         <div className="Jogger">
             <div className="Name">
@@ -294,7 +359,7 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
                             <div className="Select">
                                 <div className="SelectButton" onClick={handleSelect}>
                                     <span>
-                                        {"Select"}
+                                        {"Save"}
                                     </span>
                                 </div>
                             </div>

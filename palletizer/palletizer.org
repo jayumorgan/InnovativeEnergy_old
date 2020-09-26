@@ -61,3 +61,22 @@ PALLETIZER -*- mode: org -*-
 *** DONE Visualizer -- drop locations in order.
 *** DONE Visualizer -- partial rotations of pallet + boxe
 *** TODO Test multiple pallets.
+
+** TODO Vivian Requests:
+*** TODO Add a "go to taught position" button for validation
+*** TODO There should be a pure jogger screen (not needing to go to pallet config or machie config
+*** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
+*** TODO There should be labelled "x and y and z" in every image. With proper orientations
+*** TODO Offset user interface needed to be added
+*** TODO Path optimization needs to be fixed
+*** TODO There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
+*** TODO There should be homing buttons in the home page
+*** TODO There should be a system speed and acceleration (will do by drive)
+*** TODO Checkbox for gearbox or custom gain in the actuator set up
+*** DONE Rename "select" to "save"
+*** TODO populate columns and rows instead of dragging and dropping boxes
+*** TODO joggers (teach positions) had too large of a "click-space" where a user could accidentally click it
+*** TODO Should not refresh configuration page before other set ups are shown
+*** DONE Missing delete layer
+*** TODO Missing software stop in palletizer app ??? it should work.
+*** TODO incomplete config (edited) 

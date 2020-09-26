@@ -69,6 +69,25 @@ body {
     overflow: hidden;
 }
 
+@mixin button-style() {
+  @include flex-center();
+  cursor: pointer;
+  border-radius: $border-radius;
+  background-color: $medium-blue;
+  font-size: $large-font;
+  //font-weight: $bold-font;
+  color: white;
+  span {
+      @include unselectable();
+  }
+}
+
+@mixin button-hover() {
+    @include shadow();
+    background-color: $green;
+}
+
+
 @mixin polygon() {
     cursor: pointer;
 
