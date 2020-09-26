@@ -4,14 +4,26 @@
      height: 100%;
      width: 100%;
      display: grid;
-     grid-template-rows: 15% 60% 15%;
+     grid-template-rows: 15% 70% 15%;
      grid-template-columns: 100%;
 
      .SkipButton {
 	 @include flex-center();
 	 height: 100%;
 	 width: 100%;
-	 
+	 .Skip {
+	     width: 15%;
+	     height: 35%; // 9/15
+	     @include button-style();
+	     
+	     span {
+		 font-size: $large-font;
+	     }
+	 }
+
+	 .Skip:hover {
+	     @include button-hover();
+	 }
      }
 
      .Description {
@@ -34,12 +46,13 @@
 	     @include button-style();
 	     width: 60%;
 	     height: 15%;
+	     span {
+		  font-size: $large-font;
+	     }
 	 }
 	 .HomeButton:hover {
 	     @include button-hover();
-	     span {
-		  font-size: $large-font;
-	      }
+	     
 
 	 }
 	

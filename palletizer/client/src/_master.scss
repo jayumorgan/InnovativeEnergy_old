@@ -74,8 +74,8 @@ body {
   cursor: pointer;
   border-radius: $border-radius;
   background-color: $medium-blue;
-  font-size: $large-font;
-  //font-weight: $bold-font;
+  //font-size: $large-font;
+  font-weight: $bold-font;
   color: white;
   span {
       @include unselectable();
