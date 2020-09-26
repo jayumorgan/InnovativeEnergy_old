@@ -680,8 +680,8 @@ export class Engine {
             let { machines } = my.mechanicalLayout;
             Promise.all(machines.map((m: MachineMotion) => {
                 // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
-                return m.emitSpeed(220).then(
-                  () => { m.emitAcceleration(150).then(
+                return m.emitSpeed(200).then(
+                  () => { m.emitAcceleration(100).then(
                     () => { m.emitHomeAll().then(
                       () => { return m.waitForMotionCompletion(); }
                     )
@@ -729,23 +729,18 @@ export class Engine {
             let axes: AXES[] = Object.keys(pairing) as AXES[];
             let positions: number[] = Object.values(pairing);
 
-            let speed_action = () => {
-                return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400);
-            };
-            let acceleration_action = () => {
-              return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 400 : 200);
-            };
-
             let move_action = () => {
-                return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+                return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400).then(
+                    () => { return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 600 : 200).then(
+                        () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
+                    )}
+                )
             };
 
             let wait_action = () => {
                 return mm.waitForMotionCompletion();
             };
 
-            move_actions.push(speed_action);
-            move_actions.push(acceleration_action);
             move_actions.push(move_action);
             wait_actions.push(wait_action);
         };
