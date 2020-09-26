@@ -25,7 +25,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE θ coordinate must be numerical.
 
 ** TODO Layout Generator:
-*** TODO Start this out.
+*** TODO Row Column-Fill (Version 1)
 
 ** TODO TeachMode:
 *** DONE Compute rotation of pallet relative to box. (may not be relevant anymore.)
@@ -53,7 +53,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Consistent error messaging to client. (see: catch blocks and information send)
 
 ** TODO Configuration Page:
-*** TODO Reload configs on create (so that they show up immidiately).
+*** TODO Reload configs on create (so that they show up immediately).
 *** TODO Default to configuration page when there are no configurations.
 
 ** TODO Visualizer:
@@ -69,9 +69,9 @@ PALLETIZER -*- mode: org -*-
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations
 *** TODO Offset user interface needed to be added
 *** TODO Path optimization needs to be fixed
-*** TODO There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
-*** TODO There should be homing buttons in the home page
-*** TODO There should be a system speed and acceleration (will do by drive)
+*** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
+*** TODO There should be homing buttons in the home page ?? No there shouldn't.
+*** TODO There should be a system speed and acceleration ?? Will do by drive.
 *** TODO Checkbox for gearbox or custom gain in the actuator set up
 *** DONE Rename "select" to "save"
 *** TODO populate columns and rows instead of dragging and dropping boxes
