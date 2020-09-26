@@ -63,12 +63,12 @@ PALLETIZER -*- mode: org -*-
 *** TODO Test multiple pallets.
 
 ** TODO Vivian Requests:
-*** TODO Add a "go to taught position" button for validation
+*** TODO Add a "go to taught position" button for validation ?? Where should this button go?
 *** TODO There should be a pure jogger screen (not needing to go to pallet config or machie config
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations
 *** TODO Offset user interface needed to be added
-*** TODO Path optimization needs to be fixed
+*** TODO Path optimization needs to be fixed ?? Can I get a real configuration.
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
 *** TODO There should be homing buttons in the home page ?? No there shouldn't.
 *** TODO There should be a system speed and acceleration ?? Will do by drive.

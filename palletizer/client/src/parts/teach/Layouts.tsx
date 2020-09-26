@@ -372,7 +372,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         strokeWidth: 0
     };
 
-
     let plankColor: string = String(COLORS.PLANK);
     let planks = [] as Rect[];
     let plankNumber = 6;
@@ -695,9 +694,9 @@ function defaultLayout(index: number) {
 
 export default function Layout({ instructionNumber, allBoxes, allPallets, setPallets, handleNext, handleBack }: LayoutProps) {
 
-    let modelSize = 620;
+    const modelSize = 620;
 
-    let modelDims = {
+    const modelDims = {
         outerWidth: 835,
         outerHeight: 627
     };
@@ -706,7 +705,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     let haveLayout = false;
     let layoutCount = 0;
 
-    allPallets.forEach((p: PalletGeometry, i: number) => {
+    allPallets.forEach((p: PalletGeometry, _: number) => {
         if (p.Layouts.length > 0) {
             layoutCount += 1;
             haveLayout = true;
@@ -716,13 +715,15 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     const [currentPalletIndex, setCurrentPalletIndex] = useState<number>(0);
     const [currentLayoutIndex, setCurrentLayoutIndex] = useState<number>(0);
     const [summaryScreen, setSummaryScreen] = useState<boolean>(haveLayout);
+    const [autoLayout, setAutoLayout] = useState<boolean>(false);
+
     let DisplayElement = useRef<HTMLDivElement>(null);
     const [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
     const [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
 
     // let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             if (summaryScreen) {
@@ -735,7 +736,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         }
     };
 
-    let updateModelBox = (bpo: BoxPositionObject, index: number) => {
+    const updateModelBox = (bpo: BoxPositionObject, index: number) => {
         let newModels: BoxPositionObject[] = [];
         modelBoxes.forEach((b: BoxPositionObject, i: number) => {
             if (i === index) {
@@ -747,13 +748,13 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         setModelBoxes(newModels);
     };
 
-    let handleName = (e: ChangeEvent) => {
+    const handleName = (e: ChangeEvent) => {
         let name = (e.target as any).value;
         setEditingLayout({ ...editingLayout, name });
     };
 
 
-    let editName = (palletIndex: number, layoutIndex: number) => (e: ChangeEvent) => {
+    const editName = (palletIndex: number, layoutIndex: number) => (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         let newPallets = [...allPallets];
         let newLayouts = [...allPallets[palletIndex].Layouts];
@@ -763,7 +764,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     };
 
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
@@ -798,13 +799,14 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                     setEditingLayout(defaultLayout(layoutCount + 2));
                     setPallets(newPallets);
                     setSummaryScreen(true);
+                    setAutoLayout(false);
                 }
             }
         },
         enabled: modelBoxes.length > 0 || summaryScreen
     };
 
-    let startEdit = (palletIndex: number, layoutIndex: number) => () => {
+    const startEdit = (palletIndex: number, layoutIndex: number) => () => {
         // Handle Setting Up the Boxes here.
         setCurrentPalletIndex(palletIndex);
         setCurrentLayoutIndex(layoutIndex);
@@ -813,7 +815,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         setSummaryScreen(false);
     };
 
-    let getTotalLayouts = () => {
+    const getTotalLayouts = () => {
         let count = 0;
         allPallets.forEach((p: PalletGeometry) => {
             count += p.Layouts.length;
@@ -821,28 +823,25 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         return count;
     };
 
-    let newLayout = () => {
-
+    const newLayout = () => {
         let lc = getTotalLayouts();
-
         setCurrentLayoutIndex(lc + 1);
         setCurrentPalletIndex(0);
         setModelBoxes([]);
         setEditingLayout(defaultLayout(lc + 1));
         setSummaryScreen(false);
-
     };
 
 
     let instruction: string;
     //  let placeholder = "Custom Layer " + String(1);
 
-    let dragOver = (e: DragEvent<HTMLDivElement>) => {
+    const dragOver = (e: DragEvent<HTMLDivElement>) => {
         e.stopPropagation();
         e.preventDefault();
     };
 
-    let onDrop = (e: DragEvent<HTMLDivElement>) => {
+    const onDrop = (e: DragEvent<HTMLDivElement>) => {
         if (DisplayElement.current) {
             let modelData = getModelData(allPallets[currentPalletIndex], modelSize);
             let { clientX, clientY } = e;
@@ -927,16 +926,17 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
             </ContentItem>
         );
     } else {
+
         instruction = "Drag and drop boxes to create a layer";
 
-        let contentItemProps = {
+        const contentItemProps = {
             instructionNumber,
             instruction,
             LeftButton,
             RightButton
         } as any;
 
-        let layoutModelProps = {
+        const layoutModelProps = {
             outerWidth: modelDims.outerWidth,
             outerHeight: modelDims.outerHeight,
             boxes: modelBoxes,
@@ -946,6 +946,10 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
             enableDrag: true,
             showName: true
         } as any;
+
+        const startAutoLayout = () => {
+            setAutoLayout(true);
+        };
 
         return (
             <ContentItem {...contentItemProps} >
@@ -974,28 +978,39 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                     <div className="LayoutView">
                         <div className="LayoutContainer">
                             <div className="PalletSelect">
-                                <div className="DeleteBox">
-                                    {(modelBoxes.length > 0) &&
-                                        <div className="DeleteBoxButton" onClick={removeBox}>
+                                <div className="LayoutButtons">
+                                    <div className="AutoLayout">
+                                        <div className="AutoButton" onClick={startAutoLayout}>
                                             <span>
-                                                {"Remove box"}
+                                                {"Auto Layout"}
                                             </span>
                                         </div>
-                                    }
+                                    </div>
+                                    <div className="DeleteBox">
+                                        {(modelBoxes.length > 0) &&
+                                            <div className="DeleteBoxButton" onClick={removeBox}>
+                                                <span>
+                                                    {"Remove box"}
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
-                                <div className="Title">
-                                    <span>
-                                        {"On to pallet:"}
-                                    </span>
-                                </div>
-                                <div className="Drop">
-                                    <select value={currentPalletIndex} onChange={handlePalletSelect}>
-                                        {allPallets.map((pallet: PalletGeometry, index: number) => {
-                                            return (
-                                                <option value={index} key={index}> {pallet.name} </option>
-                                            );
-                                        })}
-                                    </select>
+                                <div className="PalletDropDown">
+                                    <div className="Title">
+                                        <span>
+                                            {"On to pallet:"}
+                                        </span>
+                                    </div>
+                                    <div className="Drop">
+                                        <select value={currentPalletIndex} onChange={handlePalletSelect}>
+                                            {allPallets.map((pallet: PalletGeometry, index: number) => {
+                                                return (
+                                                    <option value={index} key={index}> {pallet.name} </option>
+                                                );
+                                            })}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div className="Pallet" ref={DisplayElement} onDragOver={dragOver} onDrop={onDrop}>
