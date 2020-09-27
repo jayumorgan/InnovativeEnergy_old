@@ -55,6 +55,7 @@ export interface PalletConfiguration {
 export interface SavedPalletConfiguration {
     config: PalletConfiguration;
     boxCoordinates: BoxCoordinates[];
+    complete: boolean;
 };
 
 function newPalletConfiguration(name: string, machine_config_id: number) {
@@ -173,11 +174,22 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
     let configuration = {
         config,
-        boxCoordinates
+        boxCoordinates,
+        complete: true
     } as SavedPalletConfiguration;
 
     return configuration;
 };
+
+
+function generateIncompleteConfig(config: PalletConfiguration): SavedPalletConfiguration {
+    return {
+        config,
+        boxCoordinates: [],
+        complete: false
+    };
+};
+
 
 
 //---------------Pallet Configurator Component---------------
@@ -199,36 +211,56 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     let ChildElement: ReactElement = (<></>);
 
-    let setName = (name: string) => {
+    const setName = (name: string) => {
         dispatchConfiguration({ type: CONF_ACTION.SET_NAME, payload: name as any } as ConfigAction);
     };
 
-    let setBoxes = (boxes: BoxObject[]) => {
+    const setBoxes = (boxes: BoxObject[]) => {
         dispatchConfiguration({ type: CONF_ACTION.SET_BOXES, payload: boxes as any });
     };
 
-    let setPallets = (pallets: PalletGeometry[]) => {
+    const setPallets = (pallets: PalletGeometry[]) => {
         dispatchConfiguration({ type: CONF_ACTION.SET_PALLETS, payload: pallets as any });
     };
 
-    let setMachineConfigId = (id: number) => {
+    const setMachineConfigId = (id: number) => {
         dispatchConfiguration({ type: CONF_ACTION.SET_MACHINE_CONFIG_ID, payload: id as any });
     };
 
-    let handleNext = () => {
+    const handleNext = () => {
         if (teachState === PalletTeachState.SUMMARY) {
             let finalConfig = GenerateFinalConfig(configuration);
             let { name } = configuration;
-            SavePalletConfig(name, finalConfig, id);
-            close();
+            SavePalletConfig(name, finalConfig, id, finalConfig.complete).then(() => {
+                close();
+            }).catch((e: any) => {
+                console.log("error saving pallet configuration", e);
+                close();
+            });
         } else {
             setTeachState(1 + teachState);
         }
     };
 
-    let handleBack = () => {
+    const handleBack = () => {
         if (teachState > 0) {
             setTeachState(-1 + teachState);
+        } else {
+            close();
+        }
+    };
+
+    const modalClose = () => {
+        // close should not be async to prevent duplication on double click.
+        if ((palletConfig && !(palletConfig.complete)) || (teachState as number) > 0) {
+            const incomplete_config: SavedPalletConfiguration = generateIncompleteConfig(configuration);
+            const { name } = configuration;
+            SavePalletConfig(name, incomplete_config, id, incomplete_config.complete).then(() => {
+                close();
+            }).catch((e: any) => {
+                console.log("Error saving incomplete pallet configuration", e);
+                close();
+            });
         } else {
             close();
         }
@@ -297,7 +329,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
         } as any;
 
         return (
-            <Modal close={close}>
+            <Modal close={modalClose}>
                 <div className="TeachContainer">
                     <div className="TeachModeHeader">
                         <div className="TeachModeTitle">

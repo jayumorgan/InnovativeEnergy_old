@@ -19,7 +19,8 @@ const CREATE_MACHINE_CONFIGS: string = `
 CREATE TABLE IF NOT EXISTS machine_configs (
 id INTEGER PRIMARY KEY NOT NULL UNIQUE,
 name TEXT,
-raw_json BLOB
+raw_json BLOB,
+complete INTEGER NOT NULL DEFAULT 0
 );`;
 const CREATE_PALLET_CONFIGS: string = `
 CREATE TABLE IF NOT EXISTS pallet_configs (
@@ -27,23 +28,28 @@ id INTEGER PRIMARY KEY NOT NULL UNIQUE,
 name TEXT,
 raw_json BLOB,
 machine_config_id INTEGER NOT NULL,
+complete INTEGER NOT NULL DEFAULT 0,
 selected INTEGER NOT NULL DEFAULT 0,
 FOREIGN KEY(machine_config_id) REFERENCES machine_configs(id)
 );`;
 
 //---------------Select Queries---------------
-const SELECT_ALL_MACHINE_CONFIGS = `SELECT id, name FROM machine_configs;`
-const SELECT_ALL_PALLET_CONFIGS = `SELECT id, name, machine_config_id FROM pallet_configs;`;
-const SELECT_MACHINE_CONFIG_ID = `SELECT id, name, raw_json FROM machine_configs WHERE id = ?`;
-const SELECT_PALLET_CONFIG_ID = `SELECT id, name, raw_json, machine_config_id FROM pallet_configs WHERE id = ?`;
-const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json, machine_config_id FROM pallet_configs WHERE selected = 1;`;
+const SELECT_ALL_MACHINE_CONFIGS = `SELECT id, name, complete FROM machine_configs;`
+const SELECT_ALL_COMPLETE_MACHINE_CONFIGS = `SELECT id, name, complete FROM machine_configs WHERE complete = 1;`;
+const SELECT_ALL_PALLET_CONFIGS = `SELECT id, name, machine_config_id, complete FROM pallet_configs;`;
+const SELECT_ALL_COMPLETE_PALLET_CONFIGS = `SELECT id, name, machine_config_id, complete FROM pallet_configs WHERE complete = 1;`;
+
+//---------------Select Configurations By ID---------------
+const SELECT_MACHINE_CONFIG_ID = `SELECT id, name, raw_json, complete FROM machine_configs WHERE id = ?`;
+const SELECT_PALLET_CONFIG_ID = `SELECT id, name, raw_json, machine_config_id, complete FROM pallet_configs WHERE id = ?`;
+const SELECT_CURRENT_PALLET_CONFIG = `SELECT id, name, raw_json, machine_config_id, complete FROM pallet_configs WHERE selected = 1;`;
 
 //---------------Write Queries---------------
 const UPDATE_CURRENT_PALLET = `UPDATE pallet_configs SET selected = (CASE WHEN id = ? THEN 1 ELSE 0 END) WHERE id > 0;`;
-const INSERT_MACHINE_CONFIG = `INSERT INTO machine_configs (name, raw_json) VALUES (?,?);`;
-const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json, machine_config_id) VALUES (?,?,?);`;
-const UPDATE_PALLET_CONFIG = `UPDATE pallet_configs SET name = ?, raw_json = ?, machine_config_id = ? WHERE id = ?;`;
-const UPDATE_MACHINE_CONFIG = `UPDATE machine_configs SET name = ?, raw_json = ? WHERE id =?;`
+const INSERT_MACHINE_CONFIG = `INSERT INTO machine_configs (name, raw_json, complete) VALUES (?,?,?);`;
+const INSERT_PALLET_CONFIG = `INSERT INTO pallet_configs (name, raw_json, machine_config_id, complete) VALUES (?,?,?,?);`;
+const UPDATE_PALLET_CONFIG = `UPDATE pallet_configs SET name = ?, raw_json = ?, machine_config_id = ?, complete = ? WHERE id = ?;`;
+const UPDATE_MACHINE_CONFIG = `UPDATE machine_configs SET name = ?, raw_json = ?, complete = ? WHERE id = ?;`
 
 //---------------Delete Queries---------------
 const DELETE_MACHINE_CONFIG = `DELETE FROM machine_configs WHERE id = ?;`;
@@ -75,8 +81,16 @@ export class DatabaseHandler {
         return this.db.all(SELECT_ALL_MACHINE_CONFIGS);
     };
 
+    getCompleteMachineConfigs() {
+        return this.db.all(SELECT_ALL_COMPLETE_MACHINE_CONFIGS);
+    };
+
     getPalletConfigs() {
         return this.db.all(SELECT_ALL_PALLET_CONFIGS);
+    };
+
+    getCompletePalletConfigs() {
+        return this.db.all(SELECT_ALL_COMPLETE_PALLET_CONFIGS);
     };
 
     getAllConfigs() {
@@ -132,26 +146,26 @@ export class DatabaseHandler {
         return this.db.run(UPDATE_CURRENT_PALLET, [id]);
     };
 
-    addPalletConfig(name: string, data: any) {
+    addPalletConfig(name: string, data: any, complete: boolean) {
         let machine_config_id = data.config.machine_config_id;
         let data_string = JSON.stringify(data, null, "\t");
-        return this.db.run(INSERT_PALLET_CONFIG, [name, data_string, machine_config_id]);
+        return this.db.run(INSERT_PALLET_CONFIG, [name, data_string, machine_config_id, complete ? 1 : 0]);
     };
 
-    addMachineConfig(name: string, data: any) {
+    addMachineConfig(name: string, data: any, complete: boolean) {
         let data_string = JSON.stringify(data, null, "\t");
-        return this.db.run(INSERT_MACHINE_CONFIG, [name, data_string]);
+        return this.db.run(INSERT_MACHINE_CONFIG, [name, data_string, complete ? 1 : 0]);
     };
 
-    updateMachineConfig(name: string, data: any, id: number) {
+    updateMachineConfig(id: number, name: string, data: any, complete: boolean) {
         let data_string = JSON.stringify(data, null, "\t");
-        return this.db.run(UPDATE_MACHINE_CONFIG, [name, data_string, id]);
+        return this.db.run(UPDATE_MACHINE_CONFIG, [name, data_string, complete, id]);
     };
 
-    updatePalletConfig(name: string, data: any, id: number) {
+    updatePalletConfig(id: number, name: string, data: any, complete: boolean) {
         let machine_config_id = data.config.machine_config_id;
         let data_string = JSON.stringify(data, null, "\t");
-        return this.db.run(UPDATE_PALLET_CONFIG, [name, data_string, machine_config_id, id]);
+        return this.db.run(UPDATE_PALLET_CONFIG, [name, data_string, machine_config_id, complete, id]);
     };
 
     async deleteMachineConfig(id: number) {

@@ -1,43 +1,38 @@
 import React, { useContext, useState, Fragment } from 'react';
-
 import { Unlock } from "./Modal";
-
 import PalletConfigurator from "./TeachMode";
-
 import MachineConfigurator from "./MachineConfig";
-
 import { ConfigContext } from "../context/ConfigContext";
-
 import { ConfigState } from "../types/Types";
-
 import { SavedPalletConfiguration } from "./TeachMode";
-
 import { SavedMachineConfiguration } from "./MachineConfig";
-
 import { get_config, delete_config } from "../requests/requests";
-
 import { ConfigItem } from "../types/Types";
 
 // Styles
 import "./css/Configuration.scss";
 import "./css/Login.scss";
 
+
 interface ConfigCellProps {
     name: string;
     id: number;
     start_editor: (id: number) => void;
     is_machine: boolean;
-}
+    complete: boolean;
+};
 
-function ConfigCell({ name, id, start_editor, is_machine }: ConfigCellProps) {
+function ConfigCell({ name, id, start_editor, is_machine, complete }: ConfigCellProps) {
 
-    let handle_edit = () => {
+    const { reloadConfigs } = useContext(ConfigContext) as ConfigState;
+
+    const handle_edit = () => {
         start_editor(id);
     };
 
-    let handle_delete = () => {
+    const handle_delete = () => {
         delete_config(id, is_machine).then(() => {
-            console.log("Successfully deleted config", id, is_machine);
+            reloadConfigs();
         }).catch((e: any) => {
             console.log("Error deleting configuration.", id, is_machine, e);
         });
@@ -45,7 +40,7 @@ function ConfigCell({ name, id, start_editor, is_machine }: ConfigCellProps) {
 
     return (
         <div className="ConfigCell">
-            <span> {name} </span>
+            <span> {name + (complete ? "" : " (Incomplete)")} </span>
             <div className="EditConfigButton" onClick={handle_edit}>
                 <span> Edit </span>
             </div>
@@ -58,7 +53,7 @@ function ConfigCell({ name, id, start_editor, is_machine }: ConfigCellProps) {
             </div>
         </div>
     );
-}
+};
 
 interface ConfigContainerProps {
     title: string;
@@ -77,7 +72,14 @@ function ConfigContainer({ title, configs, start_editor, start_add_config, is_ma
             <div className="ConfigGrid">
                 <div className="ConfigScroll" >
                     {configs.map((item: ConfigItem, index: number) => {
-                        return (<ConfigCell id={item.id} name={item.name} key={index} start_editor={start_editor} is_machine={is_machine} />)
+                        const cc_props: ConfigCellProps = {
+                            id: item.id,
+                            name: item.name,
+                            complete: item.complete,
+                            start_editor,
+                            is_machine
+                        };
+                        return (<ConfigCell key={index} {...cc_props} />)
                     })}
                 </div>
                 <div className="ConfigAdd">
@@ -95,7 +97,7 @@ function Configuration() {
     let machine_title = "Machine Configuration";
     let pallet_title = "Pallet Configuration";
 
-    const { machine_configs, pallet_configs } = useContext(ConfigContext) as ConfigState;
+    const { machine_configs, pallet_configs, reloadConfigs } = useContext(ConfigContext) as ConfigState;
     const [locked, set_locked] = useState<boolean>(false);
     const [add_pallet_config, set_add_pallet_config] = useState<boolean>(false);
     const [add_machine_config, set_add_machine_config] = useState<boolean>(false);
@@ -104,13 +106,14 @@ function Configuration() {
     const [editPalletId, setEditPalletId] = useState<number | null>(null);
     const [editMachineId, setEditMachineId] = useState<number | null>(null);
 
-    let startPalletEditor = (id: number) => {
+    const startPalletEditor = (id: number) => {
         if (machine_configs.length > 0) {
             let fetch_data = async () => {
-                let res_data = await get_config(id, false) as any;
-                let saved = JSON.parse(res_data.raw_json);
+                const res_data = await get_config(id, false) as any;
+                const saved = JSON.parse(res_data.raw_json);
+                const complete: boolean = res_data.complete as boolean;
                 setEditPalletId(id);
-                setEditPalletConfig(saved);
+                setEditPalletConfig({ ...saved, complete });
                 set_add_pallet_config(true);
             }
             fetch_data();
@@ -119,32 +122,38 @@ function Configuration() {
         }
     };
 
-    let startMachineEditor = (id: number) => {
-        let fetch_data = async () => {
-            let res_data = await get_config(id, true) as any;
-            let saved = JSON.parse(res_data.raw_json);
+    const startMachineEditor = (id: number) => {
+        const fetch_data = async () => {
+            const res_data = await get_config(id, true) as any;
+            const saved = JSON.parse(res_data.raw_json);
+            const complete: boolean = res_data.complete as boolean;
             setEditMachineId(id)
-            setEditMachineConfig(saved);
+            setEditMachineConfig({ ...saved, complete });
             set_add_machine_config(true);
         };
         fetch_data();
     };
 
-
-    let close_unlock = () => {
+    const close_unlock = () => {
         set_locked(false);
-    }
+    };
 
-    let new_pallet = (val: boolean) => () => {
+    const new_pallet = (val: boolean) => () => {
         if (machine_configs.length > 0 || !val) {
             set_add_pallet_config(val);
             setEditPalletConfig(null);
         }
+        if (!val) {
+            reloadConfigs();
+        }
     };
 
-    let new_machine = (val: boolean) => () => {
+    const new_machine = (val: boolean) => () => {
         set_add_machine_config(val);
         setEditMachineConfig(null);
+        if (!val) {
+            reloadConfigs();
+        }
     };
 
     let pallet_count = pallet_configs.length;

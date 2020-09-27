@@ -19,7 +19,7 @@ let router: express.Router = express.Router();
 router.use(express.json());
 
 router.post("/configs/set", (req: Request, res: Response) => {
-    let handler = req.databaseHandler;
+    const handler = req.databaseHandler;
 
     let { id } = req.body;
 
@@ -29,47 +29,47 @@ router.post("/configs/set", (req: Request, res: Response) => {
 });
 
 router.post("/configs/savepallet", (req: Request, res: Response) => {
-    let handler = req.databaseHandler;
-    let { name, config, id } = req.body;
+    const handler = req.databaseHandler;
+    const { name, config, id, complete } = req.body;
+    // If it is alread 
 
     if (id === null) {
-        handler.addPalletConfig(name, config).then(() => {
+        handler.addPalletConfig(name, config, complete).then(() => {
             res.sendStatus(200);
         }).catch(handleCatch(res));
     } else {
-        handler.updatePalletConfig(name, config, id).then(() => {
+        handler.updatePalletConfig(id, name, config, complete).then(() => {
             res.sendStatus(200);
         }).catch(handleCatch(res));
     }
 });
 
 router.post("/configs/savemachine", (req: Request, res: Response) => {
-    let handler = req.databaseHandler;
-    let { name, config, id } = req.body;
+    const handler = req.databaseHandler;
+    const { name, config, id, complete } = req.body;
 
     if (id === null) {
-        handler.addMachineConfig(name, config).then(() => {
+        handler.addMachineConfig(name, config, complete).then(() => {
             res.sendStatus(200);
         }).catch(handleCatch(res));
     } else {
-        handler.updateMachineConfig(name, config, id).then(() => {
+        handler.updateMachineConfig(id, name, config, complete).then(() => {
             res.sendStatus(200);
         }).catch(handleCatch(res));
     }
 });
 
 router.post("/configs/getmachine", (req: Request, res: Response) => {
-    let handler = req.databaseHandler;
-    let { id } = req.body;
+    const handler = req.databaseHandler;
+    const { id } = req.body;
 
     handler.getMachineConfig(id).then((c: any) => {
         res.send(c);
     }).catch(handleCatch(res));
 });
 
-
 router.post("/configs/getpallet", (req: Request, res: Response) => {
-    let handler = req.databaseHandler;
+    const handler = req.databaseHandler;
     let { id } = req.body;
     handler.getPalletConfig(id).then((c: any) => {
         res.send(c);
@@ -77,9 +77,7 @@ router.post("/configs/getpallet", (req: Request, res: Response) => {
 });
 
 router.get("/configs", (req: Request, res: Response) => {
-
-    let handler = req.databaseHandler;
-
+    const handler = req.databaseHandler;
     handler.getAllConfigs().then((all: any) => {
         handler.getCurrentConfigs().then((currents: any) => {
             res.send({
@@ -91,8 +89,8 @@ router.get("/configs", (req: Request, res: Response) => {
 });
 
 router.post("/configs/delete", (req: Request, res: Response) => {
-    let handler = req.databaseHandler;
-    let { id, is_machine } = req.body;
+    const handler = req.databaseHandler;
+    const { id, is_machine } = req.body;
     let handleFn: (id: number) => Promise<any> = is_machine ? handler.deleteMachineConfig.bind(handler) : handler.deletePalletConfig.bind(handler);
 
     handleFn(id).then(() => {

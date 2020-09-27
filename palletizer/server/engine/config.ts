@@ -94,6 +94,7 @@ export interface PalletConfiguration {
 export interface SavedPalletConfiguration {
     boxCoordinates: BoxCoordinate[];
     config: PalletConfiguration;
+    complete: boolean; // Engine configurations should always be complete.
 };
 
 

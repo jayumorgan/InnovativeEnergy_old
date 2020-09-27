@@ -1,12 +1,7 @@
 import React, { useState, useReducer, ReactElement } from "react";
-
-
 import { Fraction } from "./teach/CompletionDots";
-
 import Modal from "./Modal";
-
 import { SaveMachineConfig } from "../requests/requests";
-
 import { ControlProps } from "./shared/shared";
 
 //---------------Configuration Steps---------------
@@ -43,6 +38,7 @@ export interface MachineConfiguration {
 export interface SavedMachineConfiguration {
     name: string;
     config: MachineConfiguration;
+    complete: boolean;
 }
 
 function defaultConfiguration(index: number): MachineConfiguration {
@@ -51,7 +47,8 @@ function defaultConfiguration(index: number): MachineConfiguration {
         machines: [] as MachineMotion[],
         axes: defaultAxesConfiguration(),
         io: defaultIO(),
-        box_detection: [] as IOState[]
+        box_detection: [] as IOState[],
+        complete: false
     } as MachineConfiguration;
 };
 
@@ -115,58 +112,62 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             return defaultConfiguration(index)
         }
     })());
-
     const [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
 
-    let setName = (s: string) => {
+    const setName = (s: string) => {
         dispatch({
             type: MACHINE_ACTION.NAME,
             payload: s as any
         } as ReducerAction);
     };
 
-    let setMachines = (m: MachineMotion[]) => {
+    const setMachines = (m: MachineMotion[]) => {
         dispatch({
             type: MACHINE_ACTION.MACHINES,
             payload: m as any
         });
     };
 
-    let setAxes = (a: AxesConfiguration) => {
+    const setAxes = (a: AxesConfiguration) => {
         dispatch({
             type: MACHINE_ACTION.AXES,
             payload: a as any
         });
     };
 
-    let setIO = (io: IO) => {
+    const setIO = (io: IO) => {
         dispatch({
             type: MACHINE_ACTION.IO,
             payload: io as any
         });
     };
 
-    let setDetection = (detection: IOState[]) => {
+    const setDetection = (detection: IOState[]) => {
         dispatch({
             type: MACHINE_ACTION.DETECTION,
             payload: detection as any
         });
     };
 
-    let handleNext = () => {
+    const handleNext = () => {
         if (configState as number < completionFraction.d) {
             setConfigState(configState + 1);
         } else {
-            let save: SavedMachineConfiguration = {
+            const save: SavedMachineConfiguration = {
                 name: configuration.name,
-                config: configuration
+                config: configuration,
+                complete: true
             };
-            SaveMachineConfig(configuration.name, save, id);
-            close();
+            SaveMachineConfig(configuration.name, save, id, save.complete).then(() => {
+                close();
+            }).catch((e: any) => {
+                console.log("Error saving machine configuration", e);
+                close();
+            });
         }
     };
 
-    let handleBack = () => {
+    const handleBack = () => {
         if (configState > 0) {
             setConfigState(configState - 1);
         } else {
@@ -174,7 +175,27 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         }
     };
 
+
     completionFraction.n = configState as number;
+
+    const modalClose = () => {
+        if ((machineConfig && !machineConfig.complete) || (configState as number) > 0) {
+            const incomplete_config: SavedMachineConfiguration = {
+                name: configuration.name,
+                config: configuration,
+                complete: false
+            };
+            SaveMachineConfig(incomplete_config.name, incomplete_config, id, incomplete_config.complete).then(() => {
+                close();
+            }).catch((e: any) => {
+                console.log("Error saving incomplete machine configuration", e);
+                close();
+            });
+        } else {
+            close();
+        }
+    };
+
 
     let controlProps: ControlProps = {
         handleNext,
@@ -266,7 +287,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         } as any;
 
         return (
-            <Modal close={close}>
+            <Modal close={modalClose}>
                 <div className="TeachContainer">
                     <div className="TeachModeHeader">
                         <div className="TeachModeTitle">

@@ -66,13 +66,13 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Vivian Requests:
 *** TODO Add a "go to taught position" button for validation ?? Where should this button go?
-*** TODO There should be a pure jogger screen (not needing to go to pallet config or machie config
+*** TODO There should be a pure jogger screen (not needing to go to pallet config or machine config ?? What machine do I use then?
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations
 *** TODO Offset user interface needed to be added
 *** TODO Path optimization needs to be fixed ?? Can I get a real configuration.
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
-*** TODO There should be homing buttons in the home page ?? No there shouldn't.
+*** TODO There should be homing buttons in the home page ?? Ah, okay.
 *** TODO There should be a system speed and acceleration ?? Will do by drive.
 *** DONE Checkbox for gearbox or custom gain in the actuator set up
 *** DONE Rename "select" to "save"
@@ -80,5 +80,8 @@ PALLETIZER -*- mode: org -*-
 *** TODO joggers (teach positions) had too large of a "click-space" where a user could accidentally click it
 *** TODO Should not refresh configuration page before other set ups are shown
 *** DONE Missing delete layer
-*** TODO Missing software stop in palletizer app ??? it should work.
-*** TODO incomplete config (edited) 
+*** TODO Missing software stop in palletizer app ?? check detection mechanism.
+*** DONE incomplete config (edited) 
+
+** TODO General: 
+*** TODO Name & complete are duplicated within raw_json. This is a hack around passing data from Configuration -> Teach/Machine_Config, fix later.

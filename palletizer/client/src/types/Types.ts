@@ -27,12 +27,14 @@ export interface ConfigItem {
     id: number;
     name: string;
     machine_config_id?: number;
-}
+    complete: boolean;
+};
 
 export type ConfigState = {
     machine_configs: ConfigItem[];
     pallet_configs: ConfigItem[];
     machine_index: number;
     pallet_index: number;
+    reloadConfigs: () => void;
 };
 

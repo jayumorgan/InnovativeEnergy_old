@@ -976,7 +976,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                                     <div className="AutoLayoutButton">
                                         <div className="AutoButton" onClick={handleAutoLayout}>
                                             <span>
-                                                {autoLayout ? "Custom Layout" : "Auto Layout"}
+                                                {autoLayout ? "Custom Layer" : "Auto Layer"}
                                             </span>
                                         </div>
                                     </div>
@@ -1068,23 +1068,20 @@ function generateAutoLayout(box: BoxObject, pallet: PalletGeometry, size: number
     while (i < total_columns) {
         let j: number = 0;
         while (j < total_rows) {
-            const svg_pos: SVGPosition = {
-                x: i * boxWidth,
-                y: j * boxLength
-            };
             const bpo: BoxPositionObject = {
                 size,
-                position: svg_pos,
+                position: {
+                    x: i * boxWidth,
+                    y: j * boxLength
+                },
                 rotated,
                 box
             };
-
             positions.push(bpo);
             j++;
         }
         i++;
     }
-
     return positions;
 };
 
@@ -1097,6 +1094,7 @@ interface AutoLayoutProps {
 };
 
 function AutoLayout({ allBoxes, allPallets, modelSize, name, updateLayout }: AutoLayoutProps) {
+
     const [palletIndex, setPalletIndex] = useState<number>(0);
     const [boxIndex, setBoxIndex] = useState<number>(0);
 
@@ -1111,17 +1109,13 @@ function AutoLayout({ allBoxes, allPallets, modelSize, name, updateLayout }: Aut
     const handleGenerate = () => {
         const pallet = allPallets[palletIndex];
         const box = allBoxes[boxIndex];
-
         const boxPositions: BoxPositionObject[] = generateAutoLayout(box, pallet, modelSize);
-        // Then return the positions.
-        let layout_name: string = name.replace(/^Custom Layer/gmi, "Auto Layout");
-
+        const layout_name: string = name.replace(/^Custom Layer/gmi, "Auto Layer");
         const layout: LayoutObject = {
             name: layout_name,
             height: box.dimensions.height,
             boxPositions
         };
-
         updateLayout(layout, palletIndex);
     };
 

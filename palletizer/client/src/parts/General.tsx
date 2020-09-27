@@ -55,6 +55,7 @@ function ConfigCell({ title, children }: StackProps) {
 };
 
 function ExecutePane({ current_box, status }: ExecuteProps) {
+
     const { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
     const [start_box, set_start_box] = useState(0);
     const [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
@@ -66,11 +67,11 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
     }, [machine_index, pallet_index]);
 
     useEffect(() => {
-        let { update_start_box } = control;
+        const { update_start_box } = control;
         update_start_box(start_box);
     }, []);
 
-    let handle_input = (e: ChangeEvent) => {
+    const handle_input = (e: ChangeEvent) => {
         let value: number = +(e.target as HTMLInputElement).value;
         let { update_start_box } = control;
         update_start_box(value);
@@ -106,7 +107,7 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
 
     let start_text = is_running ? "Pause" : "Start";
 
-    let handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
+    const handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
         let id: number = +((e.target as any).value);
         if (!machine) {
             set_config(id).then(() => {
@@ -131,7 +132,9 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
             <ConfigCell title={machine_config_title} >
                 <div className="ConfigItem">
                     <select onChange={handle_config_select(true)} value={machine_current_config}>
-                        {machine_configs.map((item: ConfigItem, index: number) => {
+                        {machine_configs.filter((item: ConfigItem) => {
+                            return item.complete;
+                        }).map((item: ConfigItem, index: number) => {
                             return (<option value={item.id} key={index} > {item.name} </option>)
                         })}
                     </select>
@@ -140,7 +143,9 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
             <ConfigCell title={pallet_config_title}>
                 <div className="ConfigItem">
                     <select onChange={handle_config_select(false)} value={pallet_current_config}>
-                        {pallet_configs.map((item: ConfigItem, index: number) => {
+                        {pallet_configs.filter((item: ConfigItem) => {
+                            return item.complete;
+                        }).map((item: ConfigItem, index: number) => {
                             return (<option value={item.id} key={index} > {item.name} </option>)
                         })}
                     </select>
