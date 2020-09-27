@@ -44,7 +44,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Use position from step counts. (Gain computation.) -- This is crucial for not causing giving strang positions when user jogs past end stops.
 
 ** TODO Execution:
-*** TODO Add toggle for path optimization.
+
 
 ** TODO Production:
 *** TODO Logging.
@@ -71,7 +71,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Offset user interface needed to be added
 *** TODO Path optimization needs to be fixed ?? Can I get a real configuration.
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
-*** TODO There should be homing buttons in the home page ?? Ah, okay.
+*** DONE There should be homing buttons in the home page ?? Ah, okay. -- TEST- Jog controller init (release and reset) may not be completed.
 *** TODO There should be a system speed and acceleration ?? Will do by drive.
 *** DONE Checkbox for gearbox or custom gain in the actuator set up
 *** DONE Rename "select" to "save"
