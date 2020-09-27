@@ -12,8 +12,19 @@ export type PalletizerInformation = {
     Type: string;
 };
 
+export enum PALLETIZER_STATUS {
+    SLEEP = "Sleep",
+    PAUSED = "Paused",
+    COMPLETE = "Complete",
+    ERROR = "Error",
+    STOPPED = "Stopped",
+    RUNNING = "Running",
+    OFFLINE = "Offline"
+};
+
+
 export interface PalletizerState {
-    status: string;
+    status: PALLETIZER_STATUS;
     cycle: number;
     current_box: number;
     total_box: number;

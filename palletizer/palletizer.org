@@ -11,7 +11,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Plugin to server.
 *** DONE Make path avoid both top and bottom of box.
 *** TODO Pick location lip height height: Vivian: "just use box height."
-*** TODO Handle errors and default to standard or ensure there are no errors.
+*** TODO Handle errors / ensure no errors.
 *** TODO UI Button toggle. 
 *** DONE Use Line class.
 *** DONE Top and bottom of box constraint.
@@ -55,8 +55,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Consistent error messaging to client. (see: catch blocks and information send)
 
 ** TODO Configuration Page:
-*** TODO Reload configs on create (so that they show up immediately).
-*** TODO Default to configuration page when there are no configurations.
+*** DONE Reload configs on create (so that they show up immediately).
 
 ** TODO Visualizer:
 *** DONE Visualizer: Frame + coordinates + axes 
@@ -66,9 +65,9 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Vivian Requests:
 *** TODO Add a "go to taught position" button for validation ?? Where should this button go?
-*** TODO There should be a pure jogger screen (not needing to go to pallet config or machine config ?? What machine do I use then?
+*** TODO There should be a pure jogger screen (not needing to go to pallet config or machine config ?? Extra button on machine configuration for jogger?
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
-*** TODO There should be labelled "x and y and z" in every image. With proper orientations
+*** TODO There should be labelled "x and y and z" in every image. With proper orientations ?? Going to need good images then.
 *** TODO Offset user interface needed to be added
 *** TODO Path optimization needs to be fixed ?? Can I get a real configuration.
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
@@ -85,3 +84,4 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO General: 
 *** TODO Name & complete are duplicated within raw_json. This is a hack around passing data from Configuration -> Teach/Machine_Config, fix later.
+*** TODO Electronic estop link will mess with reset, figure out a way around this.

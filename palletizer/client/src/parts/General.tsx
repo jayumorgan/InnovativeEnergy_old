@@ -8,9 +8,15 @@ import React, {
 import { MQTTControl } from "../mqtt/MQTT";
 import { PalletizerContext } from "../context/PalletizerContext";
 import { ConfigContext } from "../context/ConfigContext";
-import { set_config } from "../requests/requests";
-import { ConfigState, PalletizerState, ConfigItem } from "../types/Types";
+import { set_config, get_machine_config } from "../requests/requests";
+import {
+    ConfigState,
+    PalletizerState,
+    ConfigItem,
+    PALLETIZER_STATUS
+} from "../types/Types";
 import Visualizer, { VisualizerProps } from "./Visualizer";
+import JogController from "../jogger/Jogger";
 
 //---------------Images---------------
 import logo from "../images/vention_logo.png";
@@ -21,7 +27,9 @@ import { ReactComponent as CircleImage } from "./images/circle.svg";
 
 //---------------Styles---------------
 import "./css/General.scss";
+import { SavedMachineConfiguration } from './MachineConfig';
 
+// Probably avoid using a global variable.
 var control = MQTTControl();
 
 // Support Functions:
@@ -40,7 +48,7 @@ function make_date_string(day: number, month: number, year: number) {
 
 interface ExecuteProps {
     current_box: number;
-    status: string;
+    status: PALLETIZER_STATUS;
 };
 
 function ConfigCell({ title, children }: StackProps) {
@@ -56,7 +64,13 @@ function ConfigCell({ title, children }: StackProps) {
 
 function ExecutePane({ current_box, status }: ExecuteProps) {
 
-    const { machine_configs, pallet_configs, machine_index, pallet_index } = useContext(ConfigContext) as ConfigState;
+    const {
+        machine_configs,
+        pallet_configs,
+        machine_index,
+        pallet_index,
+        reloadConfigs
+    } = useContext(ConfigContext) as ConfigState;
     const [start_box, set_start_box] = useState(0);
     const [machine_current_config, set_machine_current_config] = useState<number>(machine_index);
     const [pallet_current_config, set_pallet_current_config] = useState<number>(pallet_index);
@@ -82,29 +96,44 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
     let machine_config_title = "Machine Configuration";
     let pallet_config_title = "Pallet Configuration";
 
-    let icons = ["icon-play", "icon-pause", "icon-stop"];
+    const icons: string[] = [
+        "icon-play",
+        "icon-pause",
+        "icon-stop"
+    ];
 
-    let stop_button = () => {
+    const stop_button = () => {
         let { stop } = control;
         stop();
     };
 
-    let pause_button = () => {
+    const pause_button = () => {
         let { pause } = control;
         pause();
     };
 
-    let start_button = () => {
+    const start_button = () => {
         let { start } = control;
         start();
     };
 
+    const home_button = () => {
+        get_machine_config(machine_current_config).then((smc: SavedMachineConfiguration) => {
+            const { machines, axes } = smc.config;
+            let jc: JogController = new JogController(machines, axes, (_: any) => { return; });
+            return jc.homeAllAxes();
+        }).then(() => {
+            console.log("Homing all axes.");
+        }).catch((e: any) => {
+            console.log("Error homing axes", e);
+        });
+    };
+
+    const show_home: boolean = status === PALLETIZER_STATUS.STOPPED || status === PALLETIZER_STATUS.COMPLETE || status === PALLETIZER_STATUS.SLEEP;
+
     let is_running: boolean = (status === "Running");
-
     let start_icon = is_running ? icons[1] : icons[0];
-
     let start_fn = is_running ? pause_button : start_button;
-
     let start_text = is_running ? "Pause" : "Start";
 
     const handle_config_select = (machine: boolean) => (e: React.ChangeEvent) => {
@@ -121,6 +150,7 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
                 }
                 set_pallet_current_config(id);
                 set_machine_current_config(machine_id);
+                reloadConfigs(); // reload from server. -- may be unessesary.
             }).catch((e) => {
                 console.log("error set_config ", e);
             });
@@ -163,12 +193,21 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
                         <span id="button-text">{start_text}</span>
                     </div>
                 </div>
-                <div className="StopButton">
-                    <div className="ButtonContainer" onClick={stop_button}>
-                        <span className={icons[2]}> </span>
-                        <span id="button-text">{"Stop"}</span>
+                {show_home ?
+                    <div className="HomeButton">
+                        <div className="ButtonContainer" onClick={home_button}>
+                            <span> Home Icon </span>
+                            <span id="button-text"> {"Home"} </span>
+                        </div>
                     </div>
-                </div>
+                    :
+                    <div className="StopButton">
+                        <div className="ButtonContainer" onClick={stop_button}>
+                            <span className={icons[2]}> </span>
+                            <span id="button-text">{"Stop"}</span>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     );
@@ -393,6 +432,8 @@ interface StatusItem {
     value: any;
 };
 
+
+
 function General() {
     const {
         status,
@@ -408,7 +449,7 @@ function General() {
 
     items.push({
         title: "Status",
-        value: status
+        value: status as string
     });
 
     items.push({
@@ -445,7 +486,6 @@ function General() {
                 </StackContainer>
             </div>
             <div className="VisualizerContainer">
-
                 <div className="Visualizer">
                     {palletConfig &&
                         <Visualizer {...visualizerProps} />}

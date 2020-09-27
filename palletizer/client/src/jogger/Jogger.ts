@@ -132,7 +132,6 @@ export default class Jogger {
             return my.setJogSpeed(my.jogSpeed);
         }).then(() => {
             my.getPosition();
-            console.log("Jogger initialized");
         }).catch((e: any) => {
             console.log("Error setting up jogger", e);
         });
@@ -214,12 +213,10 @@ export default class Jogger {
 
     prepareSystem() {
         let my = this;
-        let promises: Promise<any>[] = my.machineMotions.map((mm: MM) => {
-            return mm.releaseAndReset();
-        });
-
         return new Promise((resolve, reject) => {
-            Promise.all(promises).then(() => {
+            Promise.all(my.machineMotions.map((mm: MM) => {
+                return mm.releaseAndReset();
+            })).then(() => {
                 my.__setIsMoving(false);
                 my.__setIsMoving(false);
                 resolve();
@@ -252,7 +249,7 @@ export default class Jogger {
         return Promise.all(promises);
     };
 
-    startHome(axis: PalletizerAxes | string) {
+    startHome(axis: PalletizerAxes | string): Promise<any> {
         let my = this;
 
         if (my.isMoving) {
@@ -269,6 +266,7 @@ export default class Jogger {
             let mm: MM = my.machineMotions[d.MachineMotionIndex];
             let drive_index = driveNumberToDRIVE(d.DriveNumber);
             let p = new Promise((resolve, reject) => {
+                // Test
                 mm.emitHome(drive_index).then(() => {
                     return mm.waitForMotionCompletion();
                 }).then(() => {
@@ -293,7 +291,7 @@ export default class Jogger {
         });
     };
 
-    __getMMGroup(axis: PalletizerAxes | string) {
+    __getMMGroup(axis: PalletizerAxes | string): { [key: number]: DriveType[] } {
         let my = this;
 
         let mm_group = {} as { [key: number]: DriveType[] };
@@ -356,6 +354,17 @@ export default class Jogger {
             });
         });
     };
+
+    async homeAllAxes(): Promise<any> {
+        const my = this;
+        return my.startHome(PalletizerAxes.Z).then(() => {
+            const axes = [PalletizerAxes.X, PalletizerAxes.Y, PalletizerAxes.θ];
+            return Promise.all(axes.map((a: PalletizerAxes) => {
+                return my.startHome(a);
+            }));
+        });
+    };
+
 
     getPosition() {
         // This assumes only a single drive per axis. If we want to run multiple drives per axis, we need to deal with:

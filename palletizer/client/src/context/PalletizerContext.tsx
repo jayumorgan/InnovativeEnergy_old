@@ -3,7 +3,8 @@ import { MQTTSubscriber, RequestState } from "../mqtt/MQTT";
 import {
     PalletizerState,
     PalletizerInformation,
-    ReducerAction
+    ReducerAction,
+    PALLETIZER_STATUS
 } from "../types/Types";
 import { CoordinateRot } from '../geometry/geometry';
 
@@ -29,7 +30,7 @@ export { PalletizerContext };
 function PalletizerHub(props: any) {
 
     let initial_state: PalletizerState = {
-        status: "N/A",
+        status: PALLETIZER_STATUS.OFFLINE,
         cycle: 0,
         current_box: 0,
         total_box: 0,

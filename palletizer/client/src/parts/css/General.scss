@@ -169,6 +169,20 @@ $col-3 : 100% - $col-1 - $col-2;
                     }
                 }
 
+                .HomeButton {
+                    @include grid-coordinate(1, 2);
+                    @include button-stizz();
+                    height: 100%;
+
+                    .ButtonContainer {
+                        background-color: $medium-blue;
+                    }
+
+                    .ButtonContainer:hover {
+                        background-color: $green;
+                    }
+                }
+
                 .StopButton {
                     @include grid-coordinate(1, 2);
                     @include button-stizz();
