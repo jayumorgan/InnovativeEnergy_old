@@ -74,7 +74,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
 *** TODO There should be homing buttons in the home page ?? No there shouldn't.
 *** TODO There should be a system speed and acceleration ?? Will do by drive.
-*** TODO Checkbox for gearbox or custom gain in the actuator set up
+*** DONE Checkbox for gearbox or custom gain in the actuator set up
 *** DONE Rename "select" to "save"
 *** DONE populate columns and rows instead of dragging and dropping boxes
 *** TODO joggers (teach positions) had too large of a "click-space" where a user could accidentally click it
