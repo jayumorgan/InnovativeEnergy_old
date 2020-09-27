@@ -34,7 +34,6 @@ export interface MachineConfiguration {
     box_detection: IOState[];
 };
 
-
 export interface SavedMachineConfiguration {
     name: string;
     config: MachineConfiguration;
@@ -93,7 +92,6 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
     }
 };
 
-
 interface MachineConfiguratorProps {
     close: () => void;
     index: number;
@@ -112,6 +110,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             return defaultConfiguration(index)
         }
     })());
+    
     const [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
 
     const setName = (s: string) => {
@@ -174,7 +173,6 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             close();
         }
     };
-
 
     completionFraction.n = configState as number;
 
