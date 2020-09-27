@@ -14,6 +14,7 @@ export interface Drive {
     MechGainValue: number;
     MicroSteps: number;
     Direction: number;
+    Gearbox: boolean;
 };
 
 export interface Axes {

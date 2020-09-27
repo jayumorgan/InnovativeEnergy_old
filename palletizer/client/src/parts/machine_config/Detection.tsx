@@ -151,14 +151,18 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
 
     const [detectionArray, setDetectionArray] = useState<IOState[]>(box_detection ? box_detection : [] as IOState[]);
 
-    const [ioControllers, setioControllers] = useState<IOController[]>([]);
-
-    useEffect(() => {
-        let ios = allMachines.map((machine: MachineMotion) => {
+    const getIOControllers = () => {
+        let ios: IOController[] = allMachines.map((machine: MachineMotion) => {
             return new IOController(machine);
         });
-        setioControllers(ios);
-    }, []);
+        return ios;
+    };
+
+    const [ioControllers, setioControllers] = useState<IOController[]>(getIOControllers());
+
+    useEffect(() => {
+        setioControllers(getIOControllers());
+    }, [allMachines]);
 
     const instruction: string = "Create an input profile for box detection or skip this step";
 

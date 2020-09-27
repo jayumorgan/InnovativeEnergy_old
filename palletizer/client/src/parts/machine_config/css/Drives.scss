@@ -52,7 +52,6 @@
                     display: grid;
                     grid-template-rows: 100%;
                     grid-template-columns: 12% 30% 38% 20%;
-
                 }
             }
         }
@@ -129,8 +128,18 @@
                         }
                     }
 
-                    .DropDown {
+                    .CheckBox {
+                        @include flex-center();
 
+                        input {
+                            height: 20pt;
+                            width: 20pt;
+                        }
+
+                    }
+
+
+                    .DropDown {
                         @include flex-center();
                         width: 100%;
 

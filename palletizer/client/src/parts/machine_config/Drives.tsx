@@ -15,6 +15,7 @@ import palletizerImage from "./images/palletizer.png";
 import plus_icon from "../teach/images/plus.svg";
 //---------------Styles---------------
 import "./css/Drives.scss";
+import { wrapChangeEventNumber, wrapChangeEventString } from "../shared/shared";
 
 function changeVal(e: ChangeEvent): string {
     let val: string = (e.target as any).value;
@@ -74,6 +75,7 @@ export interface Drive {
     MechGainKey: string;
     MechGainValue: number;
     MicroSteps: MICRO_STEPS;
+    Gearbox: boolean;
     Direction: NumericalDirection;
 };
 
@@ -233,7 +235,10 @@ function getAllDrives(a: AxesConfiguration) {
 };
 
 function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
+    // limit to available drives.
     let allDrives = getAllDrives(a);
+
+
     let gain_key = Object.keys(MECH_GAIN)[0] as string;
     let d: Drive = {
         MachineMotionIndex: 0,
@@ -241,7 +246,8 @@ function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
         MechGainKey: gain_key,
         MechGainValue: MECH_GAIN[gain_key][0],
         MicroSteps: MICRO_STEPS.ustep_8,
-        Direction: NumericalDirection.NORMAL
+        Direction: NumericalDirection.NORMAL,
+        Gearbox: false
     };
     return d;
 };
@@ -270,42 +276,43 @@ interface DriveCellProps {
 
 function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines }: DriveCellProps) {
 
-    let { MachineMotionIndex, DriveNumber, MechGainKey, MicroSteps, Direction } = drive;
+    const { MachineMotionIndex, DriveNumber, MechGainKey, MicroSteps, Direction, Gearbox } = drive;
 
-    const selectMachineMotion = (e: ChangeEvent) => {
-        let val: number = +(changeVal(e));
+    const selectMachineMotion = wrapChangeEventNumber((mm_i: number) => {
         let cp = [...editingDrives];
-        cp[index].MachineMotionIndex = val;
-        setEditingDrives([...cp]);
-    };
+        cp[index].MachineMotionIndex = mm_i;
+        setEditingDrives(cp);
+    });
 
-    const selectDrive = (e: ChangeEvent) => {
-        let d_num: number = +(changeVal(e));
+    const selectDrive = wrapChangeEventNumber((d_num: number) => {
         let cp = [...editingDrives];
         cp[index].DriveNumber = d_num as DRIVE;
-        setEditingDrives([...cp]);
-    };
+        setEditingDrives(cp);
+    });
 
-    const selectGain = (e: ChangeEvent) => {
-        let key: string = changeVal(e);
+    const selectGain = wrapChangeEventString((key: string) => {
         let cp = [...editingDrives];
         cp[index].MechGainKey = key;
         cp[index].MechGainValue = MECH_GAIN[key][0];
-        setEditingDrives([...cp]);
-    };
+        setEditingDrives(cp);
+    });
 
-    const selectMicroSteps = (e: ChangeEvent) => {
-        let steps: number = +(changeVal(e));
+    const selectMicroSteps = wrapChangeEventNumber((steps: number) => {
         let cp = [...editingDrives];
         cp[index].MicroSteps = steps;
-        setEditingDrives([...cp]);
-    };
+        setEditingDrives(cp);
+    });
 
-    const selectDirection = (e: ChangeEvent) => {
-        let direction: number = +(changeVal(e));
+    const selectDirection = wrapChangeEventNumber((direction: number) => {
         let cp = [...editingDrives];
         cp[index].Direction = direction as NumericalDirection;
-        setEditingDrives([...cp]);
+        setEditingDrives(cp);
+    });
+
+    const handleGearbox = () => {
+        let cp = [...editingDrives];
+        cp[index].Gearbox = !Gearbox;
+        setEditingDrives(cp);
     };
 
     const removeDrive = () => {
@@ -394,6 +401,16 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
                                 );
                             })}
                         </select>
+                    </div>
+                </div>
+                <div className="Input">
+                    <div className="Title">
+                        <span>
+                            {"Gearbox"}
+                        </span>
+                    </div>
+                    <div className="CheckBox">
+                        <input type="checkbox" checked={Gearbox} onChange={handleGearbox} />
                     </div>
                 </div>
                 <div className="Input">

@@ -538,8 +538,9 @@ export class Engine {
                     let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
                     let mm = my.mechanicalLayout.machines[MachineMotionIndex];
                     let drive = numberToDrive(DriveNumber);
-                    // TODO: get this adjustment from a 'gearbox' property instead!
-                    let p = mm.configAxis(drive, MicroSteps * ((drive == 'X' && MachineMotionIndex == 1) ? 5 : 1) /* gearbox */, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
+                    // DONE: get this adjustment from a 'gearbox' property instead!
+                    let gearbox_multiple: number = d.Gearbox ? 5 : 1;
+                    let p = mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
                     promises.push(p);
                 });
             });
@@ -681,12 +682,14 @@ export class Engine {
             Promise.all(machines.map((m: MachineMotion) => {
                 // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
                 return m.emitSpeed(200).then(
-                  () => { m.emitAcceleration(100).then(
-                    () => { m.emitHomeAll().then(
-                      () => { return m.waitForMotionCompletion(); }
-                    )
-                  })
-                });
+                    () => {
+                        m.emitAcceleration(100).then(
+                            () => {
+                                m.emitHomeAll().then(
+                                    () => { return m.waitForMotionCompletion(); }
+                                )
+                            })
+                    });
             })).then(() => {
                 resolve();
             }).catch((e: any) => {
@@ -731,9 +734,11 @@ export class Engine {
 
             let move_action = () => {
                 return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400).then(
-                    () => { return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 600 : 200).then(
-                        () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
-                    )}
+                    () => {
+                        return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 600 : 200).then(
+                            () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
+                        )
+                    }
                 )
             };
 
