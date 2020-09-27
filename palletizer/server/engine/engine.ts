@@ -598,8 +598,14 @@ export class Engine {
             }
         };
 
+        let t: {[key: string]: Date} = {};
         return homeIfZero().then(() => {
+            t.t0 = new Date();
+            console.log("Started pallet sequence at " + t.t0);
             return my.executePathSequence(box_index, 0);
+        }).then(() => {
+            t.t1 = new Date();
+            console.log("Executed pallet sequence in " + ((t.t1.getTime() - t.t0.getTime()) / 1000) + " seconds.")
         });
     };
 
