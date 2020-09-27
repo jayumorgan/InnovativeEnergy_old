@@ -9,8 +9,8 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
     return { ...coord, z: z_top };
 };
 
-export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW): ActionCoordinate {
-    return { ...coord, action, speed };
+export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
+    return { ...coord, action, speed, waitForCompletion };
 };
 
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
@@ -25,14 +25,14 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
     let lateralApproach: Coordinate = { ...box.dropLocation };
-    lateralApproach.x += 40;
-    lateralApproach.y += 40;
+    lateralApproach.x += 50;
+    lateralApproach.y += 50;
     lateralApproach.z -= 50;
-    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST));
+    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-    lateralApproach.x -= 40;
-    lateralApproach.y -= 40;
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+    lateralApproach.x -= 50;
+    lateralApproach.y -= 50;
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
 

@@ -541,6 +541,7 @@ export class Engine {
                     // TODO: get this adjustment from a 'gearbox' property instead!
                     let p = mm.configAxis(drive, MicroSteps * ((drive == 'X' && MachineMotionIndex == 1) ? 5 : 1) /* gearbox */, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
                     promises.push(p);
+                    promises.push(mm.configHomingSpeed([drive], [(drive == 'X' && MachineMotionIndex == 1) ? 300 : 700]));
                 });
             });
 
@@ -668,6 +669,7 @@ export class Engine {
                         break;
                     }
                 };
+                console.log("Homing: completed for vertical axis");
                 resolve();
             };
             homing_function();
@@ -679,15 +681,11 @@ export class Engine {
         return new Promise((resolve, reject) => {
             let { machines } = my.mechanicalLayout;
             Promise.all(machines.map((m: MachineMotion) => {
-                // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
-                return m.emitSpeed(200).then(
-                  () => { m.emitAcceleration(100).then(
-                    () => { m.emitHomeAll().then(
-                      () => { return m.waitForMotionCompletion(); }
-                    )
-                  })
-                });
+                return m.emitHomeAll().then(
+                    () => { return m.waitForMotionCompletion(); }
+                );
             })).then(() => {
+                console.log("Homing: completed for all axes on all machines");
                 resolve();
             }).catch((e: any) => {
                 reject(e);
@@ -721,6 +719,7 @@ export class Engine {
 
         let move_actions: Action[] = [];
         let wait_actions: Action[] = [];
+        let last_speed: {[key: number]: number} = {};
 
         for (let i = 0; i < mm_ids.length; i++) {
             let id: number = +(mm_ids[i]);
@@ -730,11 +729,19 @@ export class Engine {
             let positions: number[] = Object.values(pairing);
 
             let move_action = () => {
-                return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400).then(
-                    () => { return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 600 : 200).then(
-                        () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
-                    )}
-                )
+                // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
+                const new_speed: number = (SpeedTypes.FAST == coordinate.speed ? 900 : 450);
+                const new_acceleration: number = (SpeedTypes.FAST == coordinate.speed ? 700 : 300);
+                if (!last_speed.hasOwnProperty(id) || last_speed[id] != new_speed) {
+                    last_speed[id] = new_speed;
+                    return mm.emitSpeed(new_speed).then(
+                        () => { return mm.emitAcceleration(new_acceleration).then(
+                            () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
+                        )}
+                    );
+                } else {
+                    return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+                }
             };
 
             let wait_action = () => {
@@ -742,7 +749,9 @@ export class Engine {
             };
 
             move_actions.push(move_action);
-            wait_actions.push(wait_action);
+            if (coordinate.waitForCompletion) {
+                wait_actions.push(wait_action);
+            }
         };
 
         return my.__controlSequence([...move_actions, ...wait_actions]);

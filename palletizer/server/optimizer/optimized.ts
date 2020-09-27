@@ -34,6 +34,7 @@ export enum SpeedTypes {
 export interface ActionCoordinate extends Coordinate {
     action?: ActionTypes;
     speed?: SpeedTypes;
+    waitForCompletion: boolean;
 };
 
 export type BoxPath = ActionCoordinate[];
