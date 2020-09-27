@@ -83,19 +83,19 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     switch (action.type) {
         case (CONF_ACTION.SET_NAME): {
             return { ...state, name: payload as string };
-        };
+        }
         case (CONF_ACTION.SET_BOXES): {
             return { ...state, boxes: payload as BoxObject[] };
-        };
+        }
         case (CONF_ACTION.SET_PALLETS): {
             return { ...state, pallets: payload as PalletGeometry[] };
-        };
+        }
         case (CONF_ACTION.SET_MACHINE_CONFIG_ID): {
             return { ...state, machine_config_id: payload as number };
-        };
+        }
         default: {
             return state;
-        };
+        }
     };
 };
 
