@@ -179,7 +179,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
     completionFraction.n = configState as number;
 
     const modalClose = () => {
-        if ((machineConfig && !machineConfig.complete) || (configState as number) > 0) {
+        if ((machineConfig && !machineConfig.complete) || (!machineConfig && (configState as number) > 0)) {
             const incomplete_config: SavedMachineConfiguration = {
                 name: configuration.name,
                 config: configuration,

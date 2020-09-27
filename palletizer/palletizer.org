@@ -12,7 +12,6 @@ PALLETIZER -*- mode: org -*-
 *** DONE Make path avoid both top and bottom of box.
 *** TODO Pick location lip height height: Vivian: "just use box height."
 *** TODO Handle errors / ensure no errors.
-*** TODO UI Button toggle. 
 *** DONE Use Line class.
 *** DONE Top and bottom of box constraint.
 *** TODO Clean up code and reduce total number of loops for speed.
@@ -26,7 +25,7 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Layout Generator:
 *** DONE Row Column-Fill (Version 1)
-*** TODO Distance Optimization.
+*** TODO Distance Optimization. -- See Max's changes/requirements.
 *** TODO Extend algorithmn to rotate boxes to fit more in.
 
 ** TODO TeachMode:

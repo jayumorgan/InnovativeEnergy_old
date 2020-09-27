@@ -252,7 +252,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     const modalClose = () => {
         // close should not be async to prevent duplication on double click.
-        if ((palletConfig && !(palletConfig.complete)) || (teachState as number) > 0) {
+        if ((palletConfig && !(palletConfig.complete)) || (!palletConfig && (teachState as number) > 0)) {
             const incomplete_config: SavedPalletConfiguration = generateIncompleteConfig(configuration);
             const { name } = configuration;
             SavePalletConfig(name, incomplete_config, id, incomplete_config.complete).then(() => {
