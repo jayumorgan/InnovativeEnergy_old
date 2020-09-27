@@ -206,6 +206,7 @@ export class Engine {
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
     cycleState: CYCLE_STATE = CYCLE_STATE.NONE;
     startBox: number = 0;
+    startTime: Date | null = null;
     boxPathsForPallet: BoxPath[] = [];
 
     __initTopics() {
@@ -598,14 +599,18 @@ export class Engine {
             }
         };
 
-        let t: {[key: string]: Date} = {};
         return homeIfZero().then(() => {
-            t.t0 = new Date();
-            console.log("Started pallet sequence at " + t.t0);
+            if (box_index === 0 || null == my.startTime) {
+                my.startTime = new Date();
+                console.log("Started pallet sequence at " + my.startTime.toISOString());
+            }
             return my.executePathSequence(box_index, 0);
         }).then(() => {
-            t.t1 = new Date();
-            console.log("Executed pallet sequence in " + ((t.t1.getTime() - t.t0.getTime()) / 1000) + " seconds.")
+            if (null != my.startTime) {
+              const t1: Date = new Date();
+              console.log("Pallet sequence execution time so far: " + ((t1.getTime() - my.startTime.getTime()) / 1000) + " seconds.")
+            }
+            return Promise.resolve();
         });
     };
 

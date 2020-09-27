@@ -76,8 +76,9 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
             return (coord.stackIndex === stack_indices[coord.palletIndex]);
         })).map((coord: BoxCoordinate) => {
             return coord;
-        }).sort((a: BoxCoordinate, b: BoxCoordinate) => {
-            return b.linearPathDistance - a.linearPathDistance;
+        // TODO: find a sort criterion that is 100% compatible with the lateral approach...
+        // }).sort((a: BoxCoordinate, b: BoxCoordinate) => {
+        //     return b.linearPathDistance - a.linearPathDistance;
         }).forEach((b: BoxCoordinate) => {
             has_coordinates = true;
             // Calculate a z_top that minimized travel time conservatively.
