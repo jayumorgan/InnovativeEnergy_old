@@ -15,6 +15,9 @@ export interface Drive {
     MicroSteps: number;
     Direction: number;
     Gearbox: boolean;
+    Speed: number;
+    Acceleration: number;
+    HomingSpeed: number;
 };
 
 export interface Axes {

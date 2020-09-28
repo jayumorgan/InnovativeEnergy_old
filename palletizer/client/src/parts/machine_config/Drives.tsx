@@ -68,7 +68,10 @@ const MECH_GAIN = {
     rack_pinion_mm_turn: [157.08, "Rack & Pinion"]
 } as { [key: string]: [number, string] };
 
-
+/* 
+ * Max in mm/min.
+ * HARDWARE_MIN_HOMING_FEEDRATE =251 
+ * HARDWARE_MAX_HOMING_FEEDRATE= 15999 */
 export interface Drive {
     MachineMotionIndex: number;
     DriveNumber: DRIVE;
@@ -77,6 +80,9 @@ export interface Drive {
     MicroSteps: MICRO_STEPS;
     Gearbox: boolean;
     Direction: NumericalDirection;
+    HomingSpeed: number;
+    Speed: number;
+    Acceleration: number;
 };
 
 //---------------Fix This To Avoid The Horrific Switch Statements---------------
@@ -115,7 +121,7 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
         setJogController(jc);
     }, [Axes, Machines]);
 
-    let handleMove = (axis_string: string, direction: DIRECTION) => () => {
+    const handleMove = (axis_string: string, direction: DIRECTION) => () => {
         if (jogController !== null) {
             if (axis_string === "θ") {
                 jogController.startRotation(direction === DIRECTION.NORMAL).catch(() => { });
@@ -131,25 +137,25 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
         handleEdit: () => void;
     };
 
-    let stop_jog = (_: string) => () => {
+    const stop_jog = (_: string) => () => {
         if (jogController !== null) {
             jogController.stopMotion().catch(e => console.log(e));
         }
     };
 
-    let reset_jog = (_: string) => () => {
+    const reset_jog = (_: string) => () => {
         if (jogController !== null) {
             jogController.prepareSystem().catch(e => console.log(e));
         }
     };
 
-    let home_jog = (axis: string) => () => {
+    const home_jog = (axis: string) => () => {
         if (jogController !== null) {
             jogController.startHome(axis).catch(e => console.log(e));
         }
     };
 
-    let [button_string, button_action] = (() => {
+    const [button_string, button_action] = (() => {
         if (isMoving) {
             return ["Stop", stop_jog];
         } else if (isEstopped) {
@@ -159,7 +165,7 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
         }
     })() as [string, ((s: string) => () => void)];
 
-    let showEdit: boolean = (() => {
+    const showEdit: boolean = (() => {
         if (noEdit) {
             return false;
         } else {
@@ -234,22 +240,22 @@ function getAllDrives(a: AxesConfiguration) {
     return [...a.X, ...a.Y, ...a.Z, ...a.θ];
 };
 
-function nextDrive(a: AxesConfiguration, m: MachineMotion[]) {
+function nextDrive(a: AxesConfiguration, m: MachineMotion[]): Drive {
     // limit to available drives.
-    let allDrives = getAllDrives(a);
-
-
-    let gain_key = Object.keys(MECH_GAIN)[0] as string;
-    let d: Drive = {
+    const allDrives = getAllDrives(a);
+    const gain_key = Object.keys(MECH_GAIN)[0] as string;
+    return {
         MachineMotionIndex: 0,
         DriveNumber: DRIVE.ONE,
         MechGainKey: gain_key,
         MechGainValue: MECH_GAIN[gain_key][0],
         MicroSteps: MICRO_STEPS.ustep_8,
         Direction: NumericalDirection.NORMAL,
-        Gearbox: false
+        Gearbox: false,
+        HomingSpeed: 300,
+        Speed: 400,
+        Acceleration: 400
     };
-    return d;
 };
 
 interface DrivesProps {
@@ -315,6 +321,24 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
         setEditingDrives(cp);
     };
 
+    const setSpeed = wrapChangeEventNumber((speed: number) => {
+        let cp = [...editingDrives];
+        cp[index].Speed = speed;
+        setEditingDrives(cp);
+    });
+
+    const setAcceleration = wrapChangeEventNumber((acceleration: number) => {
+        let cp = [...editingDrives];
+        cp[index].Acceleration = acceleration;
+        setEditingDrives(cp);
+    });
+
+    const setHomingSpeed = wrapChangeEventNumber((speed: number) => {
+        let cp = [...editingDrives];
+        cp[index].HomingSpeed = speed;
+        setEditingDrives(cp);
+    });
+
     const removeDrive = () => {
         if (editingDrives.length > 1) {
             let cp = [...editingDrives];
@@ -323,112 +347,148 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
         }
     };
 
+    const { Speed, HomingSpeed, Acceleration } = editingDrives[index];
+
     return (
         <div className="DriveConfigCell">
             <div className="DriveCell">
-                <div className="Input">
-                    <div className="Title">
-                        <span>
-                            {"Machine Motion"}
-                        </span>
-                    </div>
-                    <div className="DropDown">
-                        <select value={MachineMotionIndex} onChange={selectMachineMotion}>
-                            {allMachines.map((mm: MachineMotion, i: number) => {
-                                return (
-                                    <option value={i} key={i}>
-                                        {mm.name}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                    </div>
-                </div>
-                <div className="Input">
-                    <div className="Title">
-                        <span>
-                            {"Drive"}
-                        </span>
-                    </div>
-                    <div className="DropDown">
-                        <select value={DriveNumber} onChange={selectDrive}>
-                            {ALL_DRIVES.map((d: DRIVE, i: number) => {
-                                if (i < (allMachines[MachineMotionIndex].version as number)) {
+                <div className="DriveCellContent">
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Machine Motion"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={MachineMotionIndex} onChange={selectMachineMotion}>
+                                {allMachines.map((mm: MachineMotion, i: number) => {
                                     return (
-                                        <option value={d as number} key={i}>
-                                            {"Drive " + String((d as number) + 1)}
+                                        <option value={i} key={i}>
+                                            {mm.name}
                                         </option>
                                     );
-                                } else {
-                                    return null;
-                                }
-                            })}
-                        </select>
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Drive"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={DriveNumber} onChange={selectDrive}>
+                                {ALL_DRIVES.map((d: DRIVE, i: number) => {
+                                    if (i < (allMachines[MachineMotionIndex].version as number)) {
+                                        return (
+                                            <option value={d as number} key={i}>
+                                                {"Drive " + String((d as number) + 1)}
+                                            </option>
+                                        );
+                                    } else {
+                                        return null;
+                                    }
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Type"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={MechGainKey} onChange={selectGain}>
+                                {Object.keys(MECH_GAIN).map((key: string, i: number) => {
+                                    let [_, display_name] = MECH_GAIN[key] as [number, string];
+                                    return (
+                                        <option value={key} key={i}>
+                                            {display_name}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Micro Steps"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={MicroSteps} onChange={selectMicroSteps}>
+                                {ALL_MICRO_STEPS.map((m: MICRO_STEPS, i: number) => {
+                                    return (
+                                        <option value={m} key={i}>
+                                            {m}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Gearbox"}
+                            </span>
+                        </div>
+                        <div className="CheckBox">
+                            <input type="checkbox" checked={Gearbox} onChange={handleGearbox} />
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Direction"}
+                            </span>
+                        </div>
+                        <div className="DropDown">
+                            <select value={Direction} onChange={selectDirection}>
+                                {Object.keys(ALL_DIRECTIONS).map((key: string, i: number) => {
+                                    return (
+                                        <option value={ALL_DIRECTIONS[key] as number} key={i}>
+                                            {key}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div className="Input">
-                    <div className="Title">
-                        <span>
-                            {"Type"}
-                        </span>
+                <div className="DriveCellContent" style={{ justifyContent: "center" }}>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Speed (mm/s)"}
+                            </span>
+                        </div>
+                        <div className="Input">
+                            <input type="number" onChange={setSpeed} value={Speed} />
+                        </div>
                     </div>
-                    <div className="DropDown">
-                        <select value={MechGainKey} onChange={selectGain}>
-                            {Object.keys(MECH_GAIN).map((key: string, i: number) => {
-                                let [_, display_name] = MECH_GAIN[key] as [number, string];
-                                return (
-                                    <option value={key} key={i}>
-                                        {display_name}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Acceleration (mm/s²)"}
+                            </span>
+                        </div>
+                        <div className="Input">
+                            <input type="number" onChange={setAcceleration} value={Acceleration} />
+                        </div>
                     </div>
-                </div>
-                <div className="Input">
-                    <div className="Title">
-                        <span>
-                            {"Micro Steps"}
-                        </span>
-                    </div>
-                    <div className="DropDown">
-                        <select value={MicroSteps} onChange={selectMicroSteps}>
-                            {ALL_MICRO_STEPS.map((m: MICRO_STEPS, i: number) => {
-                                return (
-                                    <option value={m} key={i}>
-                                        {m}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                    </div>
-                </div>
-                <div className="Input">
-                    <div className="Title">
-                        <span>
-                            {"Gearbox"}
-                        </span>
-                    </div>
-                    <div className="CheckBox">
-                        <input type="checkbox" checked={Gearbox} onChange={handleGearbox} />
-                    </div>
-                </div>
-                <div className="Input">
-                    <div className="Title">
-                        <span>
-                            {"Direction"}
-                        </span>
-                    </div>
-                    <div className="DropDown">
-                        <select value={Direction} onChange={selectDirection}>
-                            {Object.keys(ALL_DIRECTIONS).map((key: string, i: number) => {
-                                return (
-                                    <option value={ALL_DIRECTIONS[key] as number} key={i}>
-                                        {key}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Homing Speed (mm/s)"}
+                            </span>
+                        </div>
+                        <div className="Input">
+                            <input type="number" onChange={setHomingSpeed} value={HomingSpeed} />
+                        </div>
                     </div>
                 </div>
             </div>

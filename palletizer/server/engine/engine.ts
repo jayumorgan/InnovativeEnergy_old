@@ -32,8 +32,6 @@ import {
     SpeedTypes
 } from "../optimizer/optimized";
 
-
-
 //---------------Environment Setup---------------
 dotenv.config();
 
@@ -238,7 +236,7 @@ export class Engine {
         };
         client.on("connect", subscribe);
 
-        let my = this;
+        const my = this;
 
         client.on("message", (topic: string, message_buffer: Buffer) => {
             let message: string;
@@ -276,7 +274,7 @@ export class Engine {
 
     //-------MQTT Message Handlers-------
     __publish(topic: string, message: string) {
-        let my = this;
+        const my = this;
 
         let pub = () => {
             my.mqttClient.publish(topic, message);
@@ -400,7 +398,7 @@ export class Engine {
             }
         };
 
-        let my = this;
+        const my = this;
         return new Promise((resolve, reject) => {
             my.databaseHandler.getCurrentConfigs().then((curr: any) => {
                 let { machine, pallet } = curr;
@@ -433,7 +431,7 @@ export class Engine {
 
     //-------Engine Controls-------
     handleStart() {
-        let my = this;
+        const my = this;
         let { status } = my.palletizerState;
 
         if (status === PALLETIZER_STATUS.RUNNING) {
@@ -485,7 +483,7 @@ export class Engine {
 
     //-------Mechanical Configuration-------
     configureMachine(): Promise<boolean> {
-        let my = this;
+        const my = this;
 
         if (my.machineConfig !== null && my.palletConfig !== null) {
             let promises: Promise<any>[] = [];
@@ -504,7 +502,6 @@ export class Engine {
                 let mm_controller: MachineMotion = new MachineMotion(mm_config);
 
                 // NB: estop will recursively call estop, so unbind the estop action on first call.
-
                 mm_controller.bindEstopEvent(() => {
                     console.log("Calling bound event");
                     mm_controller.bindEstopEvent(() => {
@@ -534,15 +531,16 @@ export class Engine {
 
             Object.keys(ax).forEach((axis: string) => {
                 let drives = ax[axis] as Drive[];
-                drives.forEach((d: Drive) => {
-                    let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
-                    let mm = my.mechanicalLayout.machines[MachineMotionIndex];
-                    let drive = numberToDrive(DriveNumber);
-                    // DONE: get this adjustment from a 'gearbox' property instead!
-                    let gearbox_multiple: number = d.Gearbox ? 5 : 1;
-                    let p = mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE);
-                    promises.push(p);
-                });
+                promises.push(Promise.all(drives.map(async (d: Drive) => {
+                    const { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction, HomingSpeed } = d;
+                    const mm = my.mechanicalLayout.machines[MachineMotionIndex];
+                    const drive = numberToDrive(DriveNumber);
+                    const gearbox_multiple: number = d.Gearbox ? 5 : 1;
+
+                    return mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE).then(() => {
+                        return mm.configHomingSpeed([drive], [HomingSpeed]);
+                    });
+                })));
             });
 
             my.mechanicalLayout.axes = axes;
@@ -550,7 +548,7 @@ export class Engine {
             my.mechanicalLayout.box_detection = box_detection;
 
             return new Promise((resolve, reject) => {
-                Promise.all(promises).then(() => { resolve(true) }).catch(e => reject(e));
+                Promise.all(promises).then(() => { resolve(true); }).catch(e => reject(e));
             });
         } else {
             return new Promise((_, reject) => {
@@ -562,7 +560,7 @@ export class Engine {
     //-------Palletizer Sequence-------
 
     async startPalletizer(box_index: number): Promise<any> {
-        let my = this;
+        const my = this;
 
         my.__updateStatus(PALLETIZER_STATUS.RUNNING);
 
@@ -588,7 +586,7 @@ export class Engine {
 
     // run palletizer sequence should run through the path. then continue;
     async runPalletizerSequence(box_index: number): Promise<any> {
-        let my = this;
+        const my = this;
 
         const homeIfZero = () => {
             if (box_index === 0) {
@@ -604,7 +602,7 @@ export class Engine {
     };
 
     async executePathSequence(box_index: number, path_index: number): Promise<any> {
-        let my = this;
+        const my = this;
         if (box_index >= my.boxPathsForPallet.length) {
             return Promise.resolve();
         } else {
@@ -624,7 +622,7 @@ export class Engine {
     };
 
     async executeAction(action?: ActionTypes): Promise<any> {
-        let my = this;
+        const my = this;
         if (action) {
             if (action === ActionTypes.PICK) {
                 return my.__pickIO()
@@ -644,105 +642,91 @@ export class Engine {
     };
 
     async executeHomingSequence(): Promise<any> {
-        let my = this;
+        const my = this;
         my.cycleState = CYCLE_STATE.HOMEING;
-        return my.homeVertialAxis().then(() => {
+        return my.homeVerticalAxis().then(() => {
             return my.homeAllAxes();
         });
     };
 
-    homeVertialAxis(): Promise<any> {
-        let my = this;
-        let { axes } = this.mechanicalLayout;
-        let { Z } = axes;
-        return new Promise((resolve, reject) => {
-            let homing_function = async () => {
-                for (let i = 0; i < Z.length; i++) {
-                    let { MachineMotionIndex, DriveNumber } = Z[i];
-                    let drive = numberToDrive(DriveNumber);
-                    let mm = my.mechanicalLayout.machines[MachineMotionIndex];
-                    let [err, _] = await safeAwait(mm.emitHome(drive).then(() => {
-                        return mm.waitForMotionCompletion();
-                    }));
-                    if (err) {
-                        reject(err);
-                        break;
-                    }
-                };
-                resolve();
-            };
-            homing_function();
-        });
+    homeVerticalAxis(): Promise<any> {
+        const my = this;
+        const { Z } = this.mechanicalLayout.axes;
+        return Promise.all(Z.map(async (d: Drive) => {
+            const { MachineMotionIndex, DriveNumber, HomingSpeed } = d;
+            const drive = numberToDrive(DriveNumber);
+            const mm = my.mechanicalLayout.machines[MachineMotionIndex];
+            return mm.emitHome(drive).then(() => {
+                return mm.waitForMotionCompletion();
+            });
+        }));
     };
 
     homeAllAxes(): Promise<any> {
-        let my = this;
-        return new Promise((resolve, reject) => {
-            let { machines } = my.mechanicalLayout;
-            Promise.all(machines.map((m: MachineMotion) => {
-                // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
-                return m.emitSpeed(200).then(
-                    () => {
-                        m.emitAcceleration(100).then(
-                            () => {
-                                m.emitHomeAll().then(
-                                    () => { return m.waitForMotionCompletion(); }
-                                )
-                            })
-                    });
-            })).then(() => {
-                resolve();
-            }).catch((e: any) => {
-                reject(e);
+        const my = this;
+        const { machines } = my.mechanicalLayout;
+
+        return Promise.all(machines.map((mm: MachineMotion) => {
+            return mm.emitHomeAll().then(() => {
+                return mm.waitForMotionCompletion();
             });
-        });
-    };
+        }));
+    };;
 
     __move(coordinate: ActionCoordinate): Promise<any> {
-        console.log(coordinate);
+        const my = this;
+        const { machines, axes } = my.mechanicalLayout;
 
-        let my = this;
         let mm_group = {} as { [key: number]: any };
-        let { machines, axes } = my.mechanicalLayout;
         let tagged: [Drive[], number][] = [];
 
         tagged.push([axes.Z, coordinate.z]);
         tagged.push([axes.Y, coordinate.y]);
         tagged.push([axes.X, coordinate.x]);
         tagged.push([axes.θ, coordinate.θ ? 90 : 0]);
+
         tagged.forEach((t: [Drive[], number], _: number) => {
             let [drives, position] = t;
             drives.forEach((d: Drive) => {
-                let { MachineMotionIndex, DriveNumber } = d;
+                let { MachineMotionIndex, DriveNumber, Speed, Acceleration } = d;
                 if (!(MachineMotionIndex in mm_group)) {
                     mm_group[MachineMotionIndex] = {}
                 }
-                mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = position;
+                mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = { position, Speed, Acceleration };
             });
         });
-        let mm_ids = Object.keys(mm_group) as string[];
+        const mm_ids = Object.keys(mm_group) as string[];
 
         let move_actions: Action[] = [];
         let wait_actions: Action[] = [];
 
         for (let i = 0; i < mm_ids.length; i++) {
-            let id: number = +(mm_ids[i]);
-            let mm: MachineMotion = machines[id];
-            let pairing = mm_group[id];
-            let axes: AXES[] = Object.keys(pairing) as AXES[];
-            let positions: number[] = Object.values(pairing);
+            const id: number = +(mm_ids[i]);
+            const mm: MachineMotion = machines[id];
+            const pairing = mm_group[id];
+            const axes: AXES[] = Object.keys(pairing) as AXES[];
+            const params: any[] = Object.values(pairing);
 
-            let move_action = () => {
-                return mm.emitSpeed(SpeedTypes.FAST == coordinate.speed ? 800 : 400).then(
-                    () => {
-                        return mm.emitAcceleration(SpeedTypes.FAST == coordinate.speed ? 600 : 200).then(
-                            () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
-                        )
-                    }
-                )
+            const positions = params.map((v: any) => {
+                return v.position as number;
+            });
+            const speeds = params.map((v: any) => {
+                return v.Speed as number;
+            });
+            const accelerations = params.map((v: any) => {
+                return v.Acceleration as number;
+            });
+            const speed = Math.min(...speeds);
+            const acceleration = Math.min(...accelerations);
+
+            const move_action = async () => {
+                return mm.emitSpeed(speed).then(() => {
+                    return mm.emitAcceleration(acceleration);
+                }).then(() => {
+                    return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+                });
             };
-
-            let wait_action = () => {
+            const wait_action = () => {
                 return mm.waitForMotionCompletion();
             };
 
@@ -766,7 +750,7 @@ export class Engine {
     };
 
     __writeIO(ios: IOState[]) {
-        let my = this;
+        const my = this;
         return Promise.all(ios.map((state: IOState) => {
             let { MachineMotionIndex, NetworkId, Pins } = state;
             return my.mechanicalLayout.machines[MachineMotionIndex].digitalWriteAll(NetworkId, Pins);
@@ -774,7 +758,7 @@ export class Engine {
     };
 
     handleDetect(retry_index: number = 0): Promise<boolean> {
-        let my = this;
+        const my = this;
 
         return new Promise<boolean>((resolve, reject) => {
             my.__detectBox().then((detected: boolean) => {
@@ -798,7 +782,7 @@ export class Engine {
     }
 
     __detectBox(): Promise<boolean> {
-        let my = this;
+        const my = this;
         my.cycleState = CYCLE_STATE.DETECT_IO;
         const { box_detection } = my.mechanicalLayout;
         if (box_detection.length > 0) {
@@ -838,8 +822,8 @@ export class Engine {
             })
         }
 
-        let my = this;
-        let { status } = my.palletizerState;
+        const my = this;
+        const { status } = my.palletizerState;
 
         if (status === PALLETIZER_STATUS.RUNNING) {
             let first: Action | undefined = actions.shift();

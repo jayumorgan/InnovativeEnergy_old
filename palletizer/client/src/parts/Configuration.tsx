@@ -140,8 +140,9 @@ function Configuration() {
 
     const new_pallet = (val: boolean) => () => {
         if (machine_configs.length > 0 || !val) {
-            set_add_pallet_config(val);
             setEditPalletConfig(null);
+            setEditPalletId(null);
+            set_add_pallet_config(val);
         }
         if (!val) {
             reloadConfigs();
@@ -149,8 +150,9 @@ function Configuration() {
     };
 
     const new_machine = (val: boolean) => () => {
-        set_add_machine_config(val);
         setEditMachineConfig(null);
+        setEditMachineId(null);
+        set_add_machine_config(val);
         if (!val) {
             reloadConfigs();
         }
