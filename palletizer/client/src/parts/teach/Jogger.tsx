@@ -1,19 +1,15 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-
 import JogController, { PalletizerAxes } from "../../jogger/Jogger";
-
 import SolidArrow, { ROTATION } from "./SolidArrow";
-
 import { get_machine_config } from "../../requests/requests";
-
 import { CoordinateRot } from "../../geometry/geometry";
+import { SavedMachineConfiguration } from '../MachineConfig';
+import { DIRECTION } from 'mm-js-api';
 
 //---------------Styles + Images---------------
 import "./css/Jogger.scss";
 import clockwise from "./images/clockwise.svg";
 import counterclockwise from "./images/counterclockwise.svg";
-import { SavedMachineConfiguration } from '../MachineConfig';
-import { DIRECTION } from 'mm-js-api';
 
 
 var TESTING = false;
@@ -21,9 +17,7 @@ if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
     TESTING = true;
 }
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
-
 let TEMP_JOGGER_INDEX = 0;
-
 enum Directions {
     UP = "Up",
     DOWN = "Down",
@@ -83,8 +77,7 @@ interface JoggerParameterProps {
     unit: string;
     value: number;
     handleUpdate: (e: ChangeEvent) => void;
-}
-
+};
 
 function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterProps) {
 
@@ -106,12 +99,12 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
 };
 
 
-interface ForceHomeProps {
+export interface ForceHomeProps {
     skip: () => void;
     jogController: JogController | null;
 };
 
-function ForceHome({ skip, jogController }: ForceHomeProps) {
+export function ForceHome({ skip, jogController }: ForceHomeProps) {
 
     const allAxes = [
         PalletizerAxes.X,
@@ -157,14 +150,14 @@ function ForceHome({ skip, jogController }: ForceHomeProps) {
     );
 };
 
-interface JoggerProps {
+export interface JoggerProps {
     selectAction: (c: CoordinateRot) => void;
     updateName: (s: string) => void;
     machineConfigId: number;
     name: string;
 };
 
-function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
+export default function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
 
     const [forcedHome, setForcedHome] = useState<boolean>(true);
     const [speed, setSpeed] = useState<number>(50);
@@ -247,8 +240,8 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
     let handleAMove = (dagger: boolean) => {
         if (jogController !== null) {
-            jogController.startJog(PalletizerAxes.Z, dagger ? DIRECTION.NORMAL : DIRECTION.REVERSE).then(() => {
-            }).catch((e: any) => {
+            // Up is down and down is up.
+            jogController.startJog(PalletizerAxes.Z, dagger ? DIRECTION.REVERSE : DIRECTION.NORMAL).catch((e: any) => {
                 console.log(e);
             });
         }
@@ -392,5 +385,3 @@ function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps
 
 };
 
-
-export default Jogger;

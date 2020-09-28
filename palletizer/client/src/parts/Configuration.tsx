@@ -6,13 +6,13 @@ import { ConfigContext } from "../context/ConfigContext";
 import { ConfigState } from "../types/Types";
 import { SavedPalletConfiguration } from "./TeachMode";
 import { SavedMachineConfiguration } from "./MachineConfig";
-import { get_config, delete_config } from "../requests/requests";
+import { get_config, delete_config, get_machine_config } from "../requests/requests";
 import { ConfigItem } from "../types/Types";
+import MachineJogger, { MachineJoggerProps } from "./MachineJogger";
 
 // Styles
 import "./css/Configuration.scss";
 import "./css/Login.scss";
-
 
 interface ConfigCellProps {
     name: string;
@@ -20,16 +20,16 @@ interface ConfigCellProps {
     start_editor: (id: number) => void;
     is_machine: boolean;
     complete: boolean;
+    start_jogger?: (id: number) => void;
 };
 
-function ConfigCell({ name, id, start_editor, is_machine, complete }: ConfigCellProps) {
+function ConfigCell({ name, id, start_editor, is_machine, complete, start_jogger }: ConfigCellProps) {
 
     const { reloadConfigs } = useContext(ConfigContext) as ConfigState;
 
     const handle_edit = () => {
         start_editor(id);
     };
-
     const handle_delete = () => {
         delete_config(id, is_machine).then(() => {
             reloadConfigs();
@@ -38,12 +38,26 @@ function ConfigCell({ name, id, start_editor, is_machine, complete }: ConfigCell
         });
     };
 
+    const handle_jogger = () => {
+        if (start_jogger) {
+            start_jogger(id);
+        }
+    };
+
+    const display_name: string = name + (complete ? "" : " (Incomplete)");
+
     return (
         <div className="ConfigCell">
-            <span> {name + (complete ? "" : " (Incomplete)")} </span>
+            <span>
+                {display_name}
+            </span>
             <div className="EditConfigButton" onClick={handle_edit}>
                 <span> Edit </span>
             </div>
+            {is_machine &&
+                <div className="EditConfigButton" onClick={handle_jogger}>
+                    <span> Jogger </span>
+                </div>}
             <div className="DeleteConfigButton" onClick={handle_delete}>
                 <span className="icon-delete">
                 </span>
@@ -61,9 +75,10 @@ interface ConfigContainerProps {
     start_editor: (id: number) => void;
     start_add_config: () => void;
     is_machine: boolean;
+    start_jogger?: (id: number) => void;
 };
 
-function ConfigContainer({ title, configs, start_editor, start_add_config, is_machine }: ConfigContainerProps) {
+function ConfigContainer({ title, configs, start_editor, start_add_config, is_machine, start_jogger }: ConfigContainerProps) {
     return (
         <div className="StackContainer">
             <div className="StackTitle">
@@ -77,7 +92,8 @@ function ConfigContainer({ title, configs, start_editor, start_add_config, is_ma
                             name: item.name,
                             complete: item.complete,
                             start_editor,
-                            is_machine
+                            is_machine,
+                            start_jogger
                         };
                         return (<ConfigCell key={index} {...cc_props} />)
                     })}
@@ -94,8 +110,8 @@ function ConfigContainer({ title, configs, start_editor, start_add_config, is_ma
 
 
 function Configuration() {
-    let machine_title = "Machine Configuration";
-    let pallet_title = "Pallet Configuration";
+    const machine_title = "Machine Configuration";
+    const pallet_title = "Pallet Configuration";
 
     const { machine_configs, pallet_configs, reloadConfigs } = useContext(ConfigContext) as ConfigState;
     const [locked, set_locked] = useState<boolean>(false);
@@ -105,6 +121,7 @@ function Configuration() {
     const [editMachineConfig, setEditMachineConfig] = useState<SavedMachineConfiguration | null>(null);
     const [editPalletId, setEditPalletId] = useState<number | null>(null);
     const [editMachineId, setEditMachineId] = useState<number | null>(null);
+    const [showJogger, setShowJogger] = useState<boolean>(false);
 
     const startPalletEditor = (id: number) => {
         if (machine_configs.length > 0) {
@@ -158,15 +175,52 @@ function Configuration() {
         }
     };
 
-    let pallet_count = pallet_configs.length;
-    let machine_count = machine_configs.length;
+    const close_jogger = () => {
+        setShowJogger(false);
+    };
+
+    let machineJoggerProps = {
+        close: close_jogger
+    } as any;
+
+    const start_jogger = (id: number) => {
+        get_machine_config(id).then((smc: SavedMachineConfiguration) => {
+            machineJoggerProps.config = smc;
+        }).catch((e: any) => {
+            console.log("Error start jogger", e);
+        })
+        setShowJogger(true);
+    };
+
+    const pallet_count = pallet_configs.length;
+    const machine_count = machine_configs.length;
+
+    const machineProps: ConfigContainerProps = {
+        title: machine_title,
+        is_machine: true,
+        configs: machine_configs,
+        start_editor: startMachineEditor,
+        start_add_config: new_machine(true),
+        start_jogger: start_jogger
+    };
+
+    const palletProps: ConfigContainerProps = {
+        title: pallet_title,
+        is_machine: false,
+        configs: machine_configs,
+        start_editor: startPalletEditor,
+        start_add_config: new_pallet(true)
+    };
 
     return (
         <Fragment>
             <div className="ConfigContainer">
-                <ConfigContainer title={machine_title} is_machine={true} configs={machine_configs} start_editor={startMachineEditor} start_add_config={new_machine(true)} />
-                <ConfigContainer title={pallet_title} is_machine={false} configs={pallet_configs} start_editor={startPalletEditor} start_add_config={new_pallet(true)} />
+                <ConfigContainer {...machineProps} />
+                <ConfigContainer {...palletProps} />
             </div>
+            {showJogger &&
+                <MachineJogger {...(machineJoggerProps as MachineJoggerProps)} />
+            }
             {add_pallet_config && <PalletConfigurator id={editPalletId} close={new_pallet(false)} machine_configs={machine_configs} palletConfig={editPalletConfig} index={pallet_count} />}
             {add_machine_config && <MachineConfigurator id={editMachineId} close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />}
             {locked && <Unlock close={close_unlock} />}

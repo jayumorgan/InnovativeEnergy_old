@@ -44,7 +44,6 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Execution:
 
-
 ** TODO Production:
 *** TODO Logging.
 *** TODO Update protocol -- git?

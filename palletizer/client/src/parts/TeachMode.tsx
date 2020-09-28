@@ -1,11 +1,7 @@
 import React, { useReducer, useState, ReactElement } from 'react';
-
 import Modal from "./Modal";
-
 import { SavePalletConfig } from "../requests/requests";
-
 import { ConfigItem } from "../types/Types";
-
 import {
     PalletGeometry,
     BoxObject,

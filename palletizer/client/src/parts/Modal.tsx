@@ -6,13 +6,16 @@ import { get_config } from "../requests/requests";
 // Styles
 import "./css/Modal.scss";
 
-interface ModalProps {
-    children: ReactNode;
+
+export interface ModalProps {
     close(): any;
-}
+};
 
+interface ModalPropsChildren extends ModalProps {
+    children: ReactNode;
+};
 
-export default function Modal({ children, close }: ModalProps) {
+export default function Modal({ children, close }: ModalPropsChildren) {
 
     let modal_class: string = "Modal";
 
