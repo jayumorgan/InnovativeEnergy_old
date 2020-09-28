@@ -14,7 +14,7 @@ export interface MachineJoggerProps {
 
 export default function MachineJogger({ savedMachineConfiguration, close }: MachineJoggerProps) {
 
-    const { name, id } = savedMachineConfiguration;
+    const { name } = savedMachineConfiguration;
 
     const modalProps: ModalProps = {
         close
