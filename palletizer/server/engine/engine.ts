@@ -99,7 +99,6 @@ interface PalletizerState {
     dropCoordinates: Coordinate[]
 };
 
-
 interface MechanicalLayout {
     config_id: number;
     machines: MachineMotion[];
@@ -695,8 +694,8 @@ export class Engine {
                 mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = { position, Speed, Acceleration };
             });
         });
-        const mm_ids = Object.keys(mm_group) as string[];
 
+        const mm_ids = Object.keys(mm_group) as string[];
         let move_actions: Action[] = [];
         let wait_actions: Action[] = [];
 
@@ -707,15 +706,17 @@ export class Engine {
             const axes: AXES[] = Object.keys(pairing) as AXES[];
             const params: any[] = Object.values(pairing);
 
-            const positions = params.map((v: any) => {
-                return v.position as number;
+            let positions: number[] = [];
+            let speeds: number[] = [];
+            let accelerations: number[] = [];
+
+            params.forEach((v: any) => {
+                const { position, Speed, Acceleration } = v;
+                positions.push(position);
+                speeds.push(Speed);
+                accelerations.push(acceleration);
             });
-            const speeds = params.map((v: any) => {
-                return v.Speed as number;
-            });
-            const accelerations = params.map((v: any) => {
-                return v.Acceleration as number;
-            });
+
             const speed = Math.min(...speeds);
             const acceleration = Math.min(...accelerations);
 
