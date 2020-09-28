@@ -154,27 +154,39 @@ export interface JoggerProps {
     machineConfigId: number;
     name: string;
     hideName?: boolean;
+    savedMachineConfig?: SavedMachineConfiguration;
+
 };
 
-export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName }: JoggerProps) {
+export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig }: JoggerProps) {
 
-    const [forcedHome, setForcedHome] = useState<boolean>(true);
+    const [forcedHome, setForcedHome] = useState<boolean>(!(hideName));
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(null);
 
+    const setPosition = (p: any) => {
+        const position = p as CoordinateRot;
+        setCurrentPosition(position);
+    };
+
+    const createJogger = (s: SavedMachineConfiguration) => {
+        const { axes, machines } = s.config;
+        const jc = new JogController(machines, axes, setPosition); // amen.
+        setJogController(jc);
+    };
+
     useEffect(() => {
-        get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
-            let { axes, machines } = mc.config;
-            let jc = new JogController(machines, axes, (p: any) => {
-                let position = p as CoordinateRot;
-                setCurrentPosition(position);
+        if (savedMachineConfig) {
+            createJogger(savedMachineConfig);
+        } else {
+            get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
+                createJogger(mc);
+            }).catch((e: any) => {
+                console.log("Error get_machine_config", e);
             });
-            setJogController(jc);
-        }).catch((e: any) => {
-            console.log("Error get_machine_config", e);
-        });
+        }
     }, [machineConfigId]);
 
     const handleSpeed = (e: ChangeEvent) => {

@@ -122,6 +122,7 @@ function Configuration() {
     const [editPalletId, setEditPalletId] = useState<number | null>(null);
     const [editMachineId, setEditMachineId] = useState<number | null>(null);
     const [showJogger, setShowJogger] = useState<boolean>(false);
+    const [joggerConfig, setJoggerConfig] = useState<SavedMachineConfiguration | null>(null);
 
     const startPalletEditor = (id: number) => {
         if (machine_configs.length > 0) {
@@ -179,17 +180,13 @@ function Configuration() {
         setShowJogger(false);
     };
 
-    let machineJoggerProps = {
-        close: close_jogger
-    } as any;
-
     const start_jogger = (id: number) => {
         get_machine_config(id).then((smc: SavedMachineConfiguration) => {
-            machineJoggerProps.config = smc;
+            setJoggerConfig(smc);
+            setShowJogger(true);
         }).catch((e: any) => {
             console.log("Error start jogger", e);
-        })
-        setShowJogger(true);
+        });
     };
 
     const pallet_count = pallet_configs.length;
@@ -219,11 +216,17 @@ function Configuration() {
                 <ConfigContainer {...palletProps} />
             </div>
             {showJogger &&
-                <MachineJogger {...(machineJoggerProps as MachineJoggerProps)} />
+                <MachineJogger {...({ close: close_jogger, savedMachineConfiguration: joggerConfig } as MachineJoggerProps)} />
             }
-            {add_pallet_config && <PalletConfigurator id={editPalletId} close={new_pallet(false)} machine_configs={machine_configs} palletConfig={editPalletConfig} index={pallet_count} />}
-            {add_machine_config && <MachineConfigurator id={editMachineId} close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />}
-            {locked && <Unlock close={close_unlock} />}
+            {add_pallet_config &&
+                <PalletConfigurator id={editPalletId} close={new_pallet(false)} machine_configs={machine_configs} palletConfig={editPalletConfig} index={pallet_count} />
+            }
+            {add_machine_config &&
+                <MachineConfigurator id={editMachineId} close={new_machine(false)} index={machine_count} machineConfig={editMachineConfig} />
+            }
+            {locked &&
+                <Unlock close={close_unlock} />
+            }
         </Fragment>
     );
 };
