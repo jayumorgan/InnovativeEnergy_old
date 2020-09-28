@@ -207,7 +207,7 @@ function Configuration() {
     const palletProps: ConfigContainerProps = {
         title: pallet_title,
         is_machine: false,
-        configs: machine_configs,
+        configs: pallet_configs,
         start_editor: startPalletEditor,
         start_add_config: new_pallet(true)
     };

@@ -71,7 +71,6 @@ function A({ dagger, handleMove }: AProps) {
     );
 };
 
-
 interface JoggerParameterProps {
     title: string;
     unit: string;
@@ -80,7 +79,6 @@ interface JoggerParameterProps {
 };
 
 function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterProps) {
-
     return (
         <div className="Parameter">
             <div className="Name">
@@ -155,9 +153,10 @@ export interface JoggerProps {
     updateName: (s: string) => void;
     machineConfigId: number;
     name: string;
+    hideName?: boolean;
 };
 
-export default function Jogger({ selectAction, updateName, name, machineConfigId }: JoggerProps) {
+export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName }: JoggerProps) {
 
     const [forcedHome, setForcedHome] = useState<boolean>(true);
     const [speed, setSpeed] = useState<number>(50);
@@ -178,7 +177,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         });
     }, [machineConfigId]);
 
-    let handleSpeed = (e: ChangeEvent) => {
+    const handleSpeed = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         if (jogController !== null) {
             jogController.setJogSpeed(val).then(() => {
@@ -189,7 +188,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    let handleDistance = (e: ChangeEvent) => {
+    const handleDistance = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         if (jogController !== null) {
             jogController.setJogIncrement(val).then(() => {
@@ -200,7 +199,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    let handleMove = (d: Directions) => () => {
+    const handleMove = (d: Directions) => () => {
         if (jogController === null) {
             console.log("Jog controller not initialized");
             return;
@@ -238,7 +237,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         };
     };
 
-    let handleAMove = (dagger: boolean) => {
+    const handleAMove = (dagger: boolean) => {
         if (jogController !== null) {
             // Up is down and down is up.
             jogController.startJog(PalletizerAxes.Z, dagger ? DIRECTION.REVERSE : DIRECTION.NORMAL).catch((e: any) => {
@@ -247,12 +246,12 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    let handleName = (e: ChangeEvent) => {
+    const handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         updateName(newName);
     };
 
-    let handleSelect = async () => {
+    const handleSelect = async () => {
         if (TESTING) {
             // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
             let pos = {
@@ -274,26 +273,25 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    let distanceParams: JoggerParameterProps = {
+    const distanceParams: JoggerParameterProps = {
         title: "Jog Increment",
         unit: "mm",
         value: distance,
         handleUpdate: handleDistance,
     };
 
-    let speedParams: JoggerParameterProps = {
+    const speedParams: JoggerParameterProps = {
         title: "Speed",
         unit: "mm",
         value: speed,
         handleUpdate: handleSpeed
     };
 
-    let arrowSize = 120;
-
-    let { x, y, z, θ } = currentPosition;
+    const arrowSize = 120;
+    const { x, y, z, θ } = currentPosition;
     // Rotate will be finicky if jogger reloads.
 
-    let handleRotate = () => {
+    const handleRotate = () => {
         if (jogController !== null) {
             jogController.startRotation(θ <= 90).then(() => {
                 console.log("Rotate jogger -- test after type change.");
@@ -319,14 +317,18 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     return (
         <div className="Jogger">
             <div className="Name">
-                <div className="NamePrompt">
-                    <span>
-                        {"Name:"}
-                    </span>
-                </div>
-                <div className="NameInput">
-                    <input type="text" value={name} onChange={handleName} />
-                </div>
+                {!(hideName) &&
+                    <>
+                        <div className="NamePrompt">
+                            <span>
+                                {"Name:"}
+                            </span>
+                        </div>
+                        <div className="NameInput">
+                            <input type="text" value={name} onChange={handleName} />
+                        </div>
+                    </>
+                }
             </div>
             <div className="Controls">
                 <div className="Position">

@@ -101,8 +101,6 @@ router.post("/configs/delete", (req: Request, res: Response) => {
     });
 });
 
-
-
 router.use(express.static(BUILD_PATH));
 
 router.get("/*", (req: express.Request, res: express.Response) => {
