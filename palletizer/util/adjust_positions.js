@@ -1,3 +1,20 @@
+// In order to create a new pallet layout (arrangement of boxes and layers):
+// A) go back to a safe baseline config
+//  1. copy the value of j (to clipboard; without the last semicolon)
+//  2. open a shell and do 'go_palletizer_db'
+//  3. sqlite3 Configurations.sqlite3
+//  4. update pallet_configs set raw_json='<here you paste what you copied in 1>' where id=1;
+// B) edit your new pallet
+//  1. start the application; edit your pallet normally; save it
+// C) apply your offset
+//  1. go back to sqlite3
+//  2. select raw_json from pallet_configs where id=1;
+//  3. copy the output to clipboard
+//  4. replace j with that
+//  5. run "node adjust_positions.js"
+//  6. go back to sqlite3
+//  7. same step as A.4
+
 var j = {
 	"config": {
 		"name": "Pallet Configuration 2",

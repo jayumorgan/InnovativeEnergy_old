@@ -592,7 +592,7 @@ export class Engine {
         let my = this;
 
         const homeIfZero = () => {
-            if (box_index === 0) {
+            if (box_index === my.startBox) {
                 return my.executeHomingSequence();
             } else {
                 return Promise.resolve();
@@ -741,8 +741,8 @@ export class Engine {
 
             let move_action = () => {
                 // TODO: get the speed from a config instead! (and maybe more work to be done on speed later...)
-                const new_speed: number = (SpeedTypes.FAST == coordinate.speed ? 900 : 450);
-                const new_acceleration: number = (SpeedTypes.FAST == coordinate.speed ? 700 : 200);
+                const new_speed: number = (SpeedTypes.FAST == coordinate.speed ? 850 : 450);
+                const new_acceleration: number = (SpeedTypes.FAST == coordinate.speed ? 600 : 200);
                 if (!last_speed.hasOwnProperty(id) || last_speed[id] != new_speed) {
                     last_speed[id] = new_speed;
                     return mm.emitSpeed(new_speed).then(
