@@ -17,21 +17,27 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let path: BoxPath = [];
 
     // Picking.
+    // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
+    let preRotated: Coordinate = { ...box.pickLocation };
+    preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
+    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+    preRotated = raiseOverCoordinate(box.pickLocation, z_top);
+    preRotated.θ = box.dropLocation.θ;
+    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
 
     // Dropping.
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
     let lateralApproach: Coordinate = { ...box.dropLocation };
-    lateralApproach.x += 50;
-    lateralApproach.y += 50;
+    lateralApproach.x += 80;
+    lateralApproach.y += 80;
     lateralApproach.z -= 50;
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-    lateralApproach.x -= 50;
-    lateralApproach.y -= 50;
+    lateralApproach.x -= 80;
+    lateralApproach.y -= 80;
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
@@ -95,7 +101,11 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
             // Note: highest_pick_location_z is a somewhat hacky way to avoid collisions among feeding conveyors inside the enclosure.
             let z_top: number = Math.max(0, Math.min(
                 highest_pick_location_z - b.dimensions.height, // never travel lower than the pick location.
+<<<<<<< HEAD
                 pallet_config.config.pallets[0].corner1.z - current_height - 2 * b.dimensions.height) // travel as low as the current height minus 2 boxes.
+=======
+                pallet_config.config.pallets[0].corner1.z - current_height - 1.5 * b.dimensions.height) // travel as low as the current height minus 1.5 box.
+>>>>>>> afd94788602406e6d83ca7891aa857f1cc20a079
                 - 50 /* 5cm extra safety */);
             paths.push(generatePathForBox(b, z_top));
         });
