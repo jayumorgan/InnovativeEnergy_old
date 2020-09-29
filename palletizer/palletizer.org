@@ -63,7 +63,7 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Vivian Requests:
 *** TODO Add a "go to taught position" button for validation ?? Where should this button go?
-*** TODO There should be a pure jogger screen (not needing to go to pallet config or machine config ?? Extra button on machine configuration for jogger?
+*** DONE There should be a pure jogger screen (not needing to go to pallet config or machine config ?? Extra button on machine configuration for jogger?
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations ?? Going to need good images then.
 *** TODO Offset user interface needed to be added

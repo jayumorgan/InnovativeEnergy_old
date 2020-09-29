@@ -26,10 +26,11 @@ export enum ActionTypes {
     PICK,
     DROP
 };
+
 export enum SpeedTypes {
     FAST,
     SLOW
-}
+};
 
 export interface ActionCoordinate extends Coordinate {
     action?: ActionTypes;

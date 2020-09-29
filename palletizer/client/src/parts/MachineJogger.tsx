@@ -12,17 +12,6 @@ export interface MachineJoggerProps {
     close: () => void;
 };
 
-
-/* export interface JoggerProps {
- *     selectAction: (c: CoordinateRot) => void;
- *     updateName: (s: string) => void;
- *     machineConfigId: number;
- *     name: string;
- *     hideName?: boolean;
- *     savedMachineConfig?: SavedMachineConfiguration;
- * };
- *  */
-
 export default function MachineJogger({ savedMachineConfiguration, close }: MachineJoggerProps) {
 
     const [jogController, _] = useState<JogController>((() => {
@@ -34,8 +23,6 @@ export default function MachineJogger({ savedMachineConfiguration, close }: Mach
         close
     };
 
-    const id = 0;
-
     const joggerProps: JoggerProps = {
         selectAction: (_: CoordinateRot) => { return; },
         updateName: (_: string) => { return; },
@@ -46,14 +33,11 @@ export default function MachineJogger({ savedMachineConfiguration, close }: Mach
         Controller: jogController
     };
 
-    // Use the same jog controller. across things.
-    // Need to get the jog controller out of the thing.
     const forceHomeProps: ForceHomeProps = {
         skip: () => { return; },
         hideDone: true,
         jogController
     };
-
 
     return (
         <Modal {...modalProps} >
