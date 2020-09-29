@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal, { ModalProps } from "./Modal";
 import Jogger, { JoggerProps, ForceHome, ForceHomeProps } from "./teach/Jogger";
 import { SavedMachineConfiguration } from "./MachineConfig";
-
+import JogController from "../jogger/Jogger";
 
 import "./css/MachineJogger.scss";
 import { CoordinateRot } from "../geometry/geometry";
@@ -22,7 +22,13 @@ export interface MachineJoggerProps {
  *     savedMachineConfig?: SavedMachineConfiguration;
  * };
  *  */
+
 export default function MachineJogger({ savedMachineConfiguration, close }: MachineJoggerProps) {
+
+    const [jogController, _] = useState<JogController>((() => {
+        const { axes, machines } = savedMachineConfiguration!.config;
+        return new JogController(machines, axes, (_: any) => { return; });
+    })());
 
     const modalProps: ModalProps = {
         close
@@ -36,8 +42,19 @@ export default function MachineJogger({ savedMachineConfiguration, close }: Mach
         machineConfigId: 0, // Irrelevant
         name: savedMachineConfiguration!.name,
         hideName: true,
-        savedMachineConfig: savedMachineConfiguration!
+        savedMachineConfig: savedMachineConfiguration!,
+        Controller: jogController
     };
+
+    // Use the same jog controller. across things.
+    // Need to get the jog controller out of the thing.
+    const forceHomeProps: ForceHomeProps = {
+        skip: () => { return; },
+        hideDone: true,
+        jogController
+    };
+
+
     return (
         <Modal {...modalProps} >
             <div className="MachineJogger">
@@ -49,8 +66,8 @@ export default function MachineJogger({ savedMachineConfiguration, close }: Mach
                     </div>
                 </div>
                 <div className="SplitView">
+                    <ForceHome {...forceHomeProps} />
                     <Jogger {...joggerProps} />
-
                 </div>
             </div>
         </Modal>

@@ -100,9 +100,10 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
 export interface ForceHomeProps {
     skip: () => void;
     jogController: JogController | null;
+    hideDone?: boolean
 };
 
-export function ForceHome({ skip, jogController }: ForceHomeProps) {
+export function ForceHome({ skip, jogController, hideDone }: ForceHomeProps) {
 
     const allAxes = [
         PalletizerAxes.X,
@@ -113,9 +114,7 @@ export function ForceHome({ skip, jogController }: ForceHomeProps) {
 
     const handleHome = (axis: PalletizerAxes) => () => {
         if (jogController !== null) {
-            jogController.startHome(axis).then(() => {
-
-            }).catch((e: any) => {
+            jogController.startHome(axis).catch((e: any) => {
                 console.log("Error handle home", e);
             })
         }
@@ -124,9 +123,11 @@ export function ForceHome({ skip, jogController }: ForceHomeProps) {
     return (
         <div className="ForceHome">
             <div className="Description">
-                <span>
-                    {"Home all axes before starting."}
-                </span>
+                {!(hideDone) &&
+                    <span>
+                        {"Home all axes before starting."}
+                    </span>
+                }
             </div>
             <div className="HomeButtons">
                 {allAxes.map((axis: PalletizerAxes, index: number) => {
@@ -140,9 +141,11 @@ export function ForceHome({ skip, jogController }: ForceHomeProps) {
                 })}
             </div>
             <div className="SkipButton">
-                <div className="Skip" onClick={skip} >
-                    {"Done"}
-                </div>
+                {!(hideDone) &&
+                    <div className="Skip" onClick={skip} >
+                        {"Done"}
+                    </div>
+                }
             </div>
         </div>
     );
@@ -155,10 +158,10 @@ export interface JoggerProps {
     name: string;
     hideName?: boolean;
     savedMachineConfig?: SavedMachineConfiguration;
-
+    Controller?: JogController;
 };
 
-export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig }: JoggerProps) {
+export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig, Controller }: JoggerProps) {
 
     const [forcedHome, setForcedHome] = useState<boolean>(!(hideName));
     const [speed, setSpeed] = useState<number>(50);
@@ -178,7 +181,10 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     };
 
     useEffect(() => {
-        if (savedMachineConfig) {
+        if (Controller) {
+            Controller.positionHandler = setPosition;
+            setJogController(Controller);
+        } else if (savedMachineConfig) {
             createJogger(savedMachineConfig);
         } else {
             get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
@@ -264,24 +270,30 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     };
 
     const handleSelect = async () => {
-        if (TESTING) {
-            // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
-            let pos = {
-                x: 2000, y: 2000, z: 4000, θ: 0
-            } as CoordinateRot;
-            let tmp = TEMP_JOGGER_INDEX % 3;
-            if (tmp === 0) {
-                pos.y = 3000;
-            } else if (tmp === 1) {
 
+        if (!hideName) {
+
+            if (TESTING) {
+                // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
+                let pos = {
+                    x: 2000, y: 2000, z: 4000, θ: 0
+                } as CoordinateRot;
+                let tmp = TEMP_JOGGER_INDEX % 3;
+                if (tmp === 0) {
+                    pos.y = 3000;
+                } else if (tmp === 1) {
+
+                } else {
+                    pos.x = 3000;
+                }
+                TEMP_JOGGER_INDEX++;
+                selectAction(pos);
             } else {
-                pos.x = 3000;
+                // Make sure this is valid -- should check again.
+                selectAction(currentPosition);
             }
-            TEMP_JOGGER_INDEX++;
-            selectAction(pos);
         } else {
-            // Make sure this is valid -- should check again.
-            selectAction(currentPosition);
+            // For Machine Jogger.
         }
     };
 
@@ -366,7 +378,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                             <div className="Select">
                                 <div className="SelectButton" onClick={handleSelect}>
                                     <span>
-                                        {"Save"}
+                                        {(!hideName) ? "Save" : "Done"}
                                     </span>
                                 </div>
                             </div>
