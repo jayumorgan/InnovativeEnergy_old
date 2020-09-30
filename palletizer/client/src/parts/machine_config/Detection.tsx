@@ -145,9 +145,10 @@ export interface DetectionProps extends ControlProps {
     setDetection: (detection: IOState[]) => void;
     box_detection?: IOState[];
     allMachines: MachineMotion[];
+    isDetection: boolean; // Toggle between io state setup for box detection and good pick
 };
 
-export default function Detection({ handleNext, handleBack, instructionNumber, setDetection, box_detection, allMachines }: DetectionProps) {
+export default function Detection({ handleNext, handleBack, instructionNumber, setDetection, box_detection, allMachines, isDetection }: DetectionProps) {
 
     const [detectionArray, setDetectionArray] = useState<IOState[]>(box_detection ? box_detection : [] as IOState[]);
 
@@ -164,7 +165,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
         setioControllers(getIOControllers());
     }, [allMachines]);
 
-    const instruction: string = "Create an input profile for box detection or skip this step";
+    const instruction: string = `Create an input profile for ${isDetection ? "box detection" : "good pick"} or skip this step`;
 
     const LeftButton: ButtonProps = {
         name: "Back",
@@ -183,7 +184,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
     };
 
     const AddButton: ButtonProps = {
-        name: "Add new input profile",
+        name: "Add new input",
         action: () => {
             let cp = [...detectionArray];
             cp.push(defaultIOState());

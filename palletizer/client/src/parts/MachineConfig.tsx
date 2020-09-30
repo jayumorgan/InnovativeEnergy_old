@@ -23,6 +23,7 @@ enum MachineConfigState {
     AXES_CONFIG,
     IO_CONFIG,
     BOX_DETECTION,
+    GOOD_PICK,
     SUMMARY
 };
 
@@ -32,6 +33,7 @@ export interface MachineConfiguration {
     axes: AxesConfiguration;
     io: IO;
     box_detection: IOState[];
+    good_pick: IOState[];
 };
 
 export interface SavedMachineConfiguration {
@@ -47,6 +49,7 @@ function defaultConfiguration(index: number): MachineConfiguration {
         axes: defaultAxesConfiguration(),
         io: defaultIO(),
         box_detection: [] as IOState[],
+        good_pick: [] as IOState[],
         complete: false
     } as MachineConfiguration;
 };
@@ -56,7 +59,8 @@ enum MACHINE_ACTION {
     MACHINES,
     AXES,
     IO,
-    DETECTION
+    DETECTION,
+    GOOD_PICK
 };
 
 interface ReducerAction {
@@ -66,9 +70,9 @@ interface ReducerAction {
 
 
 function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
-    let actionType = action.type;
+    const actionType = action.type;
 
-    let { payload } = action;
+    const { payload } = action;
 
     switch (actionType) {
         case (MACHINE_ACTION.NAME): {
@@ -86,6 +90,9 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
         case (MACHINE_ACTION.DETECTION): {
             return { ...state, box_detection: action.payload as IOState[] };
         }
+        case (MACHINE_ACTION.GOOD_PICK): {
+            return { ...state, good_pick: action.payload as IOState[] };
+        }
         default: {
             return state;
         }
@@ -101,7 +108,7 @@ interface MachineConfiguratorProps {
 
 function MachineConfigurator({ close, index, machineConfig, id }: MachineConfiguratorProps) {
 
-    let completionFraction = { n: 0, d: 5 } as Fraction;
+    let completionFraction = { n: 0, d: 6 } as Fraction;
 
     const [configuration, dispatch] = useReducer(MachineReducer, (() => {
         if (machineConfig) {
@@ -110,7 +117,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             return defaultConfiguration(index)
         }
     })());
-    
+
     const [configState, setConfigState] = useState<MachineConfigState>(MachineConfigState.CONFIG_NAME);
 
     const setName = (s: string) => {
@@ -145,6 +152,13 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         dispatch({
             type: MACHINE_ACTION.DETECTION,
             payload: detection as any
+        });
+    };
+
+    const setGoodPick = (gp: IOState[]) => {
+        dispatch({
+            type: MACHINE_ACTION.GOOD_PICK,
+            payload: gp as any
         });
     };
 
@@ -208,7 +222,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             break;
         };
         case (MachineConfigState.ADD_MACHINE_MOTIONS): {
-            let props = {
+            const props = {
                 allMachines: configuration.machines,
                 setMachines,
                 ...controlProps
@@ -217,7 +231,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             break;
         };
         case (MachineConfigState.AXES_CONFIG): {
-            let props = {
+            const props = {
                 setAxes,
                 Axes: configuration.axes,
                 allMachines: configuration.machines,
@@ -227,7 +241,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             break;
         };
         case (MachineConfigState.IO_CONFIG): {
-            let props = {
+            const props = {
                 io: configuration.io,
                 setIO,
                 allMachines: configuration.machines,
@@ -237,17 +251,29 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             break;
         };
         case (MachineConfigState.BOX_DETECTION): {
-            let props: DetectionProps = {
+            const props: DetectionProps = {
                 ...controlProps,
                 setDetection,
                 box_detection: configuration.box_detection,
-                allMachines: configuration.machines
+                allMachines: configuration.machines,
+                isDetection: true
+            };
+            ChildElement = (<Detection {...props} />);
+            break;
+        };
+        case (MachineConfigState.GOOD_PICK): {
+            const props: DetectionProps = {
+                ...controlProps,
+                setDetection: setGoodPick,
+                allMachines: configuration.machines,
+                box_detection: configuration.good_pick,
+                isDetection: false
             };
             ChildElement = (<Detection {...props} />);
             break;
         };
         case (MachineConfigState.SUMMARY): {
-            let props: MachineSummaryProps = {
+            const props: MachineSummaryProps = {
                 machineConfig: configuration,
                 ...controlProps
             };
