@@ -105,6 +105,7 @@ interface MechanicalLayout {
     axes: Axes;
     io: IO;
     box_detection: IOState[];
+    good_pick: IOState[];
 };
 
 function compareIODeviceStates(io1: IODeviceState, io2: IODeviceState): boolean {
@@ -165,11 +166,12 @@ function defaultMechanicalLayout(): MechanicalLayout {
             On: [],
             Off: []
         },
-        box_detection: []
+        box_detection: [],
+        good_pick: []
     } as MechanicalLayout;
 };
 
-enum CYCLE_STATE {
+enum CycleState {
     NONE,
     HOMEING,
     PICK,
@@ -201,7 +203,7 @@ export class Engine {
     machineConfig: SavedMachineConfiguration | null = null;
     palletConfig: SavedPalletConfiguration | null = null;
     mechanicalLayout: MechanicalLayout = defaultMechanicalLayout();
-    cycleState: CYCLE_STATE = CYCLE_STATE.NONE;
+    cycleState: CycleState = CycleState.NONE;
     startBox: number = 0;
     boxPathsForPallet: BoxPath[] = [];
 
@@ -223,20 +225,20 @@ export class Engine {
     constructor(handler: DatabaseHandler) {
         this.__initTopics();
         this.databaseHandler = handler;
-        let mqtt_uri = "mqtt://" + HOSTNAME + ":" + String(MQTTPORT);
-        let options: any = {
+
+        const mqtt_uri = "mqtt://" + HOSTNAME + ":" + String(MQTTPORT);
+        const options: any = {
             clientId: "PalletizerEngine-" + uuidv4()
         };
-        let client: mqtt.Client = mqtt.connect(mqtt_uri, options);
-        let subscribe = () => {
+
+        const client: mqtt.Client = mqtt.connect(mqtt_uri, options);
+        const subscribe = () => {
             client.subscribe(Object.keys(this.subscribeTopics), () => {
                 console.log("Client " + options.clientId + " subscribed to palletizer topics.");
             });
         };
         client.on("connect", subscribe);
-
         const my = this;
-
         client.on("message", (topic: string, message_buffer: Buffer) => {
             let message: string;
             try {
@@ -261,7 +263,6 @@ export class Engine {
                 };
             }
         });
-
         this.mqttClient = client;
         this.__loadMachine = this.__loadMachine.bind(this);
         this.__loadPallet = this.__loadPallet.bind(this);
@@ -270,15 +271,15 @@ export class Engine {
         this.executeHomingSequence = this.executeHomingSequence.bind(this);
     };
 
+    // Callback for IO updates;
+
 
     //-------MQTT Message Handlers-------
     __publish(topic: string, message: string) {
         const my = this;
-
-        let pub = () => {
+        const pub = () => {
             my.mqttClient.publish(topic, message);
         };
-
         if (my.mqttClient.connected) {
             pub();
         } else {
@@ -382,14 +383,14 @@ export class Engine {
 
     // Should return a promise on success.
     loadConfigurations(): Promise<boolean> {
-        let parse_config = (a: any) => {
+        const parse_config = (a: any) => {
             if (a) {
                 return JSON.parse(a.raw_json);
             } else {
                 return null;
             }
         };
-        let parse_id = (a: any) => {
+        const parse_id = (a: any) => {
             if (a) {
                 return a.id;
             } else {
@@ -454,7 +455,6 @@ export class Engine {
                 console.log("Palletizer has stopped.");
                 //		my.__updateStatus(PALLETIZER_STATUS.STOPPED);
                 my.__handleInformation(INFO_TYPE.STATUS, "Palletizer stopped.");
-
             } else {
                 my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid.");
                 my.__updateStatus(PALLETIZER_STATUS.ERROR);
@@ -478,28 +478,24 @@ export class Engine {
             let match: number = +(matches[1]);
             this.startBox = match;
         }
-    }
+    };
 
     //-------Mechanical Configuration-------
     configureMachine(): Promise<boolean> {
         const my = this;
-
         if (my.machineConfig !== null && my.palletConfig !== null) {
             let promises: Promise<any>[] = [];
             let mms: MachineMotion[] = [];
-
             const { config } = my.machineConfig;
-            const { machines, io, axes, box_detection } = config;
+            const { machines, io, axes, box_detection, good_pick } = config;
             machines.forEach((mm: MachineMotionInfo) => {
-                let { ipAddress } = mm;
-                let mm_config: MachineMotionConfig = {
+                const { ipAddress } = mm;
+                const mm_config: MachineMotionConfig = {
                     machineIP: TESTING ? "127.0.0.1" : ipAddress,
                     serverPort: 8000,
                     mqttPort: 1883,
                 };
-
-                let mm_controller: MachineMotion = new MachineMotion(mm_config);
-
+                const mm_controller: MachineMotion = new MachineMotion(mm_config);
                 // NB: estop will recursively call estop, so unbind the estop action on first call.
                 mm_controller.bindEstopEvent(() => {
                     console.log("Calling bound event");
@@ -526,7 +522,8 @@ export class Engine {
             });
 
             my.mechanicalLayout.machines = mms;
-            let ax = axes as any;
+
+            const ax = axes as any;
 
             Object.keys(ax).forEach((axis: string) => {
                 let drives = ax[axis] as Drive[];
@@ -545,6 +542,7 @@ export class Engine {
             my.mechanicalLayout.axes = axes;
             my.mechanicalLayout.io = io;
             my.mechanicalLayout.box_detection = box_detection;
+            my.mechanicalLayout.good_pick = good_pick;
 
             return new Promise((resolve, reject) => {
                 Promise.all(promises).then(() => { resolve(true); }).catch(e => reject(e));
@@ -557,19 +555,15 @@ export class Engine {
     };
 
     //-------Palletizer Sequence-------
-
     async startPalletizer(box_index: number): Promise<any> {
         const my = this;
-
         my.__updateStatus(PALLETIZER_STATUS.RUNNING);
-
         if (my.palletConfig !== null) {
             my.__stateReducer({
                 current_box: box_index + 1,
                 total_box: my.boxPathsForPallet.length
             });
         }
-
         return my.runPalletizerSequence(box_index).then(() => {
             let next_box_index = box_index + 1;
             if (my.palletConfig !== null && my.boxPathsForPallet.length > next_box_index) {
@@ -614,17 +608,18 @@ export class Engine {
         const my = this;
         if (action) {
             if (action === ActionTypes.PICK) {
-                return my.__pickIO()
-            }
-            if (action === ActionTypes.DROP) {
-                // detect box first.
-                return my.handleDetect().then((detected: boolean) => {
+                return my.handleDetect().then(async (detected: boolean) => {
                     if (detected) {
-                        return my.__dropIO();
+                        return my.__pickIO().then(() => {
+                            return my.handleGoodPick(); // Check for a good pick.
+                        });
                     } else {
-                        return Promise.reject("Unable to detect box. Operator assistance required");
+                        return Promise.reject("Unable to detect box. Operator assistance required.");
                     }
                 });
+            }
+            if (action === ActionTypes.DROP) {
+                return my.__dropIO();
             }
         }
         return Promise.resolve();
@@ -632,7 +627,7 @@ export class Engine {
 
     async executeHomingSequence(): Promise<any> {
         const my = this;
-        my.cycleState = CYCLE_STATE.HOMEING;
+        my.cycleState = CycleState.HOMEING;
         return my.homeVerticalAxis().then(() => {
             return my.homeAllAxes();
         });
@@ -729,13 +724,13 @@ export class Engine {
     };
 
     __pickIO() {
-        this.cycleState = CYCLE_STATE.PICK_IO;
+        this.cycleState = CycleState.PICK_IO;
         let ios: IOState[] = this.mechanicalLayout.io.On;
         return this.__writeIO(ios);
     };
 
     __dropIO() {
-        this.cycleState = CYCLE_STATE.DROP_IO;
+        this.cycleState = CycleState.DROP_IO;
         let ios: IOState[] = this.mechanicalLayout.io.Off;
         return this.__writeIO(ios);
     };
@@ -770,11 +765,67 @@ export class Engine {
                 reject(e);
             });
         });
-    }
+    };
+
+    handleGoodPick(retry_index: number = 0): Promise<boolean> {
+        const my = this;
+        return new Promise<boolean>((resolve, reject) => {
+            my.__detectGoodPick().then((detected: boolean) => {
+                if (detected) {
+                    resolve(detected);
+                } else if (retry_index < 5) {
+                    setTimeout(() => {
+                        my.handleGoodPick(retry_index + 1).then((d: boolean) => {
+                            resolve(d);
+                        }).catch((e: any) => {
+                            reject(e);
+                        })
+                    }, 500);
+                } else {
+                    resolve(detected);
+                }
+            }).catch((e: any) => {
+                console.log("Error handle good pick", e);
+                reject("Unable to detect good pick. Operator assistance required.");
+            });
+        });
+    };
+
+    __detectGoodPick(): Promise<boolean> {
+        const my = this;
+        const { good_pick } = my.mechanicalLayout;
+        if (good_pick.length === 0) {
+            return Promise.resolve(true);
+        } else {
+            return new Promise<boolean>((resolve, reject) => {
+                Promise.all(good_pick.map((state: IOState) => {
+                    const { MachineMotionIndex, NetworkId } = state;
+                    return my.mechanicalLayout.machines[MachineMotionIndex].digitalReadAll(NetworkId);
+                })).then((res: vResponse[]) => {
+                    let detect: boolean = false;
+                    for (let i = 0; i < res.length; i++) {
+                        const vRes: vResponse = res[i];
+                        if (vRes.success) {
+                            const read_vals: IODeviceState = vRes.result as IODeviceState;
+                            detect = compareIODeviceStates(read_vals, good_pick[i].Pins);
+                        } else {
+                            detect = false;
+                        }
+                        if (!detect) {
+                            break;
+                        }
+                    }
+                    resolve(detect);
+                }).catch((e: any) => {
+                    reject(e);
+                });
+            });
+        }
+    };
 
     __detectBox(): Promise<boolean> {
         const my = this;
-        my.cycleState = CYCLE_STATE.DETECT_IO;
+        my.cycleState = CycleState.DETECT_IO;
         const { box_detection } = my.mechanicalLayout;
         if (box_detection.length > 0) {
             return new Promise<boolean>((resolve, reject) => {
