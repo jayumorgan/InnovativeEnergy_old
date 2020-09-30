@@ -57,12 +57,12 @@ const ALL_DIRECTIONS = { "Normal": NumericalDirection.NORMAL, "Reverse": Numeric
 
 const MECH_GAIN = {
     timing_belt_150mm_turn: [150, "Timing Belt"],
-    legacy_timing_belt_200_mm_turn: [200, "Legacy Timing Belt"],
+//    legacy_timing_belt_200_mm_turn: [200, "Legacy Timing Belt"],
     enclosed_timing_belt_mm_turn: [208, "Enclosed Timing Belt"],
     ballscrew_10mm_turn: [10, "Ball Screw"],
-    legacy_ballscrew_5_mm_turn: [5, "Legacy Ball Screw"],
-    indexer_deg_turn: [85, "Indexer Degree Turn"],
-    indexer_v2_deg_turn: [36, "Indexer V2 Degree Turn"], // Rename to rotary actuator.
+//    legacy_ballscrew_5_mm_turn: [5, "Legacy Ball Screw"],
+//    indexer_deg_turn: [85, "Indexer Degree Turn"],
+    indexer_v2_deg_turn: [36, "Rotary Actuator"], // Rename to rotary actuator.
     roller_conveyor_mm_turn: [157, "Roller Conveyor"],
     belt_conveyor_mm_turn: [73.563, "Belt Conveyor"],
     rack_pinion_mm_turn: [157.08, "Rack & Pinion"]
@@ -396,7 +396,7 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
                     <div className="Input">
                         <div className="Title">
                             <span>
-                                {"Type"}
+                                {"Actuator Type"}
                             </span>
                         </div>
                         <div className="DropDown">
