@@ -10,9 +10,8 @@ import fs from "fs";
 const DATABASE_DIRECTORY = path.join(__dirname, "..", "db");
 
 //const filename: string = "cf.sqlite3";
-//const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), filename || "Configurations.sqlite3")
+//const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), "cf.sqlite3");
 const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), "Configurations.sqlite3");
-
 
 // NB: This is a first step in the move from .json configuraiton files to sqlite3 to improve 
 // inter and intra config stability. Eventually data should migrate from raw_json to other columns + tables (allowing reuse of boxes, MM's, references from Machine Config -> Pallet Config)

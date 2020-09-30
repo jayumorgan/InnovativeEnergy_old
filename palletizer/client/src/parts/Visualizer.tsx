@@ -28,7 +28,7 @@ interface FrameDimensions {
     h: number;
 };
 
-function getPalletExtrema(p: PalletGeometry) {
+function getPalletExtrema(p: PalletGeometry): FrameDimensions {
     let { corner1, corner2, corner3 } = p;
     let x1 = corner1.x;
     let x2 = corner2.x;
@@ -40,15 +40,13 @@ function getPalletExtrema(p: PalletGeometry) {
     let X = [x1, x2, x3];
     let Y = [y1, y2, y3];
 
-    let f: FrameDimensions = {
+    return {
         xl: Math.min(...X),
         xh: Math.max(...X),
         yl: Math.min(...Y),
         yh: Math.max(...Y),
         h: 0
-    };
-
-    return f;
+    } as FrameDimensions;
 };
 
 
@@ -251,9 +249,9 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         groundMesh.receiveShadow = true;
         groundMesh.position.set(0, -1, 0);
         scene.add(groundMesh);
-	/* 
-	 *         var axesHelper = new Three.AxesHelper(5);
-	 *         scene.add(axesHelper); */
+
+        var axesHelper = new Three.AxesHelper(5);
+        scene.add(axesHelper);
 
         let camera = getCamera(width, height);
         let distance = 1.2
@@ -269,23 +267,23 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         //camera.rotateX(Math.PI / 2);
         camera.lookAt(1, 1, 0.5);
 
-        let render_scene = () => {
+        const render_scene = () => {
             renderer.render(scene, camera);
         };
 
-        let add_mesh = (mesh: Three.Mesh) => {
+        const add_mesh = (mesh: Three.Mesh) => {
             scene.add(mesh);
             render_scene();
         };
 
-        let remove_mesh = (n: string) => {
+        const remove_mesh = (n: string) => {
             let m = scene.getObjectByName(n);
             if (m) {
                 scene.remove(m);
             }
-        }
+        };
 
-        let handleResize = () => {
+        const handleResize = () => {
             if (mount.current) {
                 width = (mount.current as HTMLDivElement).clientWidth;
                 height = (mount.current as HTMLDivElement).clientHeight;
@@ -368,11 +366,11 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
             boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
                 if (i < current_box) {
                     const BoxName = "BOXNAME-" + String(i);
-
                     const { dropLocation, dimensions, palletIndex } = b;
                     const pallet = palletConfig.config.pallets[palletIndex];
                     const palletHeight = getPalletHeight(pallet);
                     const φ_pallet = getXAxisAngle(Subtract3D(pallet.corner3, pallet.corner2));
+                    const angle = (dropLocation.θ - φ_pallet) * Math.PI / 180;
 
                     let { width, height, length } = dimensions;
 
@@ -394,7 +392,9 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                     z = 0;
                     z += delta_z - height / 2;
                     box.position.set(x, y, z);
-                    box.rotateY(dropLocation.θ - φ_pallet);
+                    console.log(angle, dropLocation.θ, "angle, drop location");
+
+                    box.rotateZ(angle);
                     controls.current?.add_mesh(box);
                 }
             });
@@ -405,5 +405,3 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
 
     return (<div className="Visualizer" ref={mount} />);
 };
-
-
