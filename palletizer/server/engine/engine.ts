@@ -597,8 +597,7 @@ export class Engine {
                 return my.__move(action_coordinate).then((_: any) => {
                     return my.executeAction(action_coordinate.action);
                 }).then(() => {
-                    let next_path_index = path_index + 1;
-                    return my.executePathSequence(box_index, next_path_index);
+                    return my.executePathSequence(box_index, path_index + 1);
                 });
             }
         }
