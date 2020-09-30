@@ -250,9 +250,9 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         groundMesh.position.set(0, -1, 0);
         scene.add(groundMesh);
 
-        var axesHelper = new Three.AxesHelper(5);
-        scene.add(axesHelper);
-
+        /* var axesHelper = new Three.AxesHelper(5);
+	 * scene.add(axesHelper);
+	 */
         let camera = getCamera(width, height);
         let distance = 1.2
         //        camera.position.set(- distance * 2, distance + 0.5, 0.5);
