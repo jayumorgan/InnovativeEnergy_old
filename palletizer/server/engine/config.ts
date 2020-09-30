@@ -44,6 +44,7 @@ export interface MachineConfiguration {
     axes: Axes;
     io: IO;
     box_detection: IOState[];
+    good_pick: IOState[];
 };
 
 
@@ -52,9 +53,7 @@ export interface SavedMachineConfiguration {
     config: MachineConfiguration;
 };
 
-
 //---------------Pallet Configuration---------------
-
 export interface PlaneCoordinate {
     x: number;
     y: number;

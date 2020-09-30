@@ -582,20 +582,10 @@ export class Engine {
         });
     };
 
-
-    // run palletizer sequence should run through the path. then continue;
     async runPalletizerSequence(box_index: number): Promise<any> {
         const my = this;
 
-        const homeIfZero = () => {
-            if (box_index === 0) {
-                return my.executeHomingSequence();
-            } else {
-                return Promise.resolve();
-            }
-        };
-
-        return homeIfZero().then(() => {
+        return my.executeHomingSequence().then(() => {
             return my.executePathSequence(box_index, 0);
         });
     };
