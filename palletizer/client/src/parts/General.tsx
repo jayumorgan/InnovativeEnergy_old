@@ -18,6 +18,10 @@ import {
 import Visualizer, { VisualizerProps } from "./Visualizer";
 import JogController from "../jogger/Jogger";
 
+import { SavedMachineConfiguration } from './MachineConfig';
+import Jogger from "./PerspectiveJogger";
+
+
 //---------------Images---------------
 import logo from "../images/vention_logo.png";
 import { ReactComponent as BellImage } from "./images/bell.svg";
@@ -27,9 +31,8 @@ import { ReactComponent as CircleImage } from "./images/circle.svg";
 
 //---------------Styles---------------
 import "./css/General.scss";
-import { SavedMachineConfiguration } from './MachineConfig';
 
-// Probably avoid using a global variable.
+// Avoid the use of a global variable. -- double check if this is the source multiple orphaned clients.
 var control = MQTTControl();
 
 // Support Functions:
@@ -486,10 +489,13 @@ function General() {
                 </StackContainer>
             </div>
             <div className="VisualizerContainer">
-                <div className="Visualizer">
+                <Jogger />
+                {/* <div className="Visualizer">
+
+
                     {palletConfig &&
-                        <Visualizer {...visualizerProps} />}
-                </div>
+                    <Visualizer {...visualizerProps} />}
+                    </div> */}
                 <div className="LogoContainer">
                     <img src={logo} />
                 </div>

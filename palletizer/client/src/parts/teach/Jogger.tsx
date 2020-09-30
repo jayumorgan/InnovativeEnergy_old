@@ -143,7 +143,9 @@ export function ForceHome({ skip, jogController, hideDone }: ForceHomeProps) {
             <div className="SkipButton">
                 {!(hideDone) &&
                     <div className="Skip" onClick={skip} >
-                        {"Done"}
+                        <span>
+                            {"Done"}
+                        </span>
                     </div>
                 }
             </div>

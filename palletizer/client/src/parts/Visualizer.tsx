@@ -101,7 +101,7 @@ function parseConfig(pallet: SavedPalletConfiguration) {
     return f;
 };
 
-function getCamera(width: number, height: number): Three.PerspectiveCamera {
+export function getCamera(width: number, height: number): Three.PerspectiveCamera {
     let camera = new Three.PerspectiveCamera(45, width / height, 1, 1000);
     camera.position.set(0, 1.2, 1.2);
     // camera.position.set(0, 2, 2);
@@ -118,12 +118,6 @@ export function getCardboardBox(width: number, height: number, length: number): 
     let box = new Three.Mesh(geometry, material);
     box.add(edges);
     return box;
-};
-
-interface Coordinate { // To allow for angle.
-    x: number;
-    y: number;
-    z: number;
 };
 
 interface VisualizerControls {
@@ -202,11 +196,11 @@ export interface VisualizerProps {
 export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordinates }: VisualizerProps) {
 
     let current_box = currentBoxNumber;
-    let mount = useRef<HTMLDivElement>(null);
-    let controls = useRef<VisualizerControls | null>(null);
+    const mount = useRef<HTMLDivElement>(null);
+    const controls = useRef<VisualizerControls | null>(null);
 
-    let [boxNames, setBoxNames] = useState<string[]>([]);
-    let [palletNames, setPalletNames] = useState<string[]>([]);
+    const [boxNames, setBoxNames] = useState<string[]>([]);
+    const [palletNames, setPalletNames] = useState<string[]>([]);
 
     useEffect(() => {
         let width = (mount.current as HTMLDivElement).clientWidth;
@@ -253,12 +247,13 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         /* var axesHelper = new Three.AxesHelper(5);
 	 * scene.add(axesHelper);
 	 */
+
         let camera = getCamera(width, height);
         let distance = 1.2
-        //        camera.position.set(- distance * 2, distance + 0.5, 0.5);
+        //camera.position.set(- distance * 2, distance + 0.5, 0.5);
 
         //camera.rotateY(Math.PI / 2);
-        //        camera.lookAt(-0.5, 0.25, 0.5);
+        //camera.lookAt(-0.5, 0.25, 0.5);
 
         camera.up.set(0, 0, 1);
         let back = -2
