@@ -8,6 +8,9 @@ import fs from "fs";
 
 //-------NB: These we be in the dist directory (typescript)-------
 const DATABASE_DIRECTORY = path.join(__dirname, "..", "db");
+
+//const filename: string = "cf.sqlite3";
+//const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), filename || "Configurations.sqlite3")
 const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), "Configurations.sqlite3");
 
 

@@ -82,8 +82,8 @@
                      }
 
                      .Layer {
-                         padding-left: 10%;
-                         width: 90%;
+                         padding-left: 5%;
+                         width: 99%;
                          padding-top: 3%;
                          font-size: $large-font;
                          color: $dark-blue;
@@ -91,18 +91,19 @@
                          grid-template-rows: 100%;
                          grid-template-columns: 15% 75% 10%;
 
-			 .Trash {
-			     @include flex-center();
-			     span {
-				 cursor: pointer;
-				 font-size: $medium-font;
-				 color: $red;
-			     }
-			     
-			     span:hover {
-				 font-weight: $bold-font;
-			     }
-			 }
+                         .Trash {
+                             @include flex-center();
+
+                             span {
+                                 cursor: pointer;
+                                 font-size: $medium-font;
+                                 color: $red;
+                             }
+
+                             span:hover {
+                                 font-weight: $bold-font;
+                             }
+                         }
 
                          .LayerName {
                              @include flex-center();

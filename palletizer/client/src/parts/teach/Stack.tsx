@@ -36,12 +36,20 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: Palle
                     {name}
                 </span>
             </div>
-            {Stack.map((s: number, i: number) => {
+            <div className="Add">
+                <div className="AddButton" onClick={addLayer} >
+                    <img src={plus_icon} />
+                    <span>
+                        {"Add layer"}
+                    </span>
+                </div>
+            </div>
+            {[...Stack].reverse().map((s: number, i: number) => {
                 return (
                     <div className="Layer" key={i}>
                         <div className="LayerName">
                             <span>
-                                {"Layer " + String(i + 1) + ":"}
+                                {"Layer " + String(Stack.length - i) + ":"}
                             </span>
                         </div>
                         <div className="Layout">
@@ -49,7 +57,7 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: Palle
                                 {Layouts.map((l: LayoutObject, j: number) => {
                                     return (
                                         <option value={j} key={j}> {l.name} </option>
-                                    )
+                                    );
                                 })}
                             </select>
                         </div>
@@ -61,14 +69,7 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: Palle
                 )
             })
             }
-            <div className="Add">
-                <div className="AddButton" onClick={addLayer} >
-                    <img src={plus_icon} />
-                    <span>
-                        {"Add layer"}
-                    </span>
-                </div>
-            </div>
+
         </div>
     );
 };
