@@ -101,11 +101,7 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
             // Note: highest_pick_location_z is a somewhat hacky way to avoid collisions among feeding conveyors inside the enclosure.
             let z_top: number = Math.max(0, Math.min(
                 highest_pick_location_z - b.dimensions.height, // never travel lower than the pick location.
-<<<<<<< HEAD
-                pallet_config.config.pallets[0].corner1.z - current_height - 2 * b.dimensions.height) // travel as low as the current height minus 2 boxes.
-=======
                 pallet_config.config.pallets[0].corner1.z - current_height - 1.5 * b.dimensions.height) // travel as low as the current height minus 1.5 box.
->>>>>>> afd94788602406e6d83ca7891aa857f1cc20a079
                 - 50 /* 5cm extra safety */);
             paths.push(generatePathForBox(b, z_top));
         });
