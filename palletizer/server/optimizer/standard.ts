@@ -13,42 +13,48 @@ export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, sp
     return { ...coord, action, speed };
 };
 
+
+
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let path: BoxPath = [];
 
     // Picking.
+    // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
+    let preRotated: Coordinate = { ...box.pickLocation };
+    preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
+    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+    preRotated = raiseOverCoordinate(box.pickLocation, z_top);
+    preRotated.θ = box.dropLocation.θ;
+    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
 
     // Dropping.
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
     let lateralApproach: Coordinate = { ...box.dropLocation };
-    lateralApproach.x += 40;
-    lateralApproach.y += 40;
+    lateralApproach.x += 80;
+    lateralApproach.y += 80;
     lateralApproach.z -= 50;
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-    lateralApproach.x -= 40;
-    lateralApproach.y -= 40;
+    lateralApproach.x -= 80;
+    lateralApproach.y -= 80;
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
-
     /*
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
     */
-
     return path;
 };
 
 function calculateTotalHeight(boxes: BoxCoordinate[]): number {
     let height: number = 0, iStack: number = 0;
     boxes.forEach((box) => {
-        if  (iStack != box.palletIndex) { return; }
+        if (iStack != box.palletIndex) { return; }
         height += box.dimensions.height;
         iStack++;
     });
