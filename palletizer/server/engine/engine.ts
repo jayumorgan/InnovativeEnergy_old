@@ -151,7 +151,6 @@ async function safeAwait(promise: Promise<any>) {
     });
 };
 
-
 function defaultMechanicalLayout(): MechanicalLayout {
     return {
         config_id: 0,
@@ -671,17 +670,23 @@ export class Engine {
         tagged.forEach((t: [Drive[], number], _: number) => {
             let [drives, position] = t;
             drives.forEach((d: Drive) => {
-                let { MachineMotionIndex, DriveNumber, Speed, Acceleration } = d;
+                const { MachineMotionIndex, DriveNumber } = d;
+
                 if (!(MachineMotionIndex in mm_group)) {
                     mm_group[MachineMotionIndex] = {}
                 }
-                mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = { position, Speed, Acceleration };
+                mm_group[MachineMotionIndex][numberToDrive(DriveNumber)] = {
+                    position,
+                    ...d
+                };
             });
         });
 
         const mm_ids = Object.keys(mm_group) as string[];
         let move_actions: Action[] = [];
         let wait_actions: Action[] = [];
+
+        let last_speed: { [key: number]: number } = {};
 
         for (let i = 0; i < mm_ids.length; i++) {
             const id: number = +(mm_ids[i]);
@@ -695,28 +700,42 @@ export class Engine {
             let accelerations: number[] = [];
 
             params.forEach((v: any) => {
-                const { position, Speed, Acceleration } = v;
+                const {
+                    position,
+                    Speed,
+                    FreightSpeed,
+                    Acceleration,
+                    FreightAcceleration
+                } = v;
                 positions.push(position);
-                speeds.push(Speed);
-                accelerations.push(acceleration);
+                speeds.push(coordinate.speed === SpeedTypes.FAST ? Speed : FreightSpeed);
+                accelerations.push(coordinate.speed === SpeedTypes.FAST ? Acceleration : FreightAcceleration);
             });
 
             const speed = Math.min(...speeds);
             const acceleration = Math.min(...accelerations);
 
             const move_action = async () => {
-                return mm.emitSpeed(speed).then(() => {
-                    return mm.emitAcceleration(acceleration);
-                }).then(() => {
+                if (!last_speed.hasOwnProperty(id) || last_speed[id] != speed) {
+                    last_speed[id] = speed;
+                    return mm.emitSpeed(speed).then(
+                        () => {
+                            return mm.emitAcceleration(acceleration).then(
+                                () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
+                            )
+                        }
+                    );
+                } else {
                     return mm.emitCombinedAxesAbsoluteMove(axes, positions);
-                });
+                }
             };
+
             const wait_action = () => {
                 return mm.waitForMotionCompletion();
             };
 
             move_actions.push(move_action);
-            wait_actions.push(wait_action);
+            (coordinate.waitForCompletion) && wait_actions.push(wait_action);
         };
 
         return my.__controlSequence([...move_actions, ...wait_actions]);

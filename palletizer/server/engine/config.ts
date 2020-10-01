@@ -18,6 +18,7 @@ export interface Drive {
     Speed: number;
     FreightSpeed: number; // Speed under load.
     Acceleration: number;
+    FreightAcceleration: number;
     HomingSpeed: number;
 };
 

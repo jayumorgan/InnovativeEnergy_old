@@ -387,7 +387,6 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                     z = 0;
                     z += delta_z - height / 2;
                     box.position.set(x, y, z);
-                    console.log(angle, dropLocation.θ, "angle, drop location");
 
                     box.rotateZ(angle);
                     controls.current?.add_mesh(box);

@@ -81,9 +81,10 @@ export interface Drive {
     Gearbox: boolean;
     Direction: NumericalDirection;
     HomingSpeed: number;
-    FreightSpeed: number;
+    FreightSpeed: number; // Under load
     Speed: number;
     Acceleration: number;
+    FreightAcceleration: number; // Under load
 };
 
 //---------------Fix This To Avoid The Horrific Switch Statements---------------
@@ -254,9 +255,10 @@ function nextDrive(a: AxesConfiguration, m: MachineMotion[]): Drive {
         Direction: NumericalDirection.NORMAL,
         Gearbox: false,
         HomingSpeed: 300,
-        Speed: 400,
-        FreightSpeed: 400,
-        Acceleration: 400
+        Speed: 850,
+        FreightSpeed: 450,
+        Acceleration: 600,
+        FreightAcceleration: 200
     };
 };
 
@@ -341,6 +343,12 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
         setEditingDrives(cp);
     });
 
+    const setFreightAcceleration = wrapChangeEventNumber((acceleration: number) => {
+        let cp = [...editingDrives];
+        cp[index].FreightAcceleration = acceleration;
+        setEditingDrives(cp);
+    });
+
     const setHomingSpeed = wrapChangeEventNumber((speed: number) => {
         let cp = [...editingDrives];
         cp[index].HomingSpeed = speed;
@@ -355,7 +363,13 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
         }
     };
 
-    const { Speed, FreightSpeed, HomingSpeed, Acceleration } = editingDrives[index];
+    const {
+        Speed,
+        FreightSpeed,
+        HomingSpeed,
+        Acceleration,
+        FreightAcceleration
+    } = editingDrives[index];
 
     return (
         <div className="DriveConfigCell">
@@ -496,6 +510,16 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
                         </div>
                         <div className="Input">
                             <input type="number" onChange={setAcceleration} value={Acceleration} />
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Freight Acceleration (mm/s²)"}
+                            </span>
+                        </div>
+                        <div className="Input">
+                            <input type="number" onChange={setFreightAcceleration} value={FreightAcceleration} />
                         </div>
                     </div>
                     <div className="Input">

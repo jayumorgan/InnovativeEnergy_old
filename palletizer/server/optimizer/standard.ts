@@ -9,6 +9,7 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
     return { ...coord, z: z_top };
 };
 
+
 export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
     return { ...coord, action, speed, waitForCompletion };
 };

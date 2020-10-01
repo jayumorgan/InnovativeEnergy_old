@@ -29,7 +29,7 @@ export enum ActionTypes {
 
 export enum SpeedTypes {
     FAST,
-    SLOW
+    SLOW // corresponding to FreightSpeed (Drive)
 };
 
 export interface ActionCoordinate extends Coordinate {
