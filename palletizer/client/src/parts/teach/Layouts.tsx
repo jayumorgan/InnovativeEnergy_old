@@ -1,11 +1,7 @@
 import React, { useRef, useState, DragEvent, ChangeEvent, Fragment } from 'react';
-
 import ContentItem, { ButtonProps } from "./ContentItem";
-
 import { ControlProps, COLORS, wrapChangeEventNumber, wrapChangeEventString } from "../shared/shared";
-
 import Box from "./3D/BoxRender";
-
 import {
     PalletGeometry,
     getPalletDimensions,
@@ -21,6 +17,8 @@ import {
 //---------------Styles---------------
 import "./css/Layouts.scss";
 
+
+const DISABLE_LOCKING = true;
 
 interface RotateIconProps {
     size: number;
@@ -187,10 +185,12 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
                 let thresholdX = (newR.width as number) / 7;
                 let thresholdY = (newR.height as number) / 7;
 
-                // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
-                newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
-                // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
-                newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
+                if (!DISABLE_LOCKING) {
+                    // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
+                    newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
+                    // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
+                    newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
+                }
 
                 setRectangle(newR);
             }

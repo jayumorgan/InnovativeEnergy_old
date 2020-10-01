@@ -45,15 +45,16 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: Palle
                 </div>
             </div>
             {[...Stack].reverse().map((s: number, i: number) => {
+                const trueIndex: number = Stack.length - (i + 1);
                 return (
                     <div className="Layer" key={i}>
                         <div className="LayerName">
                             <span>
-                                {"Layer " + String(Stack.length - i) + ":"}
+                                {"Layer " + String(trueIndex + 1) + ":"}
                             </span>
                         </div>
                         <div className="Layout">
-                            <select value={s} onChange={handleChange(i)}>
+                            <select value={s} onChange={handleChange(trueIndex)}>
                                 {Layouts.map((l: LayoutObject, j: number) => {
                                     return (
                                         <option value={j} key={j}> {l.name} </option>
