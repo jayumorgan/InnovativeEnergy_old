@@ -70,7 +70,6 @@
      grid-template-rows: 10% 70% 20%;
      grid-template-columns: 100%;
 
-
      .Perspective {
          display: grid;
          grid-template-rows: 100%;
@@ -250,7 +249,30 @@
      .Parameters {
          display: grid;
          grid-template-rows: 100%;
-         grid-template-columns: 50% 50%;
+         grid-template-columns: 33% 33% 33%;
+
+         .Select {
+             @include flex-center();
+             width: 100%;
+             height: 100%;
+
+             .SelectButton {
+                 @include button-style();
+                 height: 40%;
+                 width: 60%;
+
+                 span {
+                     font-size: $medium-font;
+                     font-weight: $normal-font;
+                 }
+
+             }
+
+             .SelectButton:hover {
+                 @include button-hover();
+             }
+
+         }
 
          .Parameter {
              display: grid;

@@ -70,16 +70,18 @@ body {
 }
 
 @mixin button-style() {
-  @include flex-center();
-  cursor: pointer;
-  border-radius: $border-radius;
-  background-color: $medium-blue;
-  //font-size: $large-font;
-  font-weight: $bold-font;
-  color: white;
-  span {
-      @include unselectable();
-  }
+    @include flex-center();
+    cursor: pointer;
+    border-radius: $border-radius;
+    background-color: $medium-blue;
+    //font-size: $medium-font;
+    //font-size: $large-font;
+    // font-weight: $bold-font;
+    color: white;
+
+    span {
+        @include unselectable();
+    }
 }
 
 @mixin button-hover() {
