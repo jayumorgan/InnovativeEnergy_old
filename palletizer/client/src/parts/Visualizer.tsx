@@ -211,7 +211,6 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         renderer.setSize(width, height);
 
         let scene = new Three.Scene();
-        scene = new Three.Scene();
         scene.background = new Three.Color(0xf8f8f8);
         //        scene.fog = new Three.Fog(0xa0a0a0, 1, 10);
 
