@@ -207,6 +207,7 @@ export class Engine {
     boxPathsForPallet: BoxPath[] = [];
     startTime: Date | null = null;
 
+
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
             handler: this.__handleSendState,
@@ -550,7 +551,7 @@ export class Engine {
         } else {
             return new Promise((_, reject) => {
                 reject("No machine configurations.");
-            })
+            });
         }
     };
 

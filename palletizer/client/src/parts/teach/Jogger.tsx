@@ -170,10 +170,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
-    const [jogController, setJogController] = useState<JogController | null>(null);
-
-
-
+    const [jogController, setJogController] = useState<JogController | null>(Controller ? Controller : null);
 
     const setPosition = (p: any) => {
         const position = p as CoordinateRot;
@@ -189,10 +186,9 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
 
     useEffect(() => {
         if (Controller) {
-            Controller.positionHandler = setPosition;
-            Controller.getPosition();
-            setJogController(Controller);
+            return;
         } else if (savedMachineConfig) {
+            console.log(savedMachineConfig);
             createJogger(savedMachineConfig);
         } else {
             get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
@@ -201,7 +197,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                 console.log("Error get_machine_config", e);
             });
         }
-    }, [machineConfigId]);
+    }, [machineConfigId, Controller]);
 
 
     const handleSpeed = (e: ChangeEvent) => {
@@ -438,7 +434,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                 <div className="Select">
                     <div className="SelectButton" onClick={handleSelect}>
                         <span>
-                            {"Select Point"}
+                            {(!hideName) ? "Select Point" : "Done"}
                         </span>
                     </div>
                 </div>
