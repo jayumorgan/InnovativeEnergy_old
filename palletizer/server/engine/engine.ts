@@ -205,6 +205,7 @@ export class Engine {
     cycleState: CycleState = CycleState.NONE;
     startBox: number = 0;
     boxPathsForPallet: BoxPath[] = [];
+    startTime: Date | null = null;
 
     __initTopics() {
         this.subscribeTopics[REQUEST_TOPIC] = {
@@ -575,13 +576,33 @@ export class Engine {
         });
     };
 
-    async runPalletizerSequence(box_index: number): Promise<any> {
-        const my = this;
 
-        return my.executeHomingSequence().then(() => {
+    async runPalletizerSequence(box_index: number): Promise<any> {
+        let my = this;
+
+        const homeIfZero = () => {
+            if (box_index === my.startBox) {
+                return my.executeHomingSequence();
+            } else {
+                return Promise.resolve();
+            }
+        };
+
+        return homeIfZero().then(() => {
+            if (box_index === 0 || null == my.startTime) {
+                my.startTime = new Date();
+                console.log("Started pallet sequence at " + my.startTime.toISOString());
+            }
             return my.executePathSequence(box_index, 0);
+        }).then(() => {
+            if (null != my.startTime) {
+                const t1: Date = new Date();
+                console.log("Pallet sequence execution time so far: " + ((t1.getTime() - my.startTime.getTime()) / 1000) + " seconds.")
+            }
+            return Promise.resolve();
         });
     };
+
 
     async executePathSequence(box_index: number, path_index: number): Promise<any> {
         const my = this;
