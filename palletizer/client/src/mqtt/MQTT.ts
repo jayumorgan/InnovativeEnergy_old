@@ -27,12 +27,8 @@ function MQTTSubscriber(handle_information: (v: any) => void, handle_state: (v: 
     });
 
     client.on("connect", () => {
-        client.subscribe(TOPIC + "state", () => {
-            // console.log("Subscribed to " + TOPIC + "state...");
-        });
-        client.subscribe(TOPIC + "information", () => {
-            // console.log("Subscribed to " + TOPIC + "error...");
-        });
+        client.subscribe(TOPIC + "state", () => { return; });
+        client.subscribe(TOPIC + "information", () => { return; });
     });
 
     client.on("message", (topic: string, message_buffer: Buffer) => {
