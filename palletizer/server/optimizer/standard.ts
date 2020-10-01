@@ -9,11 +9,9 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
     return { ...coord, z: z_top };
 };
 
-export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW): ActionCoordinate {
-    return { ...coord, action, speed };
+export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
+    return { ...coord, action, speed, waitForCompletion };
 };
-
-
 
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let path: BoxPath = [];
@@ -36,18 +34,20 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     lateralApproach.x += 80;
     lateralApproach.y += 80;
     lateralApproach.z -= 50;
-    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST));
+    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
     lateralApproach.x -= 80;
     lateralApproach.y -= 80;
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
+
     /*
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
     */
+
     return path;
 };
 
@@ -61,6 +61,14 @@ function calculateTotalHeight(boxes: BoxCoordinate[]): number {
     return height;
 }
 
+function calculateHighestPickLocationZ(boxes: BoxCoordinate[]): number {
+    let highestZ: number = 10000;
+    boxes.forEach((box) => {
+        if (box.pickLocation.z < highestZ) { highestZ = box.pickLocation.z; }
+    });
+    return highestZ;
+}
+
 export function generateStandardPath(pallet_config: SavedPalletConfiguration): BoxPath[] {
     const { boxCoordinates } = pallet_config;
     const { pallets } = pallet_config.config;
@@ -71,7 +79,8 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
 
     let paths: BoxPath[] = [];
     let current_height: number = 0;
-    let total_height: number = calculateTotalHeight(boxCoordinates);
+    const total_height: number = calculateTotalHeight(boxCoordinates);
+    const highest_pick_location_z: number = calculateHighestPickLocationZ(boxCoordinates);
     console.log("generateStandardPath: total_height=" + total_height);
 
     while (true) {
@@ -82,15 +91,17 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
             return (coord.stackIndex === stack_indices[coord.palletIndex]);
         })).map((coord: BoxCoordinate) => {
             return coord;
-        }).sort((a: BoxCoordinate, b: BoxCoordinate) => {
-            return b.linearPathDistance - a.linearPathDistance;
+            // TODO: find a sort criterion that is 100% compatible with the lateral approach...
+            // }).sort((a: BoxCoordinate, b: BoxCoordinate) => {
+            //     return b.linearPathDistance - a.linearPathDistance;
         }).forEach((b: BoxCoordinate) => {
             has_coordinates = true;
             // Calculate a z_top that minimized travel time conservatively.
             // TODO: review for multiple pallets...
+            // Note: highest_pick_location_z is a somewhat hacky way to avoid collisions among feeding conveyors inside the enclosure.
             let z_top: number = Math.max(0, Math.min(
-                b.pickLocation.z - b.dimensions.height, // never travel lower than the pick location.
-                pallet_config.config.pallets[0].corner1.z - current_height - 2 * b.dimensions.height) // travel as low as the current height minus 2 boxes.
+                highest_pick_location_z - b.dimensions.height, // never travel lower than the pick location.
+                pallet_config.config.pallets[0].corner1.z - current_height - 1.5 * b.dimensions.height) // travel as low as the current height minus 1.5 box.
                 - 50 /* 5cm extra safety */);
             paths.push(generatePathForBox(b, z_top));
         });

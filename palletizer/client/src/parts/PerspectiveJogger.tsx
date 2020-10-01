@@ -55,7 +55,7 @@ const ArrowDimensions: ArrowDims = {
 };
 
 function setPlaneArrowPosition(mesh: Three.Mesh, direction: PlaneArrowDirections): Three.Mesh {
-    mesh.name = direction;
+    mesh.name = String(direction);
     switch (direction) {
         case (PlaneArrowDirections.FORWARD): {
             mesh.position.setComponent(VectorDirections.Y, 0.25);
@@ -308,7 +308,6 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
             min.setComponent(VectorDirections.X, 0);
             min.setComponent(VectorDirections.Z, 0);
             min.setComponent(VectorDirections.Y, - angleArrowRadius);
-            console.log(min, "min");
             const project = min.project(camera);
             return project.y;
         })();
@@ -447,7 +446,6 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
                 if (first) {
                     const name: PlaneArrowDirections = (first.object as Three.Mesh).name as PlaneArrowDirections;
                     if (PlaneArrowDirections.ANGLE === name) {
-                        console.log("clicked angle");
                         startAngleDrag();
                     } else {
                         handleJogClick(name);

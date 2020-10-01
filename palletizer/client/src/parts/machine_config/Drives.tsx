@@ -57,11 +57,11 @@ const ALL_DIRECTIONS = { "Normal": NumericalDirection.NORMAL, "Reverse": Numeric
 
 const MECH_GAIN = {
     timing_belt_150mm_turn: [150, "Timing Belt"],
-//    legacy_timing_belt_200_mm_turn: [200, "Legacy Timing Belt"],
+    //    legacy_timing_belt_200_mm_turn: [200, "Legacy Timing Belt"],
     enclosed_timing_belt_mm_turn: [208, "Enclosed Timing Belt"],
     ballscrew_10mm_turn: [10, "Ball Screw"],
-//    legacy_ballscrew_5_mm_turn: [5, "Legacy Ball Screw"],
-//    indexer_deg_turn: [85, "Indexer Degree Turn"],
+    //    legacy_ballscrew_5_mm_turn: [5, "Legacy Ball Screw"],
+    //    indexer_deg_turn: [85, "Indexer Degree Turn"],
     indexer_v2_deg_turn: [36, "Rotary Actuator"], // Rename to rotary actuator.
     roller_conveyor_mm_turn: [157, "Roller Conveyor"],
     belt_conveyor_mm_turn: [73.563, "Belt Conveyor"],
@@ -81,6 +81,7 @@ export interface Drive {
     Gearbox: boolean;
     Direction: NumericalDirection;
     HomingSpeed: number;
+    FreightSpeed: number;
     Speed: number;
     Acceleration: number;
 };
@@ -254,6 +255,7 @@ function nextDrive(a: AxesConfiguration, m: MachineMotion[]): Drive {
         Gearbox: false,
         HomingSpeed: 300,
         Speed: 400,
+        FreightSpeed: 400,
         Acceleration: 400
     };
 };
@@ -327,6 +329,12 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
         setEditingDrives(cp);
     });
 
+    const setFreightSpeed = wrapChangeEventNumber((speed: number) => {
+        let cp = [...editingDrives];
+        cp[index].FreightSpeed = speed;
+        setEditingDrives(cp);
+    });
+
     const setAcceleration = wrapChangeEventNumber((acceleration: number) => {
         let cp = [...editingDrives];
         cp[index].Acceleration = acceleration;
@@ -347,7 +355,7 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
         }
     };
 
-    const { Speed, HomingSpeed, Acceleration } = editingDrives[index];
+    const { Speed, FreightSpeed, HomingSpeed, Acceleration } = editingDrives[index];
 
     return (
         <div className="DriveConfigCell">
@@ -468,6 +476,16 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
                         </div>
                         <div className="Input">
                             <input type="number" onChange={setSpeed} value={Speed} />
+                        </div>
+                    </div>
+                    <div className="Input">
+                        <div className="Title">
+                            <span>
+                                {"Freight Speed (mm/s)"}
+                            </span>
+                        </div>
+                        <div className="Input">
+                            <input type="number" onChange={setFreightSpeed} value={FreightSpeed} />
                         </div>
                     </div>
                     <div className="Input">

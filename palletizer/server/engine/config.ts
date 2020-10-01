@@ -16,6 +16,7 @@ export interface Drive {
     Direction: number;
     Gearbox: boolean;
     Speed: number;
+    FreightSpeed: number; // Speed under load.
     Acceleration: number;
     HomingSpeed: number;
 };

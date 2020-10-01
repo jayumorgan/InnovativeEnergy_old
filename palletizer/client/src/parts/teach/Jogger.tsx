@@ -276,19 +276,19 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const jogMove = (d: PlaneArrowDirections) => {
         switch (d) {
             case (PlaneArrowDirections.FORWARD): { // + y
-                handleMove(Directions.UP);
+                handleMove(Directions.UP)();
                 break;
             }
             case (PlaneArrowDirections.BACK): { //-y
-                handleMove(Directions.DOWN);
+                handleMove(Directions.DOWN)();
                 break;
             }
             case (PlaneArrowDirections.RIGHT): { //+x
-                handleMove(Directions.RIGHT);
+                handleMove(Directions.RIGHT)();
                 break;
             }
             case (PlaneArrowDirections.LEFT): { // -x
-                handleMove(Directions.LEFT);
+                handleMove(Directions.LEFT)();
                 break;
             }
             case (PlaneArrowDirections.UP): { // +z
@@ -314,7 +314,6 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             });
         }
     };
-
 
     const handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;

@@ -30,26 +30,32 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO TeachMode:
 *** DONE Compute rotation of pallet relative to box. (may not be relevant anymore.)
-*** TODO Jogger Rotation Display.
+*** DONE Jogger Rotation Display.
 *** TODO IO/Jog controller safety on use before initialization in subcomponents.
 *** TODO Limit Stack Height.
 *** TODO Something about setting box orientation.
-*** TODO Add good pick detection in teach mode.
+*** DONE Add good pick detection in teach mode.
 *** DONE θ coordinate numerical
 *** DONE Round coordinates in the jogger.
-*** TODO Update jogger to use numberical rotation (UI piece for this as well.) Right now it is a boolean that probably doesnt work.
+*** DONE Update jogger to use numberical rotation (UI piece for this as well.)
 
 ** DONE mm-js-api:
 *** DONE Use position from step counts. (Gain computation.) -- This is crucial for not causing giving strang positions when user jogs past end stops.
 
 ** TODO Execution:
+*** TODO I'm sure there is something.
 
 ** TODO Production:
 *** TODO Logging.
 *** TODO Update protocol -- git?
 
+** TODO Jogger:
+*** DONE Perspective Jogger
+*** DONE Plugin controls.
+*** TODO Improve beauty + usability.
+
 ** TODO Engine:
-*** TODO Add Good Pick Detection + Box Detection Actions.
+*** DONE Add Good Pick Detection + Box Detection Actions.
 *** TODO Consistent error messaging to client. (see: catch blocks and information send)
 
 ** TODO Configuration Page:
@@ -66,7 +72,6 @@ PALLETIZER -*- mode: org -*-
 *** DONE There should be a pure jogger screen (not needing to go to pallet config or machine config ?? Extra button on machine configuration for jogger?
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations ?? Going to need good images then.
-*** TODO Offset user interface needed to be added
 *** TODO Path optimization needs to be fixed ?? Can I get a real configuration.
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
 *** DONE There should be homing buttons in the home page ?? Ah, okay. -- TEST- Jog controller init (release and reset) may not be completed.
@@ -74,8 +79,8 @@ PALLETIZER -*- mode: org -*-
 *** DONE Checkbox for gearbox or custom gain in the actuator set up
 *** DONE Rename "select" to "save"
 *** DONE populate columns and rows instead of dragging and dropping boxes
-*** TODO joggers (teach positions) had too large of a "click-space" where a user could accidentally click it
-*** TODO Should not refresh configuration page before other set ups are shown
+*** DONE joggers (teach positions) had too large of a "click-space" where a user could accidentally click it
+*** DONE Should not refresh configuration page before other set ups are shown
 *** DONE Missing delete layer
 *** TODO Missing software stop in palletizer app ?? check detection mechanism.
 *** DONE incomplete config (edited) 
