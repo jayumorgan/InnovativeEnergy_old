@@ -172,6 +172,9 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(null);
 
+
+
+
     const setPosition = (p: any) => {
         const position = p as CoordinateRot;
         setCurrentPosition(position);
@@ -180,12 +183,14 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const createJogger = (s: SavedMachineConfiguration) => {
         const { axes, machines } = s.config;
         const jc = new JogController(machines, axes, setPosition); // amen.
+        jc.getPosition();
         setJogController(jc);
     };
 
     useEffect(() => {
         if (Controller) {
             Controller.positionHandler = setPosition;
+            Controller.getPosition();
             setJogController(Controller);
         } else if (savedMachineConfig) {
             createJogger(savedMachineConfig);
@@ -197,6 +202,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             });
         }
     }, [machineConfigId]);
+
 
     const handleSpeed = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
@@ -219,8 +225,6 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             });
         }
     };
-
-
 
     const handleMove = (d: Directions) => () => {
         if (jogController === null) {

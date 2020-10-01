@@ -256,7 +256,6 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
         const renderer = new Three.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
 
-
         renderer.setClearColor('white');
         renderer.setSize(width, height);
 

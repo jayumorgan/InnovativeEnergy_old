@@ -197,7 +197,7 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
                 {show_home ?
                     <div className="HomeButton">
                         <div className="ButtonContainer" onClick={home_button}>
-                            <span> Home Icon </span>
+                            <span className={"icon-home_active"}> </span>
                             <span id="button-text"> {"Home"} </span>
                         </div>
                     </div>

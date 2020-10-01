@@ -1,20 +1,21 @@
 @import './master.scss';
 
-html,body {
-    height:100%;
+html,
+body {
+    height: 100%;
 }
 
 * {
-  font-family: 'Lato';
+    font-family: 'Lato';
 }
 
 .App {
-  width: 100vw;
-  min-height: 100vh;
+    width: 100vw;
+    min-height: 100vh;
 }
 
-.LargeContainer{
-  height: 100%;
-  width: 100%;
-  position: relative;
+.LargeContainer {
+    height: 100%;
+    width: 100%;
+    position: relative;
 }
