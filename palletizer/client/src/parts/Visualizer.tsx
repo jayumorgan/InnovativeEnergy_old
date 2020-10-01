@@ -206,7 +206,8 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
         let width = (mount.current as HTMLDivElement).clientWidth;
         let height = (mount.current as HTMLDivElement).clientHeight;
 
-        let renderer = new Three.WebGLRenderer({ antialias: true });
+        const renderer = new Three.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor('white');
         renderer.setSize(width, height);
 

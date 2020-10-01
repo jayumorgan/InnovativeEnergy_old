@@ -27,6 +27,7 @@ function Box({ length, height, width }: BoxDimensions) {
         let height = (MountElement.current as HTMLDivElement).clientHeight;
 
         let renderer = new Three.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor(0xf8f8f8, 0);
         renderer.setSize(width, height);
 
