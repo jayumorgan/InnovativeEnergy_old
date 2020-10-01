@@ -2,6 +2,11 @@ import React, { useRef, useEffect } from "react";
 import * as Three from "three";
 
 import { getCamera } from "./Visualizer";
+import { Coordinate } from "../geometry/geometry";
+
+
+const LatoPath: string = "fonts/json/Lato_Bold.json";
+
 
 enum Colors {
     Aluminium = 0xa7b0bb,
@@ -9,7 +14,8 @@ enum Colors {
     MediumBlue = 0x2b3e55,
     Green = 0x5bc47e,
     White = 0xffffff,
-    LightBlue = 0xeff2f7
+    LightBlue = 0xeff2f7,
+    Black = 0x000000
 };
 
 enum VectorDirections {
@@ -19,10 +25,13 @@ enum VectorDirections {
 };
 
 enum PlaneArrowDirections {
-    FORWARD,
-    BACK,
-    LEFT,
-    RIGHT
+    FORWARD = "Forward",
+    BACK = "Backward",
+    LEFT = "Left",
+    RIGHT = "Right",
+    UP = "Up",
+    DOWN = "Down",
+    ANGLE = "Angle"
 };
 
 interface ArrowDims {
@@ -80,8 +89,8 @@ function setPlaneArrowPosition(mesh: Three.Mesh, direction: PlaneArrowDirections
 };
 
 
-function makeVerticalArrow(up: boolean) {
-    let arrow = new Three.Shape();
+function makeVerticalArrow(up: boolean): Three.Mesh {
+    const arrow = new Three.Shape();
 
     arrow.moveTo(ArrowDimensions.width / 2 * -1, ArrowDimensions.zeroY);
     arrow.lineTo(ArrowDimensions.zeroX, ArrowDimensions.offsetY * 2)
@@ -89,20 +98,22 @@ function makeVerticalArrow(up: boolean) {
     arrow.lineTo(ArrowDimensions.zeroX, ArrowDimensions.offsetY / 2);
     arrow.lineTo(ArrowDimensions.width / 2 * -1, ArrowDimensions.zeroY);
 
-    let geometry = new Three.ShapeGeometry(arrow);
+    const geometry = new Three.ShapeGeometry(arrow);
 
-    let material = new Three.MeshBasicMaterial({
+    const material = new Three.MeshBasicMaterial({
         color: Colors.MediumBlue
     });
 
-    let mesh = new Three.Mesh(geometry, material);
+    const mesh = new Three.Mesh(geometry, material);
 
     if (up) {
         mesh.rotateX(Math.PI / 2);
+        mesh.name = String(PlaneArrowDirections.UP);
         mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, 0.45);
     } else {
         mesh.rotateY(Math.PI);
         mesh.rotateX(Math.PI / 2);
+        mesh.name = String(PlaneArrowDirections.DOWN);
         mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, -0.9);
     }
 
@@ -110,8 +121,21 @@ function makeVerticalArrow(up: boolean) {
 };
 
 
+function makeAngleArrow(): Three.Mesh {
+    let arrow = makeVerticalArrow(true);
+    arrow.rotateX(-Math.PI / 2);
+    arrow.rotateZ(Math.PI);
+    arrow.name = String(PlaneArrowDirections.ANGLE);
+    arrow.position.set(0, 1.4, 0.01);
+    arrow.scale.set(0.5, 0.5, 0.5);
+
+    return arrow;
+};
+
+
+
 function makeArrow(direction: PlaneArrowDirections): Three.Mesh {
-    let arrow = new Three.Shape();
+    const arrow = new Three.Shape();
 
     const {
         zeroX,
@@ -132,29 +156,65 @@ function makeArrow(direction: PlaneArrowDirections): Three.Mesh {
     arrow.lineTo(width, zeroY);
     arrow.lineTo(zeroX, zeroY);
 
-    let geometry = new Three.ShapeGeometry(arrow);
-    let material = new Three.MeshBasicMaterial({
+    const geometry = new Three.ShapeGeometry(arrow);
+    const material = new Three.MeshBasicMaterial({
         color: Colors.MediumBlue
     });
-    /* let edges = new Three.EdgesGeometry(geometry);
-     * let line = new Three.LineSegments(edges, new Three.LineBasicMaterial({     *     color: 0xffffff
-     * })); */
 
-    let mesh = new Three.Mesh(geometry, material);
+    const mesh = new Three.Mesh(geometry, material);
     mesh.position.set(-width / 2, zeroY, 0.0001);
+    mesh.name = String(direction);
 
     return setPlaneArrowPosition(mesh, direction);
 };
 
 function makeCircle(): Three.Mesh {
-    let geometry = new Three.CircleGeometry(1, 128);
-    let material = new Three.MeshBasicMaterial({
+    const geometry = new Three.CircleGeometry(1, 128);
+    const material = new Three.MeshBasicMaterial({
         color: Colors.LightBlue
     });
-    let circle = new Three.Mesh(geometry, material);
+    const circle = new Three.Mesh(geometry, material);
     circle.receiveShadow = true;
     circle.castShadow = true;
     return circle;
+};
+
+function makeArc(): Three.Mesh {
+    let shape = new Three.Shape();
+    let radius = 1.1;
+    let shift = 0.02;
+
+    shape.moveTo(0, radius);
+    shape.absarc(0, 0, radius, Math.PI / 2, - Math.PI / 2, true);
+    shape.lineTo(0, -radius + shift);
+    shape.absarc(0, 0, radius - shift, -Math.PI / 2, Math.PI / 2, false);
+    shape.lineTo(0, radius);
+    let geometry = new Three.ShapeGeometry(shape);
+    let material = new Three.MeshBasicMaterial({
+        color: Colors.LightBlue
+    });
+
+    let mesh = new Three.Mesh(geometry, material);
+    return mesh;
+};
+
+function makeLabels(font: Three.Font, scene: Three.Scene): void {
+    const matLite = new Three.MeshBasicMaterial({
+        color: Colors.White,
+    });
+
+    const make_text = (s: string, p: Coordinate, rotationX: number = 0, size: number = 0.1) => {
+        let shapes = font.generateShapes(s, size);
+        let geometry = new Three.ShapeBufferGeometry(shapes);
+        let text = new Three.Mesh(geometry, matLite);
+        text.position.set(p.x, p.y, p.z);
+        text.rotateX(rotationX);
+        scene.add(text);
+    };
+
+    make_text("+y", { x: -0.09, y: 0.6, z: 0.001 });
+    make_text("+x", { x: 0.6, y: -0.05, z: 0.001 });
+    make_text("+z", { x: -0.06, y: -0.0001, z: 0.6 }, Math.PI / 2, 0.07);
 };
 
 
@@ -172,13 +232,7 @@ export default function Jogger() {
         renderer.setClearColor('white');
         renderer.setSize(width, height);
 
-        let light = new Three.DirectionalLight(0xffffff, 1, 100);
-        light.position.set(0, 1, 0); 			//default; light shining from top
-        light.castShadow = true;            // default false
-        scene.add(light);
-
-
-        let scene = new Three.Scene();
+        const scene = new Three.Scene();
         scene.background = new Three.Color(0xffffff);
 
         const color = 0xFFFFFF;  // white
@@ -186,27 +240,10 @@ export default function Jogger() {
         const far = 100;
         scene.fog = new Three.Fog(color, near, far);
 
-        let hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
-        hemiLight.position.set(0, -10, 7);
-        hemiLight.castShadow = true;
-        hemiLight.receiveShadow = true;
-        scene.add(hemiLight);
-
-        let dirLight = new Three.DirectionalLight(0xffffff);
-        dirLight.position.set(0, -10, 7);
-        dirLight.castShadow = true;
-        dirLight.shadow.camera.top = 10;
-        dirLight.shadow.camera.bottom = - 10;
-        dirLight.shadow.camera.left = - 10;
-        dirLight.shadow.camera.right = 10;
-        dirLight.shadow.camera.near = 0.1;
-        dirLight.shadow.camera.far = 500;
-        scene.add(dirLight);
-
-        let groundMesh = new Three.Mesh(
+        const groundMesh = new Three.Mesh(
             new Three.PlaneBufferGeometry(40, 40),
             new Three.MeshBasicMaterial({
-                color: 0x000000,
+                color: Colors.White,
                 /* depthWrite: false */
             })
         );
@@ -217,13 +254,17 @@ export default function Jogger() {
         scene.add(groundMesh);
 
 
-        let axesHelper = new Three.AxesHelper(5);
-        scene.add(axesHelper);
-
-        let circle = makeCircle();
+        /* let axesHelper = new Three.AxesHelper(5);
+	 * scene.add(axesHelper);
+	 */
+        const circle = makeCircle();
         scene.add(circle);
 
-        let camera = getCamera(width, height);
+        const arc = makeArc();
+        arc.position.set(0, 0, 0.0005);
+        scene.add(arc);
+
+        const camera = getCamera(width, height);
         camera.up.set(0, 0, 1);
         let back = -3
 
@@ -240,18 +281,12 @@ export default function Jogger() {
             scene.add(rightArrow);
             const leftArrow = makeArrow(PlaneArrowDirections.LEFT);
             scene.add(leftArrow);
-
-            /* var edges = new Three.EdgesGeometry(leftArrow.geometry);
-	     * var line = new Three.LineSegments(edges, new Three.LineBasicMaterial({ color: 0xffffff }));
-	     * scene.add(line); */
-
             const upZArrow = makeVerticalArrow(true);
-            upZArrow.name = "upZArrow";
             scene.add(upZArrow);
-
             const downZArrow = makeVerticalArrow(false);
-            downZArrow.name = "downZArrow";
             scene.add(downZArrow);
+            const angleArrow = makeAngleArrow();
+            scene.add(angleArrow);
 
             return [upArrow, downArrow, rightArrow, leftArrow, upZArrow, downZArrow];
         };
@@ -272,6 +307,16 @@ export default function Jogger() {
             }
             renderer.render(scene, camera);
         };
+
+        const fontLoader = new Three.FontLoader();
+        fontLoader.loadAsync(LatoPath).then((font: Three.Font) => {
+            makeLabels(font, scene);
+            render_scene();
+        }).catch((e: any) => {
+            console.log("Failed to load font", e);
+        })
+
+
 
         const onMouseMove = (event: any) => {
             mouse.x = (event.offsetX / width) * 2 - 1;
