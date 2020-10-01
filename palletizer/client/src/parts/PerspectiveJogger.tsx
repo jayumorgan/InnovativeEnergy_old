@@ -15,7 +15,8 @@ enum Colors {
     Green = 0x5bc47e,
     White = 0xffffff,
     LightBlue = 0xeff2f7,
-    Black = 0x000000
+    Black = 0x000000,
+    Alabaster = 0xfbfbfb
 };
 
 enum VectorDirections {
@@ -24,7 +25,7 @@ enum VectorDirections {
     Z = 2
 };
 
-enum PlaneArrowDirections {
+export enum PlaneArrowDirections {
     FORWARD = "Forward",
     BACK = "Backward",
     LEFT = "Left",
@@ -83,6 +84,9 @@ function setPlaneArrowPosition(mesh: Three.Mesh, direction: PlaneArrowDirections
 };
 
 
+const verticalArrowTop: number = 0.3
+const vertialArrowBottom: number = -1.1;
+
 function makeVerticalArrow(up: boolean): Three.Mesh {
     const arrow = new Three.Shape();
 
@@ -103,12 +107,12 @@ function makeVerticalArrow(up: boolean): Three.Mesh {
     if (up) {
         mesh.rotateX(Math.PI / 2);
         mesh.name = String(PlaneArrowDirections.UP);
-        mesh.position.set(ArrowDimensions.zeroX, 1, 0.6);
+        mesh.position.set(ArrowDimensions.zeroX, 1, verticalArrowTop);
     } else {
         mesh.rotateY(Math.PI);
         mesh.rotateX(Math.PI / 2);
         mesh.name = String(PlaneArrowDirections.DOWN);
-        mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, -1.4);
+        mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, vertialArrowBottom);
     }
 
     return mesh;
@@ -192,13 +196,13 @@ function makeLabels(font: Three.Font, scene: Three.Scene): void {
     };
     make_text("+X", { x: 0.6, y: -0.05, z: 0.001 });
     make_text("+Y", { x: -0.09, y: 0.6, z: 0.001 });
-    make_text("+Z", { x: -0.07, y: 1 - 0.0001, z: 0.8 }, Math.PI / 2, 0.07);
+    make_text("+Z", { x: -0.07, y: 1 - 0.0001, z: verticalArrowTop + 0.15 }, Math.PI / 2, 0.07);
 };
 
 const angleArrowRadius: number = 1.3;
-const angleArrowTextRadius: number = 1.3;
 const angleArrowStartingRotation: number = Math.PI;
 const angleArrowTextOffset: number = - 0.02
+const angleArrowTextOffsetY: number = 0.1;
 
 function makeAngleArrowText(θ: number, font: Three.Font): Three.Mesh {
 
@@ -210,7 +214,7 @@ function makeAngleArrowText(θ: number, font: Three.Font): Three.Mesh {
     const geometry = new Three.ShapeBufferGeometry(shapes);
     const text = new Three.Mesh(geometry, matLite);
     text.rotateX(Math.PI / 2);
-    text.position.set(angleArrowTextOffset, angleArrowTextRadius, 0.01);
+    text.position.set(angleArrowTextOffset, angleArrowRadius + angleArrowTextOffsetY, 0.01);
     return text;
 };
 
@@ -227,45 +231,25 @@ function makeAngleArrow(θ: number, font: Three.Font): [Three.Mesh, Three.Mesh] 
 
 //---------------Main Component---------------
 
-export default function Jogger() {
+export interface PerspectiveJoggerProps {
+    handleCartesianMove: (d: PlaneArrowDirections) => void;
+    handleRotateMove: (angle: number) => void;
+};
+
+export default function Jogger({ handleCartesianMove, handleRotateMove }: PerspectiveJoggerProps) {
 
     const mount = useRef<HTMLDivElement>(null);
 
     const handleAngleJog = (angle: number) => {
-        console.log("Jogging  angle", angle);
+        handleRotateMove(angle);
     };
 
     const handleJogClick = (d: PlaneArrowDirections) => {
-        console.log("Jog", d);
-        switch (d) {
-            case (PlaneArrowDirections.FORWARD): { // + y
-                break;
-            }
-            case (PlaneArrowDirections.BACK): { //-y
-                break;
-            }
-            case (PlaneArrowDirections.RIGHT): { //+x
-                break;
-            }
-            case (PlaneArrowDirections.LEFT): { // -x
-                break;
-            }
-            case (PlaneArrowDirections.UP): { // +z
-                break;
-            }
-            case (PlaneArrowDirections.DOWN): {
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+        handleCartesianMove(d);
     };
 
     useEffect(() => {
         let currentAngle: number = 0;
-
-
 
         let width = (mount.current as HTMLDivElement).clientWidth;
         let height = (mount.current as HTMLDivElement).clientHeight;
@@ -277,11 +261,11 @@ export default function Jogger() {
         renderer.setSize(width, height);
 
         const scene = new Three.Scene();
-        scene.background = new Three.Color(0xffffff);
+        scene.background = new Three.Color(Colors.Alabaster);
 
         const camera = getCamera(width, height);
         camera.up.set(0, 0, 1);
-        const back = -3
+        const back = -2.6
         camera.position.set(0, back, -0.5 * back);
         camera.lookAt(0, 0, 0);
 
@@ -291,7 +275,7 @@ export default function Jogger() {
         const groundMesh = new Three.Mesh(
             new Three.PlaneBufferGeometry(40, 40),
             new Three.MeshBasicMaterial({
-                color: Colors.White,
+                color: Colors.Alabaster,
             })
         );
 
@@ -407,8 +391,6 @@ export default function Jogger() {
             console.log("Failed to load font", e);
         });
 
-
-
         let angleDrag: boolean = false;
 
         const moveAngleArrow = () => {
@@ -432,8 +414,8 @@ export default function Jogger() {
                     const shapes = font.generateShapes(String(currentAngle) + "°", 0.05);
                     const geometry = new Three.ShapeBufferGeometry(shapes);
                     angleArrowText.geometry = geometry;
-                    angleArrowText.position.x = Math.sin(angle) * angleArrowTextRadius + angleArrowTextOffset;
-                    angleArrowText.position.y = Math.cos(angle) * angleArrowTextRadius;
+                    angleArrowText.position.x = xC;//+ angleArrowTextOffset;
+                    angleArrowText.position.y = yC + angleArrowTextOffsetY;
                 }
                 render_scene(true);
             } else {

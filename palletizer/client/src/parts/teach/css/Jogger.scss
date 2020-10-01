@@ -71,6 +71,14 @@
      grid-template-columns: 100%;
 
 
+     .Perspective {
+         display: grid;
+         grid-template-rows: 100%;
+         grid-template-columns: 100%;
+     }
+
+
+
      .Name {
          display: grid;
          grid-template-columns: 30% 70%;
@@ -92,9 +100,7 @@
                  font-size: $large-font;
                  padding: $margin;
                  color: $dark-blue;
-
              }
-
          }
      }
 
@@ -122,6 +128,8 @@
                  }
              }
          }
+
+
 
          .Move {
              display: grid;

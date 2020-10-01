@@ -158,10 +158,8 @@ export default class Jogger {
     };
 
     //NOTE: In the future -- rotation will be a number (absolute position).
-    startRotation(rotate: boolean) {
-
-        let my = this;
-
+    rotateToAngle(angle: number) {
+        const my = this;
         if (my.isMoving) {
             return Promise.reject("Already in motion");
         } else {
@@ -173,7 +171,7 @@ export default class Jogger {
             θ.forEach((d: Drive) => {
                 let { MachineMotionIndex, DriveNumber } = d;
                 let p = new Promise((resolve, reject) => {
-                    my.machineMotions[MachineMotionIndex].emitAbsoluteMove(driveNumberToDRIVE(DriveNumber), rotate ? 90 : 0).then(() => {
+                    my.machineMotions[MachineMotionIndex].emitAbsoluteMove(driveNumberToDRIVE(DriveNumber), angle).then(() => {
                         return my.machineMotions[MachineMotionIndex].waitForMotionCompletion();
                     }).then(() => {
                         my.getPosition();
@@ -196,6 +194,10 @@ export default class Jogger {
                 });
             });
         }
+    };
+
+    startRotation(rotate: boolean) {
+        return this.rotateToAngle(rotate ? 90 : 0);
     };
 
     stopMotion() {

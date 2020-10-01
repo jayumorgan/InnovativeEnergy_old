@@ -5,6 +5,7 @@ import { get_machine_config } from "../../requests/requests";
 import { CoordinateRot } from "../../geometry/geometry";
 import { SavedMachineConfiguration } from '../MachineConfig';
 import { DIRECTION } from 'mm-js-api';
+import PerspectiveJogger, { PerspectiveJoggerProps, PlaneArrowDirections } from "../PerspectiveJogger";
 
 //---------------Styles + Images---------------
 import "./css/Jogger.scss";
@@ -219,6 +220,8 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
+
+
     const handleMove = (d: Directions) => () => {
         if (jogController === null) {
             console.log("Jog controller not initialized");
@@ -265,6 +268,49 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             });
         }
     };
+
+    const jogMove = (d: PlaneArrowDirections) => {
+        switch (d) {
+            case (PlaneArrowDirections.FORWARD): { // + y
+                handleMove(Directions.UP);
+                break;
+            }
+            case (PlaneArrowDirections.BACK): { //-y
+                handleMove(Directions.DOWN);
+                break;
+            }
+            case (PlaneArrowDirections.RIGHT): { //+x
+                handleMove(Directions.RIGHT);
+                break;
+            }
+            case (PlaneArrowDirections.LEFT): { // -x
+                handleMove(Directions.LEFT);
+                break;
+            }
+            case (PlaneArrowDirections.UP): { // +z
+                handleAMove(true);
+                break;
+            }
+            case (PlaneArrowDirections.DOWN): {
+                handleAMove(false);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    };
+
+    const jogMoveAngle = (angle: number) => {
+        if (jogController !== null) {
+            jogController.rotateToAngle(angle).then(() => {
+                console.log("Rotate jogger -- test after type change.");
+            }).catch((e: any) => {
+                console.log("Error rotate ", e);
+            });
+        }
+    };
+
 
     const handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
@@ -340,6 +386,12 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         );
     }
 
+    const perspectiveJoggerProps: PerspectiveJoggerProps = {
+        handleCartesianMove: jogMove,
+        handleRotateMove: jogMoveAngle
+    };
+
+
     return (
         <div className="Jogger">
             <div className="Name">
@@ -373,35 +425,8 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                         </div>
                     </div>
                 </div>
-                <div className="Move">
-                    <A dagger={true} handleMove={handleAMove} />
-                    <div className="Mover">
-                        <div className="MoverGrid">
-                            <div className="Select">
-                                <div className="SelectButton" onClick={handleSelect}>
-                                    <span>
-                                        {(!hideName) ? "Save" : "Done"}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="Up" onClick={handleMove(Directions.UP)}>
-                                <SolidArrow rotation={ROTATION.UP} size={arrowSize} />
-                            </div>
-                            <div className="Down" onClick={handleMove(Directions.DOWN)}>
-                                <SolidArrow rotation={ROTATION.DOWN} size={arrowSize} />
-                            </div>
-                            <div className="Right" onClick={handleMove(Directions.RIGHT)}>
-                                <SolidArrow rotation={ROTATION.RIGHT} size={arrowSize} />
-                            </div>
-                            <div className="Left" onClick={handleMove(Directions.LEFT)}>
-                                <SolidArrow rotation={ROTATION.LEFT} size={arrowSize} />
-                            </div>
-                            <div className="Rotate" onClick={handleRotate}>
-                                <img src={θ ? clockwise : counterclockwise} />
-                            </div>
-                        </div>
-                    </div>
-                    <A dagger={false} handleMove={handleAMove} />
+                <div className="Perspective">
+                    <PerspectiveJogger {...perspectiveJoggerProps} />
                 </div>
             </div>
             <div className="Parameters">
@@ -410,6 +435,36 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             </div>
         </div>
     );
-
 };
 
+
+/*
+   * Used to be inside <div className="Move">
+ * <A dagger={true} handleMove={handleAMove} />
+ * <div className="Mover">
+ * <div className="MoverGrid">
+ * <div className="Select">
+ * <div className="SelectButton" onClick={handleSelect}>
+ * <span>
+ * {(!hideName) ? "Save" : "Done"}
+ * </span>
+ * </div>
+ * </div>
+ * <div className="Up" onClick={handleMove(Directions.UP)}>
+ * <SolidArrow rotation={ROTATION.UP} size={arrowSize} />
+ * </div>
+ * <div className="Down" onClick={handleMove(Directions.DOWN)}>
+ * <SolidArrow rotation={ROTATION.DOWN} size={arrowSize} />
+ * </div>
+ * <div className="Right" onClick={handleMove(Directions.RIGHT)}>
+ * <SolidArrow rotation={ROTATION.RIGHT} size={arrowSize} />
+ * </div>
+ * <div className="Left" onClick={handleMove(Directions.LEFT)}>
+ * <SolidArrow rotation={ROTATION.LEFT} size={arrowSize} />
+ * </div>
+ * <div className="Rotate" onClick={handleRotate}>
+ * <img src={θ ? clockwise : counterclockwise} />
+ * </div>
+ * </div>
+ * </div>
+ * <A dagger={false} handleMove={handleAMove} /> */

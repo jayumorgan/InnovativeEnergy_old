@@ -17,9 +17,7 @@ import {
 } from "../types/Types";
 import Visualizer, { VisualizerProps } from "./Visualizer";
 import JogController from "../jogger/Jogger";
-
 import { SavedMachineConfiguration } from './MachineConfig';
-import Jogger from "./PerspectiveJogger";
 
 
 //---------------Images---------------
@@ -489,13 +487,10 @@ function General() {
                 </StackContainer>
             </div>
             <div className="VisualizerContainer">
-                <Jogger />
-                {/* <div className="Visualizer">
-
-
+                <div className="Visualizer">
                     {palletConfig &&
-                    <Visualizer {...visualizerProps} />}
-                    </div> */}
+                        <Visualizer {...visualizerProps} />}
+                </div>
                 <div className="LogoContainer">
                     <img src={logo} />
                 </div>
