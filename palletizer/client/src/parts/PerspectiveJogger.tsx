@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import * as Three from "three";
 
 import { getCamera } from "./Visualizer";
@@ -42,7 +42,6 @@ interface ArrowDims {
     offsetX: number;
     offsetY: number;
 };
-
 
 const norm = Math.sqrt(200);
 const ArrowDimensions: ArrowDims = {
@@ -104,21 +103,19 @@ function makeVerticalArrow(up: boolean): Three.Mesh {
     if (up) {
         mesh.rotateX(Math.PI / 2);
         mesh.name = String(PlaneArrowDirections.UP);
-        mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, 0.5);
+        mesh.position.set(ArrowDimensions.zeroX, 1, 0.6);
     } else {
         mesh.rotateY(Math.PI);
         mesh.rotateX(Math.PI / 2);
         mesh.name = String(PlaneArrowDirections.DOWN);
-        mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, -0.9);
+        mesh.position.set(ArrowDimensions.zeroX, ArrowDimensions.zeroY, -1.4);
     }
 
     return mesh;
 };
 
-
 function makeArrow(direction: PlaneArrowDirections): Three.Mesh {
     const arrow = new Three.Shape();
-
     const {
         zeroX,
         zeroY,
@@ -193,20 +190,17 @@ function makeLabels(font: Three.Font, scene: Three.Scene): void {
         text.rotateX(rotationX);
         scene.add(text);
     };
-
-    make_text("+y", { x: -0.09, y: 0.6, z: 0.001 });
-    make_text("+x", { x: 0.6, y: -0.05, z: 0.001 });
-    make_text("+z", { x: -0.06, y: -0.0001, z: 0.68 }, Math.PI / 2, 0.07);
+    make_text("+X", { x: 0.6, y: -0.05, z: 0.001 });
+    make_text("+Y", { x: -0.09, y: 0.6, z: 0.001 });
+    make_text("+Z", { x: -0.07, y: 1 - 0.0001, z: 0.8 }, Math.PI / 2, 0.07);
 };
 
+const angleArrowRadius: number = 1.3;
+const angleArrowTextRadius: number = 1.3;
+const angleArrowStartingRotation: number = Math.PI;
+const angleArrowTextOffset: number = - 0.02
 
-function makeAngleArrow(θ: number, font: Three.Font): [Three.Mesh, Three.Mesh] {
-    let arrow = makeVerticalArrow(true);
-    arrow.rotateX(-Math.PI / 2);
-    arrow.rotateZ(Math.PI);
-    arrow.name = String(PlaneArrowDirections.ANGLE);
-    arrow.position.set(0, 1.4, 0.01);
-    arrow.scale.set(0.5, 0.5, 0.5);
+function makeAngleArrowText(θ: number, font: Three.Font): Three.Mesh {
 
     const matLite = new Three.MeshBasicMaterial({
         color: Colors.MediumBlue,
@@ -216,14 +210,30 @@ function makeAngleArrow(θ: number, font: Three.Font): [Three.Mesh, Three.Mesh] 
     const geometry = new Three.ShapeBufferGeometry(shapes);
     const text = new Three.Mesh(geometry, matLite);
     text.rotateX(Math.PI / 2);
-    text.position.set(-0.02, 1.5, 0.01);
-
-    return [arrow, text];
+    text.position.set(angleArrowTextOffset, angleArrowTextRadius, 0.01);
+    return text;
 };
+
+function makeAngleArrow(θ: number, font: Three.Font): [Three.Mesh, Three.Mesh] {
+    let arrow = makeVerticalArrow(true);
+    arrow.rotateX(-Math.PI / 2);
+    arrow.rotateZ(angleArrowStartingRotation);
+    arrow.name = String(PlaneArrowDirections.ANGLE);
+    arrow.position.set(0, angleArrowRadius, 0.01);
+    arrow.scale.set(0.5, 0.5, 0.5);
+    return [arrow, makeAngleArrowText(θ, font)];
+};
+
+
+//---------------Main Component---------------
 
 export default function Jogger() {
 
     const mount = useRef<HTMLDivElement>(null);
+
+    const handleAngleJog = (angle: number) => {
+        console.log("Jogging  angle", angle);
+    };
 
     const handleJogClick = (d: PlaneArrowDirections) => {
         console.log("Jog", d);
@@ -246,11 +256,17 @@ export default function Jogger() {
             case (PlaneArrowDirections.DOWN): {
                 break;
             }
+            default: {
+                break;
+            }
         }
     };
 
-
     useEffect(() => {
+        let currentAngle: number = 0;
+
+
+
         let width = (mount.current as HTMLDivElement).clientWidth;
         let height = (mount.current as HTMLDivElement).clientHeight;
         let renderer = new Three.WebGLRenderer({ antialias: true });
@@ -263,16 +279,19 @@ export default function Jogger() {
         const scene = new Three.Scene();
         scene.background = new Three.Color(0xffffff);
 
-        const color = 0xFFFFFF;  // white
-        const near = 10;
-        const far = 100;
-        scene.fog = new Three.Fog(color, near, far);
+        const camera = getCamera(width, height);
+        camera.up.set(0, 0, 1);
+        const back = -3
+        camera.position.set(0, back, -0.5 * back);
+        camera.lookAt(0, 0, 0);
+
+        camera.updateMatrixWorld();
+        camera.updateProjectionMatrix();
 
         const groundMesh = new Three.Mesh(
             new Three.PlaneBufferGeometry(40, 40),
             new Three.MeshBasicMaterial({
                 color: Colors.White,
-                /* depthWrite: false */
             })
         );
 
@@ -280,7 +299,6 @@ export default function Jogger() {
         groundMesh.castShadow = true;
         groundMesh.position.set(0, 0, -3);
         scene.add(groundMesh);
-
 
         /* let axesHelper = new Three.AxesHelper(5);
 	 * scene.add(axesHelper);
@@ -290,14 +308,31 @@ export default function Jogger() {
 
         const arc = makeArc();
         arc.position.set(0, 0, 0.0005);
+        arc.geometry.computeBoundingBox();
         scene.add(arc);
 
-        const camera = getCamera(width, height);
-        camera.up.set(0, 0, 1);
-        let back = -3
+        const topMouseCoordinate = (() => {
+            const { max } = arc.geometry.boundingBox!;
+            max.setComponent(VectorDirections.X, 0);
+            max.setComponent(VectorDirections.Z, 0);
+            max.setComponent(VectorDirections.Y, angleArrowRadius);
+            const project = max.project(camera);
+            return project.y;
+        })();
 
-        camera.position.set(0, back, -0.5 * back);
-        camera.lookAt(0, 0, 0);
+        const bottomMouseCoordinate = (() => {
+            const { min } = arc.geometry.boundingBox!;
+            min.setComponent(VectorDirections.X, 0);
+            min.setComponent(VectorDirections.Z, 0);
+            min.setComponent(VectorDirections.Y, - angleArrowRadius);
+            console.log(min, "min");
+            const project = min.project(camera);
+            return project.y;
+        })();
+
+        console.log("Top y", topMouseCoordinate);
+        console.log("Bottom y", bottomMouseCoordinate);
+
 
         // ---------------Arrow---------------
         const makeArrows = () => {
@@ -320,47 +355,139 @@ export default function Jogger() {
         const raycaster = new Three.Raycaster();
         const mouse = new Three.Vector2();
 
-        const render_scene = () => {
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(arrows);
-            arrows.forEach((a: Three.Mesh) => {
-                (a.material as Three.MeshBasicMaterial).color.setHex(Colors.MediumBlue);
-            });
-            for (let i = 0; i < intersects.length; i++) {
-                ((intersects[i].object as Three.Mesh).material as Three.MeshBasicMaterial).color.setHex(Colors.Green);
+        let getArrows = () => { return arrows; };
+
+        const render_scene = (force: boolean = false) => {
+
+            if (!angleDrag) {
+                raycaster.setFromCamera(mouse, camera);
+                const all_arrows = getArrows();
+                const intersects = raycaster.intersectObjects(all_arrows);
+                let changed = false;
+                all_arrows.forEach((a: Three.Mesh) => {
+                    let current = (a.material as Three.MeshBasicMaterial).color.getHex();
+                    if (current !== Colors.MediumBlue) {
+                        changed = true;
+                    }
+                    (a.material as Three.MeshBasicMaterial).color.setHex(Colors.MediumBlue);
+                });
+                for (let i = 0; i < intersects.length; i++) {
+                    changed = true;
+                    ((intersects[i].object as Three.Mesh).material as Three.MeshBasicMaterial).color.setHex(Colors.Green);
+                }
+                if (force || changed) { // try to avoid expensive operation.
+                    renderer.render(scene, camera);
+                }
+            } else {
+                renderer.render(scene, camera);
             }
-            renderer.render(scene, camera);
+
         };
+
+        let angleArrowMesh: null | Three.Mesh = null;
+        let angleArrowText: null | Three.Mesh = null;
+        let angleArrowFont: null | Three.Font = null;
 
         const fontLoader = new Three.FontLoader();
         fontLoader.loadAsync(LatoPath).then((font: Three.Font) => {
             makeLabels(font, scene);
-            const [angleArrow, angleText] = makeAngleArrow(0, font);
+            const [angleArrow, angleText] = makeAngleArrow(currentAngle, font);
             scene.add(angleArrow);
             scene.add(angleText);
-            render_scene();
+            angleArrowMesh = angleArrow;
+            angleArrowFont = font;
+            angleArrowText = angleText;
+
+            getArrows = () => {
+                return [...arrows, angleArrow];
+            };
+
+            render_scene(true);
         }).catch((e: any) => {
             console.log("Failed to load font", e);
         });
 
+
+
+        let angleDrag: boolean = false;
+
+        const moveAngleArrow = () => {
+
+            if (angleArrowMesh !== null) {
+                const { y } = mouse;
+                const distance: number = topMouseCoordinate - bottomMouseCoordinate;
+                let frac: number = (y - bottomMouseCoordinate) / distance;
+                frac = Math.min(1, frac);
+                frac = Math.max(0, frac);
+                const angle: number = (Math.PI) * (1 - frac);
+                let xC: number = Math.sin(angle) * angleArrowRadius;
+                let yC: number = Math.cos(angle) * angleArrowRadius;
+                angleArrowMesh.position.x = xC;
+                angleArrowMesh.position.y = yC;
+                angleArrowMesh.rotation.z = -angle + angleArrowStartingRotation;
+                currentAngle = Math.round(angle * 180 / Math.PI);
+
+                if (angleArrowFont && angleArrowText) {
+                    const font = angleArrowFont;
+                    const shapes = font.generateShapes(String(currentAngle) + "°", 0.05);
+                    const geometry = new Three.ShapeBufferGeometry(shapes);
+                    angleArrowText.geometry = geometry;
+                    angleArrowText.position.x = Math.sin(angle) * angleArrowTextRadius + angleArrowTextOffset;
+                    angleArrowText.position.y = Math.cos(angle) * angleArrowTextRadius;
+                }
+                render_scene(true);
+            } else {
+                console.log("No anglemesh");
+            }
+        };
+
+        const startAngleDrag = () => {
+            angleDrag = true;
+        };
+
         const onMouseMove = (event: any) => {
             mouse.x = (event.offsetX / width) * 2 - 1;
             mouse.y = - (event.offsetY / height) * 2 + 1;
-            render_scene();
+            if (angleDrag) {
+                moveAngleArrow();
+            } else {
+                render_scene();
+            }
         };
 
         const onMouseClick = (event: any) => {
             mouse.x = (event.offsetX / width) * 2 - 1;
             mouse.y = - (event.offsetY / height) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(arrows);
+            const all_arrows = getArrows();
+            const intersects = raycaster.intersectObjects(all_arrows);
             if (intersects.length > 0) {
                 const first = intersects.shift();
                 if (first) {
                     const name: PlaneArrowDirections = (first.object as Three.Mesh).name as PlaneArrowDirections;
-                    handleJogClick(name);
+                    if (PlaneArrowDirections.ANGLE === name) {
+                        console.log("clicked angle");
+                        startAngleDrag();
+                    } else {
+                        handleJogClick(name);
+                    }
                 }
             }
+        };
+
+        const stopAngleDrag = () => {
+            if (angleDrag) {
+                angleDrag = false;
+                handleAngleJog(currentAngle);
+            }
+        };
+
+        const onMouseUp = (_: any) => {
+            stopAngleDrag();
+        };
+
+        const onMouseExit = (_: any) => {
+            stopAngleDrag();
         };
 
         const handleResize = () => {
@@ -378,7 +505,9 @@ export default function Jogger() {
         window.addEventListener('resize', handleResize);
         (mount.current as HTMLDivElement).addEventListener('mousemove', onMouseMove, false);
         (mount.current as HTMLDivElement).addEventListener('mousedown', onMouseClick, false);
-        render_scene();
+        (mount.current as HTMLDivElement).addEventListener('mouseup', onMouseUp, false);
+        (mount.current as HTMLDivElement).addEventListener('mouseleave', onMouseExit, false);
+        render_scene(true);
     }, []);
 
     return (
