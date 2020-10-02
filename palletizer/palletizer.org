@@ -86,6 +86,8 @@ PALLETIZER -*- mode: org -*-
 *** DONE Missing delete layer
 *** TODO Missing software stop in palletizer app ?? check detection mechanism.
 *** DONE incomplete config (edited) 
+*** TODO Remove Machine Jogger From pallet configuration -- include machine config select in pallet name.
+*** TODO Create and update images.
 
 ** TODO General: 
 *** TODO Name & complete are duplicated within raw_json. This is a hack around passing data from Configuration -> Teach/Machine_Config, fix later.
@@ -93,7 +95,7 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Max Notes:
 *** TODO Rotate Visualizer back to configuration perspective.
-*** TODO Windows ECONNRESET/ECONNABORT Errors.
+*** TODO Windows ECONNRESET/ECONNABORT Errors. -- server_tx error.
 *** TODO Sorting boxes properly along rows.
 *** DONE Reverse Teach Mode stack direction.
 

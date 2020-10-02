@@ -18,8 +18,7 @@ import {
 import { Fraction } from "./teach/CompletionDots";
 import { ControlProps } from "./shared/shared";
 
-import Name from "./teach/Name";
-import MachineSelect from "./teach/MachineSelect";
+import { PalletName, PalletNameProps } from "./teach/Name";
 import BoxSize from "./teach/BoxSize";
 import PalletCorners from "./teach/Pallet";
 import Layout from "./teach/Layouts";
@@ -33,7 +32,6 @@ import "./css/BoxSize.scss";
 
 enum PalletTeachState {
     CONFIG_NAME,
-    SELECT_MACHINE_CONFIG,
     BOX_SIZE,
     PALLET_CORNERS,
     LAYER_SETUP,
@@ -106,8 +104,6 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
         const Ydirection = Subtract3D(corner1, corner2);
         const Xdirection = Subtract3D(corner3, corner2);
-
-        // Pallet angle rotation.
         const φ_pallet = getXAxisAngle(Xdirection);
 
         let currentHeightIncrement = palletHeight;
@@ -203,7 +199,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     const [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
-    let completionFraction = { n: 0, d: 6 } as Fraction;
+    let completionFraction = { n: 0, d: 5 } as Fraction;
 
     let ChildElement: ReactElement = (<></>);
 
@@ -264,7 +260,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     completionFraction.n = teachState as number;
 
-    let controlProps: ControlProps = {
+    const controlProps: ControlProps = {
         handleNext,
         handleBack,
         instructionNumber: completionFraction.n
@@ -277,10 +273,6 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
             ChildElement = (<></>);
-            break;
-        };
-        case (PalletTeachState.SELECT_MACHINE_CONFIG): {
-            ChildElement = (<MachineSelect machine_configs={machine_configs} machineConfigId={machineConfigId} setMachineConfigId={setMachineConfigId} {...controlProps} />)
             break;
         };
         case (PalletTeachState.BOX_SIZE): {
@@ -309,9 +301,21 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
     };
 
     if (teachState === PalletTeachState.CONFIG_NAME) {
+
+        const palletNameProps: PalletNameProps = {
+            name: configuration.name,
+            close: close,
+            setName,
+            setMachineConfigId,
+            existing: palletConfig !== null,
+            handleNext,
+            machineConfigs: machine_configs,
+            machineConfigId: configuration.machine_config_id
+        };
+
         return (
             <Modal close={close}>
-                <Name name={configuration.name} close={close} changeName={setName} handleStart={handleNext} existing={palletConfig !== null} isPallet={true} />
+                <PalletName {...palletNameProps} />
             </Modal>
         );
     } else {
