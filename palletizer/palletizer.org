@@ -86,7 +86,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Missing delete layer
 *** TODO Missing software stop in palletizer app ?? check detection mechanism.
 *** DONE incomplete config (edited) 
-*** TODO Remove Machine Jogger From pallet configuration -- include machine config select in pallet name.
+*** DONE Remove Machine Jogger From pallet configuration -- include machine config select in pallet name.
 *** TODO Create and update images.
 
 ** TODO General: 
