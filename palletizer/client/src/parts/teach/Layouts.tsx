@@ -859,7 +859,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         }
     };
 
-    let removeBox = () => {
+    const removeBox = () => {
         if (modelBoxes.length > 0) {
             let copy = [...modelBoxes];
             copy.pop();
@@ -867,7 +867,11 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         }
     };
 
-    let handlePalletSelect = (e: ChangeEvent) => {
+    const removeLayer = (index: number) => () => {
+
+    };
+
+    const handlePalletSelect = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         setCurrentPalletIndex(val);
     };
@@ -875,12 +879,12 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     //---------------Display---------------
     if (summaryScreen) {
         instruction = "Create and edit layers";
-        let AddButton: ButtonProps = {
+        const AddButton: ButtonProps = {
             name: "Add new layer",
             action: newLayout
         };
 
-        let contentItemProps = {
+        const contentItemProps = {
             instruction,
             instructionNumber,
             LeftButton,

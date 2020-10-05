@@ -38,6 +38,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE θ coordinate numerical
 *** DONE Round coordinates in the jogger.
 *** DONE Update jogger to use numberical rotation (UI piece for this as well.)
+*** TODO Make stack screen display stack in proper order.
 
 ** DONE mm-js-api:
 *** DONE Use position from step counts. (Gain computation.) -- This is crucial for not causing giving strang positions when user jogs past end stops.
@@ -101,3 +102,22 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Database:
 *** TODO Editable config.
+
+** TODO New List: 
+*** TODO When changing the pick location or changing the box size in the pallet configuration, it's not reflected in the rest of the configuration. This occurs when you edit a pre-existing configuration
+*** TODO  We should test the same thing to edit teach points for pallets (re-teaching after editing an existing config file)
+*** TODO Deleting layer pattern does not work
+*** TODO When adding layers and deleting layers, it seems to be upside down (weird UI behaviour)
+*** TODO We need to change the clearance height of the pallet because today during the marketing shoot, we ran into interferences at the fourth layer. I think it'll only get worse for even higher layers. Max, i can show you later today!
+*** TODO We need to test for reliability, because it keeps running into errors. I know Max and Alex, you're already on this, but I just wanted us to track this in a list. (https://github.com/VentionCo/mm-vention-control/issues/1129)
+*** TODO Max and I talked about how we could improve the user experience to not need to create an offset when configuring the teach points of a pallet. So, we suggested placing 3 boxes at each teach point on the pallet. Teach the EOAT to get to those points and depending on the box size, we could determine the size and position of the pallet. Alex, please let me know if this is clear to you or not.
+*** TODO The 3D render still has some glitches in terms of box positioning. I can not reliably repro. But the positions seem off for the boxes.
+*** TODO We need to make the drag/drop boxes on the "edit" layer more reliable. Easily snap to the edges of each box, so that the positioning is the same each time, eliminating human error and getting more repeatable positioning. If you have a better option to configure it through "edit rows and columns" format, that would be fine too (after defining the orientation of the box).
+*** TODO Replace images/renders from britt to update.
+*** TODO Take the "Home x, home y, home z, home theta, done" to step 1. Remove your current step 1 with the jogger to replace it with only the homing buttons. Remove the flow of homing first for pick location, teach points before being able to move onto them. Add drop down menu for "add machine configuration" into the "name pallet configuration" step. This is to match up to Matt's path following app too. 
+*** TODO Test the input sensor
+*** TODO When moving the boxes when configuring a layer: mouse capture is missing also (i.e. if I mousedown, then move the mouse too quickly, I lose the box, and later when I reenter the area, the box stays attached to mousemove).
+*** TODO Automated ordering of boxes based on pick location (to accommodate the lateral movement Max has implemented). Currently, it is manually determined.
+
+
+
