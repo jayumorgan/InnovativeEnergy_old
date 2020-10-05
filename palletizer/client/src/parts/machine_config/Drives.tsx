@@ -1,17 +1,17 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
-
 import { MachineMotion } from "./MachineMotions";
-
 import SolidArrow, { ROTATION } from "../teach/SolidArrow";
-
 import { DIRECTION } from "mm-js-api";
-
 import JogController from "../../jogger/Jogger";
 
 //---------------Images---------------
-import palletizerImage from "./images/palletizer.png";
+import Ximage from "./images/PalletizerX.png";
+import Yimage from "./images/PalletizerY.png";
+import Zimage from "./images/PalletizerZ.png";
+import Thetaimage from "./images/PalletizerTheta.png";
+import Blankimage from "./images/PalletizerBlank.png";
+
 import plus_icon from "../teach/images/plus.svg";
 //---------------Styles---------------
 import "./css/Drives.scss";
@@ -230,7 +230,7 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
             </div>
             <div className="DisplayContainer">
                 <div className="Display">
-                    <img src={palletizerImage} />
+                    <img src={Blankimage} />
                 </div>
             </div>
         </div>
@@ -561,10 +561,28 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
     const [fromSummary, setFromSummary] = useState<boolean>(summaryScreen);
 
     let instruction: string = "Test palletizer X, Y, Z and θ axes by jogging the actuators";
+    let imageSrc: string = (() => {
+        switch (currentAxis) {
+            case AXES.X: {
+                return Ximage;
+            }
+            case AXES.Y: {
+                return Yimage;
+            }
+            case AXES.Z: {
+                return Zimage;
+            }
+            case AXES.θ: {
+                return Thetaimage;
+            }
+            default: {
+                return Ximage;
+            }
+        }
+    })();
 
-    let handleEdit = (a: AXES) => () => {
+    const handleEdit = (a: AXES) => () => {
         let eDrives: Drive[] = [];
-
         switch (a) {
             case (AXES.X): {
                 eDrives = [...Axes.X];
@@ -589,7 +607,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
         setSummaryScreen(false);
     };
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             if (fromSummary && !summaryScreen) {
@@ -602,7 +620,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
         }
     };
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: (fromSummary && !summaryScreen) || (summaryScreen) ? "Done" : "Next",
         action: () => {
             if (summaryScreen) {
@@ -711,7 +729,7 @@ function Drives({ Axes, setAxes, allMachines, handleBack, handleNext, instructio
                         </div>
                         <div className="DisplayContainer">
                             <div className="Display">
-                                <img src={palletizerImage} />
+                                <img src={imageSrc} />
                             </div>
                         </div>
                     </div>
