@@ -93,6 +93,10 @@ PALLETIZER -*- mode: org -*-
 ** TODO General: 
 *** TODO Name & complete are duplicated within raw_json. This is a hack around passing data from Configuration -> Teach/Machine_Config, fix later.
 *** TODO Electronic estop link will mess with reset, figure out a way around this.
+*** TODO Delete Stack layers bug.
+
+** TODO Machine Configuration:
+*** TODO Default blank screen on input profiles.
 
 ** TODO Max Notes:
 *** TODO Rotate Visualizer back to configuration perspective.

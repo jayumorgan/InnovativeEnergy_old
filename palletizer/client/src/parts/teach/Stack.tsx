@@ -22,9 +22,9 @@ interface PalletLayoutProps {
 };
 
 function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: PalletLayoutProps) {
-    let { name, Layouts, Stack } = pallet;
+    const { name, Layouts, Stack } = pallet;
 
-    let handleChange = (stackIndex: number) => (e: ChangeEvent) => {
+    const handleChange = (stackIndex: number) => (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         setLayoutOnLayer(stackIndex, val);
     };
@@ -62,7 +62,7 @@ function PalletLayout({ pallet, addLayer, setLayoutOnLayer, removeLayer }: Palle
                                 })}
                             </select>
                         </div>
-                        <div className="Trash" onClick={removeLayer(i)}>
+                        <div className="Trash" onClick={removeLayer(trueIndex)}>
                             <span className="icon-delete">
                             </span>
                         </div>
