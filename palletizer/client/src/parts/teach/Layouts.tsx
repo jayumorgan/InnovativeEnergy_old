@@ -139,7 +139,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     const [rectangle, setRectangle] = useState<Rect>(rect);
     const [active, setActive] = useState<boolean>(false);
 
-    let setRectPosition = (r: Rect) => {
+    const setRectPosition = (r: Rect) => {
         updatePosition(index, r.x, r.y);
     };
 
@@ -161,7 +161,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         }
     };
 
-    let handleMove = (e: React.PointerEvent) => {
+    const handleMove = (e: React.PointerEvent) => {
 
         let bb = (e.target as any).getBoundingClientRect();
         let x = e.clientX - bb.left;
@@ -197,7 +197,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         }
     };
 
-    let handleUp = (e: React.PointerEvent) => {
+    const handleUp = (e: React.PointerEvent) => {
         if (enabled) {
             let { offset } = rectangle;
             setRectPosition(rectangle);
@@ -499,8 +499,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         cornerTextProps.x = cornerCircleProps.cx - 10;
         cornerTextProps.y = cornerCircleProps.cy + 10;
     };
-
-
 
     let snapParams = {
         xl: topX + svg_props.x,

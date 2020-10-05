@@ -96,7 +96,7 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO Max Notes:
 *** TODO Rotate Visualizer back to configuration perspective.
-*** TODO Windows ECONNRESET/ECONNABORT Errors. -- server_tx error.
+*** TODO Windows ECONNRESET/ECONNABORT Errors. -- server_tx error. -- Max Test.
 *** TODO Sorting boxes properly along rows.
 *** DONE Reverse Teach Mode stack direction.
 
@@ -105,7 +105,7 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO New List: 
 *** TODO When changing the pick location or changing the box size in the pallet configuration, it's not reflected in the rest of the configuration. This occurs when you edit a pre-existing configuration
-*** TODO  We should test the same thing to edit teach points for pallets (re-teaching after editing an existing config file)
+*** TODO We should test the same thing to edit teach points for pallets (re-teaching after editing an existing config file)
 *** TODO Deleting layer pattern does not work
 *** TODO When adding layers and deleting layers, it seems to be upside down (weird UI behaviour)
 *** TODO We need to change the clearance height of the pallet because today during the marketing shoot, we ran into interferences at the fourth layer. I think it'll only get worse for even higher layers. Max, i can show you later today!
