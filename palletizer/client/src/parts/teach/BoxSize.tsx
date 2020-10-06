@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent } from 'react';
 import ContentItem, { ButtonProps } from "./ContentItem";
 import Jogger from "./Jogger";
 import Box from "./3D/BoxRender";
-import { BoxObject, BoxDimensions, CoordinateRot } from "../../geometry/geometry";
+import { BoxObject, BoxDimensions, CoordinateRot, compareDimensions } from "../../geometry/geometry";
 import { ControlProps } from "../shared/shared";
 
 import "./css/BoxSize.scss";
@@ -213,8 +213,9 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
             } else {
                 if (editingIndex !== null) {
                     let b = [...allBoxes];
-                    // Cheap trick.
-                    b[editingIndex] = { ...editingBox, changed: true };
+                    // Check that only
+                    const oldBox = b[editingIndex];
+                    b[editingIndex] = { ...editingBox, changed: !compareDimensions(oldBox.dimensions, editingBox.dimensions) };
                     setBoxes(b);
                 } else {
                     setBoxes([...allBoxes, editingBox]);

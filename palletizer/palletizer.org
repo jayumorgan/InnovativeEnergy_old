@@ -102,3 +102,4 @@ PALLETIZER -*- mode: org -*-
 *** TODO Automated input sensing.
 *** DONE Input Splash Screen.
 *** DONE Machine Config Styling
+*** TODO Don't remove layers + stack if box pick point is the only thing that changed.

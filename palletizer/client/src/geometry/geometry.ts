@@ -9,6 +9,10 @@ export interface BoxDimensions extends PlaneDimensions {
     height: number;
 };
 
+export function compareDimensions(bd1: BoxDimensions, bd2: BoxDimensions): boolean {
+    return bd1.length === bd2.length && bd1.width === bd2.width && bd1.height === bd1.height;
+};
+
 export interface Coordinate2D {
     x: number;
     y: number;
