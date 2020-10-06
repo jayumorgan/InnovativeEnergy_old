@@ -66,6 +66,8 @@ export interface BoxObject {
     name: string;
     dimensions: BoxDimensions;
     pickLocation: CoordinateRot;
+    changed?: boolean;
+    deleted?: boolean;
 };
 
 export interface PalletGeometry {
@@ -92,17 +94,14 @@ export function getPalletDimensions(pallet: PalletGeometry): PlaneDimensions {
 
 export function getXAxisAngle(v: Coordinate): number {
     return Math.atan(v.y / v.x);
-}
+};
 
 export function getCenterOfPallet(p: PalletGeometry): Coordinate {
     let { corner1, corner2, corner3 } = p;
-
     let v1 = Subtract3D(corner1, corner2);
     let v2 = Subtract3D(corner3, corner2);
-
     return Add3D(MultiplyScalar(v1, 0.5), MultiplyScalar(v2, 0.5));
 };
-
 
 export interface BoxPosition2D {
     position: Coordinate2D;
@@ -119,6 +118,7 @@ export interface BoxPositionObject {
     box: BoxObject;
     size: number;
     rotated: boolean;
+    index: number; // Box Array Index.
 };
 
 export interface LayoutObject {

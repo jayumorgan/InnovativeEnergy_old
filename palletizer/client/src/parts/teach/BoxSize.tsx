@@ -169,7 +169,6 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
     };
 
     const [editingBox, setEditingBox] = useState<BoxObject>(box);
-
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const startEdit = (index: number) => () => {
@@ -213,9 +212,9 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
                 handleNext();
             } else {
                 if (editingIndex !== null) {
-                    console.log("Editing index");
                     let b = [...allBoxes];
-                    b[editingIndex] = editingBox;
+                    // Cheap trick.
+                    b[editingIndex] = { ...editingBox, changed: true };
                     setBoxes(b);
                 } else {
                     setBoxes([...allBoxes, editingBox]);
@@ -244,7 +243,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
         const removeBox = (index: number) => () => {
             let cp = [...allBoxes];
-            cp.splice(index, 1);
+            cp[index].deleted = true;
             setBoxes(cp);
         };
 

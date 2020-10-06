@@ -685,7 +685,7 @@ function calulateEfficientRotation(width: number, length: number, boxWidth: numb
     return rotated_total > not_rotated_total;
 };
 
-function generateAutoLayout(box: BoxObject, pallet: PalletGeometry, size: number): BoxPositionObject[] {
+function generateAutoLayout(box: BoxObject, pallet: PalletGeometry, size: number, boxIndex: number): BoxPositionObject[] {
     const palletDims = getPalletDimensions(pallet);
     let boxWidth = box.dimensions.width;
     let boxLength = box.dimensions.length;
@@ -724,7 +724,8 @@ function generateAutoLayout(box: BoxObject, pallet: PalletGeometry, size: number
                     y: j * boxLength
                 },
                 rotated,
-                box
+                box,
+                index: boxIndex
             };
             positions.push(bpo);
             j++;
@@ -758,7 +759,7 @@ function AutoLayout({ allBoxes, allPallets, modelSize, name, updateLayout }: Aut
     const handleGenerate = () => {
         const pallet = allPallets[palletIndex];
         const box = allBoxes[boxIndex];
-        const boxPositions: BoxPositionObject[] = generateAutoLayout(box, pallet, modelSize);
+        const boxPositions: BoxPositionObject[] = generateAutoLayout(box, pallet, modelSize, boxIndex);
         const layout_name: string = name.replace(/^Custom Layer/gmi, "Auto Layer");
         const layout: LayoutObject = {
             name: layout_name,
@@ -847,7 +848,6 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         outerHeight: 627
     };
 
-    //    let index = 0;
     let haveLayout = false;
     let layoutCount = 0;
 
@@ -864,11 +864,9 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     const [autoLayout, setAutoLayout] = useState<boolean>(false);
 
     let DisplayElement = useRef<HTMLDivElement>(null);
+
     const [modelBoxes, setModelBoxes] = useState<BoxPositionObject[]>([]);
-
     const [editingLayout, setEditingLayout] = useState<LayoutObject>(defaultLayout(layoutCount + 1));
-
-    // let [tempBoxes, setTempBoxes] = useState<BoxPosition2D[]>([]);
 
     const LeftButton: ButtonProps = {
         name: "Back",
@@ -911,7 +909,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                 if (modelBoxes.length > 0) {
                     let h = 0;
                     let goodBoxes: BoxPositionObject[] = [];
-                    modelBoxes.forEach((bpo: BoxPositionObject, i: number) => {
+                    modelBoxes.forEach((bpo: BoxPositionObject, _: number) => {
                         goodBoxes.push(bpo);
                         if (bpo.box.dimensions.height > h) {
                             h = bpo.box.dimensions.height;
@@ -1002,7 +1000,8 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                 },
                 box: allBoxes[index],
                 size: modelSize,
-                rotated: isRotated
+                rotated: isRotated,
+                index // The box index.
             };
             setModelBoxes([...modelBoxes, bpo]);
         }
@@ -1063,7 +1062,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
                                                         startEdit: startEdit(index, j),
                                                         deleteLayout: removeLayer(index, j)
                                                     };
-                                                    return (<LayoutCell {...layoutProps} />);
+                                                    return (<LayoutCell key={String(index) + String(j)} {...layoutProps} />);
                                                 })
                                             }
                                         </Fragment>

@@ -12,7 +12,8 @@ import {
     BoxCoordinates,
     BoxPositionObject,
     CoordinateRot,
-    getXAxisAngle
+    getXAxisAngle,
+    LayoutObject
 } from "../geometry/geometry";
 
 import { Fraction } from "./teach/CompletionDots";
@@ -29,6 +30,7 @@ import ConfigurationSummary from "./teach/ConfigurationSummary";
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";
+import { fileURLToPath } from 'url';
 
 enum PalletTeachState {
     CONFIG_NAME,
@@ -73,14 +75,91 @@ type ConfigAction = {
     payload: any
 };
 
+
+
+//-------Custom Reducers To Deal With Forward Breaking Changes-------
+function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfiguration {
+    // This rests on the assumptions that boxes are either:
+    // 1.  Deleted,
+    // 2.  Edited with change flag.
+    // 3.  Added
+    if (boxes.length > state.boxes.length) { // Added
+        console.log("Added");
+        return { ...state, boxes };
+    }
+
+    let changedIndex: number | null = null;
+
+    const filterPallets = (modifiedBoxIndex: number) => {
+        return state.pallets.map((po: PalletGeometry) => {
+            let deleted_layouts: number[] = [];
+
+            po.Layouts = po.Layouts.filter((lo: LayoutObject, i: number) => {
+                const checkBox = (n: number): boolean => {
+                    if (n >= lo.boxPositions.length) {
+                        return false;
+                    }
+                    if (lo.boxPositions[n].index === modifiedBoxIndex) {
+                        return true;
+                    }
+                    return checkBox(n + 1);
+                };
+
+                if (!checkBox(0)) {
+                    return true;
+                }
+
+                deleted_layouts.push(i);
+                return false;
+            });
+
+            let first_index: number = po.Stack.length;
+            po.Stack = po.Stack.filter((layoutIndex: number, i: number) => {
+                if (i > first_index) {
+                    return false;
+                }
+                if (layoutIndex in deleted_layouts) {
+                    first_index = i;
+                    return false;
+                }
+                return true;
+            });
+            return po;
+        });
+    };
+
+    if (boxes.length < state.boxes.length) {
+        changedIndex = boxes.length; // the last index (box that was removed).
+    }
+
+    boxes = boxes.map((b: BoxObject, i: number) => {
+        if (b.changed === true || b.deleted === true) {
+            changedIndex = i;
+        }
+        delete b.changed;
+        return b;
+    }).filter((b: BoxObject) => {
+        return !(b.deleted === true);
+    });
+
+    if (changedIndex !== null) {
+        const pallets = filterPallets(changedIndex);
+        return { ...state, pallets, boxes };
+    }
+
+    return { ...state, boxes };
+};
+
+
+
 function configurationReducer(state: PalletConfiguration, action: ConfigAction) {
-    let { payload } = action;
+    const { payload } = action;
     switch (action.type) {
         case (CONF_ACTION.SET_NAME): {
             return { ...state, name: payload as string };
         }
         case (CONF_ACTION.SET_BOXES): {
-            return { ...state, boxes: payload as BoxObject[] };
+            return boxReducer(state, payload as BoxObject[]);
         }
         case (CONF_ACTION.SET_PALLETS): {
             return { ...state, pallets: payload as PalletGeometry[] };
