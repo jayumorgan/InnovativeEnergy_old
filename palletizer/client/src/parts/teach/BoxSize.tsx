@@ -2,7 +2,12 @@ import React, { useState, ChangeEvent } from 'react';
 import ContentItem, { ButtonProps } from "./ContentItem";
 import Jogger from "./Jogger";
 import Box from "./3D/BoxRender";
-import { BoxObject, BoxDimensions, CoordinateRot, compareDimensions } from "../../geometry/geometry";
+import {
+    BoxObject,
+    BoxDimensions,
+    CoordinateRot,
+    compareDimensions
+} from "../../geometry/geometry";
 import { ControlProps } from "../shared/shared";
 
 import "./css/BoxSize.scss";
@@ -17,10 +22,9 @@ interface BoxProps {
 
 function BoxCell({ box, startEdit, editName, handleDelete }: BoxProps) {
 
-    let { dimensions } = box;
-    let { width, length, height } = dimensions;
+    const { width, length, height } = box.dimensions;
 
-    let handleName = (e: ChangeEvent) => {
+    const handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         editName(newName);
     };
@@ -29,7 +33,7 @@ function BoxCell({ box, startEdit, editName, handleDelete }: BoxProps) {
         <div className="BoxCellContainer">
             <div className="BoxCell">
                 <div className="MiniRender">
-                    <Box {...dimensions} />
+                    <Box {...box.dimensions} />
                 </div>
                 <div className="Name">
                     <input type="text" value={box.name} onChange={handleName} />
@@ -78,7 +82,7 @@ interface CoordinateItemProps {
 
 function CoordinateItem({ name, value, setter }: CoordinateItemProps) {
 
-    let onChange = (e: ChangeEvent) => {
+    const onChange = (e: ChangeEvent) => {
         let val = (e.target as any).value as number;
         setter(+val);
     }

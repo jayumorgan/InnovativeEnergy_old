@@ -16,7 +16,7 @@ enum Colors {
     White = 0xffffff,
     LightBlue = 0xeff2f7,
     Black = 0x000000,
-    Alabaster = 0xfbfbfb
+    Alabaster = 0xfbfbfb,
 };
 
 enum VectorDirections {
@@ -162,25 +162,6 @@ function makeCircle(): Three.Mesh {
     return circle;
 };
 
-function makeArc(): Three.Mesh {
-    let shape = new Three.Shape();
-    let radius = 1.1;
-    let shift = 0.02;
-
-    shape.moveTo(0, radius);
-    shape.absarc(0, 0, radius, Math.PI / 2, - Math.PI / 2, true);
-    shape.lineTo(0, -radius + shift);
-    shape.absarc(0, 0, radius - shift, -Math.PI / 2, Math.PI / 2, false);
-    shape.lineTo(0, radius);
-    const geometry = new Three.ShapeGeometry(shape);
-    const material = new Three.MeshBasicMaterial({
-        color: Colors.LightBlue
-    });
-
-    const mesh = new Three.Mesh(geometry, material);
-    return mesh;
-};
-
 function makeLabels(font: Three.Font, scene: Three.Scene): void {
     const matLite = new Three.MeshBasicMaterial({
         color: Colors.White,
@@ -199,13 +180,67 @@ function makeLabels(font: Three.Font, scene: Three.Scene): void {
     make_text("+Z", { x: -0.07, y: 1 - 0.0001, z: verticalArrowTop + 0.15 }, Math.PI / 2, 0.07);
 };
 
-const angleArrowRadius: number = 1.3;
-const angleArrowStartingRotation: number = Math.PI;
+const angleArcRadius: number = 0.4;
+const angleArcHeight: number = 0.4;
+const angleArrowRadius: number = angleArcRadius;
+const angleArrowStartingRotation: number = Math.PI / 2;
 const angleArrowTextOffset: number = - 0.02
 const angleArrowTextOffsetY: number = 0.1;
+const angleArrowYCoordinate: number = 0.5;
+
+
+function getArcGeometry(reflect: boolean) {
+    let shape = new Three.Shape();
+    const radius = angleArcRadius;
+    let shift = 0.1;
+
+    //-------Old 180deg Arc-------
+    /* shape.moveTo(0, radius);
+	 * shape.absarc(0, 0, radius, Math.PI / 2, - Math.PI / 2, true);
+	 * shape.lineTo(0, -radius + shift);
+	 * shape.absarc(0, 0, radius - shift, -Math.PI / 2, Math.PI / 2, false);
+	 * shape.lineTo(0, radius); */
+
+    //-------90deg Arc-------
+    shape.moveTo(radius, 0);
+    shape.absarc(0, 0, radius, 0, -Math.PI / 2, true);
+
+    // Arrow
+    if (!reflect) {
+        shape.lineTo(0, -radius - 0.5 * shift);
+        shape.lineTo(-shift * 1.5, -radius + shift / 2);
+        shape.lineTo(0, -radius + shift + 0.5 * shift);
+    }
+
+    shape.lineTo(0, -radius + shift);
+    shape.absarc(0, 0, radius - shift, - Math.PI / 2, 0, false);
+
+    if (reflect) {
+        shape.lineTo(radius - 0.5 * shift - shift, 0);
+        shape.lineTo(radius - shift / 2, shift * 1.5);
+        shape.lineTo(radius + 0.5 * shift, 0);
+    }
+
+    shape.lineTo(radius, 0);
+    const geometry = new Three.ShapeGeometry(shape);
+    return geometry;
+}
+
+function makeArc(): Three.Mesh {
+
+    const material = new Three.MeshBasicMaterial({
+        color: Colors.MediumBlue //Colors.LightBlue
+    });
+
+    const geometry = getArcGeometry(false);
+
+    const mesh = new Three.Mesh(geometry, material);
+    mesh.name = String(PlaneArrowDirections.ANGLE);
+    //  mesh.rotation.x = 0.05;
+    return mesh;
+};
 
 function makeAngleArrowText(θ: number, font: Three.Font): Three.Mesh {
-
     const matLite = new Three.MeshBasicMaterial({
         color: Colors.MediumBlue,
     });
@@ -214,16 +249,16 @@ function makeAngleArrowText(θ: number, font: Three.Font): Three.Mesh {
     const geometry = new Three.ShapeBufferGeometry(shapes);
     const text = new Three.Mesh(geometry, matLite);
     text.rotateX(Math.PI / 2);
-    text.position.set(angleArrowTextOffset, angleArrowRadius + angleArrowTextOffsetY, 0.01);
+    text.position.set(angleArrowTextOffset + angleArrowTextOffsetY + angleArrowRadius, angleArrowYCoordinate, angleArcHeight);
     return text;
 };
 
 function makeAngleArrow(θ: number, font: Three.Font): [Three.Mesh, Three.Mesh] {
     let arrow = makeVerticalArrow(true);
     arrow.rotateX(-Math.PI / 2);
-    arrow.rotateZ(angleArrowStartingRotation);
-    arrow.name = String(PlaneArrowDirections.ANGLE);
-    arrow.position.set(0, angleArrowRadius, 0.01);
+    arrow.rotateZ(angleArrowStartingRotation - Math.PI / 2);
+    //    arrow.name = String(PlaneArrowDirections.ANGLE);
+    arrow.position.set(angleArrowRadius, angleArrowYCoordinate - 0.1, angleArcHeight * 2);
     arrow.scale.set(0.5, 0.5, 0.5);
     return [arrow, makeAngleArrowText(θ, font)];
 };
@@ -250,6 +285,7 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
 
     useEffect(() => {
         let currentAngle: number = 0;
+        let isRotated: boolean = false;
 
         let width = (mount.current as HTMLDivElement).clientWidth;
         let height = (mount.current as HTMLDivElement).clientHeight;
@@ -289,32 +325,30 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
         const circle = makeCircle();
         scene.add(circle);
 
-        const arc = makeArc();
-        arc.position.set(0, 0, 0.0005);
-        arc.geometry.computeBoundingBox();
-        scene.add(arc);
+        const topMouseCoordinate = 0;
+        const bottomMouseCoordinate = 0;
 
-        const topMouseCoordinate = (() => {
-            const { max } = arc.geometry.boundingBox!;
-            max.setComponent(VectorDirections.X, 0);
-            max.setComponent(VectorDirections.Z, 0);
-            max.setComponent(VectorDirections.Y, angleArrowRadius);
-            const project = max.project(camera);
-            return project.y;
-        })();
+        /* const topMouseCoordinate = (() => {
+		 *     const { max } = arc.geometry.boundingBox!;
+		 *     max.setComponent(VectorDirections.X, 0);
+		 *     max.setComponent(VectorDirections.Z, 0);
+		 *     max.setComponent(VectorDirections.Y, angleArrowRadius);
+		 *     const project = max.project(camera);
+		 *     return project.y;
+		 * })();
 
-        const bottomMouseCoordinate = (() => {
-            const { min } = arc.geometry.boundingBox!;
-            min.setComponent(VectorDirections.X, 0);
-            min.setComponent(VectorDirections.Z, 0);
-            min.setComponent(VectorDirections.Y, - angleArrowRadius);
-            const project = min.project(camera);
-            return project.y;
-        })();
+		 * const bottomMouseCoordinate = (() => {
+		 *     const { min } = arc.geometry.boundingBox!;
+		 *     min.setComponent(VectorDirections.X, 0);
+		 *     min.setComponent(VectorDirections.Z, 0);
+		 *     min.setComponent(VectorDirections.Y, - angleArrowRadius);
+		 *     const project = min.project(camera);
+		 *     return project.y;
+		 * })();
 
-        console.log("Top y", topMouseCoordinate);
-        console.log("Bottom y", bottomMouseCoordinate);
-
+		 * console.log("Top y", topMouseCoordinate);
+		 * console.log("Bottom y", bottomMouseCoordinate);
+		 */
 
         // ---------------Arrow---------------
         const makeArrows = () => {
@@ -330,7 +364,12 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
             scene.add(upZArrow);
             const downZArrow = makeVerticalArrow(false);
             scene.add(downZArrow);
-            return [upArrow, downArrow, rightArrow, leftArrow, upZArrow, downZArrow];
+            const arc = makeArc();
+            arc.position.set(0, angleArrowYCoordinate, angleArcHeight);
+            arc.geometry.computeBoundingBox();
+            arc.name = String(PlaneArrowDirections.ANGLE);
+            scene.add(arc);
+            return [upArrow, downArrow, rightArrow, leftArrow, upZArrow, downZArrow, arc];
         };
 
         const arrows = makeArrows();
@@ -373,17 +412,17 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
         const fontLoader = new Three.FontLoader();
         fontLoader.loadAsync(LatoPath).then((font: Three.Font) => {
             makeLabels(font, scene);
-            const [angleArrow, angleText] = makeAngleArrow(currentAngle, font);
-            scene.add(angleArrow);
+            const [_, angleText] = makeAngleArrow(isRotated ? 90 : 0, font);
+            /* scene.add(angleArrow); */
             scene.add(angleText);
-            angleArrowMesh = angleArrow;
+            //            angleArrowMesh = angleArrow;
             angleArrowFont = font;
             angleArrowText = angleText;
 
-            getArrows = () => {
-                return [...arrows, angleArrow];
-            };
-
+            /* getArrows = () => {
+			 *     return // [...arrows, angleArrow];
+			 * };
+			 */
             render_scene(true);
         }).catch((e: any) => {
             console.log("Failed to load font", e);
@@ -435,6 +474,35 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
             }
         };
 
+
+        const handleAngleText = () => {
+            if (angleArrowFont && angleArrowText) {
+                const font = angleArrowFont;
+                const shapes = font.generateShapes(String(isRotated ? 90 : 0) + "°", 0.05);
+                const geometry = new Three.ShapeBufferGeometry(shapes);
+                angleArrowText.geometry = geometry;
+            }
+        }
+
+        const rotateAngleArc = () => {
+            let obj = scene.getObjectByName(PlaneArrowDirections.ANGLE);
+            if (obj) {
+                const mesh: Three.Mesh = (obj as Three.Mesh);
+                mesh.geometry = getArcGeometry(isRotated);
+                //                mesh.rotation.z = isRotated ? - Math.PI / 2 : 0;
+                //              mesh.rotation.x = isRotated ? Math.PI : 0;
+                handleAngleText();
+                render_scene(true);
+            }
+        };
+
+        const handleAngleClick = () => {
+            handleRotateMove(isRotated ? 0 : 90);
+            /* handleAngleJog(isRotated ? 0 : 90); */
+            isRotated = !isRotated;
+            rotateAngleArc();
+        };
+
         const onMouseClick = (event: any) => {
             mouse.x = (event.offsetX / width) * 2 - 1;
             mouse.y = - (event.offsetY / height) * 2 + 1;
@@ -446,7 +514,8 @@ export default function Jogger({ handleCartesianMove, handleRotateMove }: Perspe
                 if (first) {
                     const name: PlaneArrowDirections = (first.object as Three.Mesh).name as PlaneArrowDirections;
                     if (PlaneArrowDirections.ANGLE === name) {
-                        startAngleDrag();
+                        handleAngleClick();
+                        // startAngleDrag(); // Old.
                     } else {
                         handleJogClick(name);
                     }
