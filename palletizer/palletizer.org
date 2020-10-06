@@ -63,6 +63,7 @@ PALLETIZER -*- mode: org -*-
 ** DONE Configuration Page:
 *** DONE Reload configs on create (so that they show up immediately).
 *** DONE Machine config jogger.
+*** DONE Delete Machine Motion.
 
 ** TODO Visualizer:
 *** DONE Visualizer: Frame + coordinates + axes 
@@ -109,5 +110,4 @@ PALLETIZER -*- mode: org -*-
 *** TODO Mechanics of box drag + drop.
 *** TODO Monitoring pick quality over path.
 *** TODO Updating mechanism for machine apps.
-*** TODO Delete Machine Motion.
 *** TODO Edit Machine Motion. etc.

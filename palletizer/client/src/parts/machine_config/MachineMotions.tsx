@@ -1,12 +1,9 @@
 import React, { useState, ChangeEvent } from "react";
-
 import "../teach/css/BoxSize.scss";
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
-
 import mmV1image from "./images/mmV1.png";
 
 import "./css/MachineMotions.scss";
-
 import "../teach/css/BoxSize.scss";
 
 
