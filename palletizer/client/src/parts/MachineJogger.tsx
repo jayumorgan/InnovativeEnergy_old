@@ -4,10 +4,9 @@ import Jogger, { JoggerProps, ForceHome, ForceHomeProps } from "./teach/Jogger";
 import { SavedMachineConfiguration } from "./MachineConfig";
 import JogController from "../jogger/Jogger";
 import { XIcon } from "./teach/PlusIcon";
-
+import { CoordinateRot } from "../geometry/geometry";
 
 import "./css/MachineJogger.scss";
-import { CoordinateRot } from "../geometry/geometry";
 
 export interface MachineJoggerProps {
     savedMachineConfiguration: SavedMachineConfiguration | null;
