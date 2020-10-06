@@ -15,11 +15,10 @@ import {
     getXAxisAngle,
     LayoutObject
 } from "../geometry/geometry";
-
 import { Fraction } from "./teach/CompletionDots";
 import { ControlProps } from "./shared/shared";
-
 import { PalletName, PalletNameProps } from "./teach/Name";
+import HomingStep, { HomingStepProps } from "./teach/HomingStep";
 import BoxSize from "./teach/BoxSize";
 import PalletCorners from "./teach/Pallet";
 import Layout from "./teach/Layouts";
@@ -30,10 +29,10 @@ import ConfigurationSummary from "./teach/ConfigurationSummary";
 import "./css/TeachMode.scss";
 import "./css/Jogger.scss";
 import "./css/BoxSize.scss";
-import { fileURLToPath } from 'url';
 
 enum PalletTeachState {
     CONFIG_NAME,
+    HOMING_STEP,
     BOX_SIZE,
     PALLET_CORNERS,
     LAYER_SETUP,
@@ -76,6 +75,7 @@ type ConfigAction = {
 };
 
 //-------Custom Reducers To Deal With Forward Breaking Changes-------
+// This results from a bad data model.-- but works.
 function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfiguration {
     // This rests on the assumptions that boxes are either:
     // 1.  Deleted,
@@ -275,7 +275,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     const [teachState, setTeachState] = useState<PalletTeachState>(PalletTeachState.CONFIG_NAME);
 
-    let completionFraction = { n: 0, d: 5 } as Fraction;
+    let completionFraction = { n: 0, d: 6 } as Fraction;
 
     let ChildElement: ReactElement = (<></>);
 
@@ -320,7 +320,8 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
 
     const modalClose = () => {
         // close should not be async to prevent duplication on double click.
-        if ((palletConfig && !(palletConfig.complete)) || (!palletConfig && (teachState as number) > 0)) {
+        const minSaveStep = Number(PalletTeachState.HOMING_STEP); // Threshold for saving a partial configuration.
+        if ((palletConfig && !(palletConfig.complete)) || (!palletConfig && (teachState as number) > minSaveStep)) {
             const incomplete_config: SavedPalletConfiguration = generateIncompleteConfig(configuration);
             const { name } = configuration;
             SavePalletConfig(name, incomplete_config, id, incomplete_config.complete).then(() => {
@@ -349,6 +350,14 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
     switch (teachState) {
         case (PalletTeachState.CONFIG_NAME): {
             ChildElement = (<></>);
+            break;
+        };
+        case (PalletTeachState.HOMING_STEP): {
+            const homingStepProps: HomingStepProps = {
+                machineConfigId,
+                ...controlProps
+            };
+            ChildElement = (<HomingStep {...homingStepProps} />);
             break;
         };
         case (PalletTeachState.BOX_SIZE): {

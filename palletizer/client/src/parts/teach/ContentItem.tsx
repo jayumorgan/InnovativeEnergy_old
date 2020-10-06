@@ -10,20 +10,23 @@ export interface ButtonProps {
 };
 
 export interface ContentItemProps {
-    children: ReactElement;
     instruction: string;
     instructionNumber: number;
     LeftButton: ButtonProps;
     RightButton: ButtonProps;
     AddButton?: ButtonProps;
-}
+};
 
-let capitalize = (s: string) => {
+interface FullContentItemProps extends ContentItemProps {
+    children: ReactElement;
+};
+
+const capitalize = (s: string) => {
     return s;
     //    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 };
 
-export default function ContentItem({ children, instruction, LeftButton, RightButton, instructionNumber, AddButton }: ContentItemProps) {
+export default function ContentItem({ children, instruction, LeftButton, RightButton, instructionNumber, AddButton }: FullContentItemProps) {
     let { enabled } = RightButton;
 
     return (

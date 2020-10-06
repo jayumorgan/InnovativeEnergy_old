@@ -174,6 +174,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                 if (editComplete) {
                     let temp: PalletGeometry = { ...editingPallet };
                     temp.Layouts = [];
+                    temp.Stack = [];
                     // Save the data.
                     let newPallets: PalletGeometry[] = [];
                     if (editingIndex > allPallets.length || allPallets.length === 0) {

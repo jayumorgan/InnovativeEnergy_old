@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import JogController, { PalletizerAxes } from "../../jogger/Jogger";
-import SolidArrow, { ROTATION } from "./SolidArrow";
+// import SolidArrow, { ROTATION } from "./SolidArrow";
 import { get_machine_config } from "../../requests/requests";
 import { CoordinateRot } from "../../geometry/geometry";
 import { SavedMachineConfiguration } from '../MachineConfig';
@@ -9,16 +9,19 @@ import PerspectiveJogger, { PerspectiveJoggerProps, PlaneArrowDirections } from 
 
 //---------------Styles + Images---------------
 import "./css/Jogger.scss";
-import clockwise from "./images/clockwise.svg";
-import counterclockwise from "./images/counterclockwise.svg";
-
 
 var TESTING = false;
 if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
     TESTING = true;
 }
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
+
+
+
 let TEMP_JOGGER_INDEX = 0;
+
+
+
 enum Directions {
     UP = "Up",
     DOWN = "Down",
@@ -96,7 +99,6 @@ function JoggerParameter({ title, unit, value, handleUpdate }: JoggerParameterPr
         </div>
     );
 };
-
 
 export interface ForceHomeProps {
     skip: () => void;
