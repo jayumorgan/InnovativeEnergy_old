@@ -75,8 +75,6 @@ type ConfigAction = {
     payload: any
 };
 
-
-
 //-------Custom Reducers To Deal With Forward Breaking Changes-------
 function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfiguration {
     // This rests on the assumptions that boxes are either:
@@ -149,7 +147,6 @@ function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfi
 
     return { ...state, boxes };
 };
-
 
 
 function configurationReducer(state: PalletConfiguration, action: ConfigAction) {

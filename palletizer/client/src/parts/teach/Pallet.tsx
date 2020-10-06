@@ -1,12 +1,13 @@
 import React, { useState, ChangeEvent } from 'react';
-
 import ContentItem, { ButtonProps } from "./ContentItem";
-
 import { getPalletDimensions, Coordinate, PalletGeometry } from "../../geometry/geometry";
-
 import Jogger from "./Jogger";
-
-import { LayoutModel, PALLETCORNERS, IncreaseCorner, CornerNumber } from "./Layouts";
+import {
+    LayoutModel,
+    PALLETCORNERS,
+    IncreaseCorner,
+    CornerNumber
+} from "./Layouts";
 
 //---------------Styles---------------
 import "./css/BoxSize.scss";
