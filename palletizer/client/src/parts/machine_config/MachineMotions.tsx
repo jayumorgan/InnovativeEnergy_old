@@ -228,9 +228,9 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
     };
 
     const startEdit = (index: number) => () => {
-        if (index > 0) {
+        if (index >= 0) {
+			setEditingIndex(index);
             setEditingMachine(allMachines[index]);
-            setEditingIndex(index);
         } else {
             setEditingIndex(null);
             setEditingMachine(defaultMachine(allMachines.length));
@@ -284,14 +284,14 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
 
         instruction = "Define Machine Motion version and network parameters";
 
-        let contentItemProps = {
+		const contentItemProps = {
             instruction,
             instructionNumber,
             LeftButton,
             RightButton,
         };
 
-        let ipProps: PropertyInputProps = {
+        const ipProps: PropertyInputProps = {
             name: "IP Address",
             currentValue: editingMachine.ipAddress,
             validator: IPValidator,
@@ -302,7 +302,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             }
         };
 
-        let gatewayProps: PropertyInputProps = {
+        const gatewayProps: PropertyInputProps = {
             name: "Gateway",
             currentValue: editingMachine.gateway,
             validator: IPValidator,
@@ -313,7 +313,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             }
         };
 
-        let netmaskProps: PropertyInputProps = {
+        const netmaskProps: PropertyInputProps = {
             name: "Subnet Mask",
             currentValue: editingMachine.netMask,
             validator: IPValidator,
@@ -324,7 +324,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
             }
         };
 
-        let dropDownProps: DropDownProps = {
+       const dropDownProps: DropDownProps = {
             name: "Version",
             currentValue: editingMachine.version,
             handleSelect: (e: MM_VERSION) => {
