@@ -2,6 +2,18 @@
 @import "../../css/TeachMode.scss";
 
 
+.SplashScreen {
+    width: 100%;
+    height: 100%;
+    @include flex-center();
+
+    span {
+        font-size: 2.5em;
+        color: $border-grey;
+    }
+}
+
+
 .Detection {
     width: 100%;
     height: 100%;
@@ -99,6 +111,11 @@
                         @include flex-center();
                         height: 100%;
                         width: 100%;
+
+                        #label {
+                            font-weight: $normal-font;
+                            padding-right: $margin;
+                        }
 
                         span {
                             font-size: $large-font;

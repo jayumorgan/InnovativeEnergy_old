@@ -4,7 +4,9 @@ import ContentItem, { ButtonProps } from "../teach/ContentItem";
 import { Drive } from "./Drives";
 import { IOState } from "./IO";
 import { ControlProps } from "../shared/shared";
-import palletizerImage from "./images/palletizer.png";
+
+//---------------Images---------------
+import palletizerImage from "./images/PalletizerBlank.png";
 
 //---------------Styles---------------
 import "./css/Summary.scss";
@@ -17,9 +19,9 @@ export interface MachineSummaryProps extends ControlProps {
 
 export default function MachineSummary({ machineConfig, handleBack, handleNext, instructionNumber }: MachineSummaryProps) {
 
-    let instruction = "Review Configuration";
+    const instruction = "Review Configuration";
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: "Save and Exit",
         action: () => {
             handleNext();
@@ -27,21 +29,21 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
         enabled: true
     };
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             handleBack();
         }
     };
 
-    let contentItemProps = {
+    const contentItemProps = {
         instruction,
         instructionNumber,
         LeftButton,
         RightButton,
     } as any;
 
-    let { axes, io, machines, box_detection } = machineConfig;
+    const { axes, io, machines, box_detection, good_pick } = machineConfig;
 
     return (
         <ContentItem {...contentItemProps} >
@@ -58,7 +60,7 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
                                 <div className="Right">
                                     <span>
                                         Edit
-				    </span>
+									</span>
                                 </div>
                             </div>
                             <div className="Content">
@@ -79,7 +81,7 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
                                 <div className="Right">
                                     <span>
                                         Edit
-				    </span>
+									</span>
                                 </div>
                             </div>
                             <div className="Content">
@@ -102,7 +104,7 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
                                 <div className="Right">
                                     <span>
                                         Edit
-				    </span>
+									</span>
                                 </div>
                             </div>
                             <div className="Content">
@@ -127,12 +129,15 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
                                 <div className="Right">
                                     <span>
                                         Edit
-				    </span>
+									</span>
                                 </div>
                             </div>
                             <div className="Content">
                                 <span>
-                                    {"Detect: " + String(box_detection.length) + " module" + (box_detection.length > 1 ? "s" : "")}
+                                    {"Box Detection: " + String(box_detection.length) + " profile" + (box_detection.length > 1 || box_detection.length === 0 ? "s" : "")}
+                                </span>
+                                <span>
+                                    {"Pick Detection: " + String(good_pick.length) + " profile" + (good_pick.length > 1 || good_pick.length === 0 ? "s" : "")}
                                 </span>
                             </div>
                         </div>

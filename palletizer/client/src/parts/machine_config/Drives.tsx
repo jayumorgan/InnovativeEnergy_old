@@ -481,7 +481,7 @@ function DriveCell({ drive, index, editingDrives, setEditingDrives, allMachines 
                         </div>
                     </div>
                 </div>
-                <div className="DriveCellContent" style={{ justifyContent: "center" }}>
+                <div className="DriveCellContent" style={{ justifyContent: "flex-start" }}>
                     <div className="Input">
                         <div className="Title">
                             <span>

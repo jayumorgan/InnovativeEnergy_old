@@ -12,23 +12,14 @@ $top-height: $header-height+$navbar-height;
 $medium-blue: rgb(43, 62, 85);
 $container-blue: rgb(50, 72, 102);
 $dark-blue: rgb(22, 35, 56);
-
 $light-grey: rgb(212, 217, 226);
-
 $dull-button: rgb(167, 176, 187);
-
 $green: rgb(91, 196, 126);
-
 $light-blue: rgb(239, 242, 247);
-
 $dark-grey: rgb(135, 135, 135);
-
 $desert-storm: rgb(248, 248, 248);
-
 $off-white: rgb(251, 251, 251);
-
 $red: rgb(243, 15, 15);
-
 $border-grey: rgb(207, 207, 207);
 
 $blue-gradient:radial-gradient(circle, $medium-blue 40%, $dark-blue 100%);
@@ -40,11 +31,8 @@ $border-radius: 4pt;
 
 // Margin
 $margin: 8pt;
-
 $double-margin: #{$margin * 2};
-
 $quad-margin: #{$margin * 4};
-
 $octa-margin: #{$margin * 8};
 
 // Border:

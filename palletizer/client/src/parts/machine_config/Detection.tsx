@@ -6,10 +6,20 @@ import { ControlProps, changeEventToNumber } from "../shared/shared";
 import { MachineMotion } from "./MachineMotions";
 import IOController from "../../jogger/IO";
 
-
 //---------------Styles---------------
 import "./css/Detection.scss";
 
+
+
+function SplashScreen() {
+    return (
+        <div className="SplashScreen">
+            <span>
+                {"No input profiles configured"}
+            </span>
+        </div>
+    );
+};
 
 interface DetectionCellProps {
     updateState: (state: IOState) => void;
@@ -55,8 +65,6 @@ function DetectionCell({ state, updateState, allMachines, ioController, removeDe
         updateState(s);
     };
 
-    // Make sure current values are read.
-    // Need to get current values for this module.
     return (
         <div className="DetectionCellContainer">
             <div className="DetectionCell">
@@ -105,6 +113,9 @@ function DetectionCell({ state, updateState, allMachines, ioController, removeDe
                                 </span>
                             </div>
                             <div className="Current">
+                                <span id="label">
+                                    {"Current:"}
+                                </span>
                                 <span>
                                     {currentPinValues[i] ? "1" : "0"}
                                 </span>
@@ -216,18 +227,22 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
         <ContentItem {...contentItemProps} >
             <div className="Detection">
                 <div className="DetectionScroll">
-                    {detectionArray.map((state: IOState, i: number) => {
-                        const cellProps: DetectionCellProps = {
-                            updateState: updateCellAtIndex(i),
-                            state,
-                            allMachines,
-                            ioController: ioControllers[state.MachineMotionIndex],
-                            removeDetectionCell: removeCell(i)
-                        };
-                        return (
-                            <DetectionCell  {...cellProps} />
-                        );
-                    })}
+                    {detectionArray.length === 0 ?
+                        (<SplashScreen />)
+                        :
+                        detectionArray.map((state: IOState, i: number) => {
+                            const cellProps: DetectionCellProps = {
+                                updateState: updateCellAtIndex(i),
+                                state,
+                                allMachines,
+                                ioController: ioControllers[state.MachineMotionIndex],
+                                removeDetectionCell: removeCell(i)
+                            };
+                            return (
+                                <DetectionCell  {...cellProps} />
+                            );
+                        })
+                    }
                 </div>
             </div>
         </ContentItem>

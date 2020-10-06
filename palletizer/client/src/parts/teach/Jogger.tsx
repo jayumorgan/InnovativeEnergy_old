@@ -374,7 +374,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    if (forcedHome) {
+    if (forcedHome && false) { // orphaned for now.
         const skip = () => {
             setForcedHome(false);
         };

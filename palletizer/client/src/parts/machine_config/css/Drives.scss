@@ -73,7 +73,7 @@
         @include flex-center();
         flex-direction: column;
         justify-content: flex-start;
-        overflow-y: scroll;
+        overflow-y: hidden;
         overflow-x: hidden;
 
         .DriveConfigCell {
@@ -109,6 +109,7 @@
                 display: grid;
                 grid-template-rows: 50% 50%;
                 grid-template-columns: 100%;
+
 
                 .DriveCellContent {
                     @include flex-center();
