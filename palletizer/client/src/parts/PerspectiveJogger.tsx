@@ -3,9 +3,7 @@ import * as Three from "three";
 import { getCamera } from "./Visualizer";
 import { Coordinate } from "../geometry/geometry";
 
-
 const LatoPath: string = "fonts/json/Lato_Bold.json";
-
 
 enum Colors {
     Aluminium = 0xa7b0bb,

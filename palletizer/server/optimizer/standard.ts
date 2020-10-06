@@ -1,9 +1,14 @@
 //---------------Generate Standard Pallet Paths---------------
-
-
 import { BoxPath, ActionCoordinate, ActionTypes, SpeedTypes } from "./optimized";
 import { SavedPalletConfiguration, BoxCoordinate, Coordinate, PalletGeometry } from "../engine/config";
 
+
+
+//-------Sort along rows.
+export function sortBoxes() {
+
+
+};
 
 export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
     return { ...coord, z: z_top };
