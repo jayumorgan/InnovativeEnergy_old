@@ -176,7 +176,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
         setioControllers(getIOControllers());
     }, [allMachines]);
 
-    const instruction: string = `Create an input profile for ${isDetection ? "box detection" : "good pick"} or skip this step`;
+    const instruction: string = `Create an input profile for ${isDetection ? "box detection" : "picked box"}`;
 
     const LeftButton: ButtonProps = {
         name: "Back",
