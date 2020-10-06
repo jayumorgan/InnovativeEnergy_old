@@ -63,7 +63,7 @@ export interface PlaneCoordinate {
 
 export interface CartesianCoordinate extends PlaneCoordinate {
     z: number;
-}
+};
 
 export interface Coordinate extends CartesianCoordinate {
     θ: number;

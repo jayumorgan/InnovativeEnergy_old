@@ -103,3 +103,11 @@ PALLETIZER -*- mode: org -*-
 *** DONE Input Splash Screen.
 *** DONE Machine Config Styling
 *** TODO Don't remove layers + stack if box pick point is the only thing that changed.
+
+** TODO Final Relevant Items
+*** TODO Sorting boxes by row for lateral approach
+*** TODO Mechanics of box drag + drop.
+*** TODO Monitoring pick quality over path.
+*** TODO Updating mechanism for machine apps.
+*** TODO Delete Machine Motion.
+*** TODO Edit Machine Motion. etc.

@@ -104,9 +104,10 @@ interface MachineCellProps {
     machine: MachineMotion,
     startEdit: () => void;
     editName: (s: string) => void;
+	deleteMachine: () => void;
 };
 
-function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
+function MachineCell({ machine, startEdit, editName, deleteMachine }: MachineCellProps) {
 
     let handleName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
@@ -151,7 +152,7 @@ function MachineCell({ machine, startEdit, editName }: MachineCellProps) {
                     </div>
                 </div>
             </div>
-            <div className="Trash">
+            <div className="Trash" onClick={deleteMachine}>
                 <span className="icon-delete">
                 </span>
             </div>
@@ -182,10 +183,9 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
     const [summaryScreen, setSummaryScreen] = useState<boolean>(allMachines.length > 0);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingMachine, setEditingMachine] = useState<MachineMotion>(defaultMachine(allMachines.length));
-
     let instruction = "Add Machine Motion Controllers";
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             if (summaryScreen) {
@@ -200,7 +200,7 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
         }
     };
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
@@ -219,18 +219,18 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
         enabled: true
     };
 
-    let editName = (index: number) => (s: string) => {
+    const editName = (index: number) => (s: string) => {
         let ms = [...allMachines];
         ms[index].name = s;
         setMachines(ms);
     };
 
-    let updateEditingName = (e: ChangeEvent) => {
+    const updateEditingName = (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         setEditingMachine({ ...editingMachine, name: newName });
     };
 
-    let startEdit = (index: number) => () => {
+    const startEdit = (index: number) => () => {
         if (index > 0) {
             setEditingMachine(allMachines[index]);
             setEditingIndex(index);
@@ -241,11 +241,16 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
         setSummaryScreen(false);
     };
 
+	const deleteMachine = (index: number) => () => {
+		let ms = [...allMachines];
+		ms.splice(index,1);
+		setMachines(ms);
+	};
+
     if (summaryScreen) {
 
         instruction = "Add and edit Machine Motion controllers";
-
-        let AddButton: ButtonProps = {
+        const AddButton: ButtonProps = {
             name: "Add new Machine Motion",
             action: startEdit(-1)
         };
@@ -264,7 +269,13 @@ function MachineMotions({ allMachines, setMachines, handleBack, handleNext, inst
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
                             {allMachines.map((m: MachineMotion, index: number) => {
-                                return (<MachineCell key={index} startEdit={startEdit(index)} editName={editName(index)} machine={m} />)
+							const props : MachineCellProps = {
+								startEdit: startEdit(index),
+								editName: editName(index),
+								machine: m,
+								deleteMachine: deleteMachine(index)
+							}
+                                return (<MachineCell key={index} {...props} />)
                             })}
                         </div>
                     </div>
