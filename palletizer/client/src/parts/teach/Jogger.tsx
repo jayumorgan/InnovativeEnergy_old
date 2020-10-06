@@ -430,15 +430,16 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                     <PerspectiveJogger {...perspectiveJoggerProps} />
                 </div>
             </div>
-
             <div className="Parameters">
                 <JoggerParameter {...distanceParams} />
                 <div className="Select">
-                    <div className="SelectButton" onClick={handleSelect}>
-                        <span>
-                            {(!hideName) ? "Select Point" : "Done"}
-                        </span>
-                    </div>
+                    {(!hideName) &&
+                        <div className="SelectButton" onClick={handleSelect}>
+                            <span>
+                                {"Select Point"}
+                            </span>
+                        </div>
+                    }
                 </div>
                 <JoggerParameter {...speedParams} />
             </div>

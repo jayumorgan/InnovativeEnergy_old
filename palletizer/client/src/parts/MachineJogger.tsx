@@ -3,6 +3,8 @@ import Modal, { ModalProps } from "./Modal";
 import Jogger, { JoggerProps, ForceHome, ForceHomeProps } from "./teach/Jogger";
 import { SavedMachineConfiguration } from "./MachineConfig";
 import JogController from "../jogger/Jogger";
+import { XIcon } from "./teach/PlusIcon";
+
 
 import "./css/MachineJogger.scss";
 import { CoordinateRot } from "../geometry/geometry";
@@ -18,6 +20,8 @@ export default function MachineJogger({ savedMachineConfiguration, close }: Mach
         const { axes, machines } = savedMachineConfiguration!.config;
         return new JogController(machines, axes, (_: any) => { return; });
     })());
+
+    const iconSize = 25;
 
     const modalProps: ModalProps = {
         close
@@ -47,6 +51,11 @@ export default function MachineJogger({ savedMachineConfiguration, close }: Mach
                         <span>
                             {joggerProps.name}
                         </span>
+                    </div>
+                    <div className="CloseButton">
+                        <div className="Button" onClick={close}>
+                            <XIcon height={iconSize} width={iconSize} />
+                        </div>
                     </div>
                 </div>
                 <div className="SplitView">

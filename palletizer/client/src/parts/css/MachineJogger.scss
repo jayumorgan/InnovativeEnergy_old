@@ -35,6 +35,35 @@
                 font-weight: $bold-font;
             }
         }
+
+        .CloseButton {
+            width: 100%;
+            height: 100%;
+            @include flex-center();
+            justify-content: flex-end;
+            align-items: flex-start;
+
+            .Button {
+                width: 10%;
+                height: 100%;
+                @include flex-center();
+            }
+
+            svg {
+                cursor: pointer;
+
+                line {
+                    stroke: $light-grey;
+                    stroke-width: 4;
+                }
+            }
+
+            svg:hover {
+                line {
+                    stroke: $red;
+                }
+            }
+        }
     }
 
     .SplitView {
