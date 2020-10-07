@@ -111,3 +111,4 @@ PALLETIZER -*- mode: org -*-
 *** TODO Monitoring pick quality over path.
 *** TODO Updating mechanism for machine apps.
 *** TODO Edit Machine Motion. etc.
+*** TODO Make sure that the current configuration selection mechanism is robust -- don't allow starting with incomplete configuration.

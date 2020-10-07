@@ -19,7 +19,6 @@ import {
 import { addActionToCoordinate, raiseOverCoordinate } from "./standard";
 
 
-
 //---------------Types---------------
 export enum ActionTypes {
     NONE,

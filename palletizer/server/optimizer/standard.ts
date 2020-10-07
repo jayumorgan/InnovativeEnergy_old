@@ -1,6 +1,19 @@
-//---------------Generate Standard Pallet Paths---------------
-import { BoxPath, ActionCoordinate, ActionTypes, SpeedTypes } from "./optimized";
-import { SavedPalletConfiguration, BoxCoordinate, Coordinate, PalletGeometry, PlaneCoordinate } from "../engine/config";
+import { v4 as uuidv4 } from 'uuid';
+import fs from "fs";
+import filePath from "path";
+import {
+    BoxPath,
+    ActionCoordinate,
+    ActionTypes,
+    SpeedTypes
+} from "./optimized";
+import {
+    SavedPalletConfiguration,
+    BoxCoordinate,
+    Coordinate,
+    PalletGeometry,
+    PlaneCoordinate
+} from "../engine/config";
 
 export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
     return { ...coord, z: z_top };
@@ -9,7 +22,6 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
 export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
     return { ...coord, action, speed, waitForCompletion };
 };
-
 
 //-------Not Lateral Approach-------
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
@@ -105,36 +117,61 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
     const highest_pick_location_z: number = calculateHighestPickLocationZ(boxCoordinates);
     console.log("generateStandardPath: total_height=" + total_height);
 
-
     let stackGroups: BoxCoordinate[][][] = [];
     let current_stack_group: BoxCoordinate[][] = [];
     let current_pallet_group: BoxCoordinate[] = [];
     let current_pallet_index: number = 0;
     let current_stack_index: number = 0;
 
+    const sortPalletGroup = (a: BoxCoordinate, b: BoxCoordinate) => {
+        return b.linearPathDistance - a.linearPathDistance;
+    };
+
     boxCoordinates.sort((a: BoxCoordinate, b: BoxCoordinate) => {
         if (a.stackIndex === b.stackIndex) {
             return a.palletIndex - b.palletIndex;
         }
         return a.stackIndex - b.stackIndex;
-    }).forEach((bc: BoxCoordinate) => {
+    }).forEach((bc: BoxCoordinate, i: number) => {
         const { stackIndex, palletIndex } = bc;
-        if (stackIndex > current_stack_index) {
-            current_stack_index++;
-            current_pallet_index = 0;
-            current_stack_group.push(current_pallet_group);
-            stackGroups.push([...current_stack_group]);
-            current_stack_group = [];
+        if (i === 0) { // set proper parameters on first.
+            current_stack_index = stackIndex;
+            current_pallet_index = palletIndex;
         }
-        if (palletIndex > current_pallet_index) {
-            current_pallet_group.sort((a: BoxCoordinate, b: BoxCoordinate) => {
-                return b.linearPathDistance - a.linearPathDistance;
-            })
+
+        if (stackIndex !== current_stack_index) { // Stack index has changed.
+            current_pallet_group.sort(sortPalletGroup);
+            current_stack_group.push(current_pallet_group);
+            stackGroups.push(current_stack_group);
+            current_pallet_group = [];
+            current_stack_group = [];
+            current_pallet_index = palletIndex;
+            current_stack_index = stackIndex;
+        }
+
+        if (palletIndex !== current_pallet_index) { // Pallet index has changed.
+            current_pallet_group.sort(sortPalletGroup);
             current_stack_group.push(current_pallet_group);
             current_pallet_group = [];
+            current_pallet_index = palletIndex;
         }
+
         current_pallet_group.push(bc);
+
+        if (i === boxCoordinates.length - 1) {
+            current_pallet_group.sort(sortPalletGroup);
+            current_stack_group.push(current_pallet_group);
+            stackGroups.push(current_stack_group);
+        }
     });
+
+    //---------------Console.log---------------
+    // stackGroups.forEach((group: BoxCoordinate[][], i: number) => {
+    //     group.forEach((pallet_group: BoxCoordinate[], j: number) => {
+    //         console.log(`Stack ${i} pallet ${j}`, pallet_group);
+    //     });
+    // })
+
 
     stackGroups.forEach((stack_group: BoxCoordinate[][]) => {
         stack_group.forEach((pallet_group: BoxCoordinate[]) => {
@@ -172,5 +209,13 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
             }
         });
     });
+
+    savePath(paths);
     return paths;
+};
+
+function savePath(data: BoxPath[]) {
+    let fpath = filePath.join(__dirname, "..", "..", "path_data", `${uuidv4()}standard.json`);
+    let flat: BoxPath = data.flat();
+    fs.writeFileSync(fpath.toString(), JSON.stringify(flat, null, "\t"));
 };
