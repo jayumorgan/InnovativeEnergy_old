@@ -2,64 +2,16 @@
 import { BoxPath, ActionCoordinate, ActionTypes, SpeedTypes } from "./optimized";
 import { SavedPalletConfiguration, BoxCoordinate, Coordinate, PalletGeometry, PlaneCoordinate } from "../engine/config";
 
-//-------Sort Boxes For Lateral Approach-------
-
-function planeDifferenceAngle(p1: PlaneCoordinate, p2: PlaneCoordinate): number {
-    const Δ: PlaneCoordinate = {
-        x: p1.x - p2.x,
-        y: p1.y - p2.y
-    };
-    return Math.atan2(Δ.y, Δ.x);
-};
-
-// For single Layer, of cours
-export function sortBoxesByRowCol(bs: BoxCoordinate[]): BoxCoordinate[] {
-    let currentPoint: PlaneCoordinate = {
-        x: 1e9,
-        y: -1e9
-    };
-    let final: BoxCoordinate[] = [];
-    while (bs.length > 0) {
-
-        // 45 degree above 
-        let valids = bs.filter((bc: BoxCoordinate) => {
-            const diff: number = planeDifferenceAngle(bc.dropLocation, currentPoint);
-            // Point lies north west of the 45deg line.
-            return (diff >= Math.PI / 4) && (diff <= Math.PI * 5 / 4);
-        });
-
-        // valids.sort((a: BoxCoordinate, b: BoxCoordinate) => {
-        // 	// Find left most value;
-
-
-
-
-        // });
-
-
-        bs.sort((a: BoxCoordinate, b: BoxCoordinate) => {
-            const ad: Coordinate = a.dropLocation;
-            const bd: Coordinate = b.dropLocation;
-            const diffA: number = planeDifferenceAngle(ad, currentPoint);
-            const diffB: number = planeDifferenceAngle(bd, currentPoint);
-            return diffB - diffA;
-        });
-        const next: BoxCoordinate = bs.shift()!;
-        currentPoint = { ...next.dropLocation };
-        final.push(next);
-    }
-    return final;
-};
-
 export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
     return { ...coord, z: z_top };
 };
-
 
 export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
     return { ...coord, action, speed, waitForCompletion };
 };
 
+
+//-------Not Lateral Approach-------
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let path: BoxPath = [];
 
