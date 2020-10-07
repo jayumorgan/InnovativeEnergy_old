@@ -1,5 +1,3 @@
-// Rename this file.
-
 export interface PlaneDimensions {
     width: number;
     length: number;
@@ -40,21 +38,21 @@ export function MultiplyScalar(c1: Coordinate, alpha: number): Coordinate {
         y: c1.y * alpha,
         z: c1.z * alpha
     } as Coordinate;
-}
+};
 
 export function Norm(c: Coordinate): number {
     return Math.sqrt(c.x ** 2 + c.y ** 2 + c.z ** 2);
-}
+};
 
 export function Add3D(c1: Coordinate, c2: Coordinate): Coordinate {
     return Subtract3D(c1, MultiplyScalar(c2, -1));
-}
+};
 
 function Subtract2D(c1: Coordinate, c2: Coordinate): Coordinate2D {
-    let x1 = c1.x;
-    let y1 = c1.y;
-    let x2 = c2.x;
-    let y2 = c2.y;
+    const x1 = c1.x;
+    const y1 = c1.y;
+    const x2 = c2.x;
+    const y2 = c2.y;
 
     return {
         x: x1 - x2,
@@ -64,7 +62,7 @@ function Subtract2D(c1: Coordinate, c2: Coordinate): Coordinate2D {
 
 function Norm2D(v: Coordinate2D): number {
     return Math.sqrt(v.x ** 2 + v.y ** 2);
-}
+};
 
 export interface BoxObject {
     name: string;
@@ -115,7 +113,7 @@ export interface BoxPosition2D {
 export interface SVGPosition {
     x: number;
     y: number;
-}
+};
 
 export interface BoxPositionObject {
     position: SVGPosition;

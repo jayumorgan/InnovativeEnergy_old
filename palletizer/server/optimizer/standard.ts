@@ -78,25 +78,47 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
     let lateralApproach: Coordinate = { ...box.dropLocation };
-    lateralApproach.x += 80;
-    lateralApproach.y += 80;
-    lateralApproach.z -= 50;
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-    lateralApproach.x -= 80;
-    lateralApproach.y -= 80;
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
 
-    /*
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
-    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP));
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation), ActionTypes.NONE));
-    */
-
     return path;
 };
+
+
+function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDirection: PlaneCoordinate): BoxPath {
+    let path: BoxPath = [];
+    const lateralScale: number = 80; // 16 cm 
+
+    // Picking.
+    // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
+    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
+    let preRotated: Coordinate = { ...box.pickLocation };
+    preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
+    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+    preRotated = raiseOverCoordinate(box.pickLocation, z_top);
+    preRotated.θ = box.dropLocation.θ;
+    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+
+    // Dropping.
+    // The lateral approach allows to pack boxes tighter.
+    // Implies an ordering that preserves clearance in +x and +y.
+    let lateralApproach: Coordinate = { ...box.dropLocation };
+    lateralApproach.x += lateralDirection.x * lateralScale;
+    lateralApproach.y += lateralDirection.y * lateralScale;
+    lateralApproach.z -= 50;
+    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+    lateralApproach.x -= lateralDirection.x * lateralScale;
+    lateralApproach.y -= lateralDirection.y * lateralScale;
+    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
+
+    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
+    return path;
+}
+
 
 function calculateTotalHeight(boxes: BoxCoordinate[]): number {
     let height: number = 0, iStack: number = 0;
@@ -116,13 +138,14 @@ function calculateHighestPickLocationZ(boxes: BoxCoordinate[]): number {
     return highestZ;
 }
 
+function PlaneDistance(a: PlaneCoordinate, b: PlaneCoordinate): number {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+};
+
+//---------------Standard Path---------------
 export function generateStandardPath(pallet_config: SavedPalletConfiguration): BoxPath[] {
     const { boxCoordinates } = pallet_config;
     const { pallets } = pallet_config.config;
-
-    let stack_indices: number[] = pallets.map((_: PalletGeometry) => {
-        return 0;
-    });
 
     let paths: BoxPath[] = [];
     let current_height: number = 0;
@@ -130,33 +153,72 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
     const highest_pick_location_z: number = calculateHighestPickLocationZ(boxCoordinates);
     console.log("generateStandardPath: total_height=" + total_height);
 
-    while (true) {
-        let has_coordinates: boolean = false;
-        let bc_filtered;
-        // this is by layer, but could separate by pallet.
-        (bc_filtered = (boxCoordinates.filter((coord: BoxCoordinate) => {
-            return (coord.stackIndex === stack_indices[coord.palletIndex]);
-        }))).forEach((b: BoxCoordinate) => {
-            has_coordinates = true;
-            // Calculate a z_top that minimized travel time conservatively.
-            // TODO: review for multiple pallets...
-            // Note: highest_pick_location_z is a somewhat hacky way to avoid collisions among feeding conveyors inside the enclosure.
-            let z_top: number = Math.max(0, Math.min(
-                highest_pick_location_z - b.dimensions.height, // never travel lower than the pick location.
-                pallet_config.config.pallets[0].corner1.z - current_height - 1.5 * b.dimensions.height) // travel as low as the current height minus 1.5 box.
-                - 50 /* 5cm extra safety */);
-            paths.push(generatePathForBox(b, z_top));
-        });
 
-        if (!has_coordinates) {
-            break;
+    let stackGroups: BoxCoordinate[][][] = [];
+    let current_stack_group: BoxCoordinate[][] = [];
+    let current_pallet_group: BoxCoordinate[] = [];
+    let current_pallet_index: number = 0;
+    let current_stack_index: number = 0;
+
+    boxCoordinates.sort((a: BoxCoordinate, b: BoxCoordinate) => {
+        if (a.stackIndex === b.stackIndex) {
+            return a.palletIndex - b.palletIndex;
         }
+        return a.stackIndex - b.stackIndex;
+    }).forEach((bc: BoxCoordinate) => {
+        const { stackIndex, palletIndex } = bc;
+        if (stackIndex > current_stack_index) {
+            current_stack_index++;
+            current_pallet_index = 0;
+            current_stack_group.push(current_pallet_group);
+            stackGroups.push([...current_stack_group]);
+            current_stack_group = [];
+        }
+        if (palletIndex > current_pallet_index) {
+            current_pallet_group.sort((a: BoxCoordinate, b: BoxCoordinate) => {
+                return b.linearPathDistance - a.linearPathDistance;
+            })
+            current_stack_group.push(current_pallet_group);
+            current_pallet_group = [];
+        }
+        current_pallet_group.push(bc);
+    });
 
-        current_height += bc_filtered[0].dimensions.height;
-        stack_indices = stack_indices.map((v: number) => {
-            return v + 1;
+    stackGroups.forEach((stack_group: BoxCoordinate[][]) => {
+        stack_group.forEach((pallet_group: BoxCoordinate[]) => {
+            // We continue.
+            if (pallet_group.length > 0) {
+                const bc0 = pallet_group.shift()!;
+                const { palletIndex } = bc0; // Also the furthest away.
+
+                const getZTop = (box: BoxCoordinate) => {
+                    return Math.max(0, Math.min(
+                        highest_pick_location_z - box.dimensions.height, // never travel lower than the pick location.
+                        pallets[palletIndex].corner1.z - current_height - 1.5 * box.dimensions.height) // travel as low as the current height minus 1.5 box.
+                        - 50 /* 5cm extra safety */);
+                };
+
+                // First box doesn't need lateral approach
+                paths.push(generatePathForBox(bc0, getZTop(bc0)));
+
+                pallet_group.sort((a: BoxCoordinate, b: BoxCoordinate) => {
+                    return PlaneDistance(a.dropLocation, bc0.dropLocation) - PlaneDistance(b.dropLocation, bc0.dropLocation);
+                }).forEach((b: BoxCoordinate) => {
+
+                    let direction: PlaneCoordinate = {
+                        x: b.dropLocation.x - bc0.dropLocation.x,
+                        y: b.dropLocation.y - bc0.dropLocation.y
+                    };
+                    const norm: number = Math.sqrt(direction.x ** 2 + direction.y ** 2);
+                    direction.x *= 1 / norm;
+                    direction.y *= 1 / norm;
+                    // Lateral approach
+                    paths.push(generateLateralPathForBox(b, getZTop(b), direction));
+                });
+
+                current_height += bc0.dimensions.height;
+            }
         });
-    }
-
+    });
     return paths;
 };
