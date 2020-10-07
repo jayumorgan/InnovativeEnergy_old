@@ -53,12 +53,12 @@ def main(fileName):
             graph.set_3d_properties(z_points)
 
     time_interval = 200
-    animator = animation.FuncAnimation(fig,
-                                       update_graph,
-                                       len(xs),
-                                       interval=time_interval,
-                                       blit=False,
-                                       repeat=False)
+    # animator = animation.FuncAnimation(fig,
+    #                                    update_graph,
+    #                                    len(xs),
+    #                                    interval=time_interval,
+    #                                    blit=False,
+    #                                    repeat=False)
     plt.show()
 
 

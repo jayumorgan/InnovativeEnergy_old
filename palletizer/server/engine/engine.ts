@@ -604,7 +604,7 @@ export class Engine {
         });
     };
 
-
+    // Wrap internals with a pick quality monitor.
     async executePathSequence(box_index: number, path_index: number): Promise<any> {
         const my = this;
         if (box_index >= my.boxPathsForPallet.length) {

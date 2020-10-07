@@ -88,6 +88,8 @@ export default class Jogger {
     };
 
     constructor(machines: MachineMotion[], Axes: AxesConfiguration, onPositionUpdate: (positions: any) => void, bindIsMoving?: (b: boolean) => void, bindEstopped?: (b: boolean) => void) {
+
+        console.log(machines, "Machien in controller");
         this.axesConfiguration = Axes;
         this.positionHandler = onPositionUpdate;
 
@@ -127,11 +129,16 @@ export default class Jogger {
         });
 
         my.prepareSystem().then(() => {
+            console.log("Prepared system");
             return my.configureAxes();
         }).then(() => {
+            console.log("Confiured axes");
             return my.setJogSpeed(my.jogSpeed);
         }).then(() => {
+            console.log("Set jog speed");
             my.getPosition();
+        }).then(() => {
+            console.log("Successfully setup jogger.");
         }).catch((e: any) => {
             console.log("Error setting up jogger", e);
         });
@@ -215,6 +222,8 @@ export default class Jogger {
 
     prepareSystem() {
         let my = this;
+
+        console.log("Starting Prepare System");
         return new Promise((resolve, reject) => {
             Promise.all(my.machineMotions.map((mm: MM) => {
                 return mm.releaseAndReset();
@@ -223,6 +232,7 @@ export default class Jogger {
                 my.__setIsMoving(false);
                 resolve();
             }).catch((e: any) => {
+                console.log("Failed prepare system", e);
                 my.__setIsMoving(false);
                 my.__setEstopped(false);
                 reject(e);

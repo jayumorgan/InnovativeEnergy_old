@@ -11,7 +11,6 @@ import {
     SavedPalletConfiguration,
     BoxCoordinate,
     Coordinate,
-    PalletGeometry,
     PlaneCoordinate
 } from "../engine/config";
 
@@ -52,7 +51,8 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
 
 function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDirection: PlaneCoordinate): BoxPath {
     let path: BoxPath = [];
-    const lateralScale: number = 80; // 16 cm 
+    const lateralScale: number = 80; // 16 cm
+    const lateralZshift: number = 50;
 
     // Picking.
     // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
@@ -71,12 +71,14 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     let lateralApproach: Coordinate = { ...box.dropLocation };
     lateralApproach.x += lateralDirection.x * lateralScale;
     lateralApproach.y += lateralDirection.y * lateralScale;
-    lateralApproach.z -= 50;
+    lateralApproach.z -= lateralZshift;
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-    lateralApproach.x -= lateralDirection.x * lateralScale;
-    lateralApproach.y -= lateralDirection.y * lateralScale;
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
+
+    // Smoothed out the path.
+    // lateralApproach.x -= lateralDirection.x * lateralScale;
+    // lateralApproach.y -= lateralDirection.y * lateralScale;
+    // path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
 
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));

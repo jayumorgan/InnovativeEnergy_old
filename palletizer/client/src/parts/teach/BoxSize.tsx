@@ -1,6 +1,6 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import ContentItem, { ButtonProps } from "./ContentItem";
-import Jogger from "./Jogger";
+import Jogger, { JoggerProps } from "./Jogger";
 import Box from "./3D/BoxRender";
 import {
     BoxObject,
@@ -9,6 +9,10 @@ import {
     compareDimensions
 } from "../../geometry/geometry";
 import { ControlProps } from "../shared/shared";
+import { get_machine_config } from "../../requests/requests";
+import { SavedMachineConfiguration } from "../MachineConfig";
+import JogController from "../../jogger/Jogger";
+
 
 import "./css/BoxSize.scss";
 
@@ -137,11 +141,18 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
 
     let instruction = "Move and select box pick location";
 
+    const joggerProps: JoggerProps = {
+        machineConfigId,
+        selectAction,
+        name: box.name,
+        updateName
+    };
+
     return (
         <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
             <div className="NewBoxGrid">
                 <div className="BoxSetup">
-                    <Jogger machineConfigId={machineConfigId} selectAction={selectAction} name={box.name} updateName={updateName} />
+                    <Jogger {...joggerProps} />
                     <div className="BoxConfigurator">
                         <Box {...box.dimensions} />
                         <div className="CoordinateDisplay">

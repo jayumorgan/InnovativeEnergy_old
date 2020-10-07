@@ -106,9 +106,11 @@ PALLETIZER -*- mode: org -*-
 *** TODO Don't remove layers + stack if box pick point is the only thing that changed.
 
 ** TODO Final Relevant Items
-*** TODO Sorting boxes by row for lateral approach
+*** DONE Sorting boxes by row for lateral approach
 *** TODO Mechanics of box drag + drop.
 *** TODO Monitoring pick quality over path.
 *** TODO Updating mechanism for machine apps.
-*** TODO Edit Machine Motion. etc.
+*** DONE Edit Machine Motion. etc.
 *** TODO Make sure that the current configuration selection mechanism is robust -- don't allow starting with incomplete configuration.
+*** TODO Show stack display realtime in the Stack.tsx.
+

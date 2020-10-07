@@ -165,42 +165,46 @@ export interface JoggerProps {
     savedMachineConfig?: SavedMachineConfiguration;
     Controller?: JogController;
 };
-
+var gCountClosure = 0;
 export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig, Controller }: JoggerProps) {
-
-    const [forcedHome, setForcedHome] = useState<boolean>(!(hideName));
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(Controller ? Controller : null);
 
-    const setPosition = (p: any) => {
-        const position = p as CoordinateRot;
-        setCurrentPosition(position);
+    const myClosure = gCountClosure++;
+
+    const stateCheck = () => {
+        console.log("Jog Controller inside State Check", jogController);
     };
+
+    console.log("Jog Controller outside use effect", jogController, jogController === null, jogController !== null);
+    stateCheck();
 
     const createJogger = (s: SavedMachineConfiguration) => {
         const { axes, machines } = s.config;
-        const jc = new JogController(machines, axes, setPosition); // amen.
-        jc.getPosition();
+        const jc = new JogController(machines, axes, (p: any) => {
+            setCurrentPosition(p as CoordinateRot);
+        }); // amen.
         setJogController(jc);
+        jc.getPosition();
     };
 
     useEffect(() => {
         if (Controller) {
-            return;
+            setJogController(Controller);
         } else if (savedMachineConfig) {
             console.log(savedMachineConfig);
             createJogger(savedMachineConfig);
         } else {
+            console.log("Getting machine config for id", machineConfigId);
             get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
                 createJogger(mc);
             }).catch((e: any) => {
                 console.log("Error get_machine_config", e);
             });
         }
-    }, [machineConfigId, Controller]);
-
+    }, [machineConfigId, Controller, savedMachineConfig]);
 
     const handleSpeed = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
@@ -210,6 +214,8 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             }).catch((e: any) => {
                 console.log(e);
             });
+        } else {
+            console.log("Jog controlelr not initialized");
         }
     };
 
@@ -221,11 +227,14 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             }).catch((e: any) => {
                 console.log(e);
             });
+        } else {
+            console.log("Jog controller not initialized");
         }
     };
 
-    const handleMove = (d: Directions) => () => {
+    const handleMove = (d: Directions) => {
         if (jogController === null) {
+            console.log(jogController, Controller);
             console.log("Jog controller not initialized");
             return;
         } else {
@@ -264,29 +273,31 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
 
     const handleAMove = (dagger: boolean) => {
         if (jogController !== null) {
-            // Up is down and down is up.
             jogController.startJog(PalletizerAxes.Z, dagger ? DIRECTION.REVERSE : DIRECTION.NORMAL).catch((e: any) => {
                 console.log(e);
             });
+        } else {
+            console.log("Jog Controller Not Initialized", jogController);
         }
     };
 
     const jogMove = (d: PlaneArrowDirections) => {
+        console.log("Jog Controller in Jog Move", jogController);
         switch (d) {
             case (PlaneArrowDirections.FORWARD): { // + y
-                handleMove(Directions.UP)();
+                handleMove(Directions.UP);
                 break;
             }
             case (PlaneArrowDirections.BACK): { //-y
-                handleMove(Directions.DOWN)();
+                handleMove(Directions.DOWN);
                 break;
             }
             case (PlaneArrowDirections.RIGHT): { //+x
-                handleMove(Directions.RIGHT)();
+                handleMove(Directions.RIGHT);
                 break;
             }
             case (PlaneArrowDirections.LEFT): { // -x
-                handleMove(Directions.LEFT)();
+                handleMove(Directions.LEFT);
                 break;
             }
             case (PlaneArrowDirections.UP): { // +z
@@ -304,11 +315,13 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     };
 
     const jogMoveAngle = (angle: number) => {
-        if (jogController !== null) {
+        if (jogController === null) {
+            console.log("Jog controller is null");
+        } else {
             jogController.rotateToAngle(angle).then(() => {
-                console.log("Rotate jogger -- test after type change.");
+                console.log("Rotate Jogger");
             }).catch((e: any) => {
-                console.log("Error rotate ", e);
+                console.log("Error rotate", e);
             });
         }
     };
@@ -360,38 +373,14 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         handleUpdate: handleSpeed
     };
 
-    const arrowSize = 120;
     const { x, y, z, θ } = currentPosition;
-    // Rotate will be finicky if jogger reloads.
-
-    const handleRotate = () => {
-        if (jogController !== null) {
-            jogController.startRotation(θ <= 90).then(() => {
-                console.log("Rotate jogger -- test after type change.");
-            }).catch((e: any) => {
-                console.log("Error rotate ", e);
-            });
-        }
-    };
-
-    if (forcedHome && false) { // orphaned for now.
-        const skip = () => {
-            setForcedHome(false);
-        };
-        const forcedProps: ForceHomeProps = {
-            skip,
-            jogController
-        };
-        return (
-            <ForceHome {...forcedProps} />
-        );
-    }
 
     const perspectiveJoggerProps: PerspectiveJoggerProps = {
         handleCartesianMove: jogMove,
-        handleRotateMove: jogMoveAngle
+        handleRotateMove: jogMoveAngle,
+        jogController,
+        stateCheck
     };
-
 
     return (
         <div className="Jogger">
