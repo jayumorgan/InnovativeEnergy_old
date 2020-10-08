@@ -128,20 +128,18 @@ export default class Jogger {
             my.machineMotions.push(mm);
         });
 
-        my.prepareSystem().then(() => {
-            console.log("Prepared system");
-            return my.configureAxes();
-        }).then(() => {
-            console.log("Confiured axes");
-            return my.setJogSpeed(my.jogSpeed);
-        }).then(() => {
-            console.log("Set jog speed");
-            my.getPosition();
-        }).then(() => {
-            console.log("Successfully setup jogger.");
-        }).catch((e: any) => {
-            console.log("Error setting up jogger", e);
+        my.prepareSystem().catch((e: any) => {
+            console.log("Failed prepare system", e);
         });
+
+        my.configureAxes().catch((e: any) => {
+            console.log("Failed configure axes", e);
+        });
+
+        my.setJogSpeed(my.jogSpeed).catch((e: any) => {
+            console.log("Failed set jog speed", e);
+        });
+
     };
 
     setJogIncrement(increment: number) {
@@ -222,8 +220,6 @@ export default class Jogger {
 
     prepareSystem() {
         let my = this;
-
-        console.log("Starting Prepare System");
         return new Promise((resolve, reject) => {
             Promise.all(my.machineMotions.map((mm: MM) => {
                 return mm.releaseAndReset();
@@ -232,7 +228,6 @@ export default class Jogger {
                 my.__setIsMoving(false);
                 resolve();
             }).catch((e: any) => {
-                console.log("Failed prepare system", e);
                 my.__setIsMoving(false);
                 my.__setEstopped(false);
                 reject(e);
@@ -241,24 +236,19 @@ export default class Jogger {
     };
 
     configureAxes() {
-        let my = this;
-        let keys = Object.keys(my.axesConfiguration);
-        let promises: Promise<vResponse>[] = [];
+        const my = this;
+        const keys = Object.keys(my.axesConfiguration);
 
-        keys.forEach((k: string) => {
-            let ds: Drive[] = (my.axesConfiguration as any)[k] as Drive[];
-            ds.forEach((d: Drive) => {
-                let { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
-                let mm: MM = my.machineMotions[MachineMotionIndex];
-                let drive: string = driveNumberToDRIVE(DriveNumber);
-                // DONE: get this adjustment from a 'gearbox' property instead!
-                let gearbox_multiple: number = d.Gearbox ? 5 : 1;
-                let p = mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, (Direction > 0 ? DIRECTION.NORMAL : DIRECTION.REVERSE));
-                promises.push(p);
-            });
-        });
-
-        return Promise.all(promises);
+        return Promise.all(keys.map((k: string) => {
+            const ds: Drive[] = (my.axesConfiguration as any)[k] as Drive[];
+            return Promise.all(ds.map((d: Drive) => {
+                const { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction } = d;
+                const mm: MM = my.machineMotions[MachineMotionIndex];
+                const drive: string = driveNumberToDRIVE(DriveNumber);
+                const gearbox_multiple: number = d.Gearbox ? 5 : 1;
+                return mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, (Direction > 0 ? DIRECTION.NORMAL : DIRECTION.REVERSE));
+            }));
+        }));
     };
 
     startHome(axis: PalletizerAxes | string): Promise<any> {
@@ -404,6 +394,7 @@ export default class Jogger {
                 z: (res[2].result as any)[axisNumbertoAxisString(z_drive.DriveNumber)] as number,
                 θ: (res[3].result as any)[axisNumbertoAxisString(θ_drive.DriveNumber)] as number
             };
+
             my.positionHandler(position as any);
         }).catch((e: any) => {
             console.log("Error get position", e);

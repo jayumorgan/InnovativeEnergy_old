@@ -3,14 +3,12 @@
 .Footer {
     padding: $double-margin;
     color: $dark-blue;
-    display:flex;
+    display: flex;
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-}
 
-
-.Footer span {
-    // padding: $margin;
-    color: $light-grey;
+    span {
+        color: $light-grey;
+    }
 }
