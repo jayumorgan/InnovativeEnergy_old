@@ -54,8 +54,8 @@ export default function ContentItem({ children, instruction, LeftButton, RightBu
                 {children}
             </div>
             <div className="TeachModeBottom">
-                <div className="Left" onClick={LeftButton.action}>
-                    <div className="Button">
+                <div className="Left">
+                    <div className="Button" onClick={LeftButton.action}>
                         <span>
                             {LeftButton.name}
                         </span>

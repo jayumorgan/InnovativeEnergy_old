@@ -13,13 +13,11 @@ import MachineMotion, {
 import { DatabaseHandler } from "../database/db";
 import {
     SavedMachineConfiguration,
-    MachineConfiguration,
     MachineMotionInfo,
     Axes,
     IO,
     IOState,
     SavedPalletConfiguration,
-    PalletConfiguration,
     Drive,
     Coordinate
 } from "./config";
@@ -328,13 +326,10 @@ export class Engine {
         }
     };
 
-    __handleEstop(m: string) {
-        // don't want an infinite loop. How do we avoid this? but also want all machines to be stopped?
+    __handleEstop(_: string) {
         this.__updateStatus(PALLETIZER_STATUS.STOPPED);
         this.__handleInformation(INFO_TYPE.ERROR, "Emergency stop triggered.");
         let { machines } = this.mechanicalLayout;
-        // will still call itselt recursively.
-        // How do we stop this?
         machines.forEach((m: MachineMotion) => {
             m.triggerEstop().then(() => {
                 console.log("Estop triggered for machine at ip: ", m.machineIP);
@@ -445,12 +440,8 @@ export class Engine {
         my.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
-            my.__stateReducer({
-                cycle: my.palletizerState.cycle + 1
-            });
+            my.__stateReducer({ cycle: my.palletizerState.cycle + 1 });
             return my.startPalletizer(my.startBox);
-        }).then(() => {
-
         }).catch((e) => {
             if (my.palletizerState.status == PALLETIZER_STATUS.STOPPED) {
                 console.log("Palletizer has stopped.");
@@ -499,7 +490,6 @@ export class Engine {
                 const mm_controller: MachineMotion = new MachineMotion(mm_config);
                 // NB: estop will recursively call estop, so unbind the estop action on first call.
                 mm_controller.bindEstopEvent(() => {
-                    console.log("Calling bound event");
                     mm_controller.bindEstopEvent(() => {
                         console.log("Estop already triggered");
                     });
@@ -508,13 +498,23 @@ export class Engine {
                 });
 
                 let p = new Promise((resolve, reject) => {
-                    mm_controller.releaseEstop().then(() => {
-                        return mm_controller.resetSystem();
-                    }).then(() => {
-                        resolve();
-                    }).catch((e: vResponse) => {
-                        reject(e);
+                    // To hack around the master / slave estop. -- Fix Later.
+                    mm_controller.releaseEstop().catch((e: any) => {
+                        console.log("Failed release estop", e);
                     });
+                    mm_controller.resetSystem().catch((e: any) => {
+                        console.log("Failed reset system", e);
+                    });
+
+                    resolve();
+                    // mm_controller.releaseEstop().then(() => {
+                    //     return mm_controller.resetSystem();
+                    // }).then(() => {
+                    //     resolve();
+                    // }).catch((e: vResponse) => {
+                    //     console.log("Failed release and reset");
+                    //     reject(e);
+                    // });
                 });
 
                 promises.push(p);
