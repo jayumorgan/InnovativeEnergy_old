@@ -397,7 +397,7 @@ export class Engine {
         const my = this;
         return new Promise((resolve, reject) => {
             my.databaseHandler.getCurrentConfigs().then((curr: any) => {
-                let { machine, pallet } = curr;
+                const { machine, pallet } = curr;
 
                 let machine_id = parse_id(machine);
                 let pallet_id = parse_id(pallet);
@@ -527,7 +527,7 @@ export class Engine {
             const ax = axes as any;
 
             Object.keys(ax).forEach((axis: string) => {
-                let drives = ax[axis] as Drive[];
+                const drives = ax[axis] as Drive[];
                 promises.push(Promise.all(drives.map(async (d: Drive) => {
                     const { MachineMotionIndex, DriveNumber, MechGainValue, MicroSteps, Direction, HomingSpeed } = d;
                     const mm = my.mechanicalLayout.machines[MachineMotionIndex];
@@ -535,6 +535,8 @@ export class Engine {
                     const gearbox_multiple: number = d.Gearbox ? 5 : 1;
 
                     return mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE).then(() => {
+                        console.log("Machine Motion config axis: ", axis, "Drive=", drive, " Values ustep, mechGain", mm.uStep, mm.mechGain);
+
                         return mm.configHomingSpeed([drive], [HomingSpeed]);
                     });
                 })));
@@ -657,7 +659,7 @@ export class Engine {
         const my = this;
         const { Z } = this.mechanicalLayout.axes;
         return Promise.all(Z.map(async (d: Drive) => {
-            const { MachineMotionIndex, DriveNumber, HomingSpeed } = d;
+            const { MachineMotionIndex, DriveNumber } = d;
             const drive = numberToDrive(DriveNumber);
             const mm = my.mechanicalLayout.machines[MachineMotionIndex];
             return mm.emitHome(drive).then(() => {

@@ -19,7 +19,8 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
 };
 
 export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
-    return { ...coord, action, speed, waitForCompletion };
+    // Force Wait, Force Slow For Right Now.
+    return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion: true };
 };
 
 //-------Not Lateral Approach-------
@@ -75,6 +76,11 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     // Dropping.
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
+    const drop = box.dropLocation;
+    drop.z -= 100;
+
+
+
     let lateralApproach: Coordinate = { ...box.dropLocation };
     lateralApproach.x += lateralDirection.x * lateralScale;
     lateralApproach.y += lateralDirection.y * lateralScale;
@@ -86,8 +92,6 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     // lateralApproach.x -= lateralDirection.x * lateralScale;
     // lateralApproach.y -= lateralDirection.y * lateralScale;
     // path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
-    const drop = box.dropLocation;
-    drop.z -= 100;
 
 
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
