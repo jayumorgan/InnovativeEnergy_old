@@ -221,7 +221,9 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
         name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
-                handleNext();
+                if (allBoxes.length > 0) {
+                    handleNext();
+                }
             } else {
                 if (editingIndex !== null) {
                     let b = [...allBoxes];
