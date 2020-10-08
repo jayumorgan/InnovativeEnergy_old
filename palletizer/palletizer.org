@@ -123,4 +123,5 @@ PALLETIZER -*- mode: org -*-
 *** TODO Pick height is a little high for some reasong.
 *** TODO Pick location is still a little frigged for some reason.
 *** TODO Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
+*** TODO Add location filter for negative coordinates? 
 

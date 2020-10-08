@@ -45,9 +45,10 @@ interface PalletCellProps {
     pallet: PalletGeometry;
     startEdit: () => void;
     editName: (e: ChangeEvent) => void;
+    deletePallet: () => void;
 };
 
-function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
+function PalletCell({ pallet, startEdit, editName, deletePallet }: PalletCellProps) {
 
     let { width, length } = getPalletDimensions(pallet)
 
@@ -92,7 +93,7 @@ function PalletCell({ pallet, startEdit, editName }: PalletCellProps) {
                     </div>
                 </div>
             </div>
-            <div className="Trash">
+            <div className="Trash" onClick={deletePallet}>
                 <span className="icon-delete">
                 </span>
             </div>
@@ -140,7 +141,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
     const [editComplete, setEditComplete] = useState<boolean>(false);
     const [editingIndex, setEditingIndex] = useState<number>(allPallets.length);
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             if (summaryScreen) {
@@ -164,7 +165,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         }
     };
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
@@ -196,18 +197,18 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         enabled: summaryScreen || editComplete
     };
 
-    let setPalletName = (name: string) => {
+    const setPalletName = (name: string) => {
         setEditingPallet({ ...editingPallet, name });
     };
 
-    let editName = (palletIndex: number) => (e: ChangeEvent) => {
+    const editName = (palletIndex: number) => (e: ChangeEvent) => {
         let newName = (e.target as any).value;
         let newPallets = [...allPallets];
         newPallets[palletIndex].name = newName;
         setPallets(newPallets);
     };
 
-    let startEdit = (index: number) => () => {
+    const startEdit = (index: number) => () => {
         if (index >= 0) {
             setEditComplete(true);
             setEditingPallet(allPallets[index]);
@@ -221,15 +222,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         setSummaryScreen(false);
     };
 
-    //let title = "Select Corner " + String(CornerNumber(cornerNumber) + 1);
-
-    /* let backAction = () => {
-     *     if (cornerNumber !== PALLETCORNERS.TOP_LEFT) {
-     *         setCornerNumber(DecreaseCorner(cornerNumber));
-     *     }
-     * }; */
-
-    let addCorner = (c: Coordinate) => {
+    const addCorner = (c: Coordinate) => {
         switch (cornerNumber) {
             case (PALLETCORNERS.TOP_LEFT): {
                 setEditingPallet({ ...editingPallet, corner1: c });
@@ -258,17 +251,23 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
     if (summaryScreen) {
         instruction = "Create and edit pallets";
 
-        let AddButton: ButtonProps = {
+        const AddButton: ButtonProps = {
             name: "Add new pallet",
             action: startEdit(-1)
         };
 
-        let contentItemProps = {
+        const contentItemProps = {
             instruction,
             instructionNumber,
             LeftButton,
             RightButton,
             AddButton
+        };
+
+        const deletePallet = (pallet_index: number) => () => {
+            let cp = [...allPallets];
+            cp.splice(pallet_index, 1);
+            setPallets(cp);
         };
 
         return (
@@ -277,9 +276,15 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
                             {allPallets.map((p: PalletGeometry, i: number) => {
+                                const palletCellProps: PalletCellProps = {
+                                    pallet: p,
+                                    startEdit: startEdit(i),
+                                    editName: editName(i),
+                                    deletePallet: deletePallet(i)
+                                };
                                 return (
-                                    <PalletCell pallet={p} key={i} startEdit={startEdit(i)} editName={editName(i)} />
-                                )
+                                    <PalletCell key={i} {...palletCellProps} />
+                                );
                             })}
                         </div>
                     </div>
