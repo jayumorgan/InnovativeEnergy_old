@@ -169,7 +169,9 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
         name: summaryScreen ? "Next" : "Done",
         action: () => {
             if (summaryScreen) {
-                handleNext();
+                if (allPallets.length > 0) {
+                    handleNext();
+                }
             } else {
                 // if All corners are selected.
                 if (editComplete) {
@@ -194,7 +196,7 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
                 }
             }
         },
-        enabled: summaryScreen || editComplete
+        enabled: (summaryScreen && allPallets.length > 0) || editComplete
     };
 
     const setPalletName = (name: string) => {

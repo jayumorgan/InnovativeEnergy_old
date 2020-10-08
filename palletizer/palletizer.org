@@ -124,4 +124,5 @@ PALLETIZER -*- mode: org -*-
 *** TODO Pick location is still a little frigged for some reason.
 *** TODO Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
 *** TODO Add location filter for negative coordinates? 
+*** TODO Make sure that all teach screens, after deleting all, disables the next button (see Pallets.tsx (Right button))
 
