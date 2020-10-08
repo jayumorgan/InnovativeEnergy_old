@@ -1,3 +1,5 @@
+#!/bin/perl
+
 use strict;
 use warnings;
 use v5.30.0;
