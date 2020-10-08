@@ -8,7 +8,7 @@ export interface BoxDimensions extends PlaneDimensions {
 };
 
 export function compareDimensions(bd1: BoxDimensions, bd2: BoxDimensions): boolean {
-    return bd1.length === bd2.length && bd1.width === bd2.width && bd1.height === bd1.height;
+    return bd1.length === bd2.length && bd1.width === bd2.width && bd1.height === bd2.height;
 };
 
 export interface Coordinate2D {

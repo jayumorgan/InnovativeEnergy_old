@@ -192,13 +192,6 @@ function getArcGeometry(reflect: boolean) {
     const radius = angleArcRadius;
     let shift = 0.1;
 
-    //-------Old 180deg Arc-------
-    /* shape.moveTo(0, radius);
-	 * shape.absarc(0, 0, radius, Math.PI / 2, - Math.PI / 2, true);
-	 * shape.lineTo(0, -radius + shift);
-	 * shape.absarc(0, 0, radius - shift, -Math.PI / 2, Math.PI / 2, false);
-	 * shape.lineTo(0, radius); */
-
     //-------90deg Arc-------
     shape.moveTo(radius, 0);
     shape.absarc(0, 0, radius, 0, -Math.PI / 2, true);
@@ -256,7 +249,6 @@ function makeAngleArrowText(θ: number, font: Three.Font): Three.Mesh {
 export interface PerspectiveJoggerProps {
     handleCartesianMove: (d: PlaneArrowDirections) => void;
     handleRotateMove: (angle: number) => void;
-    jogController?: JogController | null;
 };
 
 
@@ -264,12 +256,11 @@ type AngleFunction = (angle: number) => void;
 type DirectionFunction = (d: PlaneArrowDirections) => void;
 type MouseEventHandler = (angle: AngleFunction, cartesian: DirectionFunction) => (event: any) => void;
 
-export default function Jogger({ handleCartesianMove, handleRotateMove, jogController }: PerspectiveJoggerProps) {
+export default function Jogger({ handleCartesianMove, handleRotateMove }: PerspectiveJoggerProps) {
 
     const mount = useRef<HTMLDivElement>(null);
-    const [handleMouseClick, setHandleMouseClick] = useState<MouseEventHandler | null>(null);
 
-    const handleJogClick = (d: PlaneArrowDirections) => {
+    const handleCartesian = (d: PlaneArrowDirections) => {
         handleCartesianMove(d);
     };
 
@@ -291,7 +282,6 @@ export default function Jogger({ handleCartesianMove, handleRotateMove, jogContr
         scene.background = new Three.Color(Colors.Alabaster);
 
         const camera = getCamera(width, height);
-
         camera.up.set(0, 0, 1);
 
         const back = -2.6;
@@ -323,7 +313,7 @@ export default function Jogger({ handleCartesianMove, handleRotateMove, jogContr
         const circle = makeCircle();
         scene.add(circle);
 
-        // ---------------Arrow---------------
+        // ---------------Arrows---------------
         const makeArrows = () => {
             const upArrow = makeArrow(PlaneArrowDirections.FORWARD);
             scene.add(upArrow);
@@ -418,13 +408,11 @@ export default function Jogger({ handleCartesianMove, handleRotateMove, jogContr
         };
 
         const handleAngleClick = () => {
-
-            /* handleAngleJog(isRotated ? 0 : 90); */
             isRotated = !isRotated;
             rotateAngleArc();
         };
 
-        const onMouseClick = (handleAngle: AngleFunction, handleJog: DirectionFunction) => (event: any) => {
+        const onMouseClick = (event: any) => {
             const x = (event.offsetX / width) * 2 - 1;
             const y = - (event.offsetY / height) * 2 + 1;
             mouse.set(x, y);
@@ -434,14 +422,13 @@ export default function Jogger({ handleCartesianMove, handleRotateMove, jogContr
             if (intersects.length > 0) {
                 const first = intersects.shift();
                 if (first) {
-                    const name: PlaneArrowDirections = (first.object as Three.Mesh).name as PlaneArrowDirections;
-                    if (PlaneArrowDirections.ANGLE === name) {
-                        handleAngleClick();
+                    const direct: PlaneArrowDirections = (first.object as Three.Mesh).name as PlaneArrowDirections;
+                    if (direct === PlaneArrowDirections.ANGLE) {
+                        handleAngleClick(); // Display Changes.
+                        handleRotate(isRotated ? 90 : 0);
 
-                        handleAngle(isRotated ? 90 : 0);
-                        // startAngleDrag(); // Old.
                     } else {
-                        handleJog(name);
+                        handleCartesian(direct);
                     }
                 }
             }
@@ -461,22 +448,11 @@ export default function Jogger({ handleCartesianMove, handleRotateMove, jogContr
         (mount.current as HTMLDivElement).appendChild(renderer.domElement);
         window.addEventListener('resize', handleResize);
         (mount.current as HTMLDivElement).addEventListener('mousemove', onMouseMove, false);
-        //        (mount.current as HTMLDivElement).addEventListener('mousedown', onMouseClick, false);
-        setHandleMouseClick(onMouseClick);
+        (mount.current as HTMLDivElement).addEventListener('mousedown', onMouseClick, false);
+
         render_scene(true);
     }, []);
 
-    useEffect(() => {
-        if (handleMouseClick !== null && jogController !== null) {
-            console.log("Setting the event listeners");
-            const handler = (e: any) => {
-                console.log("Andle click", e);
-            }
-            (mount.current as HTMLDivElement).addEventListener('mousedown', handler, false)
-        } else {
-            console.log("Dont have a handler or a jogger");
-        }
-    }, [handleMouseClick, jogController, handleCartesianMove, handleRotateMove]);
 
     return (
         <div className="PersectiveJogger" ref={mount} />

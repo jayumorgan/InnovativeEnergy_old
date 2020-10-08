@@ -173,7 +173,6 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(Controller ? Controller : null);
 
-
     const createJogger = (s: SavedMachineConfiguration) => {
         const { axes, machines } = s.config;
         const jc = new JogController(machines, axes, (p: any) => {
@@ -197,6 +196,11 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             });
         }
     }, [machineConfigId, Controller, savedMachineConfig]);
+
+    const handleName = (e: ChangeEvent) => {
+        let newName = (e.target as any).value;
+        updateName(newName);
+    };
 
     const handleSpeed = (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
@@ -224,80 +228,52 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    const handleMove = (d: Directions) => {
+    const jogCartesian = (d: PlaneArrowDirections) => {
+
         if (jogController === null) {
-            console.log(jogController, Controller);
-            console.log("Jog controller not initialized");
+            console.log("Jog controller not initialized", jogController);
             return;
-        } else {
-            switch (d) {
-                case Directions.UP: {
-                    jogController.startJog(PalletizerAxes.Y, DIRECTION.NORMAL).then(() => {
-                    }).catch((e: any) => {
-                        console.log(e);
-                    });
-                    break;
-                };
-                case Directions.DOWN: {
-                    jogController.startJog(PalletizerAxes.Y, DIRECTION.REVERSE).then(() => {
-                    }).catch((e: any) => {
-                        console.log(e);
-                    });
-                    break;
-                };
-                case Directions.RIGHT: {
-                    jogController.startJog(PalletizerAxes.X, DIRECTION.NORMAL).then(() => {
-                    }).catch((e: any) => {
-                        console.log(e);
-                    });
-                    break;
-                };
-                case Directions.LEFT: {
-                    jogController.startJog(PalletizerAxes.X, DIRECTION.REVERSE).then(() => {
-                    }).catch((e: any) => {
-                        console.log(e);
-                    });
-                    break;
-                };
-            };
-        };
-    };
-
-    const handleAMove = (dagger: boolean) => {
-        if (jogController !== null) {
-            jogController.startJog(PalletizerAxes.Z, dagger ? DIRECTION.REVERSE : DIRECTION.NORMAL).catch((e: any) => {
-                console.log(e);
-            });
-        } else {
-            console.log("Jog Controller Not Initialized", jogController);
         }
-    };
 
-    const jogMove = (d: PlaneArrowDirections) => {
-        console.log("Jog Controller in Jog Move", jogController);
         switch (d) {
             case (PlaneArrowDirections.FORWARD): { // + y
-                handleMove(Directions.UP);
+                jogController.startJog(PalletizerAxes.Y, DIRECTION.NORMAL).then(() => {
+                }).catch((e: any) => {
+                    console.log(e);
+                });
                 break;
             }
             case (PlaneArrowDirections.BACK): { //-y
-                handleMove(Directions.DOWN);
+                jogController.startJog(PalletizerAxes.Y, DIRECTION.REVERSE).then(() => {
+                }).catch((e: any) => {
+                    console.log(e);
+                });
                 break;
             }
             case (PlaneArrowDirections.RIGHT): { //+x
-                handleMove(Directions.RIGHT);
+                jogController.startJog(PalletizerAxes.X, DIRECTION.NORMAL).then(() => {
+                }).catch((e: any) => {
+                    console.log(e);
+                });
                 break;
             }
             case (PlaneArrowDirections.LEFT): { // -x
-                handleMove(Directions.LEFT);
+                jogController.startJog(PalletizerAxes.X, DIRECTION.REVERSE).then(() => {
+                }).catch((e: any) => {
+                    console.log(e);
+                });
                 break;
             }
-            case (PlaneArrowDirections.UP): { // +z
-                handleAMove(true);
+            case (PlaneArrowDirections.UP): { // +z (which is down)
+                jogController.startJog(PalletizerAxes.Z, DIRECTION.REVERSE).catch((e: any) => {
+                    console.log(e);
+                });
                 break;
             }
-            case (PlaneArrowDirections.DOWN): {
-                handleAMove(false);
+            case (PlaneArrowDirections.DOWN): { // -z (which is up)
+                jogController.startJog(PalletizerAxes.Z, DIRECTION.NORMAL).catch((e: any) => {
+                    console.log(e);
+                });
                 break;
             }
             default: {
@@ -306,7 +282,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    const jogMoveAngle = (angle: number) => {
+    const jogAngle = (angle: number) => {
         if (jogController === null) {
             console.log("Jog controller is null");
         } else {
@@ -318,36 +294,27 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-    const handleName = (e: ChangeEvent) => {
-        let newName = (e.target as any).value;
-        updateName(newName);
-    };
 
     const handleSelect = async () => {
-
         if (!hideName) {
-
-            if (TESTING) {
-                // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
-                let pos = {
-                    x: 2000, y: 2000, z: 4000, θ: 0
-                } as CoordinateRot;
-                let tmp = TEMP_JOGGER_INDEX % 3;
-                if (tmp === 0) {
-                    pos.y = 3000;
-                } else if (tmp === 1) {
-
-                } else {
-                    pos.x = 3000;
-                }
-                TEMP_JOGGER_INDEX++;
-                selectAction(pos);
-            } else {
-                // Make sure this is valid -- should check again.
+            if (!TESTING) {
                 selectAction(currentPosition);
+                return;
             }
-        } else {
-            // For Machine Jogger.
+            // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
+            let pos = {
+                x: 2000, y: 2000, z: 4000, θ: 0
+            } as CoordinateRot;
+            let tmp = TEMP_JOGGER_INDEX % 3;
+            if (tmp === 0) {
+                pos.y = 3000;
+            } else if (tmp === 1) {
+
+            } else {
+                pos.x = 3000;
+            }
+            TEMP_JOGGER_INDEX++;
+            selectAction(pos);
         }
     };
 
@@ -368,9 +335,8 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const { x, y, z, θ } = currentPosition;
 
     const perspectiveJoggerProps: PerspectiveJoggerProps = {
-        handleCartesianMove: jogMove,
-        handleRotateMove: jogMoveAngle,
-        jogController
+        handleCartesianMove: jogCartesian,
+        handleRotateMove: jogAngle
     };
 
     return (
@@ -407,7 +373,9 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                     </div>
                 </div>
                 <div className="Perspective">
-                    <PerspectiveJogger {...perspectiveJoggerProps} />
+                    {(jogController !== null) &&
+                        <PerspectiveJogger {...perspectiveJoggerProps} />
+                    }
                 </div>
             </div>
             <div className="Parameters">
@@ -427,34 +395,3 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     );
 };
 
-
-/*
-   * Used to be inside <div className="Move">
- * <A dagger={true} handleMove={handleAMove} />
- * <div className="Mover">
- * <div className="MoverGrid">
- * <div className="Select">
- * <div className="SelectButton" onClick={handleSelect}>
- * <span>
- * {(!hideName) ? "Save" : "Done"}
- * </span>
- * </div>
- * </div>
- * <div className="Up" onClick={handleMove(Directions.UP)}>
- * <SolidArrow rotation={ROTATION.UP} size={arrowSize} />
- * </div>
- * <div className="Down" onClick={handleMove(Directions.DOWN)}>
- * <SolidArrow rotation={ROTATION.DOWN} size={arrowSize} />
- * </div>
- * <div className="Right" onClick={handleMove(Directions.RIGHT)}>
- * <SolidArrow rotation={ROTATION.RIGHT} size={arrowSize} />
- * </div>
- * <div className="Left" onClick={handleMove(Directions.LEFT)}>
- * <SolidArrow rotation={ROTATION.LEFT} size={arrowSize} />
- * </div>
- * <div className="Rotate" onClick={handleRotate}>
- * <img src={θ ? clockwise : counterclockwise} />
- * </div>
- * </div>
- * </div>
- * <A dagger={false} handleMove={handleAMove} /> */
