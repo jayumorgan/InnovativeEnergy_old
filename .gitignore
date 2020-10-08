@@ -14,3 +14,6 @@ palletizer/backup/
 palletizer/deploy
 palletizer/server/path_data/*.json
 *.beam
+path-following/client/node_modules
+path-following/server/node_modules
+path-following/client/bundle.js
