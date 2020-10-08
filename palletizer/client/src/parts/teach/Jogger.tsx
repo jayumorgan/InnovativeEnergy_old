@@ -165,21 +165,14 @@ export interface JoggerProps {
     savedMachineConfig?: SavedMachineConfiguration;
     Controller?: JogController;
 };
-var gCountClosure = 0;
+
+
 export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig, Controller }: JoggerProps) {
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(Controller ? Controller : null);
 
-    const myClosure = gCountClosure++;
-
-    const stateCheck = () => {
-        console.log("Jog Controller inside State Check", jogController);
-    };
-
-    console.log("Jog Controller outside use effect", jogController, jogController === null, jogController !== null);
-    stateCheck();
 
     const createJogger = (s: SavedMachineConfiguration) => {
         const { axes, machines } = s.config;
@@ -197,7 +190,6 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             console.log(savedMachineConfig);
             createJogger(savedMachineConfig);
         } else {
-            console.log("Getting machine config for id", machineConfigId);
             get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
                 createJogger(mc);
             }).catch((e: any) => {
@@ -378,8 +370,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const perspectiveJoggerProps: PerspectiveJoggerProps = {
         handleCartesianMove: jogMove,
         handleRotateMove: jogMoveAngle,
-        jogController,
-        stateCheck
+        jogController
     };
 
     return (
