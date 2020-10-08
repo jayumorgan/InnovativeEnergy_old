@@ -113,4 +113,6 @@ PALLETIZER -*- mode: org -*-
 *** DONE Edit Machine Motion. etc.
 *** TODO Make sure that the current configuration selection mechanism is robust -- don't allow starting with incomplete configuration.
 *** TODO Show stack display realtime in the Stack.tsx.
+*** DONE Fix Jogger Bug.
+*** TODO 
 

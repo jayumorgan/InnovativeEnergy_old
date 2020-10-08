@@ -1,0 +1,30 @@
+
+ _    __           __  _           
+| |  / /__  ____  / /_(_)___  ____ 
+| | / / _ \/ __ \/ __/ / __ \/ __ \
+| |/ /  __/ / / / /_/ / /_/ / / / /
+|___/\___/_/ /_/\__/_/\____/_/ /_/ 
+                                  
+    __  ___           __    _            ___                    
+   /  |/  /___ ______/ /_  (_)___  ___  /   |  ____  ____  _____
+  / /|_/ / __ `/ ___/ __ \/ / __ \/ _ \/ /| | / __ \/ __ \/ ___/
+ / /  / / /_/ / /__/ / / / / / / /  __/ ___ |/ /_/ / /_/ (__  ) 
+/_/  /_/\__,_/\___/_/ /_/_/_/ /_/\___/_/  |_/ .___/ .___/____/  
+                                           /_/   /_/            
+
+** TODO Attempt 1 (CLI) (Host computer connects to 192.168.7.2)
+*** TODO List all installed machine applications on the device.
+*** TODO Check git for tags / versions that we don't have.
+*** TODO Offer updates with description. (via the tag message) (can be formatted as markdown).
+*** TODO Install updates and restart services
+
+
+
+
+
+
+
+
+
+
+
