@@ -16,64 +16,7 @@ if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
 }
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
-
-
 let TEMP_JOGGER_INDEX = 0;
-
-
-
-enum Directions {
-    UP = "Up",
-    DOWN = "Down",
-    LEFT = "Left",
-    RIGHT = "Right"
-};
-
-function MakeTriangleCoordinates(up: boolean, height: number, width: number, scale: number): string {
-    let coordinates: string = "";
-
-    let s_h = height * scale;
-    let s_w = height * scale;
-
-    width -= s_w;
-    height -= s_h;
-
-    for (let i = 0; i < 3; i++) {
-        let x = (i / 2) * width + ((i % 2 === 0) ? ((i === 0) ? s_w / 2 : -s_w / 2) : 0);
-        let y = i % 2 === 0 ? (up ? height - s_h / 2 : 0 + s_h / 2) : (up ? 0 + s_h / 2 : height - s_h / 2);
-        coordinates += `${x + 3},${y} `;
-    }
-
-    return coordinates;
-};
-
-interface AProps {
-    dagger: boolean;
-    handleMove: (dagger: boolean) => void;
-};
-
-function A({ dagger, handleMove }: AProps) {
-    let stroke_color = "rgb(22,35,56)";
-    let stroke_width = 5;
-    let frame_height = 60;
-    let frame_width = 110;
-    let scale = 2 / 10;
-
-    let move = () => {
-        handleMove(dagger);
-    };
-
-    return (
-        <div className="A" >
-            <div className="Display" onClick={move}>
-                <svg width={frame_width} height={frame_height}>
-                    <polyline id="ArrowLine" points={MakeTriangleCoordinates(dagger, frame_height, frame_width, scale)} stroke={stroke_color} fill="transparent" strokeWidth={stroke_width} />
-
-                </svg>
-            </div>
-        </div>
-    );
-};
 
 interface JoggerParameterProps {
     title: string;
@@ -184,6 +127,11 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
 
     useEffect(() => {
         if (Controller) {
+
+            Controller.positionHandler = (p: any) => {
+                setCurrentPosition(p as CoordinateRot);
+            }
+            Controller.getPosition();
             setJogController(Controller);
         } else if (savedMachineConfig) {
             console.log(savedMachineConfig);
@@ -287,7 +235,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
             console.log("Jog controller is null");
         } else {
             jogController.rotateToAngle(angle).then(() => {
-                console.log("Rotate Jogger");
+                return jogController.getPosition();
             }).catch((e: any) => {
                 console.log("Error rotate", e);
             });

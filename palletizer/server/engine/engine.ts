@@ -10,7 +10,6 @@ import MachineMotion, {
     MachineMotionConfig,
     IODeviceState
 } from "mm-js-api";
-import { DatabaseHandler } from "../database/db";
 import {
     SavedMachineConfiguration,
     MachineMotionInfo,
@@ -21,14 +20,15 @@ import {
     Drive,
     Coordinate
 } from "./config";
-import { generateStandardPath } from "../optimizer/standard";
-import { generateOptimizedPath } from "../optimizer/optimized";
 import {
     BoxPath,
     ActionCoordinate,
     ActionTypes,
-    SpeedTypes
+    SpeedTypes,
+    generateOptimizedPath
 } from "../optimizer/optimized";
+import { DatabaseHandler } from "../database/db";
+import { generateStandardPath } from "../optimizer/standard";
 
 //---------------Environment Setup---------------
 dotenv.config();

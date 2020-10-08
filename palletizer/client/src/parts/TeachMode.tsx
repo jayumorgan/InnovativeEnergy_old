@@ -75,7 +75,6 @@ type ConfigAction = {
 };
 
 //-------Custom Reducers To Deal With Forward Breaking Changes-------
-// This results from a bad data model.-- but works.
 function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfiguration {
     // This rests on the assumptions that boxes are either:
     // 1.  Deleted,
@@ -193,7 +192,8 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
             boxPositions.forEach((b: BoxPositionObject) => {
                 const { box, position, rotated } = b;
-                const { pickLocation } = box;
+                // Really, The box object should be referenced, not copied.
+                const { pickLocation } = config.boxes[b.index]; // Get pick location from actual boxes.
                 const { x, y } = position; // These are fractions from the left of the pallet.
 
                 let boxWidth = box.dimensions.width;

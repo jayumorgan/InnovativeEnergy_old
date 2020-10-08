@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import ContentItem, { ButtonProps } from "./ContentItem";
 import Jogger, { JoggerProps } from "./Jogger";
 import Box from "./3D/BoxRender";
@@ -9,14 +9,11 @@ import {
     compareDimensions
 } from "../../geometry/geometry";
 import { ControlProps } from "../shared/shared";
-import { get_machine_config } from "../../requests/requests";
-import { SavedMachineConfiguration } from "../MachineConfig";
-import JogController from "../../jogger/Jogger";
 
-
+//---------------Styles---------------
 import "./css/BoxSize.scss";
 
-//---------------Box Size---------------
+
 interface BoxProps {
     box: BoxObject;
     startEdit: () => void;

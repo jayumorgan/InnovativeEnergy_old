@@ -89,7 +89,6 @@ export default class Jogger {
 
     constructor(machines: MachineMotion[], Axes: AxesConfiguration, onPositionUpdate: (positions: any) => void, bindIsMoving?: (b: boolean) => void, bindEstopped?: (b: boolean) => void) {
 
-        console.log(machines, "Machien in controller");
         this.axesConfiguration = Axes;
         this.positionHandler = onPositionUpdate;
 
@@ -120,10 +119,8 @@ export default class Jogger {
                 mqttPort: 9001,
                 mqttClient
             };
-
             // Check reminder.
             console.log("Double check that jogger parameters are okay for browser side machine motion ", config);
-
             let mm: MM = new MM(config);
             my.machineMotions.push(mm);
         });
