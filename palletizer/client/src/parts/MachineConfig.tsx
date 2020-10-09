@@ -262,6 +262,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             break;
         };
         case (MachineConfigState.GOOD_PICK): {
+			console.log("Good Pick", configuration.good_pick);
             const props: DetectionProps = {
                 ...controlProps,
                 setDetection: setGoodPick,

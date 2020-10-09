@@ -129,3 +129,17 @@ PALLETIZER -*- mode: org -*-
 ** NOTE Gcode logs available at: debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-02.log 
 
 *** TODO mm-cli
+
+
+
+Server (18479): SyntaxError: Unexpected number in JSON at position 1
+Server (18479):     at JSON.parse (<anonymous>)
+Server (18479):     at MqttClient.<anonymous> (/home/alex/mm-js-api/dist/MessageController.js:132:27)
+Server (18479):     at MqttClient.emit (events.js:326:22)
+Server (18479):     at MqttClient._handlePublish (/home/alex/mm-js-api/node_modules/mqtt/lib/client.js:1271:12)
+Server (18479):     at MqttClient._handlePacket (/home/alex/mm-js-api/node_modules/mqtt/lib/client.js:410:12)
+Server (18479):     at work (/home/alex/mm-js-api/node_modules/mqtt/lib/client.js:321:12)
+Server (18479):     at Writable.writable._write (/home/alex/mm-js-api/node_modules/mqtt/lib/client.js:335:5)
+Server (18479):     at doWrite (/home/alex/mm-js-api/node_modules/readable-stream/lib/_stream_writable.js:428:64)
+Server (18479):     at writeOrBuffer (/home/alex/mm-js-api/node_modules/readable-stream/lib/_stream_writable.js:417:5)
+Server (18479):     at Writable.write (/home/alex/mm-js-api/node_modules/readable-stream/lib/_stream_writable.js:334:11)

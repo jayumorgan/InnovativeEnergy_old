@@ -191,9 +191,10 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
             currentHeightIncrement -= height;
 
             boxPositions.forEach((b: BoxPositionObject) => {
-                const { box, position, rotated } = b;
+                const { position, rotated } = b;
                 // Really, The box object should be referenced, not copied.
-                const { pickLocation } = config.boxes[b.index]; // Get pick location from actual boxes.
+                const box = config.boxes[b.index];
+                const { pickLocation } = box; // Get pick location from actual boxes.
                 const { x, y } = position; // These are fractions from the left of the pallet.
 
                 let boxWidth = box.dimensions.width;
@@ -225,6 +226,10 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 let θ_drop: number = (rotated ? 90 : 0) + φ_pallet;
                 let dropLocation: CoordinateRot = { ...averagePosition, θ: θ_drop };
+
+                //B/C Using top of box to teach pallet -- subtract height of box (which means add)
+                dropLocation.z += box.dimensions.height;
+
                 let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
                 boxCoordinates.push({
