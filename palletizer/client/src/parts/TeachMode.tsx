@@ -188,7 +188,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
             const { boxPositions, height } = Layouts[n];
 
             // Change this to minus if Z-home is at the top of the machine.
-            currentHeightIncrement -= height;
+            //  currentHeightIncrement -= height;
 
             boxPositions.forEach((b: BoxPositionObject) => {
                 const { position, rotated } = b;
@@ -228,7 +228,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                 let dropLocation: CoordinateRot = { ...averagePosition, θ: θ_drop };
 
                 //B/C Using top of box to teach pallet -- subtract height of box (which means add)
-                dropLocation.z += box.dimensions.height;
+                // dropLocation.z += box.dimensions.height + 30;
 
                 let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
@@ -241,6 +241,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                     linearPathDistance
                 } as BoxCoordinates);
             });
+            currentHeightIncrement -= height;
         });
     });
     console.log("Final Box Coordinates ", boxCoordinates);

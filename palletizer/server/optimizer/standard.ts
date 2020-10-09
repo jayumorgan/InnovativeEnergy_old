@@ -47,7 +47,9 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     // Make Drop Location Slightly Higher.
 
     const drop = box.dropLocation;
-	//  drop.z -= 100;
+    // Shift up 1cm
+    // drop.z -= 100;
+    //  drop.z -= 100;
 
 
     path.push(addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW));
@@ -77,7 +79,7 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
     const drop = box.dropLocation;
-	//  drop.z -= 100;
+    //  drop.z -= 100;
 
 
 
