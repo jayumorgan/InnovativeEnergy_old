@@ -118,19 +118,26 @@ PALLETIZER -*- mode: org -*-
 *** DONE Fix Jogger Bug.
 *** TODO Handle master / slave estop situation.
 *** TODO Master Slave issue also has to be solved in the control center button.
-*** TODO Add positions to machine jogger.
+*** DONE Add positions to machine jogger.
 *** TODO Palletizer won't stop when returning to pick location.
-*** TODO Pick height is a little high for some reasong.
-*** TODO Pick location is still a little frigged for some reason.
-*** TODO Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
+*** DONE Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
+*** TODO In browser IO Monitoring doesn't work.
 *** TODO Add location filter for negative coordinates? 
 *** TODO Make sure that all teach screens, after deleting all, disables the next button (see Pallets.tsx (Right button))
+*** TODO Box Detection should be moved to Box Size Area (not the main thing.)
+*** DONE Box detection and monitoring label the same thing.
+*** TODO Make sure that box detection is functional.
+*** TODO Heights are a little low on second layer -- fix this.
+*** TODO Update visualizer to reflect top of box (And add instructions for this.) (maybe offset).
+*** TODO Robust update mechanism absolutely necessary.
 
 ** NOTE Gcode logs available at: debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-02.log 
+debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-04.log | grep "G[0-9]*\|M92"
 
 *** TODO mm-cli
-
-
+*** TODO Logs
+*** TODO Motion Control
+*** TODO MQTT Stream
 
 Server (18479): SyntaxError: Unexpected number in JSON at position 1
 Server (18479):     at JSON.parse (<anonymous>)

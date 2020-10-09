@@ -31,9 +31,9 @@ def main(fileName):
     path = load_data(fileName)
     [xs, ys, zs] = generateCoordinates(path)
     zs = list(map(lambda z: -1 * z, zs))
-    print("X : ", xs)
-    print("Y : ", ys)
-    print("Z : ", zs)
+    # print("X : ", xs)
+    # print("Y : ", ys)
+    # print("Z : ", zs)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
