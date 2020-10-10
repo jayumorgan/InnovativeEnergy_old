@@ -2,17 +2,32 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from "fs";
 import filePath from "path";
 import {
-    BoxPath,
-    ActionCoordinate,
-    ActionTypes,
-    SpeedTypes
-} from "./optimized";
-import {
     SavedPalletConfiguration,
     BoxCoordinate,
     Coordinate,
     PlaneCoordinate
 } from "../engine/config";
+
+
+//-------IO Actions-------
+export enum ActionTypes {
+    NONE,
+    PICK,
+    DROP
+};
+
+export enum SpeedTypes {
+    FAST,
+    SLOW // corresponding to FreightSpeed (Drive)
+};
+
+export interface ActionCoordinate extends Coordinate {
+    action?: ActionTypes;
+    speed?: SpeedTypes;
+    waitForCompletion: boolean;
+};
+
+export type BoxPath = ActionCoordinate[];
 
 export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coordinate {
     return { ...coord, z: z_top };
@@ -47,7 +62,7 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     // Make Drop Location Slightly Higher.
 
     const drop = box.dropLocation;
-	//  drop.z -= 100;
+    //  drop.z -= 100;
 
 
     path.push(addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW));
@@ -77,7 +92,7 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     // The lateral approach allows to pack boxes tighter.
     // Implies an ordering that preserves clearance in +x and +y.
     const drop = box.dropLocation;
-	//  drop.z -= 100;
+    //  drop.z -= 100;
 
 
 

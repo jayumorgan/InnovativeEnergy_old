@@ -9,11 +9,9 @@ import router from "./routes/router";
 import { initDatabaseHandler, DatabaseHandler } from "./database/db";
 //---------------Control Engine---------------
 import { Engine } from "./engine/engine";
-// Test path optimization.
-import { main } from "./optimizer/optimized";
 
 dotenv.config();
-console.log("Server starting in " + process.env.ENVIRONMENT + " environment using " + process.env.PATH_TYPE + " paths.");
+console.log("Server starting in " + process.env.ENVIRONMENT + " environment.");
 
 const PORT = 3011;
 const HOSTNAME = "127.0.0.1";
@@ -22,9 +20,6 @@ const HOSTNAME = "127.0.0.1";
 const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
-
-// To run the path optimization test.
-// main();
 
 if (true) { // for testing.
     initDatabaseHandler().then((handler: DatabaseHandler) => {

@@ -107,7 +107,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Machine Config Styling
 *** TODO Don't remove layers + stack if box pick point is the only thing that changed.
 
-** TODO Final Relevant Items
+** TODO Further Items
 *** DONE Sorting boxes by row for lateral approach
 *** TODO Mechanics of box drag + drop.
 *** TODO Monitoring pick quality over path.
@@ -130,6 +130,26 @@ PALLETIZER -*- mode: org -*-
 *** TODO Heights are a little low on second layer -- fix this.
 *** TODO Update visualizer to reflect top of box (And add instructions for this.) (maybe offset).
 *** TODO Robust update mechanism absolutely necessary.
+
+** TODO Post FAT
+*** TODO Add a "go to taught position" button for validation (for teach position of the pallet corners and the pick locations)
+*** TODO We need to make the drag/drop boxes on the "edit" layer more reliable. Easily snap to the edges of each box, so that the positioning is the same each time, eliminating human error and getting more repeatable positioning. If you have a better option to configure it through "edit rows and columns" format, that would be fine too (after defining the orientation of the box).
+*** TODO There should be labelled "x and y and z" in every image. With proper orientations
+*** TODO Missing software stop in palletizer app
+*** TODO Clicking the empty save outside the config screen should not close the configuration screen. Use "x" at top right corner
+*** TODO The 3D render still has some glitches in terms of box positioning and representation
+*** TODO Replace images/renders from britt to update
+*** TODO Test the input sensor
+*** TODO Input sensor should be configurable for each box (input menu should just have an association for the box created)
+*** TODO Wire the master and slave controller
+*** TODO Figure what's wrong with the drop distances
+*** TODO Automated ordering of boxes based on pick location (there's an issue for some box placements)
+*** TODO Ability to palletize separators using a z height difference. Instead of using an infeed conveyors, it would palletize stacks. So in the "configure box" section, there should be a drop down options that include "Palletize from in-feed" or "Palletize from stack". "Palletize from stack" option is removing the height difference of the box for each time it picks that box.
+*** TODO Make sure the e-stop will not stop the gripper from functioning
+*** TODO Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
+*** TODO IF there is time, update layer image with your visualiser
+
+
 
 ** NOTE Gcode logs available at: debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-02.log 
 debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-04.log | grep "G[0-9]*\|M92"

@@ -20,15 +20,14 @@ import {
     Drive,
     Coordinate
 } from "./config";
+import { DatabaseHandler } from "../database/db";
 import {
     BoxPath,
     ActionCoordinate,
     ActionTypes,
     SpeedTypes,
-    generateOptimizedPath
-} from "../optimizer/optimized";
-import { DatabaseHandler } from "../database/db";
-import { generateStandardPath } from "../optimizer/standard";
+    generateStandardPath
+} from "../optimizer/standard";
 
 //---------------Environment Setup---------------
 dotenv.config();
@@ -39,12 +38,6 @@ if (process.env.ENVIRONMENT === "PRODUCTION") {
     TESTING = false;
 }
 console.log((TESTING ? "In" : "Not in") + " Testing environment");
-// This will eventually be a control side flag (sent in with start signal)
-var OPTIMIZE_PATHS: boolean = true;
-if (process.env.PATH_TYPE === "STANDARD") {
-    OPTIMIZE_PATHS = false;
-}
-console.log(OPTIMIZE_PATHS ? "Using path optimization." : "Using standard paths.");
 
 
 //---------------Network Parameters---------------
@@ -355,11 +348,7 @@ export class Engine {
         let is_null = this.palletConfig === null;
         if (!is_null) {
             let paths: BoxPath[];
-            if (OPTIMIZE_PATHS) { // Again, this will be a flag from control at some point.
-                paths = generateOptimizedPath(spc);
-            } else {
-                paths = generateStandardPath(spc);
-            }
+            paths = generateStandardPath(spc);
             this.boxPathsForPallet = paths;
             let drop_coords: Coordinate[] = [];
             paths.forEach((bp: BoxPath) => {
