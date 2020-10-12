@@ -64,7 +64,6 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     const drop = box.dropLocation;
     //  drop.z -= 100;
 
-
     path.push(addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
 

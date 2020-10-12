@@ -78,7 +78,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE There should be a pure jogger screen (not needing to go to pallet config or machine config ?? Extra button on machine configuration for jogger?
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
 *** DONE There should be labelled "x and y and z" in every image. With proper orientations ?? Going to need good images then.
-*** TODO Path optimization needs to be fixed ?? Can I get a real configuration.
+*** DONE Path optimization needs to be fixed ?? Can I get a real configuration. -- Use optimized standard.
 *** DONE There should be a home axes screen in the pallet configuration. Step 3 should not show unless homed first
 *** DONE There should be homing buttons in the home page ?? Ah, okay. -- TEST- Jog controller init (release and reset) may not be completed.
 *** DONE There should be a system speed and acceleration ?? Will do by drive.boxes properly along rows.
@@ -149,6 +149,20 @@ PALLETIZER -*- mode: org -*-
 *** TODO Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
 *** TODO IF there is time, update layer image with your visualiser
 
+
+Breaking up these items:
+
+** TODO Jogger 
+*** TODO Add a go to taught position.
+*** TODO Add an IO box suction on off switch.
+
+** TODO Execute:
+*** TODO Toggle suction from home screen.
+*** DONE Fix homing on home screen.
+
+** TODO Visualizer: 
+*** TODO Fix the box display thing.
+*** TODO Display in the stack area. (Dynamically add boxes).
 
 
 ** NOTE Gcode logs available at: debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-02.log 

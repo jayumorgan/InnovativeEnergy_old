@@ -1,5 +1,4 @@
 [
     {"name": "MQTT", "script": "startMQTT.sh"},
-    {"name": "Server", "script": "palletizer/server/start.sh"},
-    {"name": "VirtualMM", "script": "../mm-test-server/start.sh"}
+    {"name": "Server", "script": "palletizer/server/start.sh"}
 ]

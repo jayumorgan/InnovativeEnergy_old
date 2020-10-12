@@ -7,9 +7,11 @@ import { CoordinateRot } from "../geometry/geometry";
 
 
 var TESTING = false;
+
 if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
     TESTING = true;
 }
+
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 // MM is the controller, MachineMotion is the configuration parameters from MachineConfig (just info, no methods)
 
@@ -92,7 +94,7 @@ export default class Jogger {
         this.axesConfiguration = Axes;
         this.positionHandler = onPositionUpdate;
 
-        let my = this;
+        const my = this;
 
         if (bindIsMoving) {
             my.onIsMoving = bindIsMoving;
@@ -147,7 +149,7 @@ export default class Jogger {
     };
 
     setJogSpeed(speed: number) {
-        let my = this;
+        const my = this;
         my.jogSpeed = speed;
 
         let promises: Promise<vResponse>[] = [];
@@ -203,7 +205,7 @@ export default class Jogger {
     };
 
     stopMotion() {
-        let my = this;
+        const my = this;
         let promises: Promise<vResponse>[] = [];
 
         my.machineMotions.forEach((m: MM) => {
@@ -216,7 +218,7 @@ export default class Jogger {
     };
 
     prepareSystem() {
-        let my = this;
+        const my = this;
         return new Promise((resolve, reject) => {
             Promise.all(my.machineMotions.map((mm: MM) => {
                 return mm.releaseAndReset();
@@ -248,8 +250,9 @@ export default class Jogger {
         }));
     };
 
+
     startHome(axis: PalletizerAxes | string): Promise<any> {
-        let my = this;
+        const my = this;
 
         if (my.isMoving) {
             return Promise.reject("Already in motion");
@@ -257,14 +260,12 @@ export default class Jogger {
             my.__setIsMoving(true);
         }
 
-        let drives: Drive[] = (my.axesConfiguration as any)[axis as string];
+        const drives: Drive[] = (my.axesConfiguration as any)[axis as string];
 
-        let promises = [] as Promise<any>[];
-
-        drives.forEach((d: Drive) => {
+        const promises = drives.map((d: Drive) => {
             let mm: MM = my.machineMotions[d.MachineMotionIndex];
             let drive_index = driveNumberToDRIVE(d.DriveNumber);
-            let p = new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 // Test
                 mm.emitHome(drive_index).then(() => {
                     return mm.waitForMotionCompletion();
@@ -274,7 +275,6 @@ export default class Jogger {
                     reject(e);
                 });
             });
-            promises.push(p);
         });
 
         return new Promise((resolve, reject) => {
@@ -291,7 +291,7 @@ export default class Jogger {
     };
 
     __getMMGroup(axis: PalletizerAxes | string): { [key: number]: DriveType[] } {
-        let my = this;
+        const my = this;
 
         let mm_group = {} as { [key: number]: DriveType[] };
         let axes_keys: string[] = Object.keys(my.axesConfiguration);
@@ -311,7 +311,7 @@ export default class Jogger {
     };
 
     startJog(axis: PalletizerAxes | string, direction: number | DIRECTION) {
-        let my = this;
+        const my = this;
 
         if (my.isMoving) {
             return Promise.reject("Already in motion");
@@ -357,19 +357,19 @@ export default class Jogger {
     async homeAllAxes(): Promise<any> {
         const my = this;
         return my.startHome(PalletizerAxes.Z).then(() => {
-            const axes = [PalletizerAxes.X, PalletizerAxes.Y, PalletizerAxes.θ];
-            return Promise.all(axes.map((a: PalletizerAxes) => {
-                return my.startHome(a);
-            }));
+            return my.startHome(PalletizerAxes.X);
+        }).then(() => {
+            return my.startHome(PalletizerAxes.Y);
+        }).then(() => {
+            return my.startHome(PalletizerAxes.θ);
         });
     };
-
 
     getPosition() {
         // This assumes only a single drive per axis. If we want to run multiple drives per axis, we need to deal with:
         // (A) synchronization of drive motion.
         // (B) higher-dimensional recording of taught positions and box coordinates. I have left some space to do this (change all coordinate to arrays of coordinates, organize by drive index).
-        let my = this;
+        const my = this;
         let { X, Y, Z, θ } = my.axesConfiguration;
 
         // here is where we assume a single drive;
@@ -399,7 +399,7 @@ export default class Jogger {
     };
 
     triggerEstop() {
-        let my = this;
+        const my = this;
         my.machineMotions.forEach((m: MM) => {
             m.triggerEstop().then(() => {
                 // Do nothing.
