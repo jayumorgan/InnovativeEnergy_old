@@ -3,12 +3,10 @@ import { Fraction } from "./teach/CompletionDots";
 import Modal from "./Modal";
 import { SaveMachineConfig } from "../requests/requests";
 import { ControlProps } from "./shared/shared";
-
-//---------------Configuration Steps---------------
-
+import { XIcon } from "./teach/PlusIcon";
 import Name from "./teach/Name";
 import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
-import Drives, { Drive, AxesConfiguration, defaultAxesConfiguration } from "./machine_config/Drives";
+import Drives, { AxesConfiguration, defaultAxesConfiguration } from "./machine_config/Drives";
 import IOConfig, { IOState, IO, defaultIO } from "./machine_config/IO";
 import MachineSummary, { MachineSummaryProps } from "./machine_config/Summary";
 import Detection, { DetectionProps } from "./machine_config/Detection";
@@ -262,7 +260,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             break;
         };
         case (MachineConfigState.GOOD_PICK): {
-			console.log("Good Pick", configuration.good_pick);
+            console.log("Good Pick", configuration.good_pick);
             const props: DetectionProps = {
                 ...controlProps,
                 setDetection: setGoodPick,
@@ -286,6 +284,8 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         };
     };
 
+    const disabledStop = () => { return; };
+
     if (configState === MachineConfigState.CONFIG_NAME) {
         let nameProps = {
             name: configuration.name,
@@ -296,7 +296,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             isPallet: false
         } as any;
         return (
-            <Modal close={close}>
+            <Modal close={disabledStop}>
                 <Name {...nameProps} />
             </Modal>
         );
@@ -311,8 +311,10 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
             width: widthString
         } as any;
 
+        const iconSize = 25;
+
         return (
-            <Modal close={modalClose}>
+            <Modal close={disabledStop}>
                 <div className="TeachContainer">
                     <div className="TeachModeHeader">
                         <div className="TeachModeTitle">
@@ -321,6 +323,11 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
                             </span>
                         </div>
                         <div className="TeachModeCompletion">
+                            <div className="CloseButton">
+                                <div className="Button" onClick={modalClose}>
+                                    <XIcon height={iconSize} width={iconSize} />
+                                </div>
+                            </div>
                             <div className="CompletionLabel">
                                 <span>
                                     {completionString}

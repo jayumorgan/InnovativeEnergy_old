@@ -45,6 +45,7 @@ function ConfigCell({ name, id, start_editor, is_machine, complete, start_jogger
     };
 
     const display_name: string = name + (complete ? "" : " (Incomplete)");
+    const displayJogger: boolean = is_machine && complete;
 
     return (
         <div className="ConfigCell">
@@ -54,10 +55,11 @@ function ConfigCell({ name, id, start_editor, is_machine, complete, start_jogger
             <div className="EditConfigButton" onClick={handle_edit}>
                 <span> Edit </span>
             </div>
-            {is_machine &&
+            {displayJogger ?
                 <div className="EditConfigButton" onClick={handle_jogger}>
                     <span> Jogger </span>
-                </div>}
+                </div> :
+                <> </>}
             <div className="DeleteConfigButton" onClick={handle_delete}>
                 <span className="icon-delete">
                 </span>

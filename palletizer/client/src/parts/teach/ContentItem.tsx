@@ -1,6 +1,5 @@
 import React, { Fragment, ReactElement } from 'react';
 
-
 import PlusIcon from "./PlusIcon";
 
 export interface ButtonProps {

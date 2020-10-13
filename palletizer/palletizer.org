@@ -136,7 +136,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO We need to make the drag/drop boxes on the "edit" layer more reliable. Easily snap to the edges of each box, so that the positioning is the same each time, eliminating human error and getting more repeatable positioning. If you have a better option to configure it through "edit rows and columns" format, that would be fine too (after defining the orientation of the box).
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations
 *** TODO Missing software stop in palletizer app
-*** TODO Clicking the empty save outside the config screen should not close the configuration screen. Use "x" at top right corner
+*** DONE Clicking the empty save outside the config screen should not close the configuration screen. Use "x" at top right corner
 *** TODO The 3D render still has some glitches in terms of box positioning and representation
 *** TODO Replace images/renders from britt to update
 *** TODO Test the input sensor
@@ -145,9 +145,10 @@ PALLETIZER -*- mode: org -*-
 *** TODO Figure what's wrong with the drop distances
 *** TODO Automated ordering of boxes based on pick location (there's an issue for some box placements)
 *** TODO Ability to palletize separators using a z height difference. Instead of using an infeed conveyors, it would palletize stacks. So in the "configure box" section, there should be a drop down options that include "Palletize from in-feed" or "Palletize from stack". "Palletize from stack" option is removing the height difference of the box for each time it picks that box.
-*** TODO Make sure the e-stop will not stop the gripper from functioning
+*** DONE Make sure the e-stop will not stop the gripper from functioning
 *** TODO Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
 *** TODO IF there is time, update layer image with your visualiser
+*** DONE Don't allow jogger on incomplete machine configuration.
 
 
 Breaking up these items:

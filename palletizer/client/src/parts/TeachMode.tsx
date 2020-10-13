@@ -24,6 +24,7 @@ import PalletCorners from "./teach/Pallet";
 import Layout from "./teach/Layouts";
 import Stack from "./teach/Stack";
 import ConfigurationSummary from "./teach/ConfigurationSummary";
+import { XIcon } from "./teach/PlusIcon";
 
 //---------------Styles---------------
 import "./css/TeachMode.scss";
@@ -388,8 +389,11 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
         };
         default: {
             console.log("Default Pallet Configurator Case -- unhandled");
+            break;
         };
     };
+
+    const disabledClose = () => { return; };
 
     if (teachState === PalletTeachState.CONFIG_NAME) {
 
@@ -405,7 +409,7 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
         };
 
         return (
-            <Modal close={close}>
+            <Modal close={disabledClose}>
                 <PalletName {...palletNameProps} />
             </Modal>
         );
@@ -419,8 +423,10 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
             width: widthString
         } as any;
 
+        const iconSize = 25;
+
         return (
-            <Modal close={modalClose}>
+            <Modal close={disabledClose}>
                 <div className="TeachContainer">
                     <div className="TeachModeHeader">
                         <div className="TeachModeTitle">
@@ -429,6 +435,11 @@ function PalletConfigurator({ close, index, palletConfig, id, machine_configs }:
                             </span>
                         </div>
                         <div className="TeachModeCompletion">
+                            <div className="CloseButton">
+                                <div className="Button" onClick={modalClose}>
+                                    <XIcon height={iconSize} width={iconSize} />
+                                </div>
+                            </div>
                             <div className="CompletionLabel">
                                 <span>
                                     {completionString}
