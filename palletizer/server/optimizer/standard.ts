@@ -107,7 +107,6 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     // lateralApproach.y -= lateralDirection.y * lateralScale;
     // path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
 
-
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     return path;

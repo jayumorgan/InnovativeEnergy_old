@@ -182,7 +182,7 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
         const Xdirection = Subtract3D(corner3, corner2);
         const φ_pallet = getXAxisAngle(Xdirection);
 
-        let currentHeightIncrement = palletHeight;
+        let currentHeightIncrement = palletHeight; // Pallet Height Is Height of first box on pallet. --> This is not universal.
 
         Stack.forEach((n: number, stackIndex: number) => {
 
@@ -223,13 +223,14 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
                 let z_add = currentHeightIncrement;
 
+                if (stackIndex > 0) { // If not first stack, add box height.
+                    z_add -= box.dimensions.height;
+                }
+
                 averagePosition.z = z_add;
 
-                let θ_drop: number = (rotated ? 90 : 0) + φ_pallet;
+                const θ_drop: number = (rotated ? 90 : 0) + φ_pallet;
                 let dropLocation: CoordinateRot = { ...averagePosition, θ: θ_drop };
-
-                //B/C Using top of box to teach pallet -- subtract height of box (which means add)
-                // dropLocation.z += box.dimensions.height + 30;
 
                 let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
@@ -242,7 +243,10 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                     linearPathDistance
                 } as BoxCoordinates);
             });
-            currentHeightIncrement -= height;
+            // Drop the height by the size of the previous layer.
+            if (stackIndex > 0) { // don't add if first row.
+                currentHeightIncrement -= height;
+            }
         });
     });
     console.log("Final Box Coordinates ", boxCoordinates);

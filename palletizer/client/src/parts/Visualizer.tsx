@@ -341,13 +341,14 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
 
             setPalletNames([...newPalletNames]);
 
-            let getPalletHeight = (p: PalletGeometry) => {
+            const getPalletHeight = (p: PalletGeometry) => {
                 let { corner1, corner2, corner3 } = p;
                 let z1 = corner1.z;
                 let z2 = corner2.z;
                 let z3 = corner3.z;
                 return (z1 + z2 + z3) / 3;
-            }
+            };
+
             let newBoxNames = [] as string[];
 
             boxNames.forEach((bn: string) => {
@@ -358,39 +359,43 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                 return b.linearPathDistance - a.linearPathDistance;
             });
 
-            boxCoordinates.forEach((b: BoxCoordinates, i: number) => {
-                if (i < current_box) {
-                    const BoxName = "BOXNAME-" + String(i);
-                    const { dropLocation, dimensions, palletIndex } = b;
-                    const pallet = palletConfig.config.pallets[palletIndex];
-                    const palletHeight = getPalletHeight(pallet);
-                    const φ_pallet = getXAxisAngle(Subtract3D(pallet.corner3, pallet.corner2));
-                    const angle = (dropLocation.θ - φ_pallet) * Math.PI / 180;
+            boxCoordinates.filter((_: BoxCoordinates, i: number) => {
+                return i < current_box;
+            }).forEach((b: BoxCoordinates, i: number) => {
+                const BoxName = "BOXNAME-" + String(i);
+                const { dropLocation, dimensions, palletIndex } = b;
+                const pallet = palletConfig.config.pallets[palletIndex];
 
-                    let { width, height, length } = dimensions;
+                const first_layout_height = pallet.Layouts[pallet.Stack[0]].height;
+                const palletHeight = getPalletHeight(pallet);
+                const φ_pallet = getXAxisAngle(Subtract3D(pallet.corner3, pallet.corner2));
+                const angle = (dropLocation.θ - φ_pallet) * Math.PI / 180;
+                console.log(first_layout_height);
 
-                    width /= frameNorm;
-                    height /= frameNorm;
-                    length /= frameNorm;
+                let { width, height, length } = dimensions;
 
-                    let box = getCardboardBox(width, height, length);
+                width /= frameNorm;
+                height /= frameNorm;
+                length /= frameNorm;
 
-                    box.name = BoxName;
-                    newBoxNames.push(BoxName);
+                let box = getCardboardBox(width, height, length);
 
-                    let { x, y, z } = Subtract3D(dropLocation, pallet.corner2);
+                box.name = BoxName;
+                newBoxNames.push(BoxName);
 
-                    let delta_z = palletHeight - dropLocation.z;
-                    delta_z /= frameNorm;
-                    x /= frameNorm;
-                    y /= frameNorm;
-                    z = 0;
-                    z += delta_z - height / 2;
-                    box.position.set(x, y, z);
+                let { x, y, z } = Subtract3D(dropLocation, pallet.corner2);
 
-                    box.rotateZ(angle);
-                    controls.current?.add_mesh(box);
-                }
+                let delta_z = palletHeight - dropLocation.z;
+
+                delta_z /= frameNorm;
+                x /= frameNorm;
+                y /= frameNorm;
+                z = 0;
+                z += delta_z - height / 2 + first_layout_height / frameNorm; // Add the height of the first layer -- to get top of box.
+                box.position.set(x, y, z);
+
+                box.rotateZ(angle);
+                controls.current?.add_mesh(box);
             });
 
             setBoxNames([...newBoxNames]);
