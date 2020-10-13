@@ -5,7 +5,8 @@ import {
     SavedPalletConfiguration,
     BoxCoordinate,
     Coordinate,
-    PlaneCoordinate
+    PlaneCoordinate,
+    IOState
 } from "../engine/config";
 
 
@@ -25,6 +26,7 @@ export interface ActionCoordinate extends Coordinate {
     action?: ActionTypes;
     speed?: SpeedTypes;
     waitForCompletion: boolean;
+    boxDetection: IOState[];
 };
 
 export type BoxPath = ActionCoordinate[];
@@ -33,9 +35,9 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
     return { ...coord, z: z_top };
 };
 
-export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true): ActionCoordinate {
+export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true, boxDetection: IOState[] = []): ActionCoordinate {
     // Force Wait, Force Slow For Right Now.
-    return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion: true };
+    return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion: true, boxDetection };
 };
 
 //-------Not Lateral Approach-------
@@ -45,7 +47,8 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     // Picking.
     // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
-    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
+    // Add box detection to action.
+    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW, true, box.boxDetection));
     let preRotated: Coordinate = { ...box.pickLocation };
     preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));

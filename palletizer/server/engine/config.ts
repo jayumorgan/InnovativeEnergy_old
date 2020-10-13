@@ -45,7 +45,6 @@ export interface MachineConfiguration {
     machines: MachineMotionInfo[];
     axes: Axes;
     io: IO;
-    box_detection: IOState[];
     good_pick: IOState[];
 };
 
@@ -79,8 +78,10 @@ export interface BoxCoordinate {
     pickLocation: Coordinate;
     dropLocation: Coordinate;
     dimensions: BoxDimensions;
+    boxDetection: IOState[];
     palletIndex: number;
     stackIndex: number;
+    boxIndex: number; // Box index number in configuration.
     linearPathDistance: number;
 };
 
@@ -90,9 +91,18 @@ export interface PalletGeometry {
     corner3: Coordinate;
 };
 
+export interface BoxObject {
+    name: string;
+    dimensions: BoxDimensions;
+    pickLocation: Coordinate;
+    boxDetection: IOState[];
+};
+
 export interface PalletConfiguration {
     name: string;
     pallets: PalletGeometry[];
+    boxes: BoxObject[];
+    machine_config_id: number;
 };
 
 export interface SavedPalletConfiguration {

@@ -10,7 +10,6 @@ import IOController from "../../jogger/IO";
 import "./css/Detection.scss";
 
 
-
 function SplashScreen() {
     return (
         <div className="SplashScreen">
@@ -163,9 +162,9 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
 
     const [detectionArray, setDetectionArray] = useState<IOState[]>(box_detection ? box_detection : [] as IOState[]);
 
-	useEffect(()=>{
-		setDetectionArray(box_detection ? box_detection : [] as IOState[]);
-	},[box_detection]);
+    useEffect(() => {
+        setDetectionArray(box_detection ? box_detection : [] as IOState[]);
+    }, [box_detection]);
 
     const getIOControllers = () => {
         let ios: IOController[] = allMachines.map((machine: MachineMotion) => {

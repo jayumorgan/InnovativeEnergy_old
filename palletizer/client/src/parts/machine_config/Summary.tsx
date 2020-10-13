@@ -13,6 +13,7 @@ import "./css/Summary.scss";
 import "./css/Drives.scss";
 
 
+
 export interface MachineSummaryProps extends ControlProps {
     machineConfig: MachineConfiguration;
 };
@@ -43,7 +44,7 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
         RightButton,
     } as any;
 
-    const { axes, io, machines, box_detection, good_pick } = machineConfig;
+    const { axes, io, machines, good_pick } = machineConfig;
 
     return (
         <ContentItem {...contentItemProps} >
@@ -133,9 +134,6 @@ export default function MachineSummary({ machineConfig, handleBack, handleNext, 
                                 </div>
                             </div>
                             <div className="Content">
-                                <span>
-                                    {"Box Detection: " + String(box_detection.length) + " profile" + (box_detection.length > 1 || box_detection.length === 0 ? "s" : "")}
-                                </span>
                                 <span>
                                     {"Pick Detection: " + String(good_pick.length) + " profile" + (good_pick.length > 1 || good_pick.length === 0 ? "s" : "")}
                                 </span>

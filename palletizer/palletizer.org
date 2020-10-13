@@ -150,6 +150,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
 *** TODO IF there is time, update layer image with your visualiser
 *** DONE Don't allow jogger on incomplete machine configuration.
+*** DONE Tailor height addition for top-of-box teach.
 
 
 Breaking up these items:

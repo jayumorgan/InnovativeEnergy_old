@@ -1,4 +1,4 @@
-@import "../../../master.scss";
+@import "../../../_master.scss";
 @import "../../css/TeachMode.scss";
 
 .BoxSummary {
@@ -233,12 +233,37 @@
             height: 100%;
             width: 100%;
             display: grid;
-            grid-template-rows: 80% 20%;
+            grid-template-rows: 10% 70% 20%;
             grid-template-columns: 100%;
             border: $container-border;
             border-radius: $border-radius;
             background-color: $desert-storm;
 
+            .InputProfileButton {
+                height: 100%;
+                width: 100%;
+                @include flex-center();
+                justify-content: flex-end;
+
+                .InputButton {
+                    height: 70%;
+                    width: 30%;
+                    @include button-style();
+                    margin-right: $margin;
+
+                    span {
+                        font-size: $medium-font;
+                    }
+
+                    // @include flex-center();
+
+
+                }
+
+                .InputButton:hover {
+                    @include button-hover();
+                }
+            }
 
             .BoxDisplayRender {
                 margin-top: 1%;

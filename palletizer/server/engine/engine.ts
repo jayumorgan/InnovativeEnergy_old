@@ -95,7 +95,6 @@ interface MechanicalLayout {
     machines: MachineMotion[];
     axes: Axes;
     io: IO;
-    box_detection: IOState[];
     good_pick: IOState[];
 };
 
@@ -156,7 +155,6 @@ function defaultMechanicalLayout(): MechanicalLayout {
             On: [],
             Off: []
         },
-        box_detection: [],
         good_pick: []
     } as MechanicalLayout;
 };
@@ -430,13 +428,13 @@ export class Engine {
         }).then(() => {
             my.__stateReducer({ cycle: my.palletizerState.cycle + 1 });
             return my.startPalletizer(my.startBox);
-        }).catch((e) => {
+        }).catch((e: string) => {
             if (my.palletizerState.status == PALLETIZER_STATUS.STOPPED) {
                 console.log("Palletizer has stopped.");
                 //		my.__updateStatus(PALLETIZER_STATUS.STOPPED);
                 my.__handleInformation(INFO_TYPE.STATUS, "Palletizer stopped.");
             } else {
-                my.__handleInformation(INFO_TYPE.ERROR, "Unable to start machine. Verify that configurations are valid.");
+                my.__handleInformation(INFO_TYPE.ERROR, e);
                 my.__updateStatus(PALLETIZER_STATUS.ERROR);
                 console.log("Failed in handle start", e);
             }
@@ -467,7 +465,7 @@ export class Engine {
             let promises: Promise<any>[] = [];
             let mms: MachineMotion[] = [];
             const { config } = my.machineConfig;
-            const { machines, io, axes, box_detection, good_pick } = config;
+            const { machines, io, axes, good_pick } = config;
             machines.forEach((mm: MachineMotionInfo) => {
                 const { ipAddress } = mm;
                 const mm_config: MachineMotionConfig = {
@@ -532,7 +530,6 @@ export class Engine {
 
             my.mechanicalLayout.axes = axes;
             my.mechanicalLayout.io = io;
-            my.mechanicalLayout.box_detection = box_detection;
             my.mechanicalLayout.good_pick = good_pick;
 
             return new Promise((resolve, reject) => {
@@ -606,7 +603,7 @@ export class Engine {
             } else {
                 let action_coordinate: ActionCoordinate = path[path_index];
                 return my.__move(action_coordinate).then((_: any) => {
-                    return my.executeAction(action_coordinate.action);
+                    return my.executeAction(action_coordinate);
                 }).then(() => {
                     return my.executePathSequence(box_index, path_index + 1);
                 });
@@ -614,11 +611,12 @@ export class Engine {
         }
     };
 
-    async executeAction(action?: ActionTypes): Promise<any> {
-        const my = this;
+    async executeAction(action_coordinate: ActionCoordinate): Promise<any> {
+        const { action } = action_coordinate;
         if (action) {
+            const my = this;
             if (action === ActionTypes.PICK) {
-                return my.handleDetect().then(async (detected: boolean) => {
+                return my.handleDetect(action_coordinate.boxDetection).then(async (detected: boolean) => {
                     if (detected) {
                         return my.__pickIO().then(() => {
                             return my.handleGoodPick(); // Check for a good pick.
@@ -773,16 +771,15 @@ export class Engine {
         }));
     };
 
-    handleDetect(retry_index: number = 0): Promise<boolean> {
+    handleDetect(boxDetection: IOState[], retry_index: number = 0): Promise<boolean> {
         const my = this;
-
         return new Promise<boolean>((resolve, reject) => {
-            my.__detectBox().then((detected: boolean) => {
+            my.__detectBox(boxDetection).then((detected: boolean) => {
                 if (detected) {
                     resolve(detected); // has been detected.
                 } else if (retry_index < 5) {
                     setTimeout(() => {
-                        my.handleDetect(retry_index + 1).then((d: boolean) => {
+                        my.handleDetect(boxDetection, retry_index + 1).then((d: boolean) => {
                             resolve(d);
                         }).catch((e: any) => {
                             reject(e);
@@ -853,37 +850,37 @@ export class Engine {
         }
     };
 
-    __detectBox(): Promise<boolean> {
+    __detectBox(boxDetection: IOState[]): Promise<boolean> {
         const my = this;
         my.cycleState = CycleState.DETECT_IO;
-        const { box_detection } = my.mechanicalLayout;
-        if (box_detection.length > 0) {
-            return new Promise<boolean>((resolve, reject) => {
-                Promise.all(box_detection.map((state: IOState) => {
-                    const { MachineMotionIndex, NetworkId, Pins } = state;
-                    return my.mechanicalLayout.machines[MachineMotionIndex].digitalReadAll(NetworkId);
-                })).then((res: vResponse[]) => {
-                    let detect: boolean = false;
-                    for (let i = 0; i < res.length; i++) {
-                        const vRes: vResponse = res[i];
-                        if (vRes.success) {
-                            const read_vals: IODeviceState = vRes.result as IODeviceState;
-                            detect = compareIODeviceStates(read_vals, box_detection[i].Pins);
-                        } else {
-                            detect = false;
-                        }
-                        if (!detect) {
-                            break;
-                        }
-                    }
-                    resolve(detect);
-                }).catch((e: any) => {
-                    reject(e);
-                });
-            });
-        } else {
+
+        if (boxDetection.length === 0) {
             return Promise.resolve(true);
         }
+
+        return new Promise<boolean>((resolve, reject) => {
+            Promise.all(boxDetection.map((state: IOState) => {
+                const { MachineMotionIndex, NetworkId } = state;
+                return my.mechanicalLayout.machines[MachineMotionIndex].digitalReadAll(NetworkId);
+            })).then((res: vResponse[]) => {
+                let detect: boolean = false;
+                for (let i = 0; i < res.length; i++) {
+                    const vRes: vResponse = res[i];
+                    if (vRes.success) {
+                        const read_vals: IODeviceState = vRes.result as IODeviceState;
+                        detect = compareIODeviceStates(read_vals, boxDetection[i].Pins);
+                    } else {
+                        detect = false;
+                    }
+                    if (!detect) {
+                        break;
+                    }
+                }
+                resolve(detect);
+            }).catch((e: any) => {
+                reject(e);
+            });
+        });
     };
 
     // will repeat sequence starting from top on run.

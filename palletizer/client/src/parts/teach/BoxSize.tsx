@@ -1,5 +1,5 @@
-import React, { useState, ChangeEvent } from 'react';
-import ContentItem, { ButtonProps } from "./ContentItem";
+import React, { useState, ChangeEvent, useEffect } from 'react';
+import ContentItem, { ButtonProps, ContentItemProps } from "./ContentItem";
 import Jogger, { JoggerProps } from "./Jogger";
 import Box from "./3D/BoxRender";
 import {
@@ -12,6 +12,11 @@ import { ControlProps } from "../shared/shared";
 
 //---------------Styles---------------
 import "./css/BoxSize.scss";
+import { IOState } from '../machine_config/IO';
+import { get_machine_config } from '../../requests/requests';
+import { SavedMachineConfiguration } from '../MachineConfig';
+import { MachineMotion } from '../machine_config/MachineMotions';
+import Detection, { DetectionProps } from '../machine_config/Detection';
 
 
 interface BoxProps {
@@ -115,6 +120,20 @@ interface CreateNewBoxProps {
 };
 
 function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
+    // All machines.
+
+    const [showBoxDetection, setShowBoxDetection] = useState<boolean>(false);
+    const [allMachines, setAllMachines] = useState<MachineMotion[]>([]);
+
+    useEffect(() => {
+        get_machine_config(machineConfigId).then((s: SavedMachineConfiguration) => {
+            const machines = s.config.machines;
+            setAllMachines(machines);
+        }).catch((e: any) => {
+            console.log("Error get machine configuration", e);
+        });
+    }, [machineConfigId]);
+
 
     const updateName = (name: string) => {
         updateBox({ ...box, name });
@@ -136,6 +155,18 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         updateBox({ ...box, pickLocation: c });
     };
 
+    const startShowingBoxDetection = () => {
+        setShowBoxDetection(true);
+    };
+
+    const stopShowingBoxDetection = () => {
+        setShowBoxDetection(false);
+    };
+
+    const setDetection = (ios: IOState[]) => {
+        updateBox({ ...box, boxDetection: ios });
+    };
+
     let instruction = "Move and select box pick location";
 
     const joggerProps: JoggerProps = {
@@ -145,23 +176,53 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         updateName
     };
 
-    return (
-        <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
-            <div className="NewBoxGrid">
-                <div className="BoxSetup">
-                    <Jogger {...joggerProps} />
-                    <div className="BoxConfigurator">
-                        <Box {...box.dimensions} />
-                        <div className="CoordinateDisplay">
-                            <CoordinateItem name={"Width"} value={box.dimensions.width} setter={updateCoordinate("width")} />
-                            <CoordinateItem name={"Length"} value={box.dimensions.length} setter={updateCoordinate("length")} />
-                            <CoordinateItem name={"Height"} value={box.dimensions.height} setter={updateCoordinate("height")} />
+    if (showBoxDetection) {
+
+        const controlProps: ControlProps = {
+            instructionNumber,
+            handleNext: () => {
+                stopShowingBoxDetection();
+            },
+            handleBack: () => {
+                stopShowingBoxDetection();
+            }
+        };
+        const props: DetectionProps = {
+            ...controlProps,
+            setDetection,
+            box_detection: box.boxDetection,
+            allMachines,
+            isDetection: true
+        };
+
+        return (<Detection {...props} />);
+
+    } else {
+        return (
+            <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
+                <div className="NewBoxGrid">
+                    <div className="BoxSetup">
+                        <Jogger {...joggerProps} />
+                        <div className="BoxConfigurator">
+                            <div className="InputProfileButton">
+                                <div className="InputButton" onClick={startShowingBoxDetection} >
+                                    <span>
+                                        {box.boxDetection.length > 0 ? "Edit Box Detection" : "Add Box Detection"}
+                                    </span>
+                                </div>
+                            </div>
+                            <Box {...box.dimensions} />
+                            <div className="CoordinateDisplay">
+                                <CoordinateItem name={"Width"} value={box.dimensions.width} setter={updateCoordinate("width")} />
+                                <CoordinateItem name={"Length"} value={box.dimensions.length} setter={updateCoordinate("length")} />
+                                <CoordinateItem name={"Height"} value={box.dimensions.height} setter={updateCoordinate("height")} />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </ContentItem>
-    );
+            </ContentItem>
+        );
+    }
 };
 
 interface BoxSizeProps extends ControlProps {
@@ -177,7 +238,8 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
     let box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
         dimensions: { length: 500, height: 100, width: 500 },
-        pickLocation: { x: 0, y: 0, z: 1500, θ: 0 }
+        pickLocation: { x: 0, y: 0, z: 1500, θ: 0 },
+        boxDetection: [] as IOState[]
     };
 
     const [editingBox, setEditingBox] = useState<BoxObject>(box);

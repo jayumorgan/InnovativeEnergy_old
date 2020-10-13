@@ -26,7 +26,9 @@ const capitalize = (s: string) => {
 };
 
 export default function ContentItem({ children, instruction, LeftButton, RightButton, instructionNumber, AddButton }: FullContentItemProps) {
-    let { enabled } = RightButton;
+    const { enabled } = RightButton;
+    const plusIconSize = 20;
+
 
     return (
         <Fragment>
@@ -42,7 +44,7 @@ export default function ContentItem({ children, instruction, LeftButton, RightBu
                 <div className="Right">
                     {AddButton &&
                         <div className="AddButton" onClick={AddButton.action}>
-                            <PlusIcon height={20} width={20} />
+                            <PlusIcon height={plusIconSize} width={plusIconSize} />
                             <span>
                                 {AddButton.name}
                             </span>

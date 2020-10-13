@@ -238,9 +238,11 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                     pickLocation,
                     dropLocation,
                     dimensions: box.dimensions,
+                    boxIndex: b.index,
                     palletIndex,
                     stackIndex,
-                    linearPathDistance
+                    linearPathDistance,
+                    boxDetection: box.boxDetection
                 } as BoxCoordinates);
             });
             // Drop the height by the size of the previous layer.
