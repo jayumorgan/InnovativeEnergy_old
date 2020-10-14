@@ -136,7 +136,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Add a "go to taught position" button for validation (for teach position of the pallet corners and the pick locations)
 *** TODO We need to make the drag/drop boxes on the "edit" layer more reliable. Easily snap to the edges of each box, so that the positioning is the same each time, eliminating human error and getting more repeatable positioning. If you have a better option to configure it through "edit rows and columns" format, that would be fine too (after defining the orientation of the box).
 *** TODO There should be labelled "x and y and z" in every image. With proper orientations ?? What is the confusion?
-*** TODO Missing software stop in palletizer app
+*** DONE Missing software stop in palletizer app
 *** DONE Clicking the empty save outside the config screen should not close the configuration screen. Use "x" at top right corner
 *** DONE 3D Render height. 
 *** DONE The 3D render still has some glitches in terms of box positioning and representation
@@ -160,6 +160,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently.
 *** DONE Path optimization fix (lateral approach).
 *** TODO Stop suction from the main page.
+*** DONE Sort out the estop controversy.
 
 Breaking up these items:
 

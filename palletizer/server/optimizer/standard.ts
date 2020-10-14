@@ -250,8 +250,7 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
     //     group.forEach((pallet_group: BoxCoordinate[], j: number) => {
     //         console.log(`Stack ${i} pallet ${j}`, pallet_group);
     //     });
-    // })
-
+    // });
     // Sort around the center and move in that direction.
 
     stackGroups.forEach((stack_group: BoxCoordinate[][]) => {
@@ -274,15 +273,7 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
             pallet_group.forEach((b: BoxCoordinate) => {
                 let direction: CartesianCoordinate = subtractCartesianCoordinate(b.dropLocation, pallet.center);
                 direction.z = 0;
-                console.log("Pallet Center", pallet.center, pallet.corner2, pallet.corner1, pallet.corner3);
-                console.log("drop location", b.dropLocation);
-                console.log("Direction", direction);
-
-
                 direction = multiplyScalar(direction, 1 / getNorm(direction));
-
-
-
                 paths.push(generateLateralPathForBox(b, getZTop(b), direction));
             });
             current_height += first_box.dimensions.height;

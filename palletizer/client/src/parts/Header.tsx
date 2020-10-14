@@ -50,6 +50,7 @@ function Header() {
                 let mm: MM = new MM(config);
 
                 mm.bindEstopEvent((estop: boolean) => {
+					console.log("Estop event from header", estop);
                     seteStopped(estop);
                 });
                 return mm;

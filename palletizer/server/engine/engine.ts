@@ -28,6 +28,7 @@ import {
     SpeedTypes,
     generateStandardPath
 } from "../optimizer/standard";
+import { resolve } from "dns";
 
 //---------------Environment Setup---------------
 dotenv.config();
@@ -165,7 +166,6 @@ enum CycleState {
     PICK,
     DETECT_IO,
     PICK_IO,
-    DROP,
     DROP_IO
 };
 
@@ -206,7 +206,7 @@ export class Engine {
             handler: this.__handleControl,
             regex: /palletizer\/control/
         };
-        this.subscribeTopics[ESTOP_TOPIC] = {
+        this.subscribeTopics[ESTOP_TOPIC] = { // deprecated.
             handler: this.__handleEstop,
             regex: /palletizer\/trigger\/estop/
         };
@@ -497,23 +497,21 @@ export class Engine {
                 };
                 const mm_controller: MachineMotion = new MachineMotion(mm_config);
                 // NB: estop will recursively call estop, so unbind the estop action on first call.
-                mm_controller.bindEstopEvent(() => {
-                    mm_controller.bindEstopEvent(() => {
-                        console.log("Estop already triggered");
-                    });
-                    let handler = my.__handleEstop.bind(my);
-                    handler("Estop message is irrelevant");
-                });
 
-                let p = new Promise((resolve, reject) => {
+                const p = new Promise((resolve, reject) => {
                     // To hack around the master / slave estop. -- Fix Later.
                     console.log("Release estop without knowledge of failure.");
 
 
-                    mm_controller.releaseEstop().catch((e: any) => {
+                    mm_controller.releaseEstop().then(() => {
+                        console.log("Estop release succeeded.");
+                    }).catch((e: any) => {
                         console.log("Failed release estop", e);
                     });
-                    mm_controller.resetSystem().catch((e: any) => {
+
+                    mm_controller.resetSystem().then(() => {
+                        console.log("system reset succeeded.");
+                    }).catch((e: any) => {
                         console.log("Failed reset system", e);
                     });
 
@@ -529,9 +527,30 @@ export class Engine {
                 });
 
                 promises.push(p);
-
                 mms.push(mm_controller);
             });
+
+
+
+            mms.forEach((m: MachineMotion) => {
+                const unboundEstopHandler = (estop: boolean) => {
+                    return; // estop already triggered.
+                };
+
+                const estopHandler = (estop: boolean) => {
+                    if (estop) {
+                        console.log("Header estop event", estop);
+                        m.bindEstopEvent(unboundEstopHandler);
+                        const handler = my.__handleEstop.bind(my);
+                        handler("Estop message is irrelevant");
+                    } else {
+                        console.log("Estop released.");
+                    }
+                };
+
+                m.bindEstopEvent(estopHandler);
+            })
+
 
             my.mechanicalLayout.machines = mms;
 
@@ -561,9 +580,10 @@ export class Engine {
                 Promise.all(promises).then(() => { resolve(true); }).catch(e => reject(e));
             });
         } else {
-            return new Promise((_, reject) => {
-                reject("No machine configurations.");
-            });
+            return Promise.reject("No machine configuration");
+            // return new Promise((_, reject) => {
+            //     reject("No machine configurations.");
+            // });;
         }
     };
 
@@ -635,6 +655,7 @@ export class Engine {
         }
     };
 
+
     async executeAction(action_coordinate: ActionCoordinate): Promise<any> {
         const { action } = action_coordinate;
         if (action) {
@@ -645,15 +666,7 @@ export class Engine {
                 });
             }
             if (action === ActionTypes.DETECT_BOX) {
-                return my.handleDetect(action_coordinate.boxDetection).then(async (detected: boolean) => {
-                    if (detected) {
-                        return my.__pickIO().then(() => {
-                            return my.handleGoodPick(); // Check for a good pick.
-                        });
-                    } else {
-                        return Promise.reject("Unable to detect box. Operator assistance required.");
-                    }
-                });
+                return my.handleDetect(action_coordinate.boxDetection);
             }
             if (action === ActionTypes.DROP) {
                 return my.__dropIO();
@@ -780,13 +793,50 @@ export class Engine {
         return my.__controlSequence([...move_actions, ...wait_actions]);
     };
 
+
+    async __monitorGoodPick() {
+        const my = this;
+
+        if (my.cycleState !== CycleState.PICK_IO) {
+            return;
+        }
+
+        console.log("Monitoring");
+
+
+        const throwError = () => {
+            my.handleStop();
+            this.__handleInformation(INFO_TYPE.ERROR, "Box pick failed. Operator assistance required.");
+        };
+        my.__detectGoodPick().then((good: boolean) => {
+            if (my.cycleState === CycleState.PICK_IO) { // It should be carrying a box.
+                if (!good) {
+                    throwError();
+                } else {
+                    setTimeout(() => {
+                        my.__monitorGoodPick();
+                    }, 300);
+                }
+            }
+        }).catch((e: any) => {
+            if (my.cycleState === CycleState.PICK_IO) { // It should be carrying a box.
+                throwError();
+            }
+        });
+    };
+
     __pickIO() {
-        this.cycleState = CycleState.PICK_IO;
-        let ios: IOState[] = this.mechanicalLayout.io.On;
-        return this.__writeIO(ios);
+        console.log("Picking");
+        const my = this;
+        my.cycleState = CycleState.PICK_IO;
+        let ios: IOState[] = my.mechanicalLayout.io.On;
+        return my.__writeIO(ios).then(() => {
+            my.__monitorGoodPick();
+        });
     };
 
     __dropIO() {
+        console.log("Dropping");
         this.cycleState = CycleState.DROP_IO;
         let ios: IOState[] = this.mechanicalLayout.io.Off;
         return this.__writeIO(ios);
