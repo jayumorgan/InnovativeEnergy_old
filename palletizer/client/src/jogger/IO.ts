@@ -38,7 +38,7 @@ export default class IO {
 
     constructor(machine: MachineMotion) {
         this.machine = machine;
-        this.machineMotion = getMachineMotion(machine);
+        this.machineMotion = getMachineMotion(machine);		
     };
 
     setMachineMotion(machine: MachineMotion) {

@@ -4,8 +4,6 @@ import IOController from "../../jogger/IO";
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 import { IODeviceState } from "mm-js-api";
 
-
-
 import "./css/IO.scss";
 
 export interface IOState {

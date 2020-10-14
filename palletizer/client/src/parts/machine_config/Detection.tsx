@@ -24,29 +24,50 @@ interface DetectionCellProps {
     updateState: (state: IOState) => void;
     state: IOState;
     allMachines: MachineMotion[];
-    ioController: IOController;
     removeDetectionCell: () => void;
 };
 
-function DetectionCell({ state, updateState, allMachines, ioController, removeDetectionCell }: DetectionCellProps) {
+function DetectionCell({ state, updateState, allMachines, removeDetectionCell }: DetectionCellProps) {
 
     const [currentPinValues, setCurrentPinValues] = useState<IODeviceState>([false, false, false, false]);
+    const [ioController, setIOController] = useState<IOController>(new IOController(allMachines[state.MachineMotionIndex]));
+    const [currentMMIndex, setCurrentMMIndex] = useState<number>(-1);
+
+    const pinCompare = (newPins: IODeviceState): boolean => {
+        let same = true;
+        for (let i = 0; i < newPins.length; i++) {
+            if (newPins[i] !== currentPinValues[i]) {
+                same = false;
+                break;
+            }
+        }
+        return same;
+    };
 
     const handleIoValueUpdate = (device_id: number, s: IODeviceState) => {
+        console.log("IO Value callback!", s, device_id);
         if (device_id === state.NetworkId) {
-            setCurrentPinValues(s);
+            if (!pinCompare(s)) {
+                setCurrentPinValues(s);
+            }
         }
     };
 
     useEffect(() => {
-        ioController.machineMotion.setIoValueUpdateCallback(handleIoValueUpdate);
-        ioController.detectInputState(state.NetworkId).then((res: vResponse) => {
-            let s: IODeviceState = res.result as IODeviceState;
-            setCurrentPinValues(s);
-        }).catch((e: any) => {
-            console.log("Error retrieving device input state", e);
-        })
-    }, []);
+
+        console.log("Using effect", currentMMIndex, state.MachineMotionIndex);
+        if (currentMMIndex !== state.MachineMotionIndex) {
+            ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
+            ioController.machineMotion.setIoValueUpdateCallback(handleIoValueUpdate);
+            ioController.detectInputState(state.NetworkId).then((v: vResponse) => {
+                const ioState = v.result as IODeviceState;
+                setCurrentPinValues(ioState);
+            }).catch((e: any) => {
+                console.log("Error detect input state", e);
+            });
+            setCurrentMMIndex(state.MachineMotionIndex);
+        }
+    }, [ioController, state]);
 
     const updateNetworkId = (e: ChangeEvent) => {
         let NetworkId: number = changeEventToNumber(e);
@@ -63,6 +84,8 @@ function DetectionCell({ state, updateState, allMachines, ioController, removeDe
         s.Pins[pin_index] = !(s.Pins[pin_index]);
         updateState(s);
     };
+
+    console.log("Current Pin Values", currentPinValues);
 
     return (
         <div className="DetectionCellContainer">
@@ -103,7 +126,11 @@ function DetectionCell({ state, updateState, allMachines, ioController, removeDe
                         </select>
                     </div>
                 </div>
-                {state.Pins.map((pin: boolean, i: number) => {
+                {currentPinValues.map((current_val: boolean, i: number) => {
+                    const currentString: string = current_val ? "1" : "0";
+                    console.log("Current value", current_val, currentString);
+
+                    const pin = state.Pins[i];
                     return (
                         <div className="SwitchContainer" key={i}>
                             <div className="Name">
@@ -116,7 +143,7 @@ function DetectionCell({ state, updateState, allMachines, ioController, removeDe
                                     {"Current:"}
                                 </span>
                                 <span>
-                                    {currentPinValues[i] ? "1" : "0"}
+                                    {currentString}
                                 </span>
                             </div>
                             <div className="Status">
@@ -165,20 +192,6 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
     useEffect(() => {
         setDetectionArray(box_detection ? box_detection : [] as IOState[]);
     }, [box_detection]);
-
-    const getIOControllers = () => {
-        let ios: IOController[] = allMachines.map((machine: MachineMotion, i: number) => {
-            const ioController = new IOController(machine);
-            return ioController;
-        });
-        return ios;
-    };
-
-    const [ioControllers, setioControllers] = useState<IOController[]>(getIOControllers());
-
-    useEffect(() => {
-        setioControllers(getIOControllers());
-    }, [allMachines]);
 
     const instruction: string = `Create an input profile for ${isDetection ? "box detection" : "picked box"}`;
 
@@ -239,11 +252,10 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
                                 updateState: updateCellAtIndex(i),
                                 state,
                                 allMachines,
-                                ioController: ioControllers[state.MachineMotionIndex],
                                 removeDetectionCell: removeCell(i)
                             };
                             return (
-                                <DetectionCell  {...cellProps} />
+                                <DetectionCell  {...cellProps} key={i} />
                             );
                         })
                     }

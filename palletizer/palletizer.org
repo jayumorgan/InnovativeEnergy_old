@@ -148,7 +148,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Automated ordering of boxes based on pick location (there's an issue for some box placements)
 *** TODO Ability to palletize separators using a z height difference. Instead of using an infeed conveyors, it would palletize stacks. So in the "configure box" section, there should be a drop down options that include "Palletize from in-feed" or "Palletize from stack". "Palletize from stack" option is removing the height difference of the box for each time it picks that box.
 *** DONE Make sure the e-stop will not stop the gripper from functioning
-*** TODO Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
+*** DONE Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
 *** TODO IF there is time, update layer image with your visualiser
 *** DONE Don't allow jogger on incomplete machine configuration.
 *** DONE Tailor height addition for top-of-box teach.
@@ -161,6 +161,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Path optimization fix (lateral approach).
 *** TODO Stop suction from the main page.
 *** DONE Sort out the estop controversy.
+*** DONE Monitoring along path.
 
 Breaking up these items:
 
@@ -173,7 +174,7 @@ Breaking up these items:
 *** DONE Fix homing on home screen.
 
 ** TODO Visualizer: 
-*** TODO Fix the box display thing.
+*** DONE Fix the box display thing.
 *** TODO Display in the stack area. (Dynamically add boxes).
 
 

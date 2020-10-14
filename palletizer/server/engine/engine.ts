@@ -803,7 +803,6 @@ export class Engine {
 
         console.log("Monitoring");
 
-
         const throwError = () => {
             my.handleStop();
             this.__handleInformation(INFO_TYPE.ERROR, "Box pick failed. Operator assistance required.");
@@ -865,6 +864,7 @@ export class Engine {
                         });
                     }, 500);
                 } else {
+                    // Throw error and keep trying.
                     resolve(detected);
                 }
             }).catch((e: any) => {
