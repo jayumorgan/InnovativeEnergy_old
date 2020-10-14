@@ -159,7 +159,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Make sure that drag mechanics work.
 *** TODO Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently.
 *** DONE Path optimization fix (lateral approach).
-*** TODO Stop subction from the main page.
+*** TODO Stop suction from the main page.
 
 Breaking up these items:
 

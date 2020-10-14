@@ -30,6 +30,7 @@ function ConfigCell({ name, id, start_editor, is_machine, complete, start_jogger
     const handle_edit = () => {
         start_editor(id);
     };
+
     const handle_delete = () => {
         delete_config(id, is_machine).then(() => {
             reloadConfigs();
