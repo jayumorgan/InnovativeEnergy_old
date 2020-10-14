@@ -103,7 +103,7 @@ interface MachineConfiguratorProps {
 
 function MachineConfigurator({ close, index, machineConfig, id }: MachineConfiguratorProps) {
 
-    let completionFraction = { n: 0, d: 6 } as Fraction;
+    let completionFraction = { n: 0, d: 5 } as Fraction;
 
     const [configuration, dispatch] = useReducer(MachineReducer, (() => {
         if (machineConfig) {

@@ -154,7 +154,8 @@ PALLETIZER -*- mode: org -*-
 *** DONE Tailor height addition for top-of-box teach.
 
 ** TODO Actual Things
-*** DONE  Make sure stop works.
+*** DONE Make sure stop works.
+*** TODO Single IO Selection.
 *** TODO Make sure IO's update on the UI.
 *** TODO Make sure that drag mechanics work.
 *** TODO Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently.
@@ -162,6 +163,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Stop suction from the main page.
 *** DONE Sort out the estop controversy.
 *** DONE Monitoring along path.
+*** TODO Picking from stack.
 
 Breaking up these items:
 

@@ -177,7 +177,6 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
     );
 };
 
-
 export interface DetectionProps extends ControlProps {
     setDetection: (detection: IOState[]) => void;
     box_detection?: IOState[];

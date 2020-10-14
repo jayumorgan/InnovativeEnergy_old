@@ -239,11 +239,25 @@
             border-radius: $border-radius;
             background-color: $desert-storm;
 
-            .InputProfileButton {
+            .CreateNewBoxParameterContainer {
                 height: 100%;
                 width: 100%;
                 @include flex-center();
                 justify-content: flex-end;
+
+                .PickFromStackToggle {
+                    @include flex-center;
+                    flex-direction: row;
+
+                    input {
+                        height: 20pt;
+                        width: 20pt;
+                    }
+
+                    span {
+                        font-size: $medium-font;
+                    }
+                }
 
                 .InputButton {
                     height: 70%;

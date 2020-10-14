@@ -204,7 +204,13 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
                     <div className="BoxSetup">
                         <Jogger {...joggerProps} />
                         <div className="BoxConfigurator">
-                            <div className="InputProfileButton">
+                            <div className="CreateNewBoxParameterContainer">
+                                <div className="PickFromStackToggle">
+                                    <input type="checkbox" value={0} />
+                                    <span>
+                                        {"Pick From Stack"}
+                                    </span>
+                                </div>
                                 <div className="InputButton" onClick={startShowingBoxDetection} >
                                     <span>
                                         {box.boxDetection.length > 0 ? "Edit Box Detection" : "Add Box Detection"}

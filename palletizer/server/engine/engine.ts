@@ -28,7 +28,6 @@ import {
     SpeedTypes,
     generateStandardPath
 } from "../optimizer/standard";
-import { resolve } from "dns";
 
 //---------------Environment Setup---------------
 dotenv.config();
@@ -100,7 +99,7 @@ interface MechanicalLayout {
 };
 
 function compareIODeviceStates(io1: IODeviceState, io2: IODeviceState): boolean {
-    let equal: boolean = false;
+    let equal: boolean = true;
     for (let i = 0; i < io1.length; i++) {
         equal = io1[i] === io2[i];
         if (!equal) {
@@ -824,7 +823,7 @@ export class Engine {
         });
     };
 
-    __pickIO() {
+    async __pickIO() {
         console.log("Picking");
         const my = this;
         my.cycleState = CycleState.PICK_IO;
@@ -855,10 +854,17 @@ export class Engine {
             my.__detectBox(boxDetection).then((detected: boolean) => {
                 if (detected) {
                     resolve(detected); // has been detected.
-                } else if (retry_index < 5) {
+                } else if (retry_index < 2000) {
+                    if (retry_index === 0) {
+                        my.__handleInformation(INFO_TYPE.WARNING, "Unable to detect box.");
+                    }
                     setTimeout(() => {
                         my.handleDetect(boxDetection, retry_index + 1).then((d: boolean) => {
-                            resolve(d);
+                            if (d) {
+                                resolve(d);
+                            } else {
+                                reject("Unable to detect box. Operator assistance required.");
+                            }
                         }).catch((e: any) => {
                             reject(e);
                         });
@@ -932,6 +938,7 @@ export class Engine {
     __detectBox(boxDetection: IOState[]): Promise<boolean> {
         const my = this;
         my.cycleState = CycleState.DETECT_IO;
+        console.log(boxDetection, "Box Detect IO State");
 
         if (boxDetection.length === 0) {
             return Promise.resolve(true);
