@@ -1005,6 +1005,5 @@ export class Engine {
         }
 
         return Promise.reject("Palletizer is not un run state " + String(status) + ".");
-
     };
 };
