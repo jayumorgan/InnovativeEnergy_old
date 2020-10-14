@@ -167,8 +167,9 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
     }, [box_detection]);
 
     const getIOControllers = () => {
-        let ios: IOController[] = allMachines.map((machine: MachineMotion) => {
-            return new IOController(machine);
+        let ios: IOController[] = allMachines.map((machine: MachineMotion, i: number) => {
+            const ioController = new IOController(machine);
+            return ioController;
         });
         return ios;
     };

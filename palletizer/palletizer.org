@@ -123,13 +123,14 @@ PALLETIZER -*- mode: org -*-
 *** DONE Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
 *** TODO In browser IO Monitoring doesn't work.
 *** TODO Add location filter for negative coordinates? 
-*** TODO Make sure that all teach screens, after deleting all, disables the next button (see Pallets.tsx (Right button))
-*** TODO Box Detection should be moved to Box Size Area (not the main thing.)
+*** DONE Make sure that all teach screens, after deleting all, disables the next button (see Pallets.tsx (Right button))
+*** DONE Box Detection should be moved to Box Size Area (not the main thing.)
 *** DONE Box detection and monitoring label the same thing.
-*** TODO Make sure that box detection is functional.
-*** TODO Heights are a little low on second layer -- fix this.
-*** TODO Update visualizer to reflect top of box (And add instructions for this.) (maybe offset).
+*** DONE Make sure that box detection is functional.
+*** DONE Heights are a little low on second layer -- fix this.
+*** DONE Update visualizer to reflect top of box (And add instructions for this.) (maybe offset).
 *** TODO Robust update mechanism absolutely necessary.
+*** TODO Make sure that stop actually stops.
 
 ** TODO Post FAT
 *** TODO Add a "go to taught position" button for validation (for teach position of the pallet corners and the pick locations)
@@ -138,13 +139,13 @@ PALLETIZER -*- mode: org -*-
 *** TODO Missing software stop in palletizer app
 *** DONE Clicking the empty save outside the config screen should not close the configuration screen. Use "x" at top right corner
 *** DONE 3D Render height. 
-*** TODO The 3D render still has some glitches in terms of box positioning and representation
+*** DONE The 3D render still has some glitches in terms of box positioning and representation
 *** TODO Replace images/renders from britt to update
-*** TODO Test the input sensor
-*** TODO Input sensor should be configurable for each box (input menu should just have an association for the box created)
+*** DONE Test the input sensor
+*** DONE Input sensor should be configurable for each box (input menu should just have an association for the box created)
 *** TODO Wire the master and slave controller
-*** TODO Figure what's wrong with the drop distances
-*** TODO Automated ordering of boxes based on pick location (there's an issue for some box placements)
+*** DONE Figure what's wrong with the drop distances
+*** DONE Automated ordering of boxes based on pick location (there's an issue for some box placements)
 *** TODO Ability to palletize separators using a z height difference. Instead of using an infeed conveyors, it would palletize stacks. So in the "configure box" section, there should be a drop down options that include "Palletize from in-feed" or "Palletize from stack". "Palletize from stack" option is removing the height difference of the box for each time it picks that box.
 *** DONE Make sure the e-stop will not stop the gripper from functioning
 *** TODO Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
@@ -152,6 +153,13 @@ PALLETIZER -*- mode: org -*-
 *** DONE Don't allow jogger on incomplete machine configuration.
 *** DONE Tailor height addition for top-of-box teach.
 
+** TODO Actual Things
+*** DONE  Make sure stop works.
+*** TODO Make sure IO's update on the UI.
+*** TODO Make sure that drag mechanics work.
+*** TODO Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently.
+*** DONE Path optimization fix (lateral approach).
+*** TODO Stop subction from the main page.
 
 Breaking up these items:
 

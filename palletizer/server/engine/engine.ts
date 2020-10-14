@@ -59,12 +59,12 @@ interface TopicStruct {
 
 //---------------Palletizer Control---------------
 enum PALLETIZER_STATUS {
-    SLEEP = "Sleep",
-    PAUSED = "Paused",
-    COMPLETE = "Complete",
-    ERROR = "Error",
-    STOPPED = "Stopped",
-    RUNNING = "Running"
+    SLEEP = "Sleep", // State on startup.
+    PAUSED = "Paused", // Paused, will resume from here.
+    COMPLETE = "Complete", // Completed a cycle, equivalent to sleep.
+    ERROR = "Error", // Error (equivalent to pause).
+    STOPPED = "Stopped", // Stopped, will restart from here
+    RUNNING = "Running" // In run statue.
 };
 
 enum INFO_TYPE {
@@ -416,12 +416,35 @@ export class Engine {
         const my = this;
         let { status } = my.palletizerState;
 
-        if (status === PALLETIZER_STATUS.RUNNING) {
-            return;
-        } else if (status === PALLETIZER_STATUS.PAUSED) {
+        const setRunning = () => {
             my.__updateStatus(PALLETIZER_STATUS.RUNNING);
-            return;
         }
+
+        switch (status) {
+            case PALLETIZER_STATUS.RUNNING: {
+                return;
+            }
+            case PALLETIZER_STATUS.PAUSED: {
+                setRunning();
+                return;
+            }
+            case PALLETIZER_STATUS.ERROR: {
+                setRunning(); // Error should be equivalent to pause -- this needs to be fixed.
+                return;
+            }
+            case PALLETIZER_STATUS.COMPLETE: {
+                setRunning();
+                break;
+            }
+            case PALLETIZER_STATUS.SLEEP: {
+                setRunning();
+                break;
+            }
+            case PALLETIZER_STATUS.STOPPED: {
+                setRunning();
+                break;
+            }
+        };
 
         my.loadConfigurations().then(() => {
             return my.configureMachine();
@@ -431,7 +454,6 @@ export class Engine {
         }).catch((e: string) => {
             if (my.palletizerState.status == PALLETIZER_STATUS.STOPPED) {
                 console.log("Palletizer has stopped.");
-                //		my.__updateStatus(PALLETIZER_STATUS.STOPPED);
                 my.__handleInformation(INFO_TYPE.STATUS, "Palletizer stopped.");
             } else {
                 my.__handleInformation(INFO_TYPE.ERROR, e);
@@ -485,6 +507,9 @@ export class Engine {
 
                 let p = new Promise((resolve, reject) => {
                     // To hack around the master / slave estop. -- Fix Later.
+                    console.log("Release estop without knowledge of failure.");
+
+
                     mm_controller.releaseEstop().catch((e: any) => {
                         console.log("Failed release estop", e);
                     });
@@ -545,7 +570,7 @@ export class Engine {
     //-------Palletizer Sequence-------
     async startPalletizer(box_index: number): Promise<any> {
         const my = this;
-        my.__updateStatus(PALLETIZER_STATUS.RUNNING);
+        //        my.__updateStatus(PALLETIZER_STATUS.RUNNING); // This is probably the problem.
         if (my.palletConfig !== null) {
             my.__stateReducer({
                 current_box: box_index + 1,
@@ -563,7 +588,6 @@ export class Engine {
             }
         });
     };
-
 
     async runPalletizerSequence(box_index: number): Promise<any> {
         let my = this;
@@ -616,6 +640,11 @@ export class Engine {
         if (action) {
             const my = this;
             if (action === ActionTypes.PICK) {
+                return my.__pickIO().then(() => {
+                    return my.handleGoodPick(); // Check for a good pick.
+                });
+            }
+            if (action === ActionTypes.DETECT_BOX) {
                 return my.handleDetect(action_coordinate.boxDetection).then(async (detected: boolean) => {
                     if (detected) {
                         return my.__pickIO().then(() => {
@@ -918,8 +947,7 @@ export class Engine {
             });
         }
 
-        return new Promise((_, reject) => {
-            reject("Palletizer is not in run state " + String(status));
-        });
+        return Promise.reject("Palletizer is not un run state " + String(status) + ".");
+
     };
 };

@@ -64,5 +64,4 @@ export default class IO {
     detectInputState(networkId: number): Promise<vResponse> {
         return this.machineMotion.digitalReadAll(networkId);
     };
-
 };
