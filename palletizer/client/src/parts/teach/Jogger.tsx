@@ -101,8 +101,6 @@ export function ForceHome({ skip, jogController, hideDone }: ForceHomeProps) {
     );
 };
 
-
-
 export interface JoggerProps {
     selectAction: (c: CoordinateRot) => void;
     updateName: (s: string) => void;
@@ -115,7 +113,6 @@ export interface JoggerProps {
     allowManualEntry?: boolean;
 };
 
-
 export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig, Controller, allowManualEntry, savedCoordinate }: JoggerProps) {
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
@@ -123,7 +120,6 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
     const [jogController, setJogController] = useState<JogController | null>(Controller ? Controller : null);
     const [showManualEntry, setShowManualEntry] = useState<boolean>(false);
     const [manualEntryCoordinate, setManualEntryCoordinate] = useState<CoordinateRot>(savedCoordinate ? savedCoordinate : { x: 0, y: 0, z: 0, θ: 0 });
-
 
     useEffect(() => {
         if (savedCoordinate) {

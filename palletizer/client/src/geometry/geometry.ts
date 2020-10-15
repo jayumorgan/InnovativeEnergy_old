@@ -1,4 +1,5 @@
 import { IOState } from "../parts/machine_config/IO";
+import { IOOutputPin } from "../parts/machine_config/Detection";
 
 export interface PlaneDimensions {
     width: number;
@@ -70,7 +71,7 @@ export interface BoxObject {
     name: string;
     dimensions: BoxDimensions;
     pickLocation: CoordinateRot;
-    boxDetection: IOState[];
+    boxDetection: IOOutputPin[];
     pickFromStack: boolean;
     changed?: boolean;
     deleted?: boolean;
@@ -137,7 +138,7 @@ export interface BoxCoordinates {
     pickLocation: CoordinateRot;
     dropLocation: CoordinateRot;
     dimensions: BoxDimensions;
-    boxDetection: IOState[];
+    boxDetection: IOOutputPin[];
     boxIndex: number; // index of box.
     palletIndex: number;
     stackIndex: number;

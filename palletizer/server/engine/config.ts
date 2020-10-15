@@ -35,6 +35,13 @@ export interface IOState {
     Pins: [boolean, boolean, boolean, boolean];
 };
 
+export interface IOOutputPin {
+    MachineMotionIndex: number;
+    NetworkId: number; // 0, 1, 2
+    PinId: number; // 0, 1, 2, 3
+    PinVal: boolean;
+};
+
 export interface IO {
     On: IOState[];
     Off: IOState[];
@@ -45,7 +52,7 @@ export interface MachineConfiguration {
     machines: MachineMotionInfo[];
     axes: Axes;
     io: IO;
-    good_pick: IOState[];
+    good_pick: IOOutputPin[];
 };
 
 
@@ -78,7 +85,7 @@ export interface BoxCoordinate {
     pickLocation: Coordinate;
     dropLocation: Coordinate;
     dimensions: BoxDimensions;
-    boxDetection: IOState[];
+    boxDetection: IOOutputPin[];
     palletIndex: number;
     stackIndex: number;
     boxIndex: number; // Box index number in configuration.

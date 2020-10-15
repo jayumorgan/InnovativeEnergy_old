@@ -2,13 +2,22 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { IODeviceState, vResponse } from "mm-js-api";
 import ContentItem, { ButtonProps } from "../teach/ContentItem";
 import { IOState, defaultIOState, ALL_NETWORK_IDS } from "./IO";
-import { ControlProps, changeEventToNumber } from "../shared/shared";
+import { ControlProps, changeEventToNumber, wrapChangeEventNumber } from "../shared/shared";
 import { MachineMotion } from "./MachineMotions";
 import IOController from "../../jogger/IO";
 
 //---------------Styles---------------
 import "./css/Detection.scss";
 
+
+const ALL_PIN_IDS: number[] = [0, 1, 2, 3];
+
+export interface IOOutputPin {
+    MachineMotionIndex: number;
+    NetworkId: number; // 1,2,3
+    PinId: number; // 0, 1, 2, 3
+    PinVal: boolean;
+};
 
 function SplashScreen() {
     return (
@@ -21,47 +30,32 @@ function SplashScreen() {
 };
 
 interface DetectionCellProps {
-    updateState: (state: IOState) => void;
-    state: IOState;
+    updateState: (state: IOOutputPin) => void;
+    state: IOOutputPin;
     allMachines: MachineMotion[];
     removeDetectionCell: () => void;
 };
 
-function DetectionCell({ state, updateState, allMachines, removeDetectionCell }: DetectionCellProps) {
 
-    const [currentPinValues, setCurrentPinValues] = useState<IODeviceState>([false, false, false, false]);
+function DetectionCell({ state, updateState, allMachines, removeDetectionCell }: DetectionCellProps) {
+    const [currentPinValue, setCurrentPinValue] = useState<boolean>(false);
     const [ioController, setIOController] = useState<IOController>(new IOController(allMachines[state.MachineMotionIndex]));
     const [currentMMIndex, setCurrentMMIndex] = useState<number>(-1);
-
-    const pinCompare = (newPins: IODeviceState): boolean => {
-        let same = true;
-        for (let i = 0; i < newPins.length; i++) {
-            if (newPins[i] !== currentPinValues[i]) {
-                same = false;
-                break;
-            }
-        }
-        return same;
-    };
 
     const handleIoValueUpdate = (device_id: number, s: IODeviceState) => {
         console.log("IO Value callback!", s, device_id);
         if (device_id === state.NetworkId) {
-            if (!pinCompare(s)) {
-                setCurrentPinValues(s);
-            }
+            setCurrentPinValue(s[state.PinId]);
         }
     };
 
     useEffect(() => {
-
-        console.log("Using effect", currentMMIndex, state.MachineMotionIndex);
         if (currentMMIndex !== state.MachineMotionIndex) {
             ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
             ioController.machineMotion.setIoValueUpdateCallback(handleIoValueUpdate);
             ioController.detectInputState(state.NetworkId).then((v: vResponse) => {
                 const ioState = v.result as IODeviceState;
-                setCurrentPinValues(ioState);
+                setCurrentPinValue(ioState[state.PinId]);
             }).catch((e: any) => {
                 console.log("Error detect input state", e);
             });
@@ -79,13 +73,20 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
         updateState({ ...state, MachineMotionIndex });
     };
 
-    const togglePin = (pin_index: number) => () => {
+    const updatePinId = wrapChangeEventNumber((pin_id: number) => {
         let s = { ...state };
-        s.Pins[pin_index] = !(s.Pins[pin_index]);
+        s.PinVal = false;
+        s.PinId = pin_id;
+        updateState(s);
+    });
+
+    const togglePin = () => {
+        let s = { ...state };
+        s.PinVal = !(s.PinVal);
         updateState(s);
     };
 
-    console.log("Current Pin Values", currentPinValues);
+    console.log("Current Pin Value: ", currentPinValue);
 
     return (
         <div className="DetectionCellContainer">
@@ -126,70 +127,94 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
                         </select>
                     </div>
                 </div>
-                {currentPinValues.map((current_val: boolean, i: number) => {
-                    const currentString: string = current_val ? "1" : "0";
-                    console.log("Current value", current_val, currentString);
-
-                    const pin = state.Pins[i];
-                    return (
-                        <div className="SwitchContainer" key={i}>
-                            <div className="Name">
-                                <span>
-                                    {"Pin " + String(i)}
-                                </span>
-                            </div>
-                            <div className="Current">
-                                <span id="label">
-                                    {"Current:"}
-                                </span>
-                                <span>
-                                    {currentString}
-                                </span>
-                            </div>
-                            <div className="Status">
-                                <div className="Switch" onClick={togglePin(i)}>
-                                    {pin &&
-                                        <div className="NumberContainer">
-                                            <div className="Number">
-                                                <span> {"1"} </span>
-                                            </div>
-                                        </div>}
-                                    {pin && <div className="SwitchHandle"></div>}
-                                    {(!pin) && <div className="SwitchHandle"> </div>}
-                                    {(!pin) &&
-                                        <div className="NumberContainer">
-                                            <div className="Number">
-                                                <span> {"0"} </span>
-                                            </div>
-                                        </div>}
-                                </div>
-                            </div>
+                <div className="Input">
+                    <div className="Title">
+                        <span>
+                            {"Pin"}
+                        </span>
+                    </div>
+                    <div className="DropDown">
+                        <select value={state.PinId} onChange={updatePinId}>
+                            {ALL_NETWORK_IDS.map((pin_id: number, i: number) => {
+                                return (
+                                    <option value={pin_id} key={i}>
+                                        {"Pin " + String(pin_id)}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                </div>
+                <div className="Input">
+                    <div className="Title">
+                        <span>
+                            {"Current"}
+                        </span>
+                    </div>
+                    <div className="Value">
+                        <span>
+                            {"0"}
+                        </span>
+                    </div>
+                </div>
+                <div className="Input">
+                    <div className="Title">
+                        <span>
+                            {"Target"}
+                        </span>
+                    </div>
+                    <div className="Status">
+                        <div className="Switch" onClick={togglePin}>
+                            {state.PinVal &&
+                                <div className="NumberContainer">
+                                    <div className="Number">
+                                        <span> {"1"} </span>
+                                    </div>
+                                </div>}
+                            {state.PinVal && <div className="SwitchHandle"></div>}
+                            {(!state.PinVal) && <div className="SwitchHandle"> </div>}
+                            {(!state.PinVal) &&
+                                <div className="NumberContainer">
+                                    <div className="Number">
+                                        <span> {"0"} </span>
+                                    </div>
+                                </div>}
                         </div>
-                    );
-                })}
-
-            </div>
+                    </div>
+                </div>
+            </div >
             <div className="Trash">
                 <span className="icon-delete" onClick={removeDetectionCell}>
                 </span>
             </div>
-        </div>
+        </div >
     );
 };
 
 export interface DetectionProps extends ControlProps {
-    setDetection: (detection: IOState[]) => void;
-    box_detection?: IOState[];
+    setDetection: (detection: IOOutputPin[]) => void;
+    box_detection?: IOOutputPin[];
     allMachines: MachineMotion[];
     isDetection: boolean; // Toggle between io state setup for box detection and good pick
 };
 
+
+function defaultOuputPin(): IOOutputPin {
+    return {
+        MachineMotionIndex: 0,
+        NetworkId: 0,
+        PinId: 0,
+        PinVal: false
+    };
+};
+
+
 export default function Detection({ handleNext, handleBack, instructionNumber, setDetection, box_detection, allMachines, isDetection }: DetectionProps) {
 
-    const [detectionArray, setDetectionArray] = useState<IOState[]>(box_detection ? box_detection : [] as IOState[]);
+    const [detectionArray, setDetectionArray] = useState<IOOutputPin[]>(box_detection ? box_detection : [] as IOOutputPin[]);
 
     useEffect(() => {
-        setDetectionArray(box_detection ? box_detection : [] as IOState[]);
+        setDetectionArray(box_detection ? box_detection : [] as IOOutputPin[]);
     }, [box_detection]);
 
     const instruction: string = `Create an input profile for ${isDetection ? "box detection" : "picked box"}`;
@@ -213,8 +238,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
     const AddButton: ButtonProps = {
         name: "Add new input",
         action: () => {
-            let cp = [...detectionArray];
-            cp.push(defaultIOState());
+            let cp = [...detectionArray, defaultOuputPin()];
             setDetectionArray(cp);
         }
     };
@@ -227,7 +251,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
         instructionNumber
     };
 
-    const updateCellAtIndex = (index: number) => (state: IOState) => {
+    const updateCellAtIndex = (index: number) => (state: IOOutputPin) => {
         let cp = [...detectionArray];
         cp[index] = state;
         setDetectionArray(cp);
@@ -246,7 +270,7 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
                     {detectionArray.length === 0 ?
                         (<SplashScreen />)
                         :
-                        detectionArray.map((state: IOState, i: number) => {
+                        detectionArray.map((state: IOOutputPin, i: number) => {
                             const cellProps: DetectionCellProps = {
                                 updateState: updateCellAtIndex(i),
                                 state,

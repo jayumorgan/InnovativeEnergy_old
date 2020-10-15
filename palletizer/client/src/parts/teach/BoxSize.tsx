@@ -16,7 +16,7 @@ import { IOState } from '../machine_config/IO';
 import { get_machine_config } from '../../requests/requests';
 import { SavedMachineConfiguration } from '../MachineConfig';
 import { MachineMotion } from '../machine_config/MachineMotions';
-import Detection, { DetectionProps } from '../machine_config/Detection';
+import Detection, { DetectionProps, IOOutputPin } from '../machine_config/Detection';
 
 
 interface BoxProps {
@@ -162,7 +162,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         setShowBoxDetection(false);
     };
 
-    const setDetection = (ios: IOState[]) => {
+    const setDetection = (ios: IOOutputPin[]) => {
         updateBox({ ...box, boxDetection: ios });
     };
 
@@ -251,7 +251,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
         name: "Box " + String(allBoxes.length + 1),
         dimensions: { length: 500, height: 100, width: 500 },
         pickLocation: { x: 0, y: 0, z: 1500, θ: 0 },
-        boxDetection: [] as IOState[],
+        boxDetection: [] as IOOutputPin[],
         pickFromStack: false
     };
 

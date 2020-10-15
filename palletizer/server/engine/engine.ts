@@ -18,7 +18,8 @@ import {
     IOState,
     SavedPalletConfiguration,
     Drive,
-    Coordinate
+    Coordinate,
+    IOOutputPin
 } from "./config";
 import { DatabaseHandler } from "../database/db";
 import {
@@ -79,7 +80,6 @@ interface Information {
     DateString: string;
 };
 
-
 interface PalletizerState {
     status: PALLETIZER_STATUS,
     cycle: number;
@@ -95,7 +95,7 @@ interface MechanicalLayout {
     machines: MachineMotion[];
     axes: Axes;
     io: IO;
-    good_pick: IOState[];
+    good_pick: IOOutputPin[];
 };
 
 function compareIODeviceStates(io1: IODeviceState, io2: IODeviceState): boolean {
@@ -816,7 +816,7 @@ export class Engine {
                     }, 300);
                 }
             }
-        }).catch((e: any) => {
+        }).catch((_: any) => {
             if (my.cycleState === CycleState.PICK_IO) { // It should be carrying a box.
                 throwError();
             }
@@ -848,7 +848,8 @@ export class Engine {
         }));
     };
 
-    handleDetect(boxDetection: IOState[], retry_index: number = 0): Promise<boolean> {
+
+    handleDetect(boxDetection: IOOutputPin[], retry_index: number = 0): Promise<boolean> {
         const my = this;
         return new Promise<boolean>((resolve, reject) => {
             my.__detectBox(boxDetection).then((detected: boolean) => {
@@ -910,16 +911,16 @@ export class Engine {
             return Promise.resolve(true);
         } else {
             return new Promise<boolean>((resolve, reject) => {
-                Promise.all(good_pick.map((state: IOState) => {
-                    const { MachineMotionIndex, NetworkId } = state;
-                    return my.mechanicalLayout.machines[MachineMotionIndex].digitalReadAll(NetworkId);
+                Promise.all(good_pick.map((state: IOOutputPin) => {
+                    const { MachineMotionIndex, NetworkId, PinId } = state;
+                    return my.mechanicalLayout.machines[MachineMotionIndex].digitalRead(NetworkId, PinId);
                 })).then((res: vResponse[]) => {
                     let detect: boolean = false;
                     for (let i = 0; i < res.length; i++) {
                         const vRes: vResponse = res[i];
                         if (vRes.success) {
-                            const read_vals: IODeviceState = vRes.result as IODeviceState;
-                            detect = compareIODeviceStates(read_vals, good_pick[i].Pins);
+                            const read_val: boolean = vRes.result as boolean;
+                            detect = read_val === good_pick[i].PinVal;
                         } else {
                             detect = false;
                         }
@@ -935,7 +936,7 @@ export class Engine {
         }
     };
 
-    __detectBox(boxDetection: IOState[]): Promise<boolean> {
+    __detectBox(boxDetection: IOOutputPin[]): Promise<boolean> {
         const my = this;
         my.cycleState = CycleState.DETECT_IO;
         console.log(boxDetection, "Box Detect IO State");
@@ -945,16 +946,16 @@ export class Engine {
         }
 
         return new Promise<boolean>((resolve, reject) => {
-            Promise.all(boxDetection.map((state: IOState) => {
-                const { MachineMotionIndex, NetworkId } = state;
-                return my.mechanicalLayout.machines[MachineMotionIndex].digitalReadAll(NetworkId);
+            Promise.all(boxDetection.map((state: IOOutputPin) => {
+                const { MachineMotionIndex, NetworkId, PinId } = state;
+                return my.mechanicalLayout.machines[MachineMotionIndex].digitalRead(NetworkId, PinId);
             })).then((res: vResponse[]) => {
                 let detect: boolean = false;
                 for (let i = 0; i < res.length; i++) {
                     const vRes: vResponse = res[i];
                     if (vRes.success) {
-                        const read_vals: IODeviceState = vRes.result as IODeviceState;
-                        detect = compareIODeviceStates(read_vals, boxDetection[i].Pins);
+                        const read_val: boolean = vRes.result as boolean;
+                        detect = read_val === boxDetection[i].PinVal;
                     } else {
                         detect = false;
                     }

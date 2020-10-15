@@ -9,7 +9,7 @@ import MachineMotions, { MachineMotion } from "./machine_config/MachineMotions";
 import Drives, { AxesConfiguration, defaultAxesConfiguration } from "./machine_config/Drives";
 import IOConfig, { IOState, IO, defaultIO } from "./machine_config/IO";
 import MachineSummary, { MachineSummaryProps } from "./machine_config/Summary";
-import Detection, { DetectionProps } from "./machine_config/Detection";
+import Detection, { DetectionProps, IOOutputPin } from "./machine_config/Detection";
 
 
 //---------------Style---------------
@@ -31,7 +31,7 @@ export interface MachineConfiguration {
     axes: AxesConfiguration;
     io: IO;
     //    box_detection: IOState[];
-    good_pick: IOState[];
+    good_pick: IOOutputPin[];
 };
 
 export interface SavedMachineConfiguration {
@@ -47,7 +47,7 @@ function defaultConfiguration(index: number): MachineConfiguration {
         axes: defaultAxesConfiguration(),
         io: defaultIO(),
         box_detection: [] as IOState[],
-        good_pick: [] as IOState[],
+        good_pick: [] as IOOutputPin[],
         complete: false
     } as MachineConfiguration;
 };
@@ -86,7 +86,7 @@ function MachineReducer(state: MachineConfiguration, action: ReducerAction) {
             return { ...state, io: action.payload as IO };
         }
         case (MACHINE_ACTION.GOOD_PICK): {
-            return { ...state, good_pick: action.payload as IOState[] };
+            return { ...state, good_pick: action.payload as IOOutputPin[] };
         }
         default: {
             return state;
@@ -143,7 +143,7 @@ function MachineConfigurator({ close, index, machineConfig, id }: MachineConfigu
         });
     };
 
-    const setGoodPick = (gp: IOState[]) => {
+    const setGoodPick = (gp: IOOutputPin[]) => {
         dispatch({
             type: MACHINE_ACTION.GOOD_PICK,
             payload: gp as any
