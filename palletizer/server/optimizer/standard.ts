@@ -116,9 +116,8 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     const lateralScale: number = 80; // 16 cm
     const lateralZshift: number = 50;
 
-    // Picking.
     // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.DETECT_BOX, SpeedTypes.FAST, true, box.boxDetection));
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
     let preRotated: Coordinate = { ...box.pickLocation };
     preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
@@ -132,8 +131,6 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     // Implies an ordering that preserves clearance in +x and +y.
     const drop = box.dropLocation;
     //  drop.z -= 100;
-
-
 
     let lateralApproach: Coordinate = { ...box.dropLocation };
     lateralApproach.x += lateralDirection.x * lateralScale;
@@ -203,7 +200,7 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
     const sortPalletGroup = (a: BoxCoordinate, b: BoxCoordinate) => {
         const pallet_a: PalletGeometryCenter = pallets[a.palletIndex];
         const pallet_b: PalletGeometryCenter = pallets[b.palletIndex];
-        return PlaneDistance(b.dropLocation, pallet_b.center) - PlaneDistance(a.dropLocation, pallet_a.center);
+        return PlaneDistance(a.dropLocation, pallet_a.center) - PlaneDistance(b.dropLocation, pallet_b.center);
     };
 
 

@@ -164,6 +164,24 @@ PALLETIZER -*- mode: org -*-
 *** DONE Sort out the estop controversy.
 *** DONE Monitoring along path.
 *** TODO Picking from stack.
+*** TODO Manually modifying coordinates.
+*** TODO IO by pin (not by module).
+*** TODO Estop starting location (and action.)
+*** TODO Make sure layouts are deleted on pallet size change.
+*** TODO Toggle suction from jogger / home screen.
+*** TODO Make sure that palletizer angle works.
+*** TODO Palletizer visualizer is in outer space for some reason -- not sure why.
+*** TODO Visualizer needs to be able to handle real coordinates in order. (Send up drop locations in status update?).
+
+** TODO Other Things:
+*** TODO Better Machine Motion State Management
+*** TODO Better API's for the machine motion.
+*** TODO Better development and testing environment.
+
+** TODO Deployment:
+*** TODO Distribution of software.
+*** TODO Ability to quickly update software.
+
 
 Breaking up these items:
 
