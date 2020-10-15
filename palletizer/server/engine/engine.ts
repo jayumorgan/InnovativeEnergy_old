@@ -30,6 +30,8 @@ import {
     generateStandardPath
 } from "../optimizer/standard";
 
+// This file could use some cleanup.
+
 //---------------Environment Setup---------------
 dotenv.config();
 
@@ -796,7 +798,7 @@ export class Engine {
     async __monitorGoodPick() {
         const my = this;
 
-        if (my.cycleState !== CycleState.PICK_IO) {
+        if (my.cycleState !== CycleState.PICK_IO || my.palletizerState.status !== PALLETIZER_STATUS.RUNNING) {
             return;
         }
 

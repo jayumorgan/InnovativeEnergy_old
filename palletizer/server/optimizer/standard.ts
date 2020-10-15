@@ -8,7 +8,8 @@ import {
     PlaneCoordinate,
     IOState,
     PalletGeometry,
-    CartesianCoordinate
+    CartesianCoordinate,
+    IOOutputPin
 } from "../engine/config";
 
 
@@ -29,7 +30,7 @@ export interface ActionCoordinate extends Coordinate {
     action?: ActionTypes;
     speed?: SpeedTypes;
     waitForCompletion: boolean;
-    boxDetection: IOState[];
+    boxDetection: IOOutputPin[];
 };
 
 export type BoxPath = ActionCoordinate[];
@@ -38,7 +39,7 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
     return { ...coord, z: z_top };
 };
 
-export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true, boxDetection: IOState[] = []): ActionCoordinate {
+export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true, boxDetection: IOOutputPin[] = []): ActionCoordinate {
     // Force Wait, Force Slow For Right Now.
     return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion: true, boxDetection };
 };
@@ -79,12 +80,7 @@ function getPalletCenter(p: PalletGeometry): CartesianCoordinate {
 //-------Not Lateral Approach-------
 function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let path: BoxPath = [];
-
-    // Picking.
-    // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
-    // detect box before dropping and picking..
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.DETECT_BOX, SpeedTypes.FAST, true, box.boxDetection));
-
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
     let preRotated: Coordinate = { ...box.pickLocation };
     preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
@@ -92,21 +88,11 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     preRotated = raiseOverCoordinate(box.pickLocation, z_top);
     preRotated.θ = box.dropLocation.θ;
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-
-    // Dropping.
-    // The lateral approach allows to pack boxes tighter.
-    // Implies an ordering that preserves clearance in +x and +y.
     let lateralApproach: Coordinate = { ...box.dropLocation };
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
-
-    // Make Drop Location Slightly Higher.
-
     const drop = box.dropLocation;
-    //  drop.z -= 100;
-
     path.push(addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
-
     return path;
 };
 
@@ -115,8 +101,6 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     let path: BoxPath = [];
     const lateralScale: number = 80; // 16 cm
     const lateralZshift: number = 50;
-
-    // Note: we rotate immediately on the way up, because otherwise if we rotate towards the drop location, sometimes we hit neighbouring boxes due to the rotation.
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.DETECT_BOX, SpeedTypes.FAST, true, box.boxDetection));
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
     let preRotated: Coordinate = { ...box.pickLocation };
@@ -125,30 +109,17 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     preRotated = raiseOverCoordinate(box.pickLocation, z_top);
     preRotated.θ = box.dropLocation.θ;
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-
-    // Dropping.
-    // The lateral approach allows to pack boxes tighter.
-    // Implies an ordering that preserves clearance in +x and +y.
     const drop = box.dropLocation;
-    //  drop.z -= 100;
-
     let lateralApproach: Coordinate = { ...box.dropLocation };
     lateralApproach.x += lateralDirection.x * lateralScale;
     lateralApproach.y += lateralDirection.y * lateralScale;
     lateralApproach.z -= lateralZshift;
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-
-    // Smoothed out the path.
-    // lateralApproach.x -= lateralDirection.x * lateralScale;
-    // lateralApproach.y -= lateralDirection.y * lateralScale;
-    // path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW, false));
-
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     return path;
 };
-
 
 function calculateTotalHeight(boxes: BoxCoordinate[]): number {
     let height: number = 0, iStack: number = 0;
@@ -166,16 +137,132 @@ function calculateHighestPickLocationZ(boxes: BoxCoordinate[]): number {
         if (box.pickLocation.z < highestZ) { highestZ = box.pickLocation.z; }
     });
     return highestZ;
-}
-
+};
 
 interface PalletGeometryCenter extends PalletGeometry {
     center: Coordinate;
-}
+};
 
-// Build outwards from center?
+
+function getFurthestPalletCorners(pick_location: Coordinate, pallet: PalletGeometryCenter): [CartesianCoordinate, CartesianCoordinate] {
+    const { corner1, corner2, corner3 } = pallet;
+    const v1 = subtractCartesianCoordinate(corner1, corner2);
+    const corner4 = addCartesianCoordinate(corner3, v1);
+
+    const corners = [corner1, corner2, corner3, corner4];
+
+    corners.sort((a: CartesianCoordinate, b: CartesianCoordinate) => {
+        return getDistance(b, pick_location) - getDistance(a, pick_location);
+    })
+
+    return [corners[0], corners[1]];
+};
+
+
+interface BoxCoordinateLateral extends BoxCoordinate {
+    lateral: PlaneCoordinate;
+};
+
+function sortLayerIntoGrid(pallet_group: BoxCoordinate[], pallets: PalletGeometryCenter[]): BoxCoordinateLateral[] {
+    // generate a grid using min direction.
+
+    if (pallet_group.length === 0) {
+        return [];
+    }
+
+    const pallet = pallets[pallet_group[0].palletIndex];
+    // Get the two furthest corners.
+    const [a, b] = getFurthestPalletCorners(pallet_group[0].pickLocation, pallet);
+    let direction = subtractCartesianCoordinate(b, a);
+    direction.z = 0;
+    direction = multiplyScalar(direction, 1 / getNorm(direction));
+
+    let grid_width: number = Infinity;
+
+    const lineDistance = (bc: BoxCoordinate): number => {
+        const { x, y } = bc.dropLocation;
+        const denom = Math.sqrt((b.y - a.y) ** 2 + (b.x - a.x) ** 2);
+        const num = Math.abs((b.y - a.y) * x - (b.x - a.x) * y + b.x * a.y - b.y * a.x);
+        if (denom === 0) {
+            return 0;
+        }
+        return num / denom;
+    };
+
+    pallet_group.forEach((b: BoxCoordinate) => {
+        const { width, length } = b.dimensions;
+        if (width < grid_width) {
+            grid_width = width;
+        }
+        if (length < grid_width) {
+            grid_width = length;
+        }
+    });
+
+    let ladder_rung = 1;
+    let grid_groups: BoxCoordinateLateral[][] = [];
+    let current_group: BoxCoordinateLateral[] = [];
+
+    const scalarProjection2D = (x: BoxCoordinate): number => {
+        return x.dropLocation.x * direction.x + x.dropLocation.y * direction.y;
+    };
+
+    const sortAlongLine = (x: BoxCoordinateLateral, y: BoxCoordinateLateral): number => {
+        return scalarProjection2D(x) - scalarProjection2D(y);
+    };
+
+    const getLateralVector = (x: BoxCoordinate): PlaneCoordinate => {
+        const lat = {
+            x: x.dropLocation.x - a.x,
+            y: x.dropLocation.y - a.y
+        };
+
+        const norm = Math.sqrt(lat.x ** 2 + lat.y ** 2);
+        lat.x /= norm;
+        lat.y /= norm;
+        return lat;
+    };
+
+
+    pallet_group.sort((x: BoxCoordinate, y: BoxCoordinate) => {
+        return lineDistance(x) - lineDistance(y);
+    });
+
+    let i = 0;
+    while (i < pallet_group.length) {
+        const b = pallet_group[i];
+        const distance = lineDistance(b);
+        if (distance < grid_width * ladder_rung) {
+            current_group.push({ ...b, lateral: getLateralVector(b) });
+            i++;
+        } else {
+            if (current_group.length > 0) {
+                current_group.sort(sortAlongLine);
+                grid_groups.push(current_group);
+                current_group = [];
+            }
+            ladder_rung++;
+        }
+        // Push the last element
+        if (i === pallet_group.length) {
+            current_group.sort(sortAlongLine);
+            grid_groups.push(current_group);
+        }
+    }
+
+    let final_array: BoxCoordinateLateral[] = [];
+    // Flatten
+    grid_groups.forEach((group: BoxCoordinateLateral[]) => {
+        group.forEach((bcl: BoxCoordinateLateral) => {
+            final_array.push(bcl);
+        });
+    });
+
+    return final_array;
+};
 
 //---------------Standard Path---------------
+// Builds from the center -> out.
 export function generateStandardPath(pallet_config: SavedPalletConfiguration): BoxPath[] {
     const { boxCoordinates } = pallet_config;
     const pallets: PalletGeometryCenter[] = pallet_config.config.pallets.map((p: PalletGeometry) => {
@@ -202,6 +289,7 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
         const pallet_b: PalletGeometryCenter = pallets[b.palletIndex];
         return PlaneDistance(a.dropLocation, pallet_a.center) - PlaneDistance(b.dropLocation, pallet_b.center);
     };
+
 
 
     boxCoordinates.sort((a: BoxCoordinate, b: BoxCoordinate) => {
@@ -242,79 +330,70 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
         }
     });
 
-    //---------------Console.log---------------
-    // stackGroups.forEach((group: BoxCoordinate[][], i: number) => {
-    //     group.forEach((pallet_group: BoxCoordinate[], j: number) => {
-    //         console.log(`Stack ${i} pallet ${j}`, pallet_group);
-    //     });
-    // });
-    // Sort around the center and move in that direction.
 
     stackGroups.forEach((stack_group: BoxCoordinate[][]) => {
         stack_group.forEach((pallet_group: BoxCoordinate[]) => {
             if (pallet_group.length === 0) {
                 return;
             }
-            const first_box: BoxCoordinate = pallet_group.shift()!;
-            const pallet: PalletGeometryCenter = pallets[first_box.palletIndex];
+            const grid_group: BoxCoordinateLateral[] = sortLayerIntoGrid(pallet_group, pallets);
+            const first = grid_group[0];
+            grid_group.forEach((bcl: BoxCoordinateLateral, i: number) => {
+                console.log(bcl.dropLocation, "drop: ", i);
 
-            const getZTop = (box: BoxCoordinate) => {
-                return Math.max(0, Math.min(
-                    highest_pick_location_z - box.dimensions.height, // never travel lower than the pick location.
-                    pallet.corner1.z - current_height - 1.5 * box.dimensions.height) // travel as low as the current height minus 1.5 box.
-                    - 50 /* 5cm extra safety */);
-            };
+                const pallet = pallets[bcl.palletIndex];
+                const getZTop = (box: BoxCoordinate) => {
+                    return Math.max(0, Math.min(
+                        highest_pick_location_z - box.dimensions.height, // never travel lower than the pick location.
+                        pallet.corner1.z - current_height - 1.5 * box.dimensions.height) // travel as low as the current height minus 1.5 box.
+                        - 50 /* 5cm extra safety */);
+                };
+                if (i === 0) {
+                    paths.push(generatePathForBox(bcl, getZTop(bcl)));
+                    return;
+                }
+                paths.push(generateLateralPathForBox(bcl, getZTop(bcl), bcl.lateral));
 
-            paths.push(generatePathForBox(first_box, getZTop(first_box)));
-
-            pallet_group.forEach((b: BoxCoordinate) => {
-                let direction: CartesianCoordinate = subtractCartesianCoordinate(b.dropLocation, pallet.center);
-                direction.z = 0;
-                direction = multiplyScalar(direction, 1 / getNorm(direction));
-                paths.push(generateLateralPathForBox(b, getZTop(b), direction));
             });
-            current_height += first_box.dimensions.height;
+            current_height += first.dimensions.height;
         });
     });
 
-    // 
-    // 
-    //     stackGroups.forEach((stack_group: BoxCoordinate[][]) => {
-    //         stack_group.forEach((pallet_group: BoxCoordinate[]) => {
-    //             // We continue.
-    //             if (pallet_group.length > 0) {
-    //                 const bc0 = pallet_group.shift()!;
-    //                 const { palletIndex } = bc0; // Also the furthest away.
-    // 
-    //                 const getZTop = (box: BoxCoordinate) => {
-    //                     return Math.max(0, Math.min(
-    //                         highest_pick_location_z - box.dimensions.height, // never travel lower than the pick location.
-    //                         pallets[palletIndex].corner1.z - current_height - 1.5 * box.dimensions.height) // travel as low as the current height minus 1.5 box.
-    //                         - 50 /* 5cm extra safety */);
-    //                 };
-    // 
-    //                 // First box doesn't need lateral approach
-    //                 paths.push(generatePathForBox(bc0, getZTop(bc0)));
-    // 
-    //                 pallet_group.sort((a: BoxCoordinate, b: BoxCoordinate) => {
-    //                     return PlaneDistance(a.dropLocation, bc0.dropLocation) - PlaneDistance(b.dropLocation, bc0.dropLocation);
-    //                 }).forEach((b: BoxCoordinate) => {
-    // 
-    //                     let direction: PlaneCoordinate = {
-    //                         x: b.dropLocation.x - bc0.dropLocation.x,
-    //                         y: b.dropLocation.y - bc0.dropLocation.y
-    //                     };
-    //                     const norm: number = Math.sqrt(direction.x ** 2 + direction.y ** 2);
-    //                     direction.x *= 1 / norm;
-    //                     direction.y *= 1 / norm;
-    //                     // Lateral approach
-    //                     paths.push(generateLateralPathForBox(b, getZTop(b), direction));
-    //                 });
-    // 
-    //                 current_height += bc0.dimensions.height;
-    //             }
-    //         });
+    //---------------Console.log---------------
+    // stackGroups.forEach((group: BoxCoordinate[][], i: number) => {
+    //     group.forEach((pallet_group: BoxCoordinate[], j: number) => {
+    //         console.log(`Stack ${i} pallet ${j}`, pallet_group);
     //     });
+    // });
+
+    // Center out computation.
+    // stackGroups.forEach((stack_group: BoxCoordinate[][]) => {
+    //     stack_group.forEach((pallet_group: BoxCoordinate[]) => {
+    //         if (pallet_group.length === 0) {
+    //             return;
+    //         }
+    //         const first_box: BoxCoordinate = pallet_group.shift()!;
+    //         const pallet: PalletGeometryCenter = pallets[first_box.palletIndex];
+
+
+    //         const getZTop = (box: BoxCoordinate) => {
+    //             return Math.max(0, Math.min(
+    //                 highest_pick_location_z - box.dimensions.height, // never travel lower than the pick location.
+    //                 pallet.corner1.z - current_height - 1.5 * box.dimensions.height) // travel as low as the current height minus 1.5 box.
+    //                 - 50 /* 5cm extra safety */);
+    //         };
+
+    //         paths.push(generatePathForBox(first_box, getZTop(first_box)));
+
+    //         pallet_group.forEach((b: BoxCoordinate) => {
+    //             let direction: CartesianCoordinate = subtractCartesianCoordinate(b.dropLocation, pallet.center);
+    //             direction.z = 0;
+    //             direction = multiplyScalar(direction, 1 / getNorm(direction));
+    //             paths.push(generateLateralPathForBox(b, getZTop(b), direction));
+    //         });
+    //         current_height += first_box.dimensions.height;
+    //     });
+    // });
 
     savePath(paths);
     return paths;
