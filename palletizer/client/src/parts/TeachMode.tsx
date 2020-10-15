@@ -170,7 +170,9 @@ function configurationReducer(state: PalletConfiguration, action: ConfigAction) 
     };
 };
 
-export function GenerateFinalConfig(config: PalletConfiguration) {
+export function GenerateFinalConfig(startingConfig: PalletConfiguration) {
+    const config = { ...startingConfig };
+
     const { pallets } = config;
     let boxCoordinates: BoxCoordinates[] = [];
 
@@ -188,12 +190,8 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
 
             const { boxPositions, height } = Layouts[n];
 
-            // Change this to minus if Z-home is at the top of the machine.
-            //  currentHeightIncrement -= height;
-
             boxPositions.forEach((b: BoxPositionObject) => {
                 const { position, rotated } = b;
-                // Really, The box object should be referenced, not copied.
                 const box = config.boxes[b.index];
                 const { pickLocation } = box; // Get pick location from actual boxes.
                 const { x, y } = position; // These are fractions from the left of the pallet.
@@ -244,8 +242,13 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
                     linearPathDistance,
                     boxDetection: box.boxDetection
                 } as BoxCoordinates);
+
+
+                if (box.pickFromStack) { // If picking from stack, subtract a box height.
+                    config.boxes[b.index].pickLocation.z += box.dimensions.height;
+                }
             });
-            // Drop the height by the size of the previous layer.
+
             if (stackIndex > 0) { // don't add if first row.
                 currentHeightIncrement -= height;
             }
@@ -253,13 +256,11 @@ export function GenerateFinalConfig(config: PalletConfiguration) {
     });
     console.log("Final Box Coordinates ", boxCoordinates);
 
-    let configuration = {
-        config,
+    return {
+        config: startingConfig,
         boxCoordinates,
         complete: true
     } as SavedPalletConfiguration;
-
-    return configuration;
 };
 
 

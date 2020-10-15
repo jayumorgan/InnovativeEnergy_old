@@ -7,10 +7,8 @@
     @include flex-center();
 
     .BoxScrollContainer {
-        //padding: $margin * 2;
         height: 100%;
         width: 100%;
-        //  margin: $margin * 2;
 
         .BoxScroll {
             margin: 1%;
@@ -56,11 +54,6 @@
                     background-color: $green;
                 }
             }
-
-
-            //---------------Box Cell---------------
-
-
 
             .BoxCellContainer {
                 padding-top: 1%;
@@ -246,15 +239,18 @@
                 justify-content: flex-end;
 
                 .PickFromStackToggle {
+                    width: 30%;
                     @include flex-center;
                     flex-direction: row;
 
                     input {
                         height: 20pt;
                         width: 20pt;
+                        cursor: pointer;
                     }
 
                     span {
+                        padding-left: $margin / 2;
                         font-size: $medium-font;
                     }
                 }

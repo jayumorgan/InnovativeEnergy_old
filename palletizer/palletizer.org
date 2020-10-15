@@ -143,10 +143,10 @@ PALLETIZER -*- mode: org -*-
 *** TODO Replace images/renders from britt to update
 *** DONE Test the input sensor
 *** DONE Input sensor should be configurable for each box (input menu should just have an association for the box created)
-*** TODO Wire the master and slave controller
+*** DONE Wire the master and slave controller
 *** DONE Figure what's wrong with the drop distances
 *** DONE Automated ordering of boxes based on pick location (there's an issue for some box placements)
-*** TODO Ability to palletize separators using a z height difference. Instead of using an infeed conveyors, it would palletize stacks. So in the "configure box" section, there should be a drop down options that include "Palletize from in-feed" or "Palletize from stack". "Palletize from stack" option is removing the height difference of the box for each time it picks that box.
+*** DONE Ability to palletize separators using a z height difference. Instead of using an infeed conveyors, it would palletize stacks. So in the "configure box" section, there should be a drop down options that include "Palletize from in-feed" or "Palletize from stack". "Palletize from stack" option is removing the height difference of the box for each time it picks that box.
 *** DONE Make sure the e-stop will not stop the gripper from functioning
 *** DONE Gripper pressure signal - implement check whether box is still on the gripper or no (wiring, logic)
 *** TODO IF there is time, update layer image with your visualiser
@@ -163,7 +163,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Stop suction from the main page.
 *** DONE Sort out the estop controversy.
 *** DONE Monitoring along path.
-*** TODO Picking from stack.
+*** DONE Picking from stack.
 *** TODO Manually modifying coordinates.
 *** TODO IO by pin (not by module).
 *** TODO Estop starting location (and action.)

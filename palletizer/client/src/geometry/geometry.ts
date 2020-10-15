@@ -71,6 +71,7 @@ export interface BoxObject {
     dimensions: BoxDimensions;
     pickLocation: CoordinateRot;
     boxDetection: IOState[];
+    pickFromStack: boolean;
     changed?: boolean;
     deleted?: boolean;
 };

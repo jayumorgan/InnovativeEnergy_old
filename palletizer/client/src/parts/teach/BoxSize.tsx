@@ -8,7 +8,7 @@ import {
     CoordinateRot,
     compareDimensions
 } from "../../geometry/geometry";
-import { ControlProps } from "../shared/shared";
+import { ControlProps, wrapChangeEventNumber } from "../shared/shared";
 
 //---------------Styles---------------
 import "./css/BoxSize.scss";
@@ -119,9 +119,9 @@ interface CreateNewBoxProps {
     instructionNumber: number;
 };
 
+
 function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, RightButton, updateBox }: CreateNewBoxProps) {
     // All machines.
-
     const [showBoxDetection, setShowBoxDetection] = useState<boolean>(false);
     const [allMachines, setAllMachines] = useState<MachineMotion[]>([]);
 
@@ -134,14 +134,13 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         });
     }, [machineConfigId]);
 
-
     const updateName = (name: string) => {
         updateBox({ ...box, name });
     };
 
     const updateCoordinate = (dim: string) => (val: number) => {
-        let { dimensions } = box;
-        let dims = {
+        const { dimensions } = box;
+        const dims = {
             width: dimensions.width,
             length: dimensions.length,
             height: dimensions.height
@@ -167,13 +166,19 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         updateBox({ ...box, boxDetection: ios });
     };
 
+    const handlePickFromBox = wrapChangeEventNumber((val: number) => {
+        updateBox({ ...box, pickFromStack: (val > 0) });
+    });
+
     let instruction = "Move and select box pick location";
 
     const joggerProps: JoggerProps = {
         machineConfigId,
         selectAction,
         name: box.name,
-        updateName
+        updateName,
+        allowManualEntry: true, // Allow manual input.
+        savedCoordinate: box.pickLocation // start at pick locaiton.
     };
 
     if (showBoxDetection) {
@@ -187,6 +192,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
                 stopShowingBoxDetection();
             }
         };
+
         const props: DetectionProps = {
             ...controlProps,
             setDetection,
@@ -206,7 +212,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
                         <div className="BoxConfigurator">
                             <div className="CreateNewBoxParameterContainer">
                                 <div className="PickFromStackToggle">
-                                    <input type="checkbox" value={0} />
+                                    <input type="checkbox" value={box.pickFromStack ? 1 : 0} onChange={handlePickFromBox} />
                                     <span>
                                         {"Pick From Stack"}
                                     </span>
@@ -241,11 +247,12 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
 
     const [summaryScreen, setSummaryScreen] = useState<boolean>(allBoxes.length > 0);
 
-    let box: BoxObject = {
+    const box: BoxObject = {
         name: "Box " + String(allBoxes.length + 1),
         dimensions: { length: 500, height: 100, width: 500 },
         pickLocation: { x: 0, y: 0, z: 1500, θ: 0 },
-        boxDetection: [] as IOState[]
+        boxDetection: [] as IOState[],
+        pickFromStack: false
     };
 
     const [editingBox, setEditingBox] = useState<BoxObject>(box);
@@ -353,7 +360,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
         );
     } else {
 
-        let createBoxProps: CreateNewBoxProps = {
+        const createBoxProps: CreateNewBoxProps = {
             box: editingBox,
             LeftButton,
             RightButton,

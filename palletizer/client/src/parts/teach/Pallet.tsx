@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import ContentItem, { ButtonProps } from "./ContentItem";
-import { getPalletDimensions, Coordinate, PalletGeometry } from "../../geometry/geometry";
-import Jogger from "./Jogger";
+import { getPalletDimensions, Coordinate, PalletGeometry, CoordinateRot } from "../../geometry/geometry";
+import Jogger, { JoggerProps } from "./Jogger";
 import {
     LayoutModel,
     PALLETCORNERS,
@@ -299,11 +299,37 @@ function PalletCorners({ instructionNumber, allPallets, handleNext, handleBack, 
 
         instruction = "Move to corner " + String(CornerNumber(cornerNumber) + 1) + " and click select. ";
 
+        const savedCoordinate: CoordinateRot = (() => {
+            switch (cornerNumber) {
+                case PALLETCORNERS.TOP_LEFT: {
+                    return editingPallet.corner1 as CoordinateRot;
+                }
+                case PALLETCORNERS.BOTTOM_LEFT: {
+                    return editingPallet.corner2 as CoordinateRot;
+                }
+                case PALLETCORNERS.BOTTOM_RIGHT: {
+                    return editingPallet.corner3 as CoordinateRot;
+                }
+                default: {
+                    return { x: 0, y: 0, z: 0, θ: 0 } as CoordinateRot;
+                }
+            }
+        })();
+
+        const joggerProps: JoggerProps = {
+            machineConfigId,
+            selectAction: addCorner,
+            name: editingPallet.name,
+            updateName: setPalletName,
+            allowManualEntry: true,
+            savedCoordinate
+        };
+
         return (
             <ContentItem instructionNumber={instructionNumber} instruction={instruction} LeftButton={LeftButton} RightButton={RightButton} >
                 <div className="CornerGrid">
                     <div className="PickLocationGrid">
-                        <Jogger machineConfigId={machineConfigId} selectAction={addCorner} name={editingPallet.name} updateName={setPalletName} />
+                        <Jogger {...joggerProps} />
                         <div className="PalletContainer">
                             <div className="PalletMount">
                                 <PalletModel size={size} pallet={defaultPallet(-2)} corner={cornerNumber} />

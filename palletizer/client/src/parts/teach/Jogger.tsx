@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, useEffect, ReactElement } from 'react';
 import JogController, { PalletizerAxes } from "../../jogger/Jogger";
 // import SolidArrow, { ROTATION } from "./SolidArrow";
 import { get_machine_config } from "../../requests/requests";
@@ -6,6 +6,8 @@ import { CoordinateRot } from "../../geometry/geometry";
 import { SavedMachineConfiguration } from '../MachineConfig';
 import { DIRECTION } from 'mm-js-api';
 import PerspectiveJogger, { PerspectiveJoggerProps, PlaneArrowDirections } from "../PerspectiveJogger";
+import { wrapChangeEventNumber } from "../shared/shared";
+
 
 //---------------Styles + Images---------------
 import "./css/Jogger.scss";
@@ -99,6 +101,8 @@ export function ForceHome({ skip, jogController, hideDone }: ForceHomeProps) {
     );
 };
 
+
+
 export interface JoggerProps {
     selectAction: (c: CoordinateRot) => void;
     updateName: (s: string) => void;
@@ -107,14 +111,25 @@ export interface JoggerProps {
     hideName?: boolean;
     savedMachineConfig?: SavedMachineConfiguration;
     Controller?: JogController;
+    savedCoordinate?: CoordinateRot;
+    allowManualEntry?: boolean;
 };
 
 
-export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig, Controller }: JoggerProps) {
+export default function Jogger({ selectAction, updateName, name, machineConfigId, hideName, savedMachineConfig, Controller, allowManualEntry, savedCoordinate }: JoggerProps) {
     const [speed, setSpeed] = useState<number>(50);
     const [distance, setDistance] = useState<number>(50);
     const [currentPosition, setCurrentPosition] = useState<CoordinateRot>({ x: 0, y: 0, z: 0, θ: 0 });
     const [jogController, setJogController] = useState<JogController | null>(Controller ? Controller : null);
+    const [showManualEntry, setShowManualEntry] = useState<boolean>(false);
+    const [manualEntryCoordinate, setManualEntryCoordinate] = useState<CoordinateRot>(savedCoordinate ? savedCoordinate : { x: 0, y: 0, z: 0, θ: 0 });
+
+
+    useEffect(() => {
+        if (savedCoordinate) {
+            setManualEntryCoordinate(savedCoordinate);
+        }
+    }, [savedCoordinate]);
 
     const createJogger = (s: SavedMachineConfiguration) => {
         const { axes, machines } = s.config;
@@ -242,9 +257,14 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
-
     const handleSelect = async () => {
         if (!hideName) {
+
+            if (showManualEntry) {
+                selectAction(manualEntryCoordinate);
+                return;
+            }
+
             if (!TESTING) {
                 selectAction(currentPosition);
                 return;
@@ -287,47 +307,50 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         handleRotateMove: jogAngle
     };
 
+    const joggerHeaderProps: JoggerHeaderProps = {
+        name,
+        handleName,
+        hideName,
+    };
+
+    if (allowManualEntry) {
+        joggerHeaderProps.toggleManualInput = () => {
+            setShowManualEntry(!showManualEntry);
+        };
+    }
+
     return (
         <div className="Jogger">
-            <div className="Name">
-                {!(hideName) &&
-                    <>
-                        <div className="NamePrompt">
-                            <span>
-                                {"Name:"}
-                            </span>
-                        </div>
-                        <div className="NameInput">
-                            <input type="text" value={name} onChange={handleName} />
-                        </div>
-                    </>
-                }
-            </div>
-            <div className="Controls">
-                <div className="Position">
-                    <div className="PositionBox">
-                        <div className="PositionValue">
-                            <span> {"x : " + String(Math.round(x))} </span>
-                        </div>
-                        <div className="PositionValue">
-                            <span> {"y : " + String(Math.round(y))} </span>
-                        </div>
-                        <div className="PositionValue">
-                            <span> {"z : " + String(Math.round(z))} </span>
-                        </div>
-                        <div className="PositionValue">
-                            <span> {"θ : " + (θ ? "90°" : "0°")} </span>
+            <JoggerHeader {...joggerHeaderProps} />
+            {showManualEntry ?
+                <ManualEntry coordinate={manualEntryCoordinate} updateCoordinate={setManualEntryCoordinate} /> :
+                <div className="Controls">
+                    <div className="Position">
+                        <div className="PositionBox">
+                            <div className="PositionValue">
+                                <span> {"x : " + String(Math.round(x))} </span>
+                            </div>
+                            <div className="PositionValue">
+                                <span> {"y : " + String(Math.round(y))} </span>
+                            </div>
+                            <div className="PositionValue">
+                                <span> {"z : " + String(Math.round(z))} </span>
+                            </div>
+                            <div className="PositionValue">
+                                <span> {"θ : " + (θ ? "90°" : "0°")} </span>
+                            </div>
                         </div>
                     </div>
+                    <div className="Perspective">
+                        {(jogController !== null) &&
+                            <PerspectiveJogger {...perspectiveJoggerProps} />
+                        }
+                    </div>
                 </div>
-                <div className="Perspective">
-                    {(jogController !== null) &&
-                        <PerspectiveJogger {...perspectiveJoggerProps} />
-                    }
-                </div>
-            </div>
+            }
             <div className="Parameters">
-                <JoggerParameter {...distanceParams} />
+                {showManualEntry ? <div> </div> :
+                    <JoggerParameter {...distanceParams} />}
                 <div className="Select">
                     {(!hideName) &&
                         <div className="SelectButton" onClick={handleSelect}>
@@ -337,9 +360,126 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                         </div>
                     }
                 </div>
-                <JoggerParameter {...speedParams} />
+                {showManualEntry ? <div> </div> :
+                    <JoggerParameter {...speedParams} />}
             </div>
         </div>
     );
 };
+
+interface JoggerHeaderProps {
+    name: string;
+    handleName: (e: ChangeEvent) => void;
+    hideName?: boolean;
+    toggleManualInput?: () => void;
+};
+
+function JoggerHeader({ hideName, toggleManualInput, name, handleName }: JoggerHeaderProps) {
+
+    const namePrompt = (
+        <>
+            <div className="NamePrompt">
+                <span>
+                    {"Name:"}
+                </span>
+            </div>
+            <div className="NameInput">
+                <input type="text" value={name} onChange={handleName} />
+            </div>
+        </>
+    );
+
+    if (toggleManualInput) {
+        return (
+            <div className="JoggerHeader">
+                <div className="Name">
+                    {namePrompt}
+                </div>
+                <div className="ToggleButton">
+                    <div className="Button" onClick={toggleManualInput}>
+                        <span>
+                            {"Manual Mode"}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+    } else {
+        return (
+            <div className="Name">
+                {!(hideName) &&
+                    namePrompt
+                }
+            </div>
+        );
+    }
+};
+
+
+//-------Manual Entry-------
+
+interface ManualEntryProps {
+    coordinate: CoordinateRot;
+    updateCoordinate: (c: CoordinateRot) => void;
+};
+
+interface CoordinateInputProps {
+    name: string;
+    value: number;
+    update: (n: number) => void;
+}
+
+function CoordinateInput({ name, value, update }: CoordinateInputProps) {
+    return (
+        <div className="CoordinateInput">
+            <div className="Name">
+                <span>
+                    {name}
+                </span>
+            </div>
+            <div className="Input">
+                <input type="number" value={value} onChange={wrapChangeEventNumber(update)} />
+            </div>
+        </div>
+    );
+}
+
+
+function ManualEntry({ coordinate, updateCoordinate }: ManualEntryProps) {
+    const update = (axis: PalletizerAxes) => (n: number) => {
+
+        let c = { ...coordinate };
+        switch (axis) {
+            case PalletizerAxes.X: {
+                c.x = n;
+                break
+            }
+            case PalletizerAxes.Y: {
+                c.y = n;
+                break;
+            }
+            case PalletizerAxes.Z: {
+                c.z = n;
+                break;
+            }
+            case PalletizerAxes.θ: {
+                c.θ = n;
+            }
+            default: {
+                return;
+            }
+        }
+        updateCoordinate(c);
+    };
+
+    return (
+        <div className="ManualEntry">
+            <CoordinateInput name={PalletizerAxes.X} value={coordinate.x} update={update(PalletizerAxes.X)} />
+            <CoordinateInput name={PalletizerAxes.Y} value={coordinate.y} update={update(PalletizerAxes.Y)} />
+            <CoordinateInput name={PalletizerAxes.Z} value={coordinate.z} update={update(PalletizerAxes.Z)} />
+            <CoordinateInput name={PalletizerAxes.θ} value={coordinate.θ} update={update(PalletizerAxes.θ)} />
+        </div>
+    );
+};
+
 
