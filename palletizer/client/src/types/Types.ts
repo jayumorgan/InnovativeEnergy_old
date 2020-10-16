@@ -1,5 +1,5 @@
 import { SavedPalletConfiguration } from "../parts/TeachMode";
-import { CoordinateRot } from "../geometry/geometry";
+import { DropCoordinate } from "../context/PalletizerContext";
 
 export type ReducerAction = {
     type_of: string;
@@ -30,7 +30,7 @@ export interface PalletizerState {
     total_box: number;
     time: number; // hours? 
     palletConfig?: SavedPalletConfiguration;
-    dropCoordinates: CoordinateRot[];
+    dropCoordinates: DropCoordinate[];
     information: PalletizerInformation[];
 };
 

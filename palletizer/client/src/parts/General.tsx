@@ -19,7 +19,6 @@ import Visualizer, { VisualizerProps } from "./Visualizer";
 import JogController from "../jogger/Jogger";
 import { SavedMachineConfiguration } from './MachineConfig';
 
-
 //---------------Images---------------
 import logo from "../images/vention_logo.png";
 import { ReactComponent as BellImage } from "./images/bell.svg";

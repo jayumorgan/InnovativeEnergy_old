@@ -30,6 +30,9 @@ export interface ActionCoordinate extends Coordinate {
     speed?: SpeedTypes;
     waitForCompletion: boolean;
     boxDetection: IOOutputPin[];
+    boxIndex?: number;
+    palletIndex?: number;
+    dropLocation?: Coordinate;
 };
 
 export type BoxPath = ActionCoordinate[];
@@ -90,7 +93,11 @@ function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
     let lateralApproach: Coordinate = { ...box.dropLocation };
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     const drop = box.dropLocation;
-    path.push(addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW));
+    const dropAction = addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW);
+    dropAction.boxIndex = box.boxIndex;
+    dropAction.palletIndex = box.palletIndex;
+    dropAction.dropLocation = { ...drop };
+    path.push(dropAction);
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     return path;
 };
@@ -115,7 +122,12 @@ function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDir
     lateralApproach.z -= lateralZshift;
     path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
     path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
-    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
+
+    const dropAction = addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW);
+    dropAction.boxIndex = box.boxIndex;
+    dropAction.palletIndex = box.palletIndex;
+    dropAction.dropLocation = { ...drop };
+    path.push(dropAction);
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     return path;
 };

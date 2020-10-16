@@ -27,6 +27,12 @@ const PalletizerContext = createContext<Partial<PalletizerState>>({});
 
 export { PalletizerContext };
 
+export interface DropCoordinate extends CoordinateRot {
+    boxIndex: number;
+    palletIndex: number;
+    dropLocation: CoordinateRot;
+};
+
 function PalletizerHub(props: any) {
 
     let initial_state: PalletizerState = {
@@ -36,7 +42,7 @@ function PalletizerHub(props: any) {
         total_box: 0,
         time: 0,
         information: [] as PalletizerInformation[],
-        dropCoordinates: [] as CoordinateRot[]
+        dropCoordinates: [] as DropCoordinate[]
     };
 
     const [state, dispatch] = useReducer(PalletizerReducer, initial_state);

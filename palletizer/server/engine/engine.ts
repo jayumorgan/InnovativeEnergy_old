@@ -357,6 +357,7 @@ export class Engine {
                     }
                 });
             });
+
             this.palletizerState.dropCoordinates = drop_coords;
         }
         let info_status: INFO_TYPE = (is_null) ? INFO_TYPE.ERROR : INFO_TYPE.STATUS;
@@ -578,10 +579,14 @@ export class Engine {
             my.mechanicalLayout.good_pick = good_pick;
 
             return new Promise((resolve, reject) => {
-                Promise.all(promises).then(() => { resolve(true); }).catch(e => reject(e));
+                Promise.all(promises).then(() => {
+                    resolve(true);
+                }).catch((e: any) => {
+                    reject("Failed to configure axes. Make sure that Machine Motion controllers are operational and machine configuration network information is correct.");
+                });
             });
         } else {
-            return Promise.reject("No machine configuration");
+            return Promise.reject("No machine configuration set.");
             // return new Promise((_, reject) => {
             //     reject("No machine configurations.");
             // });;
