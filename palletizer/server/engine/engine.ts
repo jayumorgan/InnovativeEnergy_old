@@ -656,7 +656,6 @@ export class Engine {
         }
     };
 
-
     async executeAction(action_coordinate: ActionCoordinate): Promise<any> {
         const { action } = action_coordinate;
         if (action) {
@@ -664,6 +663,8 @@ export class Engine {
             if (action === ActionTypes.PICK) {
                 return my.__pickIO().then(() => {
                     return my.handleGoodPick(); // Check for a good pick.
+                }).then(() => {
+                    my.__monitorGoodPick();
                 });
             }
             if (action === ActionTypes.DETECT_BOX) {
@@ -830,9 +831,7 @@ export class Engine {
         const my = this;
         my.cycleState = CycleState.PICK_IO;
         let ios: IOState[] = my.mechanicalLayout.io.On;
-        return my.__writeIO(ios).then(() => {
-            my.__monitorGoodPick();
-        });
+        return my.__writeIO(ios);
     };
 
     __dropIO() {
@@ -888,7 +887,7 @@ export class Engine {
             my.__detectGoodPick().then((detected: boolean) => {
                 if (detected) {
                     resolve(detected);
-                } else if (retry_index < 5) {
+                } else if (retry_index < 200) {
                     setTimeout(() => {
                         my.handleGoodPick(retry_index + 1).then((d: boolean) => {
                             resolve(d);
