@@ -6,7 +6,6 @@ import {
     BoxCoordinate,
     Coordinate,
     PlaneCoordinate,
-    IOState,
     PalletGeometry,
     CartesianCoordinate,
     IOOutputPin
@@ -143,7 +142,6 @@ interface PalletGeometryCenter extends PalletGeometry {
     center: Coordinate;
 };
 
-
 function getFurthestPalletCorners(pick_location: Coordinate, pallet: PalletGeometryCenter): [CartesianCoordinate, CartesianCoordinate] {
     const { corner1, corner2, corner3 } = pallet;
     const v1 = subtractCartesianCoordinate(corner1, corner2);
@@ -153,7 +151,7 @@ function getFurthestPalletCorners(pick_location: Coordinate, pallet: PalletGeome
 
     corners.sort((a: CartesianCoordinate, b: CartesianCoordinate) => {
         return getDistance(b, pick_location) - getDistance(a, pick_location);
-    })
+    });
 
     return [corners[0], corners[1]];
 };
