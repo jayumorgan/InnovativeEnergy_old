@@ -77,46 +77,36 @@ function getPalletCenter(p: PalletGeometry): CartesianCoordinate {
     return center;
 };
 
-//-------Not Lateral Approach-------
-function generatePathForBox(box: BoxCoordinate, z_top: number): BoxPath {
-    let path: BoxPath = [];
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.DETECT_BOX, SpeedTypes.FAST, true, box.boxDetection));
-    path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
-    let preRotated: Coordinate = { ...box.pickLocation };
-    preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
-    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-    preRotated = raiseOverCoordinate(box.pickLocation, z_top);
-    preRotated.θ = box.dropLocation.θ;
-    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-    let lateralApproach: Coordinate = { ...box.dropLocation };
-    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
-    const drop = box.dropLocation;
-    path.push(addActionToCoordinate(drop, ActionTypes.DROP, SpeedTypes.SLOW));
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
-    return path;
-};
 
-
-function generateLateralPathForBox(box: BoxCoordinate, z_top: number, lateralDirection: PlaneCoordinate): BoxPath {
+function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?: PlaneCoordinate): BoxPath {
     let path: BoxPath = [];
     const lateralScale: number = 80; // 16 cm
     const lateralZshift: number = 50;
+
+    //-------Pick-------
     path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.DETECT_BOX, SpeedTypes.FAST, true, box.boxDetection));
     path.push(addActionToCoordinate(box.pickLocation, ActionTypes.PICK, SpeedTypes.SLOW));
+
+    //-------Lift + Rotate-------
     let preRotated: Coordinate = { ...box.pickLocation };
     preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
     preRotated = raiseOverCoordinate(box.pickLocation, z_top);
     preRotated.θ = box.dropLocation.θ;
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-    const drop = box.dropLocation;
-    let lateralApproach: Coordinate = { ...box.dropLocation };
-    lateralApproach.x += lateralDirection.x * lateralScale;
-    lateralApproach.y += lateralDirection.y * lateralScale;
-    lateralApproach.z -= lateralZshift;
-    path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
-    path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+
+    //-------Move + Drop-------
+    if (lateralDirection) {
+        let lateralApproach: Coordinate = { ...box.dropLocation };
+        lateralApproach.x += lateralDirection.x * lateralScale;
+        lateralApproach.y += lateralDirection.y * lateralScale;
+        lateralApproach.z -= lateralZshift;
+        path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
+        path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+    }
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
+
+    //-------Raise-------
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     return path;
 };
@@ -352,8 +342,7 @@ export function generateStandardPath(pallet_config: SavedPalletConfiguration): B
                     paths.push(generatePathForBox(bcl, getZTop(bcl)));
                     return;
                 }
-                paths.push(generateLateralPathForBox(bcl, getZTop(bcl), bcl.lateral));
-
+                paths.push(generatePathForBox(bcl, getZTop(bcl), bcl.lateral));
             });
             current_height += first.dimensions.height;
         });
