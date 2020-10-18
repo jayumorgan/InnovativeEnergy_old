@@ -80,6 +80,7 @@ function getPalletCenter(p: PalletGeometry): CartesianCoordinate {
 };
 
 function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?: PlaneCoordinate): BoxPath {
+
     let path: BoxPath = [];
     const lateralScale: number = 80; // 16 cm
     const lateralZshift: number = 50;
@@ -95,7 +96,6 @@ function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?
     preRotated = raiseOverCoordinate(box.pickLocation, z_top);
     preRotated.θ = box.dropLocation.θ;
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-
 
     //-------Move + Drop-------
     if (lateralDirection) {
