@@ -12,13 +12,15 @@ import {
     getXAxisAngle
 } from "../geometry/geometry";
 import { SavedPalletConfiguration } from "./TeachMode";
-import { PalletizerContext } from "../context/PalletizerContext";
 
 //---------------Styles---------------
 import "./css/Visualizer.scss";
+import { DropCoordinate } from '../context/PalletizerContext';
 
 
 //NB: Frame dimension code is quite stupid -- fix later.
+
+
 
 interface FrameDimensions {
     xl: number;
@@ -188,7 +190,7 @@ function GetPalletMesh(width: number, length: number, height: number, callback: 
 
 export interface VisualizerProps {
     palletConfig?: SavedPalletConfiguration;
-    dropCoordinates?: CoordinateRot[];
+    dropCoordinates?: DropCoordinate[];
     currentBoxNumber: number;
 };
 
@@ -355,15 +357,27 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
                 controls.current?.remove_mesh(bn);
             });
 
-            const boxCoordinates = palletConfig.boxCoordinates.sort((a: BoxCoordinates, b: BoxCoordinates) => {
-                return b.linearPathDistance - a.linearPathDistance;
-            });
 
-            boxCoordinates.filter((_: BoxCoordinates, i: number) => {
+            const boxCoordinates: DropCoordinate[] | BoxCoordinates[] = (() => {
+                if (dropCoordinates) {
+                    return dropCoordinates;
+                }
+
+                return palletConfig.boxCoordinates.sort((a: BoxCoordinates, b: BoxCoordinates) => {
+                    return b.linearPathDistance - a.linearPathDistance;
+                });
+            })();
+
+
+            (boxCoordinates as any[]).filter((_: BoxCoordinates | DropCoordinate, i: number) => {
                 return i < current_box;
-            }).forEach((b: BoxCoordinates, i: number) => {
+
+            }).forEach((bsplit: BoxCoordinates | DropCoordinate, i: number) => {
+                const b = dropCoordinates ? palletConfig.config.boxes[(bsplit as DropCoordinate).boxIndex] : (bsplit as BoxCoordinates);
+
                 const BoxName = "BOXNAME-" + String(i);
-                const { dropLocation, dimensions, palletIndex } = b;
+                const { dropLocation, palletIndex } = bsplit;
+                const { dimensions } = b;
                 const pallet = palletConfig.config.pallets[palletIndex];
 
                 const first_layout_height = pallet.Layouts[pallet.Stack[0]].height;

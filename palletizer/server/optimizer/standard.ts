@@ -6,7 +6,6 @@ import {
     BoxCoordinate,
     Coordinate,
     PlaneCoordinate,
-    IOState,
     PalletGeometry,
     CartesianCoordinate,
     IOOutputPin
@@ -31,6 +30,9 @@ export interface ActionCoordinate extends Coordinate {
     speed?: SpeedTypes;
     waitForCompletion: boolean;
     boxDetection: IOOutputPin[];
+    boxIndex?: number;
+    palletIndex?: number;
+    dropLocation?: Coordinate;
 };
 
 export type BoxPath = ActionCoordinate[];
@@ -77,7 +79,6 @@ function getPalletCenter(p: PalletGeometry): CartesianCoordinate {
     return center;
 };
 
-
 function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?: PlaneCoordinate): BoxPath {
     let path: BoxPath = [];
     const lateralScale: number = 80; // 16 cm
@@ -94,6 +95,7 @@ function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?
     preRotated = raiseOverCoordinate(box.pickLocation, z_top);
     preRotated.θ = box.dropLocation.θ;
     path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+
 
     //-------Move + Drop-------
     if (lateralDirection) {
@@ -133,7 +135,6 @@ interface PalletGeometryCenter extends PalletGeometry {
     center: Coordinate;
 };
 
-
 function getFurthestPalletCorners(pick_location: Coordinate, pallet: PalletGeometryCenter): [CartesianCoordinate, CartesianCoordinate] {
     const { corner1, corner2, corner3 } = pallet;
     const v1 = subtractCartesianCoordinate(corner1, corner2);
@@ -143,7 +144,7 @@ function getFurthestPalletCorners(pick_location: Coordinate, pallet: PalletGeome
 
     corners.sort((a: CartesianCoordinate, b: CartesianCoordinate) => {
         return getDistance(b, pick_location) - getDistance(a, pick_location);
-    })
+    });
 
     return [corners[0], corners[1]];
 };

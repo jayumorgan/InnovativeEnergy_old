@@ -9,7 +9,6 @@ import IOController from "../../jogger/IO";
 //---------------Styles---------------
 import "./css/Detection.scss";
 
-
 const ALL_PIN_IDS: number[] = [0, 1, 2, 3];
 
 export interface IOOutputPin {
@@ -135,7 +134,7 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
                     </div>
                     <div className="DropDown">
                         <select value={state.PinId} onChange={updatePinId}>
-                            {ALL_NETWORK_IDS.map((pin_id: number, i: number) => {
+                            {ALL_PIN_IDS.map((pin_id: number, i: number) => {
                                 return (
                                     <option value={pin_id} key={i}>
                                         {"Pin " + String(pin_id)}

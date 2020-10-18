@@ -167,7 +167,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
     };
 
     const handlePickFromBox = wrapChangeEventNumber((val: number) => {
-        updateBox({ ...box, pickFromStack: (val > 0) });
+        updateBox({ ...box, pickFromStack: !box.pickFromStack });
     });
 
     let instruction = "Move and select box pick location";
@@ -212,7 +212,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
                         <div className="BoxConfigurator">
                             <div className="CreateNewBoxParameterContainer">
                                 <div className="PickFromStackToggle">
-                                    <input type="checkbox" value={box.pickFromStack ? 1 : 0} onChange={handlePickFromBox} />
+                                    <input type="checkbox" checked={box.pickFromStack} onChange={handlePickFromBox} />
                                     <span>
                                         {"Pick From Stack"}
                                     </span>
