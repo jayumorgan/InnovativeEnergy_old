@@ -1,6 +1,11 @@
 import React, { useRef, useState, DragEvent, ChangeEvent, Fragment } from 'react';
 import ContentItem, { ButtonProps } from "./ContentItem";
-import { ControlProps, COLORS, wrapChangeEventNumber, wrapChangeEventString } from "../shared/shared";
+import {
+    ControlProps,
+    COLORS,
+    wrapChangeEventNumber,
+    wrapChangeEventString
+} from "../shared/shared";
 import Box from "./3D/BoxRender";
 import {
     PalletGeometry,
@@ -14,10 +19,91 @@ import {
 } from "../../geometry/geometry";
 import { RotateIcon } from "./PlusIcon";
 
-//---------------Styles---------------
 import "./css/Layouts.scss";
 
 const DISABLE_LOCKING = false;
+
+const round = (n: number): number => {
+    return Math.round(n * 10) / 10;
+};
+
+interface ModelData {
+    w: number;
+    l: number;
+    scale: number;
+    norm: number;
+    cx: number;
+    topX: number;
+    topY: number;
+    size: number;
+};
+
+function getModelData(pallet: PalletGeometry, size: number): ModelData {
+    let dimensions: PlaneDimensions = getPalletDimensions(pallet);
+    let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
+    let w = dimensions.width / norm * size;
+    let l = dimensions.length / norm * size;
+    // Scale up the coordinates to take maximum size.
+    let scale = (w >= l) ? size / w : size / l;
+    w *= scale;
+    l *= scale;
+    let cx = size / 2;
+    let topX = cx - w / 2;
+    let topY = (size - l) / 2;
+    return { w, l, norm, scale, cx, topX, topY, size } as ModelData
+};
+
+function getFractionalCoordinates(modelData: ModelData, outerWidth: number, outerHeight: number, x: number, y: number): [number, number] {
+    const { topX, topY, size, w, l } = modelData;
+    const palletX = (outerWidth - size) / 2 + topX;
+    const palletY = topY;
+    const fractionX = (x - palletX) / w;
+    const fractionY = (y - palletY) / l;
+    return [fractionX, fractionY];
+};
+
+export enum PALLETCORNERS {
+    TOP_LEFT = "TOP_LEFT",
+    BOTTOM_LEFT = "BOTTOM_LEFT",
+    BOTTOM_RIGHT = "BOTTOM_RIGHT"
+};
+
+export function IncreaseCorner(c: PALLETCORNERS) {
+    if (c === PALLETCORNERS.TOP_LEFT) {
+        return PALLETCORNERS.BOTTOM_LEFT;
+    } else if (c === PALLETCORNERS.BOTTOM_LEFT) {
+        return PALLETCORNERS.BOTTOM_RIGHT;
+    } else {
+        return PALLETCORNERS.BOTTOM_RIGHT;
+    }
+};
+
+export function DecreaseCorner(c: PALLETCORNERS) {
+    if (c === PALLETCORNERS.BOTTOM_LEFT) {
+        return PALLETCORNERS.TOP_LEFT;
+    } else if (c === PALLETCORNERS.BOTTOM_RIGHT) {
+        return PALLETCORNERS.TOP_LEFT;
+    } else {
+        return PALLETCORNERS.TOP_LEFT;
+    }
+};
+
+export function CornerNumber(c: PALLETCORNERS) {
+    switch (c) {
+        case PALLETCORNERS.TOP_LEFT: {
+            return 0;
+        }
+        case PALLETCORNERS.BOTTOM_LEFT: {
+            return 1;
+        }
+        case PALLETCORNERS.BOTTOM_RIGHT: {
+            return 2;
+        }
+        default: {
+            return -1;
+        }
+    }
+};
 
 interface DraggableRectProps {
     rect: Rect;
@@ -34,37 +120,21 @@ interface DraggableRectProps {
 
 // Lock to edges of the pallet.
 function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
-    console.log("c, d, f", currentPosition, dimensionSize, fullDistance);
     const distanceUnit = fullDistance / (2 * 6);
     const thresholdDistance = distanceUnit / 3;
 
     const leftEdge = currentPosition - dimensionSize / 2;
     const rightEdge = currentPosition + dimensionSize / 2;
 
-    console.log(leftEdge, rightEdge, "l-r");
-
-
     if (leftEdge <= thresholdDistance) {
         return 0;
     }
+
     if (fullDistance - rightEdge <= thresholdDistance) {
         return fullDistance - dimensionSize;
     }
 
     return leftEdge;
-
-
-    if (leftEdge < thresholdDistance) {
-        console.log(leftEdge, "left edge");
-        return 0;
-    }
-
-    if (fullDistance - rightEdge < thresholdDistance) {
-        console.log("right edge", rightEdge, fullDistance - rightEdge);
-        return fullDistance - dimensionSize;
-    }
-
-    return currentPosition;
 };
 
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
@@ -167,49 +237,6 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     );
 };
 
-export enum PALLETCORNERS {
-    TOP_LEFT = "TOP_LEFT",
-    BOTTOM_LEFT = "BOTTOM_LEFT",
-    BOTTOM_RIGHT = "BOTTOM_RIGHT"
-};
-
-export function IncreaseCorner(c: PALLETCORNERS) {
-    if (c === PALLETCORNERS.TOP_LEFT) {
-        return PALLETCORNERS.BOTTOM_LEFT;
-    } else if (c === PALLETCORNERS.BOTTOM_LEFT) {
-        return PALLETCORNERS.BOTTOM_RIGHT;
-    } else {
-        return PALLETCORNERS.BOTTOM_RIGHT;
-    }
-}
-
-export function DecreaseCorner(c: PALLETCORNERS) {
-    if (c === PALLETCORNERS.BOTTOM_LEFT) {
-        return PALLETCORNERS.TOP_LEFT;
-    } else if (c === PALLETCORNERS.BOTTOM_RIGHT) {
-        return PALLETCORNERS.TOP_LEFT;
-    } else {
-        return PALLETCORNERS.TOP_LEFT;
-    }
-}
-
-export function CornerNumber(c: PALLETCORNERS) {
-    switch (c) {
-        case PALLETCORNERS.TOP_LEFT: {
-            return 0;
-        }
-        case PALLETCORNERS.BOTTOM_LEFT: {
-            return 1;
-        }
-        case PALLETCORNERS.BOTTOM_RIGHT: {
-            return 2;
-        }
-        default: {
-            return -1;
-        }
-    }
-};
-
 interface LayoutModelProps {
     pallet: PalletGeometry;
     size: number; // 650 for half content width;
@@ -224,57 +251,6 @@ interface LayoutModelProps {
     showName?: boolean;
 };
 
-interface ModelData {
-    w: number;
-    l: number;
-    scale: number;
-    norm: number;
-    cx: number;
-    topX: number;
-    topY: number;
-    size: number;
-};
-
-
-function getModelData(pallet: PalletGeometry, size: number): ModelData {
-
-    let dimensions: PlaneDimensions = getPalletDimensions(pallet);
-    let norm = Math.sqrt(dimensions.width ** 2 + dimensions.length ** 2);
-    let w = dimensions.width / norm * size;
-    let l = dimensions.length / norm * size;
-    // Scale up the coordinates to take maximum size.
-    let scale = (w >= l) ? size / w : size / l;
-    w *= scale;
-    l *= scale;
-    let cx = size / 2;
-    let topX = cx - w / 2;
-    let topY = (size - l) / 2;
-
-    return {
-        w,
-        l,
-        norm,
-        scale,
-        cx,
-        topX,
-        topY,
-        size
-    } as ModelData
-};
-
-
-function getFractionalCoordinates(modelData: ModelData, outerWidth: number, outerHeight: number, x: number, y: number): [number, number] {
-    let { topX, topY, size, w, l } = modelData;
-
-    let palletX = (outerWidth - size) / 2 + topX;
-    let palletY = topY;
-    let fractionX = (x - palletX) / w;
-    let fractionY = (y - palletY) / l;
-
-    return [fractionX, fractionY];
-};
-
-
 export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth, boxes, updateModelBox, fullWidth, fullHeight, corner, showName }: LayoutModelProps) {
 
     let isDragEnabled = enableDrag ? enableDrag : false;
@@ -285,7 +261,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
 
     let logColor: string = String(COLORS.LOG);
 
-    let bottomLog: Rect = {
+    const bottomLog: Rect = {
         x: topX,
         y: size - (size - l) / 2 - size / 10,
         width: w,
@@ -295,7 +271,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         strokeWidth: 0
     };
 
-    let topLog: Rect = {
+    const topLog: Rect = {
         x: topX,
         y: topY,
         width: w,
@@ -352,12 +328,10 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
 
     let BoxSVGs: Rect[] = [];
     if (boxes) {
-        boxes.forEach((b: BoxPositionObject) => {
+        BoxSVGs = boxes.map((b: BoxPositionObject) => {
             let { position, box, rotated } = b;
-
             let x = w * position.x + topX + svg_props.x;
             let y = l * position.y + topY + svg_props.y;
-
             let { width, length } = box.dimensions;
 
             width *= size * scale / norm;
@@ -366,7 +340,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             let boxColor = String(COLORS.CLEAR_BOX);
             let strokeColor = String(COLORS.CARDBOARD);
 
-            let boxprops: Rect = {
+            const boxprops: Rect = {
                 x,
                 y,
                 width: rotated ? length : width,
@@ -376,7 +350,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 strokeWidth: 1
             };
 
-            BoxSVGs.push(boxprops);
+            return boxprops;
         });
     }
 
@@ -396,11 +370,8 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
 
     if (corner) {
         let green = "rgb(91,196,126)"
-        //        let grey = "rgb(135,135,135)"
         cornerCircleProps.r = 30;
         cornerCircleProps.fill = green;
-        //cornerCircleProps.stroke = grey;
-        //cornerCircleProps.strokeWidth = 2;
         cornerTextProps.height = 60;
         cornerTextProps.width = 60;
         cornerTextProps.fontSize = 30;
@@ -432,12 +403,12 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
         cornerTextProps.y = cornerCircleProps.cy + 10;
     };
 
-    let snapParams = {
+    const snapParams = {
         xl: topX + svg_props.x,
         xh: topX + w + svg_props.x,
         yl: topY + svg_props.y,
         yh: topY + l + svg_props.y
-    }
+    };
 
     return (
         <>
@@ -485,9 +456,6 @@ function LayoutCell({ layout, pallet, startEdit, editName, deleteLayout }: Layou
         boxes: boxPositions
     } as LayoutModelProps;
 
-    const round = (n: number) => {
-        return Math.round(n * 10) / 10;
-    };
 
     return (
         <div className="BoxCellContainer">
@@ -901,9 +869,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
         setSummaryScreen(false);
     };
 
-
     let instruction: string;
-    //  let placeholder = "Custom Layer " + String(1);
 
     const dragOver = (e: DragEvent<HTMLDivElement>) => {
         e.stopPropagation();

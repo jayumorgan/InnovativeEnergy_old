@@ -4,7 +4,7 @@ import { MachineMotion } from "./MachineMotions";
 import SolidArrow, { ROTATION } from "../teach/SolidArrow";
 import { DIRECTION } from "mm-js-api";
 import JogController from "../../jogger/Jogger";
-
+import { wrapChangeEventNumber, wrapChangeEventString } from "../shared/shared";
 //---------------Images---------------
 import Ximage from "./images/PalletizerX.png";
 import Yimage from "./images/PalletizerY.png";
@@ -15,12 +15,8 @@ import Blankimage from "./images/PalletizerBlank.png";
 import plus_icon from "../teach/images/plus.svg";
 //---------------Styles---------------
 import "./css/Drives.scss";
-import { wrapChangeEventNumber, wrapChangeEventString } from "../shared/shared";
 
-function changeVal(e: ChangeEvent): string {
-    let val: string = (e.target as any).value;
-    return val;
-};
+
 
 export enum AXES {
     X,
@@ -111,6 +107,62 @@ export interface DriveSummaryProps {
     noEdit?: boolean;
 };
 
+
+interface AxisListingProps {
+    drives: Drive[];
+    title: string;
+    handleEdit: () => void;
+    showEdit: boolean;
+    button_string: string;
+    handleMove: (s: string, direction: DIRECTION) => () => void;
+    button_action: (s: string) => () => void;
+};
+
+function AxisListing({ drives, title, handleEdit, showEdit, button_string, handleMove, button_action }: AxisListingProps) {
+    return (
+        <div className="AxisListing">
+            <div className={"AxisListingCell" + (showEdit ? "" : "NoEdit")}>
+                <div className="Title">
+                    <span>
+                        {title + " Axis"}
+                    </span>
+                </div>
+                <div className="DetailsContainer">
+                    <div className="Details">
+                        <span>
+                            {String(drives.length) + " Drive" + (drives.length > 1 ? "s" : "")}
+                        </span>
+                    </div>
+                </div>
+                <div className="AxisJog">
+                    <div className="ArrowLeft" onClick={handleMove(title, DIRECTION.REVERSE)}>
+                        <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
+                    </div>
+                    <div className="ButtonCenter">
+                        <div className="Button" onClick={button_action(title)}>
+                            <span>
+                                {button_string}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="ArrowRight" onClick={handleMove(title, DIRECTION.NORMAL)}>
+                        <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
+                    </div>
+                </div>
+                {showEdit &&
+                    <div className="Edit">
+                        <div className="EditButton" onClick={handleEdit}>
+                            <span>
+                                {"Edit"}
+                            </span>
+                        </div>
+                    </div>}
+            </div>
+        </div>
+    );
+};
+
+
 export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSummaryProps) {
     const [jogController, setJogController] = useState<JogController | null>(null);
     const [isMoving, setIsMoving] = useState<boolean>(false);
@@ -131,12 +183,6 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
                 jogController.startJog(axis_string, direction).catch(() => { });
             }
         }
-    };
-
-    interface AxisListingProps {
-        drives: Drive[];
-        title: string;
-        handleEdit: () => void;
     };
 
     const stop_jog = (_: string) => () => {
@@ -167,6 +213,7 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
         }
     })() as [string, ((s: string) => () => void)];
 
+
     const showEdit: boolean = (() => {
         if (noEdit) {
             return false;
@@ -175,58 +222,13 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
         }
     })();
 
-
-    let AxisListing = ({ drives, title, handleEdit }: AxisListingProps) => {
-        return (
-            <div className="AxisListing">
-                <div className={"AxisListingCell" + (showEdit ? "" : "NoEdit")}>
-                    <div className="Title">
-                        <span>
-                            {title + " Axis"}
-                        </span>
-                    </div>
-                    <div className="DetailsContainer">
-                        <div className="Details">
-                            <span>
-                                {String(drives.length) + " Drive" + (drives.length > 1 ? "s" : "")}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="AxisJog">
-                        <div className="ArrowLeft" onClick={handleMove(title, DIRECTION.REVERSE)}>
-                            <SolidArrow size={70} longer={110} rotation={ROTATION.LEFT} />
-                        </div>
-                        <div className="ButtonCenter">
-                            <div className="Button" onClick={button_action(title)}>
-                                <span>
-                                    {button_string}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="ArrowRight" onClick={handleMove(title, DIRECTION.NORMAL)}>
-                            <SolidArrow size={70} longer={110} rotation={ROTATION.RIGHT} />
-                        </div>
-                    </div>
-                    {showEdit &&
-                        <div className="Edit">
-                            <div className="EditButton" onClick={handleEdit}>
-                                <span>
-                                    {"Edit"}
-                                </span>
-                            </div>
-                        </div>}
-                </div>
-            </div>
-        );
-    };
-
     return (
         <div className="AxesSummary">
             <div className="AxesScroll">
-                <AxisListing drives={Axes.X} title={"X"} handleEdit={handleEditAxis(AXES.X)} />
-                <AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEditAxis(AXES.Y)} />
-                <AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEditAxis(AXES.Z)} />
-                <AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEditAxis(AXES.θ)} />
+                <AxisListing drives={Axes.X} title={"X"} handleEdit={handleEditAxis(AXES.X)} button_string={button_string} button_action={button_action} showEdit={showEdit} handleMove={handleMove} />
+                <AxisListing drives={Axes.Y} title={"Y"} handleEdit={handleEditAxis(AXES.Y)} button_string={button_string} button_action={button_action} showEdit={showEdit} handleMove={handleMove} />
+                <AxisListing drives={Axes.Z} title={"Z"} handleEdit={handleEditAxis(AXES.Z)} button_string={button_string} button_action={button_action} showEdit={showEdit} handleMove={handleMove} />
+                <AxisListing drives={Axes.θ} title={"θ"} handleEdit={handleEditAxis(AXES.θ)} button_string={button_string} button_action={button_action} showEdit={showEdit} handleMove={handleMove} />
             </div>
             <div className="DisplayContainer">
                 <div className="Display">
@@ -244,7 +246,7 @@ function getAllDrives(a: AxesConfiguration) {
 
 function nextDrive(a: AxesConfiguration, m: MachineMotion[]): Drive {
     // limit to available drives.
-    const allDrives = getAllDrives(a);
+    //    const allDrives = getAllDrives(a);
     const gain_key = Object.keys(MECH_GAIN)[0] as string;
     return {
         MachineMotionIndex: 0,
