@@ -374,6 +374,9 @@ export default function Visualizer({ palletConfig, currentBoxNumber, dropCoordin
 
             }).forEach((bsplit: BoxCoordinates | DropCoordinate, i: number) => {
                 const b = dropCoordinates ? palletConfig.config.boxes[(bsplit as DropCoordinate).boxIndex] : (bsplit as BoxCoordinates);
+				if (!b) {
+					return;
+				}
 
                 const BoxName = "BOXNAME-" + String(i);
                 const { dropLocation, palletIndex } = bsplit;

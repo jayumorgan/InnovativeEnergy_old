@@ -42,8 +42,7 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
 };
 
 export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true, boxDetection: IOOutputPin[] = []): ActionCoordinate {
-    // Force Wait, Force Slow For Right Now.
-    return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion, boxDetection };
+    return { ...coord, action, speed, waitForCompletion, boxDetection };
 };
 
 function addCartesianCoordinate(a: CartesianCoordinate, b: CartesianCoordinate): CartesianCoordinate {
@@ -100,20 +99,22 @@ function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?
         preRotated.θ = box.dropLocation.θ;
         path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW, false));
     }
-
     //-------Move + Drop-------
     if (lateralDirection) {
         let lateralApproach: Coordinate = { ...box.dropLocation };
         lateralApproach.x += lateralDirection.x * lateralScale;
         lateralApproach.y += lateralDirection.y * lateralScale;
         lateralApproach.z -= lateralZshift;
-        path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST, false));
+        path.push(addActionToCoordinate(raiseOverCoordinate(lateralApproach, z_top), ActionTypes.NONE, SpeedTypes.FAST));
         path.push(addActionToCoordinate(lateralApproach, ActionTypes.NONE, SpeedTypes.SLOW));
+    } else {
+        path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     }
+
     path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
 
     //-------Raise-------
-    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
+    path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));
     return path;
 };
 
