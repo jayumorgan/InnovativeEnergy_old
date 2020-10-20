@@ -43,7 +43,7 @@ export function raiseOverCoordinate(coord: Coordinate, z_top: number = 0): Coord
 
 export function addActionToCoordinate(coord: Coordinate, action: ActionTypes, speed: SpeedTypes = SpeedTypes.SLOW, waitForCompletion: boolean = true, boxDetection: IOOutputPin[] = []): ActionCoordinate {
     // Force Wait, Force Slow For Right Now.
-    return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion: true, boxDetection };
+    return { ...coord, action, speed: SpeedTypes.SLOW, waitForCompletion, boxDetection };
 };
 
 function addCartesianCoordinate(a: CartesianCoordinate, b: CartesianCoordinate): CartesianCoordinate {
@@ -91,11 +91,15 @@ function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?
 
     //-------Lift + Rotate-------
     let preRotated: Coordinate = { ...box.pickLocation };
-    preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
-    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
-    preRotated = raiseOverCoordinate(box.pickLocation, z_top);
-    preRotated.θ = box.dropLocation.θ;
-    path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+    if (preRotated.θ === box.dropLocation.θ) { // if no rotation, skip.
+        path.push(addActionToCoordinate(raiseOverCoordinate(box.pickLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
+    } else {
+        preRotated.z = Math.max(z_top, box.pickLocation.z - box.dimensions.height - 20);
+        path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
+        preRotated = raiseOverCoordinate(box.pickLocation, z_top);
+        preRotated.θ = box.dropLocation.θ;
+        path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW, false));
+    }
 
     //-------Move + Drop-------
     if (lateralDirection) {

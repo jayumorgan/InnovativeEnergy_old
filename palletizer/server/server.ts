@@ -21,26 +21,23 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
-if (true) { // for testing.
-    initDatabaseHandler().then((handler: DatabaseHandler) => {
+initDatabaseHandler().then((handler: DatabaseHandler) => {
+    const attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        req.databaseHandler = handler;
+        next();
+    };
+    const engine = new Engine(handler);
 
-        let attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            req.databaseHandler = handler;
-            next();
-        };
+    app.use(attachDatabaseHandler);
+    app.use(router);
 
-        let engine = new Engine(handler);
-
-        app.use(attachDatabaseHandler);
-        app.use(router);
-
-        let server = app.listen(PORT, HOSTNAME, () => {
-            let address = server.address() as AddressInfo;
-            let address_string = "http://" + address.address + ":" + address.port;
-            console.log(`Server running at ${address_string}.`);
-        });
-
-    }).catch((e) => {
-        console.log("Error initializing database handler", e);
+    const server = app.listen(PORT, HOSTNAME, () => {
+        let address = server.address() as AddressInfo;
+        let address_string = "http://" + address.address + ":" + address.port;
+        console.log(`Palletizer machine application server running at ${address_string}.`);
     });
-}
+
+}).catch((e) => {
+    console.log("Error initializing database handler", e);
+});
+
