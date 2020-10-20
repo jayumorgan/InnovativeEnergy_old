@@ -10,68 +10,14 @@ import {
     LayoutObject,
     BoxPositionObject,
     Rect,
-    BoxDimensions,
-    SVGPosition
+    BoxDimensions
 } from "../../geometry/geometry";
+import { RotateIcon } from "./PlusIcon";
 
 //---------------Styles---------------
 import "./css/Layouts.scss";
 
-const DISABLE_LOCKING = true;
-
-interface RotateIconProps {
-    size: number;
-    rotate: boolean;
-};
-
-function RotateIcon({ size, rotate }: RotateIconProps) {
-
-    let dString: string = "M 35 15 L 35 15, 70 15 C 75 15, 75 15, 75 35 L 75 35 75 55";
-
-    let scale = Math.round(size / 100 * 10) / 10;
-
-    let scaleString = `scale(${scale}, ${scale})`;
-
-    let rectProps: Rect = {
-        x: 10,
-        y: 30,
-        width: 50,
-        height: 50,
-        fill: "none",
-        stroke: "black",
-        strokeWidth: 3
-    };
-
-    let pathProps = {
-        d: dString,
-        stroke: "black",
-        strokeWidth: size / 15,
-        fill: "transparent",
-    } as any;
-
-    if (!rotate) {
-        pathProps.markerStart = "url(#arrowheadback)";
-    } else {
-        pathProps.markerEnd = "url(#arrowhead)";
-    }
-
-    return (
-        <svg width={size} height={size}>
-            <g transform={scaleString}>
-                <marker id="arrowhead" markerWidth={5} markerHeight={4}
-                    refX="0" refY="2" orient="auto">
-                    <polygon points="0 0, 5 2, 0 4" />
-                </marker>
-                <marker id="arrowheadback" markerWidth={5} markerHeight={4}
-                    refX="2.5" refY="2" orient="auto">
-                    <polygon points="5 0, 0 2, 5 4" />
-                </marker>
-                <rect {...rectProps} />
-                <path {...pathProps} />
-            </g>
-        </svg>
-    );
-};
+const DISABLE_LOCKING = false;
 
 interface DraggableRectProps {
     rect: Rect;
@@ -86,52 +32,39 @@ interface DraggableRectProps {
     yh: number;
 };
 
+// Lock to edges of the pallet.
 function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
-    let leftEdge = currentPosition - dimensionSize / 2;
-    let rightEdge = currentPosition + dimensionSize / 2;
-    let newPosition = leftEdge;
+    console.log("c, d, f", currentPosition, dimensionSize, fullDistance);
+    const distanceUnit = fullDistance / (2 * 6);
+    const thresholdDistance = distanceUnit / 3;
 
-    let divisor = 2 * 6; // Even Number
-    let distanceUnit = fullDistance / divisor;
-    let thresholdDistance = distanceUnit / 3;
+    const leftEdge = currentPosition - dimensionSize / 2;
+    const rightEdge = currentPosition + dimensionSize / 2;
 
-    let modDistances = (a: number) => {
-        let lmd = Math.abs(a % distanceUnit);
-        let hmd = Math.abs(distanceUnit - lmd);
-        return [lmd, hmd];
-    };
+    console.log(leftEdge, rightEdge, "l-r");
 
-    let lowMultiple = (a: number) => Math.floor(a / distanceUnit);
-    let highMultiple = (a: number) => Math.ceil(a / distanceUnit);
 
-    let [lowModDistance, highModDistance] = modDistances(leftEdge);
-
-    let leftEdgeLowMultiple = lowMultiple(leftEdge);
-    let leftEdgeHighMultiple = highMultiple(leftEdge);
-
-    let centerFromCenter = Math.abs(currentPosition - fullDistance / 2);
-
-    if (centerFromCenter < thresholdDistance) {
-        newPosition = (fullDistance - dimensionSize) / 2;
-        return newPosition;
-    } else if (leftEdgeLowMultiple < 0) { // It has gone over the edge
-        newPosition = leftEdge;
-        return newPosition;
-    } else {
-        let [lowModDistance, highModDistance] = modDistances(leftEdge);
-        let rightEdgeFromCenter = Math.abs(rightEdge - fullDistance / 2);
-        let rightEdgeFromEdge = Math.abs(rightEdge - fullDistance);
-        if (lowModDistance < thresholdDistance) {
-            newPosition = leftEdgeLowMultiple * distanceUnit;
-        } else if (highModDistance < thresholdDistance) {
-            newPosition = leftEdgeHighMultiple * distanceUnit;
-        } else if (rightEdgeFromCenter < thresholdDistance) {
-            newPosition = fullDistance / 2 - dimensionSize;
-        } else if (rightEdgeFromEdge < thresholdDistance) {
-            newPosition = fullDistance - dimensionSize;
-        }
-        return newPosition;
+    if (leftEdge <= thresholdDistance) {
+        return 0;
     }
+    if (fullDistance - rightEdge <= thresholdDistance) {
+        return fullDistance - dimensionSize;
+    }
+
+    return leftEdge;
+
+
+    if (leftEdge < thresholdDistance) {
+        console.log(leftEdge, "left edge");
+        return 0;
+    }
+
+    if (fullDistance - rightEdge < thresholdDistance) {
+        console.log("right edge", rightEdge, fullDistance - rightEdge);
+        return fullDistance - dimensionSize;
+    }
+
+    return currentPosition;
 };
 
 function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
@@ -142,19 +75,18 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         updatePosition(index, r.x, r.y);
     };
 
-    let handleDown = (e: React.PointerEvent) => {
+    const handleDown = (e: React.PointerEvent) => {
         if (enabled) {
-            let el = e.target;
-            let bb = (e.target as any).getBoundingClientRect();
-            let x = e.clientX - bb.left;
-            let y = e.clientY - bb.top;
+            const bb = (e.target as any).getBoundingClientRect();
+            const x = e.clientX - bb.left;
+            const y = e.clientY - bb.top;
+            const offset = {
+                x, y
+            };
 
             setRectangle({
                 ...rectangle,
-                offset: {
-                    x,
-                    y
-                }
+                offset
             });
             setActive(true);
         }
@@ -163,8 +95,11 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     const handleMove = (e: React.PointerEvent) => {
 
         let bb = (e.target as any).getBoundingClientRect();
+        // new mouse positions.
         let x = e.clientX - bb.left;
         let y = e.clientY - bb.top;
+
+
         // check distances -- with tolerance
         if (active) {
 
@@ -176,15 +111,13 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
                 y: rectangle.y - (offset.y - y)
             };
 
-            let xWidth = newR.width as number;
-            let yWidth = newR.height as number;
+            const xWidth = newR.width as number;
+            const yWidth = newR.height as number;
 
-            if (!(newR.x < 0 || newR.y < 0 || newR.x > xh || newR.y > yh - yWidth / 2)) {
-                //---------------Locking/Snap Mechanism---------------
-                let thresholdX = (newR.width as number) / 7;
-                let thresholdY = (newR.height as number) / 7;
+            if (true || !(newR.x < 0 || newR.y < 0 || newR.x > xh || newR.y > yh - yWidth / 2)) {
 
                 if (!DISABLE_LOCKING) {
+
                     // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
                     newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
                     // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
@@ -204,16 +137,16 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
         }
     };
 
-    let actions = {
+    const actions = {
         onPointerDown: handleDown,
         onPointerMove: handleMove,
         onPointerUp: handleUp
     } as any;
 
-    let fill = active ? String(COLORS.MOVE_BOX) : String(COLORS.CLEAR_BOX);
-    let stroke = active ? String("white") : String(COLORS.CARDBOARD);
+    const fill = active ? String(COLORS.MOVE_BOX) : String(COLORS.CLEAR_BOX);
+    const stroke = active ? String("white") : String(COLORS.CARDBOARD);
 
-    let textProps = {
+    const textProps = {
         x: (rectangle.x as number) + (rectangle.width as number) / 2,
         y: (rectangle.y as number) + (rectangle.height as number) / 2,
         textAnchor: "middle",
