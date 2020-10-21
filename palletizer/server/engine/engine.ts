@@ -437,7 +437,7 @@ export class Engine {
             return my.releaseAndReset();
         }).then(() => {
             my.__stateReducer({ cycle: my.palletizerState.cycle + 1 });
-            return my.startPalletizer(my.startBox);
+            return my.startPalletizer(my.startBox > 0 ? my.startBox - 1 : 0);
         }).catch((e: string) => {
             if (my.palletizerState.status == PALLETIZER_STATUS.STOPPED) {
                 console.log("Palletizer has stopped.");
@@ -462,7 +462,7 @@ export class Engine {
         let r: RegExp = /box number:([\d]+)/mi;
         let matches = r.exec(m);
         if (matches !== null) {
-            let match: number = +(matches[1]);
+            let match: number = Math.round(+(matches[1]));
             this.startBox = match;
         }
     };

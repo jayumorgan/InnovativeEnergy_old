@@ -1,7 +1,7 @@
 PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
 
-** TODO Optimizer:
+** DONE Optimizer:
 *** DONE Path Triangulation.
 *** DONE Return paths.
 *** DONE Level Paths.
@@ -43,7 +43,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Add m201, m203 commands.
 
 ** TODO Production:
-*** TODO Logging.
+*** DONE Logging.
 *** TODO Update protocol -- git?
 
 ** DONE Jogger:
@@ -52,10 +52,11 @@ PALLETIZER -*- mode: org -*-
 *** DONE Improve beauty and usability.
 *** DONE React memoization issue.
 *** DONE Return to discrete rotations.
+*** DONE Add a go to taught position.
 
-** TODO Engine:
+** DONE Engine:
 *** DONE Add Good Pick Detection + Box Detection Actions.
-*** TODO Consistent error messaging to client. (see: catch blocks and information send)
+*** DONE Consistent error messaging to client. (see: catch blocks and information send)
 
 ** DONE Configuration Page:
 *** DONE Reload configs on create (so that they show up immediately).
@@ -69,7 +70,7 @@ PALLETIZER -*- mode: org -*-
 *** TODO Test multiple pallets.
 
 ** TODO Vivian Requests:
-*** TODO Add a "go to taught position" button for validation ?? Where should this button go?
+*** DONE Add a "go to taught position" button for validation ?? Where should this button go?
 *** DONE There should be a pure jogger screen (not needing to go to pallet config or machine config ?? Extra button on machine configuration for jogger?
 *** TODO Layer configuration is tough to use (snapping with overlaps). Need better control of the boxes location too
 *** DONE There should be labelled "x and y and z" in every image. With proper orientations ?? Going to need good images then.
@@ -84,23 +85,23 @@ PALLETIZER -*- mode: org -*-
 
 ** TODO New List: 
 *** DONE When changing the pick location or changing the box size in the pallet configuration, it's not reflected in the rest of the configuration. This occurs when you edit a pre-existing configuration
-*** TODO We should test the same thing to edit teach points for pallets (re-teaching after editing an existing config file)
+*** DONE We should test the same thing to edit teach points for pallets (re-teaching after editing an existing config file)
 *** DONE Deleting layer pattern does not work
 *** DONE When adding layers and deleting layers, it seems to be upside down (weird UI behaviour) ?? Ask.
-*** TODO We need to change the clearance height of the pallet because today during the marketing shoot, we ran into interferences at the fourth layer. I think it'll only get worse for even higher layers. Max, i can show you later today!
-*** TODO We need to test for reliability, because it keeps running into errors. I know Max and Alex, you're already on this, but I just wanted us to track this in a list. (https://github.com/VentionCo/mm-vention-control/issues/1129)
-*** TODO Max and I talked about how we could improve the user experience to not need to create an offset when configuring the teach points of a pallet. So, we suggested placing 3 boxes at each teach point on the pallet. Teach the EOAT to get to those points and depending on the box size, we could determine the size and position of the pallet. Alex, please let me know if this is clear to you or not.
-*** TODO The 3D render still has some glitches in terms of box positioning. I can not reliably repro. But the positions seem off for the boxes.
+*** DONE We need to change the clearance height of the pallet because today during the marketing shoot, we ran into interferences at the fourth layer. I think it'll only get worse for even higher layers. Max, i can show you later today!
+*** DONE We need to test for reliability, because it keeps running into errors. I know Max and Alex, you're already on this, but I just wanted us to track this in a list. (https://github.com/VentionCo/mm-vention-control/issues/1129)
+*** DONE Max and I talked about how we could improve the user experience to not need to create an offset when configuring the teach points of a pallet. So, we suggested placing 3 boxes at each teach point on the pallet. Teach the EOAT to get to those points and depending on the box size, we could determine the size and position of the pallet. Alex, please let me know if this is clear to you or not.
+*** DONE The 3D render still has some glitches in terms of box positioning. I can not reliably repro. But the positions seem off for the boxes.
 *** TODO We need to make the drag/drop boxes on the "edit" layer more reliable. Easily snap to the edges of each box, so that the positioning is the same each time, eliminating human error and getting more repeatable positioning. If you have a better option to configure it through "edit rows and columns" format, that would be fine too (after defining the orientation of the box).
 *** DONE Replace images/renders from britt to update.
 *** DONE Take the "Home x, home y, home z, home theta, done" to step 1. Remove your current step 1 with the jogger to replace it with only the homing buttons. Remove the flow of homing first for pick location, teach points before being able to move onto them. Add drop down menu for "add machine configuration" into the "name pallet configuration" step. This is to match up to Matt's path following app too. 
-*** TODO Test the input sensor
+*** DONE Test the input sensor
 *** TODO When moving the boxes when configuring a layer: mouse capture is missing also (i.e. if I mousedown, then move the mouse too quickly, I lose the box, and later when I reenter the area, the box stays attached to mousemove).
-*** TODO Automated ordering of boxes based on pick location (to accommodate the lateral movement Max has implemented). Currently, it is manually determined.
-*** TODO Automated input sensing.
+*** DONE Automated ordering of boxes based on pick location (to accommodate the lateral movement Max has implemented). Currently, it is manually determined.
+*** DONE Automated input sensing.
 *** DONE Input Splash Screen.
 *** DONE Machine Config Styling
-*** TODO Don't remove layers + stack if box pick point is the only thing that changed.
+*** DONE Don't remove layers + stack if box pick point is the only thing that changed.
 
 ** TODO Further Items
 *** DONE Sorting boxes by row for lateral approach
@@ -111,20 +112,18 @@ PALLETIZER -*- mode: org -*-
 *** TODO Make sure that the current configuration selection mechanism is robust -- don't allow starting with incomplete configuration.
 *** TODO Show stack display realtime in the Stack.tsx.
 *** DONE Fix Jogger Bug.
-*** TODO Handle master / slave estop situation.
-*** TODO Master Slave issue also has to be solved in the control center button.
+*** DONE Handle master / slave estop situation.
+*** DONE Master Slave issue also has to be solved in the control center button.
 *** DONE Add positions to machine jogger.
 *** DONE Palletizer won't stop when returning to pick location.
 *** DONE Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
 *** TODO In browser IO Monitoring doesn't work.
-*** TODO Add location filter for negative coordinates? 
 *** DONE Make sure that all teach screens, after deleting all, disables the next button (see Pallets.tsx (Right button))
 *** DONE Box Detection should be moved to Box Size Area (not the main thing.)
 *** DONE Box detection and monitoring label the same thing.
 *** DONE Make sure that box detection is functional.
 *** DONE Heights are a little low on second layer -- fix this.
 *** DONE Update visualizer to reflect top of box (And add instructions for this.) (maybe offset).
-*** TODO Robust update mechanism absolutely necessary.
 *** DONE Make sure that stop actually stops.
 
 ** TODO Post FAT
@@ -168,18 +167,13 @@ PALLETIZER -*- mode: org -*-
 *** DONE Palletizer visualizer is in outer space for some reason -- not sure why.
 *** DONE Visualizer needs to be able to handle real coordinates in order. (Send up drop locations in status update?).
 
-Breaking up these items:
 
-** TODO Jogger 
-*** TODO Add a go to taught position.
-*** TODO Add an IO box suction on off switch.
-
-** TODO Execute:
-*** TODO Toggle suction from home screen.
+** DONE Execute:
+*** DONE Toggle suction from home screen.
 *** DONE Fix homing on home screen.
 
 ** DONE Visualizer: 
-*** DONE Fix the box display thing.
+*** DONE Fix the box display surrealism.
 *** DONE Display in the stack area. (Dynamically add boxes).
 
 
@@ -200,23 +194,25 @@ debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f se
 ** DONE Save box bug.
 ** DONE Delete box bug (box index).
 ** DONE Estop bug.
-** TODO Drag and drop mechanics.
 ** DONE Toggle stuction from jogger / home screen.
-** TODO Current configuration mechanism (0 config bug).
-** TODO In browser IO monitoring.
 ** DONE Logging.
 ** DONE Verify palletizer offset angle.
-** TODO Start from box, use non-confusing number.
-** TODO Distribution of application.
+** DONE Start from box, use non-confusing number.
 ** DONE Error message handling.
 ** DONE Retry failed requests.
+** DONE Go to taught position in jogger.
+** TODO In browser IO monitoring.
+** TODO Current configuration mechanism (0 config bug).
+** TODO Drag and drop mechanics.
+** TODO Distribution of application.
 ** TODO MQTT try to reconnect.
-** TODO Go to taught position in jogger.
 
-* TODO Future Items
+* TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.
+** TODO MM-app engine api.
 
 
+** DONE This:
 Server (18479): SyntaxError: Unexpected number in JSON at position 1
 Server (18479):     at JSON.parse (<anonymous>)
 Server (18479):     at MqttClient.<anonymous> (/home/alex/mm-js-api/dist/MessageController.js:132:27)
