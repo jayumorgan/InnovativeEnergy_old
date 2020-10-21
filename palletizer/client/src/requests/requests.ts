@@ -1,13 +1,11 @@
 import axios, { AxiosResponse } from "axios";
-
 import {
     ConfigItem,
     ConfigState
 } from "../types/Types";
-
 import { SavedMachineConfiguration } from "../parts/MachineConfig";
 
-function get_url(url: string): string {
+const get_url = (url: string): string => {
     return "" + url;
 };
 

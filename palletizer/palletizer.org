@@ -201,7 +201,7 @@ debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f se
 ** DONE Delete box bug (box index).
 ** DONE Estop bug.
 ** TODO Drag and drop mechanics.
-** TODO Toggle stuction from jogger / home screen.
+** DONE Toggle stuction from jogger / home screen.
 ** TODO Current configuration mechanism (0 config bug).
 ** TODO In browser IO monitoring.
 ** DONE Logging.
@@ -210,14 +210,10 @@ debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f se
 ** TODO Distribution of application.
 ** DONE Error message handling.
 ** DONE Retry failed requests.
-
+** TODO MQTT try to reconnect.
 
 * TODO Future Items
-** TODO Convert to mm-app engine.
-
-
-
-
+** TODO Convert to mm-app-engine.
 
 
 Server (18479): SyntaxError: Unexpected number in JSON at position 1

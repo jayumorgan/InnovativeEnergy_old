@@ -169,12 +169,37 @@ $col-3 : 100% - $col-1 - $col-2;
                     }
                 }
 
-                .HomeButton {
+                .HomeButtonContainer {
                     @include grid-coordinate(1, 2);
+                    display: grid;
+                    grid-template-rows: 80% 20%;
+
+                    .SuctionButton {
+                        height: 100%;
+                        width: 100%;
+                        cursor: pointer;
+                        @include flex-center();
+                        align-items: flex-start;
+
+                        span {
+                            font-weight: $bold-font;
+                        }
+
+                    }
+
+                    .SuctionButton:hover {
+                        color: $red;
+                        text-shadow: $medium-blue;
+                    }
+                }
+
+                .HomeButton {
                     @include button-stizz();
                     height: 100%;
 
+
                     .ButtonContainer {
+                        height: 65%;
                         background-color: $medium-blue;
                     }
 

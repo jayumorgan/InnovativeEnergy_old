@@ -18,6 +18,10 @@ import {
 import Visualizer, { VisualizerProps } from "./Visualizer";
 import JogController from "../jogger/Jogger";
 import { SavedMachineConfiguration } from './MachineConfig';
+import { MachineMotion } from './machine_config/MachineMotions';
+import { IOState } from './machine_config/IO';
+import IOController from "../jogger/IO";
+
 
 //---------------Images---------------
 import logo from "../images/vention_logo.png";
@@ -60,6 +64,35 @@ function ConfigCell({ title, children }: StackProps) {
             {children}
         </div>
     );
+};
+
+function stopSuction(machineConfigId: number) {
+    get_machine_config(machineConfigId).then((smc: SavedMachineConfiguration) => {
+        const { Off } = smc.config.io;
+        const { machines } = smc.config;
+
+        let iocs = Off.map((io: IOState) => {
+
+            return new IOController(machines[io.MachineMotionIndex]);
+        });
+        const try_stop = async (retry: number = 0) => {
+            let ps = iocs.map((ioc: IOController, i: number) => {
+                return ioc.triggerTest(Off[i]);
+            })
+
+            return Promise.all(ps).then(() => {
+                return;
+            }).catch(() => {
+                if (retry >= 5) {
+                    return;
+                }
+                setTimeout(() => {
+                    try_stop(++retry);
+                }, 300);
+            });
+        };
+        return try_stop();
+    }).catch((e) => { console.log("Error stop suction:", e); });
 };
 
 function ExecutePane({ current_box, status }: ExecuteProps) {
@@ -129,6 +162,10 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
         });
     };
 
+    const suction_button = () => {
+        stopSuction(machine_current_config);;
+    };
+
     const show_home: boolean = status === PALLETIZER_STATUS.STOPPED || status === PALLETIZER_STATUS.COMPLETE || status === PALLETIZER_STATUS.SLEEP;
 
     let is_running: boolean = (status === "Running");
@@ -194,10 +231,17 @@ function ExecutePane({ current_box, status }: ExecuteProps) {
                     </div>
                 </div>
                 {show_home ?
-                    <div className="HomeButton">
-                        <div className="ButtonContainer" onClick={home_button}>
-                            <span className={"icon-home_active"}> </span>
-                            <span id="button-text"> {"Home"} </span>
+                    <div className="HomeButtonContainer">
+                        <div className="HomeButton">
+                            <div className="ButtonContainer" onClick={home_button}>
+                                <span className={"icon-home_active"}> </span>
+                                <span id="button-text"> {"Home"} </span>
+                            </div>
+                        </div>
+                        <div className="SuctionButton" onClick={suction_button} >
+                            <span>
+                                {"Stop Suction"}
+                            </span>
                         </div>
                     </div>
                     :
