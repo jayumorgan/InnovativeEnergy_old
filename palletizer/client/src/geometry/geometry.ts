@@ -1,4 +1,3 @@
-import { IOState } from "../parts/machine_config/IO";
 import { IOOutputPin } from "../parts/machine_config/Detection";
 
 export interface PlaneDimensions {
@@ -33,7 +32,7 @@ export function Subtract3D(c1: Coordinate, c2: Coordinate): Coordinate {
         y: c1.y - c2.y,
         z: c1.z - c2.z
     } as Coordinate;
-}
+};
 
 export function MultiplyScalar(c1: Coordinate, alpha: number): Coordinate {
     return {
@@ -56,7 +55,6 @@ function Subtract2D(c1: Coordinate, c2: Coordinate): Coordinate2D {
     const y1 = c1.y;
     const x2 = c2.x;
     const y2 = c2.y;
-
     return {
         x: x1 - x2,
         y: y1 - y2

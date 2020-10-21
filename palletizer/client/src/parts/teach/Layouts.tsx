@@ -19,6 +19,7 @@ import {
 } from "../../geometry/geometry";
 import { RotateIcon } from "./PlusIcon";
 
+//---------------Styles---------------
 import "./css/Layouts.scss";
 
 const DISABLE_LOCKING = false;
@@ -105,7 +106,83 @@ export function CornerNumber(c: PALLETCORNERS) {
     }
 };
 
+
+//-------Lock to pallet-------
+// Pick your offset -- don't handle it here.
+const lockCoordinateEdges = (currentPosition: number, dimensionSize: number, fullDistance: number): number => {
+    const distanceUnit = fullDistance / (2 * 6);
+    const thresholdDistance = distanceUnit / 3;
+    const leftEdge = currentPosition - dimensionSize / 2;
+    const rightEdge = currentPosition + dimensionSize / 2;
+
+    if (leftEdge <= thresholdDistance) {
+        return 0;
+    }
+    if (fullDistance - rightEdge <= thresholdDistance) {
+        return fullDistance - dimensionSize;
+    }
+    return leftEdge;
+};
+
+
+const lockToNeighbor = (x: number, y: number, width: number, height: number, nb: Rect): [number, number] => {
+    let rv: [number, number] = [x, y];
+
+    const denom = 5;
+    const x_tol = width / denom;
+    const y_tol = height / denom;
+
+    const nx_l = nb.x;
+    const nx_r = nb.x + (+nb.width);
+    const ny_l = nb.y;
+    const ny_r = nb.y + (+nb.height);
+
+    const x_l = x;
+    const x_r = x + width;
+    const y_l = y;
+    const y_r = y + height;
+
+    let xflag = false;
+    let yflag = false;
+
+    if (Math.abs(x_l - nx_l) < x_tol) { // left to left
+        xflag = true;
+        rv[0] = nx_l
+    }
+
+    if (!xflag && Math.abs(x_l - nx_r) < x_tol) { // left to right
+        xflag = true;
+        rv[0] = nx_r;
+    }
+
+    if (!xflag && Math.abs(x_r - nx_l) < x_tol) { // right to left
+        xflag = true;
+        rv[0] = nx_l - width;
+    }
+
+    const bug_y = 3.5
+
+    if (Math.abs(y_l - ny_l) < y_tol) { // bottom to bottom
+        yflag = true;
+        rv[1] = ny_l - bug_y;
+    }
+
+    if (!yflag && Math.abs(y_l - ny_r) < y_tol) { // bottom to top
+        yflag = true;
+        rv[1] = ny_r - bug_y;
+    }
+
+    if (!yflag && Math.abs(y_r - ny_l) < y_tol) { // top to bottom
+        yflag = true;
+        rv[1] = ny_l - height - bug_y;
+    }
+
+    return rv;
+};
+
+
 interface DraggableRectProps {
+    otherRects: Rect[];
     rect: Rect;
     updatePosition: (index: number, x: number, y: number) => void;
     index: number;
@@ -118,26 +195,7 @@ interface DraggableRectProps {
     yh: number;
 };
 
-// Lock to edges of the pallet.
-function lockCoordinateEdges(currentPosition: number, dimensionSize: number, fullDistance: number): number {
-    const distanceUnit = fullDistance / (2 * 6);
-    const thresholdDistance = distanceUnit / 3;
-
-    const leftEdge = currentPosition - dimensionSize / 2;
-    const rightEdge = currentPosition + dimensionSize / 2;
-
-    if (leftEdge <= thresholdDistance) {
-        return 0;
-    }
-
-    if (fullDistance - rightEdge <= thresholdDistance) {
-        return fullDistance - dimensionSize;
-    }
-
-    return leftEdge;
-};
-
-function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh }: DraggableRectProps) {
+function DraggableRect({ rect, updatePosition, index, enabled, name, showName, xl, xh, yl, yh, otherRects }: DraggableRectProps) {
     const [rectangle, setRectangle] = useState<Rect>(rect);
     const [active, setActive] = useState<boolean>(false);
 
@@ -150,10 +208,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
             const bb = (e.target as any).getBoundingClientRect();
             const x = e.clientX - bb.left;
             const y = e.clientY - bb.top;
-            const offset = {
-                x, y
-            };
-
+            const offset = { x, y };
             setRectangle({
                 ...rectangle,
                 offset
@@ -163,45 +218,37 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
     };
 
     const handleMove = (e: React.PointerEvent) => {
-
         let bb = (e.target as any).getBoundingClientRect();
-        // new mouse positions.
         let x = e.clientX - bb.left;
         let y = e.clientY - bb.top;
-
-
         // check distances -- with tolerance
         if (active) {
-
-            let { offset } = rectangle;
-
-            let newR = {
+            const { offset } = rectangle;
+            const newR = {
                 ...rectangle,
                 x: rectangle.x - (offset.x - x),
                 y: rectangle.y - (offset.y - y)
             };
+            const xWidth = +(newR.width) as number;
+            const yWidth = +(newR.height) as number;
+            if (!DISABLE_LOCKING) {
 
-            const xWidth = newR.width as number;
-            const yWidth = newR.height as number;
+                otherRects.forEach((nb: Rect) => {
+                    const [xn, yn] = lockToNeighbor(newR.x, newR.y, xWidth, yWidth, nb);
+                    newR.x = xn;
+                    newR.y = yn;
+                });
 
-            if (true || !(newR.x < 0 || newR.y < 0 || newR.x > xh || newR.y > yh - yWidth / 2)) {
-
-                if (!DISABLE_LOCKING) {
-
-                    // newR.x = lockCoordinateCenter(newR.x + xWidth / 2 - xl, xh - xl) + xl;
-                    newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
-                    // newR.y = lockCoordinateCenter(newR.y + xWidth / 2 - yl, yh - yl) + yl;
-                    newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
-                }
-
-                setRectangle(newR);
+                newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
+                newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
             }
+
+            setRectangle(newR);
         }
     };
 
     const handleUp = (e: React.PointerEvent) => {
         if (enabled) {
-            let { offset } = rectangle;
             setRectPosition(rectangle);
             setActive(false);
         }
@@ -337,8 +384,8 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             width *= size * scale / norm;
             length *= size * scale / norm;
 
-            let boxColor = String(COLORS.CLEAR_BOX);
-            let strokeColor = String(COLORS.CARDBOARD);
+            const boxColor = String(COLORS.CLEAR_BOX);
+            const strokeColor = String(COLORS.CARDBOARD);
 
             const boxprops: Rect = {
                 x,
@@ -394,7 +441,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 cornerCircleProps.cy = (bottomLog.y as number) + (bottomLog.height as number);
                 break;
             }
-
         };
         cornerCircleProps.cx += outerSVG.x;
         cornerCircleProps.cy += outerSVG.y;
@@ -423,8 +469,21 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                     })}
                 </svg>
                 {BoxSVGs.map((r: Rect, index: number) => {
+                    let otherRects = [...BoxSVGs];
+                    otherRects.splice(index, 1);
+
+                    const dp: DraggableRectProps = {
+                        index,
+                        rect: r,
+                        otherRects,
+                        updatePosition: updateRectPosition,
+                        enabled: isDragEnabled,
+                        name: boxes![index].box.name,
+                        showName,
+                        ...snapParams
+                    };
                     return (
-                        <DraggableRect index={index} rect={r} updatePosition={updateRectPosition} key={index} enabled={isDragEnabled} name={boxes![index].box.name} showName={showName} {...snapParams} />
+                        <DraggableRect key={index} {...dp} />
                     );
                 })}
             </svg>
