@@ -211,6 +211,7 @@ debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f se
 ** DONE Error message handling.
 ** DONE Retry failed requests.
 ** TODO MQTT try to reconnect.
+** TODO Go to taught position in jogger.
 
 * TODO Future Items
 ** TODO Convert to mm-app-engine.
