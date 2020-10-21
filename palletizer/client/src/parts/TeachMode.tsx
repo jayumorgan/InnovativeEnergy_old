@@ -77,7 +77,6 @@ type ConfigAction = {
 
 //-------Custom Reducers To Deal With Forward Breaking Changes-------
 function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfiguration {
-    // This rests on the assumptions that boxes are either:
     // 1.  Deleted,
     // 2.  Edited with change flag.
     // 3.  Added
@@ -88,7 +87,9 @@ function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfi
 
     let changedIndex: number | null = null;
 
-    const filterPallets = (modifiedBoxIndex: number) => {
+    // Shift boxes down.
+
+    const filterPallets = (modifiedBoxIndex: number, deleted: boolean) => {
         return state.pallets.map((po: PalletGeometry) => {
             let deleted_layouts: number[] = [];
 
@@ -111,17 +112,34 @@ function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfi
                 return false;
             });
 
-            let first_index: number = po.Stack.length;
-            po.Stack = po.Stack.filter((layoutIndex: number, i: number) => {
-                if (i > first_index) {
-                    return false;
-                }
-                if (layoutIndex in deleted_layouts) {
-                    first_index = i;
-                    return false;
-                }
-                return true;
+            if (deleted) {
+                po.Layouts = po.Layouts.map((lo: LayoutObject) => {
+                    lo.boxPositions = lo.boxPositions.map((bpo: BoxPositionObject) => {
+                        if (bpo.index > modifiedBoxIndex) {
+                            bpo.index--;
+                        }
+                        return bpo;
+                    });
+                    return lo;
+                });
+            }
+
+            deleted_layouts.sort((a, b) => { return b - a });
+
+            po.Stack = po.Stack.filter((li: number) => {
+                return deleted_layouts.indexOf(li) < 0; // not in deleted
             });
+
+            deleted_layouts.forEach((dl: number) => {
+                po.Stack = po.Stack.map((li: number) => {
+                    if (li > dl) {
+                        return --li;
+                    }
+                    return li;
+
+                });
+            });
+
             return po;
         });
     };
@@ -129,10 +147,16 @@ function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfi
     if (boxes.length < state.boxes.length) {
         changedIndex = boxes.length; // the last index (box that was removed).
     }
+    let delete_flag = false;
 
     boxes = boxes.map((b: BoxObject, i: number) => {
-        if (b.changed === true || b.deleted === true) {
+        if (b.changed === true) {
             changedIndex = i;
+        }
+
+        if (b.deleted === true) {
+            changedIndex = i;
+            delete_flag = true;
         }
         delete b.changed;
         return b;
@@ -141,7 +165,8 @@ function boxReducer(state: PalletConfiguration, boxes: BoxObject[]): PalletConfi
     });
 
     if (changedIndex !== null) {
-        const pallets = filterPallets(changedIndex);
+        const pallets = filterPallets(changedIndex, delete_flag);
+        console.log(pallets, "Pallet update");
         return { ...state, pallets, boxes };
     }
 

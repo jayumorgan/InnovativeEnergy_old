@@ -2,13 +2,17 @@ import sqlite3 from "sqlite3";
 import { open, Database as sqliteDB } from "sqlite";
 import path from "path";
 import fs from "fs";
+import Logger, { log_fn } from "../log/log";
+
+//---------------Log---------------
+const log: log_fn = Logger().db_log;
+
 //---------------Notes---------------
-// Make promise chains less stupid.
+// Make it easier to modify raw_json (development).
 
 
 //-------NB: These we be in the dist directory (typescript)-------
 const DATABASE_DIRECTORY = path.join(__dirname, "..", "db");
-
 //const filename: string = "cf.sqlite3";
 //const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), "cf.sqlite3");
 const DATABASE_PATH = path.join(DATABASE_DIRECTORY.toString(), "Configurations.sqlite3");
@@ -64,16 +68,18 @@ const DEFAULT_CURRENT_PALLET_CONFIG = `UPDATE pallet_configs SET selected = (CAS
 export class DatabaseHandler {
     db: sqliteDB;
 
+
     constructor(db: sqliteDB) {
         this.db = db;
     };
 
     __checkCurrentConfigs() {
-        let my = this;
+        const my = this;
         return new Promise((resolve, reject) => {
             my.db.run(DEFAULT_CURRENT_PALLET_CONFIG).then(() => {
                 resolve();
             }).catch((e: any) => {
+                my
                 reject(e);
             });
         });
@@ -96,7 +102,7 @@ export class DatabaseHandler {
     };
 
     getAllConfigs() {
-        let my = this;
+        const my = this;
         return new Promise((resolve, reject) => {
             my.__checkCurrentConfigs().then(() => {
                 my.getMachineConfigs().then((machine: any) => {
@@ -120,7 +126,7 @@ export class DatabaseHandler {
     };
 
     getCurrentConfigs() {
-        let my = this;
+        const my = this;
         return new Promise((resolve, reject) => {
             my.__checkCurrentConfigs().then(() => {
                 my.db.get(SELECT_CURRENT_PALLET_CONFIG).then((pallet: any) => {
@@ -171,7 +177,7 @@ export class DatabaseHandler {
     };
 
     async deleteMachineConfig(id: number) {
-        let my = this;
+        const my = this;
         return my.db.run(DELETE_PALLET_BY_MACHINE, [id]).then(() => {
             return my.db.run(DELETE_MACHINE_CONFIG, [id]);
         });
@@ -202,7 +208,7 @@ function getDatabase(): Promise<sqliteDB> {
                 reject(e);
             });
         }).catch((e) => {
-            console.log(e);
+            log(e);
             reject(e)
         });
     });

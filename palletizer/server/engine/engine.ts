@@ -7,8 +7,7 @@ import MachineMotion, {
     DIRECTION,
     DRIVES,
     DriveType,
-    MachineMotionConfig,
-    IODeviceState
+    MachineMotionConfig
 } from "mm-js-api";
 import {
     SavedMachineConfiguration,
@@ -30,7 +29,8 @@ import {
     generateStandardPath
 } from "../optimizer/standard";
 
-// This file could use some cleanup.
+import Logger, { log_fn } from "../log/log";
+const log: log_fn = Logger().engine_log;
 
 //---------------Environment Setup---------------
 dotenv.config();
@@ -40,20 +40,21 @@ var TESTING: boolean = true;
 if (process.env.ENVIRONMENT === "PRODUCTION") {
     TESTING = false;
 }
-console.log((TESTING ? "In" : "Not in") + " Testing environment");
 
+console.log((TESTING ? "In" : "Not in") + " Testing environment");
 
 //---------------Network Parameters---------------
 const HOSTNAME = "127.0.0.1";
 const MQTTPORT = 1883;
+
 //---------------Topics---------------
-const PALLETIZER_TOPIC = "palletizer/";
-const STATE_TOPIC = PALLETIZER_TOPIC + "state";
-const INFORMATION_TOPIC = PALLETIZER_TOPIC + "information";
-const REQUEST_TOPIC = PALLETIZER_TOPIC + "request";
-const CONTROL_TOPIC = PALLETIZER_TOPIC + "control";
-// Trigger machine scale estop (stop all machines).
-const ESTOP_TOPIC = PALLETIZER_TOPIC + "trigger/estop";
+enum TOPICS {
+    STATE = "palletizer/state",
+    INFO = "palletizer/information",
+    REQUEST = "palletizer/request",
+    CONTROL = "palletizer/control",
+    ESTOP = "palletizer/trigger/estop"
+};
 
 interface TopicStruct {
     handler: (m: string) => void;
@@ -100,19 +101,8 @@ interface MechanicalLayout {
     good_pick: IOOutputPin[];
 };
 
-function compareIODeviceStates(io1: IODeviceState, io2: IODeviceState): boolean {
-    let equal: boolean = true;
-    for (let i = 0; i < io1.length; i++) {
-        equal = io1[i] === io2[i];
-        if (!equal) {
-            break;
-        }
-    }
-    return equal;
-}
-
 function handleCatch(e: any) {
-    console.log("Engine error: ", e);
+    log("Engine error: ", e);
 };
 
 function numberToDrive(n: number): DriveType {
@@ -135,13 +125,6 @@ function numberToDrive(n: number): DriveType {
     }
 };
 
-async function safeAwait(promise: Promise<any>) {
-    return promise.then(data => {
-        return [undefined, data];
-    }).catch((e) => {
-        return [e];
-    });
-};
 
 function defaultMechanicalLayout(): MechanicalLayout {
     return {
@@ -199,15 +182,15 @@ export class Engine {
 
 
     __initTopics() {
-        this.subscribeTopics[REQUEST_TOPIC] = {
+        this.subscribeTopics[TOPICS.REQUEST] = {
             handler: this.__handleSendState,
             regex: /palletizer\/request/
         };
-        this.subscribeTopics[CONTROL_TOPIC] = {
+        this.subscribeTopics[TOPICS.CONTROL] = {
             handler: this.__handleControl,
             regex: /palletizer\/control/
         };
-        this.subscribeTopics[ESTOP_TOPIC] = { // deprecated.
+        this.subscribeTopics[TOPICS.ESTOP] = { // deprecated.
             handler: this.__handleEstop,
             regex: /palletizer\/trigger\/estop/
         };
@@ -279,13 +262,13 @@ export class Engine {
 
     __handleSendState(m?: string) {
         let state_string = JSON.stringify(this.palletizerState);
-        this.__publish(STATE_TOPIC, state_string);
+        this.__publish(TOPICS.STATE, state_string);
         this.__handleSendInformation();
     };
 
     __handleSendInformation() {
         let info_string = JSON.stringify(this.informationLog);
-        this.__publish(INFORMATION_TOPIC, info_string);
+        this.__publish(TOPICS.INFO, info_string);
     };
 
     __handleInformation(t: INFO_TYPE, description: string) {
@@ -325,7 +308,7 @@ export class Engine {
             m.triggerEstop().then(() => {
                 console.log("Estop triggered for machine at ip: ", m.machineIP);
             }).catch((e) => {
-                console.log("Trigger estop failed ", e);
+                log("Trigger estop failed ", e);
             });
         });
     };
@@ -451,6 +434,8 @@ export class Engine {
         my.loadConfigurations().then(() => {
             return my.configureMachine();
         }).then(() => {
+            return my.releaseAndReset();
+        }).then(() => {
             my.__stateReducer({ cycle: my.palletizerState.cycle + 1 });
             return my.startPalletizer(my.startBox);
         }).catch((e: string) => {
@@ -458,9 +443,9 @@ export class Engine {
                 console.log("Palletizer has stopped.");
                 my.__handleInformation(INFO_TYPE.STATUS, "Palletizer stopped.");
             } else {
-                my.__handleInformation(INFO_TYPE.ERROR, e);
+                my.__handleInformation(INFO_TYPE.ERROR, String(e));
                 my.__updateStatus(PALLETIZER_STATUS.ERROR);
-                console.log("Failed in handle start", e);
+                log("Failed in handle start", e);
             }
         });
     };
@@ -482,56 +467,51 @@ export class Engine {
         }
     };
 
+    releaseAndReset(retry_count: number = 0): Promise<boolean> {
+        // Test.
+        const my = this;
+        const { machines } = my.mechanicalLayout;
+
+        return new Promise<boolean>((resolve, reject) => {
+
+            const ps = machines.map((m: MachineMotion) => {
+                return m.releaseAndReset();
+            });
+
+            Promise.all(ps).then(() => {
+                resolve(true);
+            }).catch((e: any) => {
+                if (retry_count <= 5) { // retry 5x.
+                    my.releaseAndReset(++retry_count).then((b: boolean) => {
+                        resolve(b);
+                    }).catch((e: string) => {
+                        reject(e);
+                    })
+                } else {
+                    reject("Unable to release estop. Verify that estop button is not locked.");
+                }
+            });
+        });
+    };
+
     //-------Mechanical Configuration-------
     configureMachine(): Promise<boolean> {
         const my = this;
         if (my.machineConfig !== null && my.palletConfig !== null) {
-            let promises: Promise<any>[] = [];
-            let mms: MachineMotion[] = [];
+            let promises: Promise<vResponse[]>[] = [];
             const { config } = my.machineConfig;
             const { machines, io, axes, good_pick } = config;
-            machines.forEach((mm: MachineMotionInfo) => {
+            const mms: MachineMotion[] = machines.map((mm: MachineMotionInfo) => {
                 const { ipAddress } = mm;
                 const mm_config: MachineMotionConfig = {
                     machineIP: TESTING ? "127.0.0.1" : ipAddress,
                     serverPort: 8000,
                     mqttPort: 1883,
+                    retryCount: 2 // retry request 1x
                 };
                 const mm_controller: MachineMotion = new MachineMotion(mm_config);
-                // NB: estop will recursively call estop, so unbind the estop action on first call.
-
-                const p = new Promise((resolve, reject) => {
-                    // To hack around the master / slave estop. -- Fix Later.
-                    console.log("Release estop without knowledge of failure.");
-
-
-                    mm_controller.releaseEstop().then(() => {
-                        console.log("Estop release succeeded.");
-                    }).catch((e: any) => {
-                        console.log("Failed release estop", e);
-                    });
-
-                    mm_controller.resetSystem().then(() => {
-                        console.log("system reset succeeded.");
-                    }).catch((e: any) => {
-                        console.log("Failed reset system", e);
-                    });
-
-                    resolve();
-                    // mm_controller.releaseEstop().then(() => {
-                    //     return mm_controller.resetSystem();
-                    // }).then(() => {
-                    //     resolve();
-                    // }).catch((e: vResponse) => {
-                    //     console.log("Failed release and reset");
-                    //     reject(e);
-                    // });
-                });
-
-                promises.push(p);
-                mms.push(mm_controller);
+                return mm_controller;
             });
-
 
 
             mms.forEach((m: MachineMotion) => {
@@ -541,7 +521,6 @@ export class Engine {
 
                 const estopHandler = (estop: boolean) => {
                     if (estop) {
-                        console.log("Header estop event", estop);
                         m.bindEstopEvent(unboundEstopHandler);
                         const handler = my.__handleEstop.bind(my);
                         handler("Estop message is irrelevant");
@@ -567,8 +546,6 @@ export class Engine {
                     const gearbox_multiple: number = d.Gearbox ? 5 : 1;
 
                     return mm.configAxis(drive, MicroSteps * gearbox_multiple, MechGainValue, Direction > 0 ? DIRECTION.POSITIVE : DIRECTION.NEGATIVE).then(() => {
-                        console.log("Machine Motion config axis: ", axis, "Drive=", drive, " Values ustep, mechGain", mm.uStep, mm.mechGain);
-
                         return mm.configHomingSpeed([drive], [HomingSpeed]);
                     });
                 })));
@@ -577,6 +554,7 @@ export class Engine {
             my.mechanicalLayout.axes = axes;
             my.mechanicalLayout.io = io;
             my.mechanicalLayout.good_pick = good_pick;
+            return Promise.resolve(true);
 
             return new Promise((resolve, reject) => {
                 Promise.all(promises).then(() => {
@@ -651,11 +629,19 @@ export class Engine {
             if (path_index >= path.length) {
                 return Promise.resolve();
             } else {
+
                 let action_coordinate: ActionCoordinate = path[path_index];
-                return my.__move(action_coordinate).then((_: any) => {
-                    return my.executeAction(action_coordinate);
-                }).then(() => {
-                    return my.executePathSequence(box_index, path_index + 1);
+                return new Promise((resolve, reject) => {
+                    my.__move(action_coordinate).then((_: any) => {
+                        return my.executeAction(action_coordinate);
+                    }).then(() => {
+                        return my.executePathSequence(box_index, path_index + 1);
+                    }).then(() => {
+                        resolve();
+                    }).catch((e: any) => {
+                        log(e);
+                        reject("Unable to execute path sequence. Verify that motion controller is running.");
+                    });
                 });
             }
         }
@@ -685,8 +671,15 @@ export class Engine {
     async executeHomingSequence(): Promise<any> {
         const my = this;
         my.cycleState = CycleState.HOMEING;
-        return my.homeVerticalAxis().then(() => {
-            return my.homeAllAxes();
+
+        return new Promise((resolve, reject) => {
+            my.homeVerticalAxis().then(() => {
+                return my.homeAllAxes();
+            }).then(() => {
+                resolve();
+            }).catch((e: any) => {
+                reject("Failed to home axes. Verify that motion controller is running.");
+            })
         });
     };
 
@@ -904,7 +897,7 @@ export class Engine {
                     resolve(detected);
                 }
             }).catch((e: any) => {
-                console.log("Error handle good pick", e);
+                log("Error handle good pick", e);
                 reject("Unable to detect good pick. Operator assistance required.");
             });
         });

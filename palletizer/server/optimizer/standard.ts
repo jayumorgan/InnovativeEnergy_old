@@ -111,7 +111,11 @@ function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?
         path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.SLOW));
     }
 
-    path.push(addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW));
+    const dropAction = addActionToCoordinate(box.dropLocation, ActionTypes.DROP, SpeedTypes.SLOW);
+    dropAction.boxIndex = box.boxIndex;
+    dropAction.palletIndex = box.palletIndex;
+    dropAction.dropLocation = { ...box.dropLocation };
+    path.push(dropAction);
 
     //-------Raise-------
     path.push(addActionToCoordinate(raiseOverCoordinate(box.dropLocation, z_top), ActionTypes.NONE, SpeedTypes.FAST));

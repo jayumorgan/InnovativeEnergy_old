@@ -9,15 +9,13 @@ import {
     compareDimensions
 } from "../../geometry/geometry";
 import { ControlProps, wrapChangeEventNumber } from "../shared/shared";
-
-//---------------Styles---------------
-import "./css/BoxSize.scss";
-import { IOState } from '../machine_config/IO';
 import { get_machine_config } from '../../requests/requests';
 import { SavedMachineConfiguration } from '../MachineConfig';
 import { MachineMotion } from '../machine_config/MachineMotions';
 import Detection, { DetectionProps, IOOutputPin } from '../machine_config/Detection';
 
+//---------------Styles---------------
+import "./css/BoxSize.scss";
 
 interface BoxProps {
     box: BoxObject;
@@ -166,7 +164,7 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         updateBox({ ...box, boxDetection: ios });
     };
 
-    const handlePickFromBox = wrapChangeEventNumber((val: number) => {
+    const handlePickFromBox = wrapChangeEventNumber(() => {
         updateBox({ ...box, pickFromStack: !box.pickFromStack });
     });
 
@@ -204,8 +202,16 @@ function CreateNewBox({ machineConfigId, instructionNumber, box, LeftButton, Rig
         return (<Detection {...props} />);
 
     } else {
+
+        const contentItemProps: ContentItemProps = {
+            instruction,
+            RightButton,
+            LeftButton,
+            instructionNumber
+        };
+
         return (
-            <ContentItem instruction={instruction} RightButton={RightButton} LeftButton={LeftButton} instructionNumber={instructionNumber}>
+            <ContentItem {...contentItemProps} >
                 <div className="NewBoxGrid">
                     <div className="BoxSetup">
                         <Jogger {...joggerProps} />
@@ -323,7 +329,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
             action: startEdit(-1)
         };
 
-        const contentItemProps = {
+        const contentItemProps: ContentItemProps = {
             instruction,
             instructionNumber,
             LeftButton,
@@ -343,7 +349,7 @@ export default function BoxSize({ allBoxes, instructionNumber, setBoxes, handleB
                     <div className="BoxScrollContainer">
                         <div className="BoxScroll">
                             {allBoxes.map((val: BoxObject, index: number) => {
-                                let boxCellProps: BoxProps = {
+                                const boxCellProps: BoxProps = {
                                     box: val,
                                     startEdit: startEdit(index),
                                     editName: editName(index),

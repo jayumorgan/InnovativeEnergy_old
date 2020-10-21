@@ -1,13 +1,9 @@
-// Express
 import express from "express";
 import morgan from "morgan";
 import * as dotenv from "dotenv";
 import { AddressInfo } from "net";
-//---------------Router---------------
 import router from "./routes/router";
-//---------------Database Handler---------------
 import { initDatabaseHandler, DatabaseHandler } from "./database/db";
-//---------------Control Engine---------------
 import { Engine } from "./engine/engine";
 
 dotenv.config();
@@ -21,11 +17,14 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
+
 initDatabaseHandler().then((handler: DatabaseHandler) => {
     const attachDatabaseHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
         req.databaseHandler = handler;
         next();
     };
+
+    // To keep in scope.
     const engine = new Engine(handler);
 
     app.use(attachDatabaseHandler);

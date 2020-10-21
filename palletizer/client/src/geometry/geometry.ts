@@ -100,7 +100,7 @@ export function getPalletDimensions(pallet: PalletGeometry): PlaneDimensions {
 };
 
 export function getXAxisAngle(v: Coordinate): number {
-    return Math.atan(v.y / v.x);
+    return Math.atan(v.y / v.x) * 180 / Math.PI; // to degrees
 };
 
 export function getCenterOfPallet(p: PalletGeometry): Coordinate {

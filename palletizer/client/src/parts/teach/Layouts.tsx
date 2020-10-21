@@ -940,6 +940,15 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
             let newLayouts = [...allPallets[palletIndex].Layouts];
             newLayouts.splice(layoutIndex, 1);
             newPallets[palletIndex].Layouts = newLayouts;
+            // Shift layout indices.
+            newPallets[palletIndex].Stack = newPallets[palletIndex].Stack.filter((li: number) => {
+                return li !== layoutIndex;
+            }).map((li: number) => {
+                if (li > layoutIndex) {
+                    return --li;
+                }
+                return li;
+            });
             setPallets(newPallets);
         };
 

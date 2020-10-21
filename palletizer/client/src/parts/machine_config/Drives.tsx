@@ -257,10 +257,10 @@ function nextDrive(a: AxesConfiguration, m: MachineMotion[]): Drive {
         Direction: NumericalDirection.NORMAL,
         Gearbox: false,
         HomingSpeed: 300,
-        Speed: 850,
-        FreightSpeed: 450,
-        Acceleration: 600,
-        FreightAcceleration: 200
+        Speed: 1000,
+        FreightSpeed: 1000,
+        Acceleration: 950,
+        FreightAcceleration: 950
     };
 };
 

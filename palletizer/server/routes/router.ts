@@ -1,20 +1,19 @@
-// Express
 import express, { Request, Response } from "express";
-// File Handling
 import fs from "fs";
 import path from "path";
+import Logger, { log_fn } from "../log/log";
 
-let BUILD_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'client', 'build');
+const BUILD_PATH: fs.PathLike = path.join(__dirname, '..', '..', 'client', 'build');
+const log: log_fn = Logger().db_log;
 
 function handleCatch(res: Response) {
     return (e: any) => {
-        console.log(e);
+        log(e);
         res.sendStatus(500);
     }
 };
 
 //---------------Router---------------
-
 let router: express.Router = express.Router();
 router.use(express.json());
 
@@ -31,7 +30,6 @@ router.post("/configs/set", (req: Request, res: Response) => {
 router.post("/configs/savepallet", (req: Request, res: Response) => {
     const handler = req.databaseHandler;
     const { name, config, id, complete } = req.body;
-    // If it is alread 
 
     if (id === null) {
         handler.addPalletConfig(name, config, complete).then(() => {
@@ -95,10 +93,7 @@ router.post("/configs/delete", (req: Request, res: Response) => {
 
     handleFn(id).then(() => {
         res.sendStatus(200);
-    }).catch((e) => {
-        console.log("Error configs/delete", e);
-        res.sendStatus(500);
-    });
+    }).catch(handleCatch(res));
 });
 
 router.use(express.static(BUILD_PATH));

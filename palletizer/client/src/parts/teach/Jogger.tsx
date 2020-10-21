@@ -18,7 +18,6 @@ if (process.env.REACT_APP_ENVIRONMENT === "DEVELOPMENT") {
 }
 console.log((TESTING ? "In" : "Not in") + " Testing environment -- (Jogger -- set machine ips.)");
 
-let TEMP_JOGGER_INDEX = 0;
 
 interface JoggerParameterProps {
     title: string;
@@ -138,14 +137,12 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
 
     useEffect(() => {
         if (Controller) {
-
             Controller.positionHandler = (p: any) => {
                 setCurrentPosition(p as CoordinateRot);
             }
             Controller.getPosition();
             setJogController(Controller);
         } else if (savedMachineConfig) {
-            console.log(savedMachineConfig);
             createJogger(savedMachineConfig);
         } else {
             get_machine_config(machineConfigId).then((mc: SavedMachineConfiguration) => {
@@ -255,30 +252,12 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
 
     const handleSelect = async () => {
         if (!hideName) {
-
             if (showManualEntry) {
                 selectAction(manualEntryCoordinate);
                 return;
             }
-
-            if (!TESTING) {
-                selectAction(currentPosition);
-                return;
-            }
-            // This makes a 1000 x 1000 pallet centered at 2500,2500, z.
-            let pos = {
-                x: 2000, y: 2000, z: 4000, θ: 0
-            } as CoordinateRot;
-            let tmp = TEMP_JOGGER_INDEX % 3;
-            if (tmp === 0) {
-                pos.y = 3000;
-            } else if (tmp === 1) {
-
-            } else {
-                pos.x = 3000;
-            }
-            TEMP_JOGGER_INDEX++;
-            selectAction(pos);
+            selectAction(currentPosition);
+            return;
         }
     };
 
