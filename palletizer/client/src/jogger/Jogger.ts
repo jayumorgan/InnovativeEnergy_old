@@ -310,6 +310,47 @@ export default class Jogger {
         return mm_group;
     };
 
+    moveToPoint(axis: PalletizerAxes | string, position: number) {
+        const my = this;
+
+        if (my.isMoving) {
+            return Promise.reject("Already in motion");
+        } else {
+            my.isMoving = true;
+        }
+
+        let mm_group = my.__getMMGroup(axis);
+        let mm_indices = Object.keys(mm_group) as string[];
+        let promises = mm_indices.map((is: string) => {
+            let i: number = +is;
+            let drives: DriveType[] = mm_group[i];
+            let mm: MM = my.machineMotions[i];
+            let positions: number[] = new Array(drives.length).fill(position);
+            let p = new Promise((resolve, reject) => {
+                mm.emitCombinedAxesAbsoluteMove(drives, positions).then(() => {
+                    return mm.waitForMotionCompletion();
+                }).then(() => {
+                    resolve();
+                }).catch((e: any) => {
+                    reject(e);
+                });
+            });
+            return p;
+        });
+
+        return new Promise((resolve, reject) => {
+            Promise.all(promises).then(() => {
+                my.getPosition();
+                my.isMoving = false;
+                resolve();
+            }).catch((e: any) => {
+                my.getPosition();
+                my.isMoving = false;
+                reject(e);
+            });
+        });
+    };
+
     startJog(axis: PalletizerAxes | string, direction: number | DIRECTION) {
         const my = this;
 
@@ -397,6 +438,23 @@ export default class Jogger {
             console.log("Error get position", e);
         })
     };
+
+    async goToPoint(p: CoordinateRot): Promise<any> {
+        const my = this;
+        return my.moveToPoint(PalletizerAxes.Z, p.z - 50).then(() => { // raise above z.
+            return my.moveToPoint(PalletizerAxes.X, p.x);
+        }).then(() => {
+            return my.moveToPoint(PalletizerAxes.Y, p.y);
+        }).then(() => {
+            return my.moveToPoint(PalletizerAxes.θ, p.θ);
+        }).then(() => {
+            return my.moveToPoint(PalletizerAxes.Z, p.z)
+        }).then(() => {
+            my.getPosition();
+        });
+    };
+
+
 
     triggerEstop() {
         const my = this;

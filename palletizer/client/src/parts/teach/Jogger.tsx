@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, useEffect, ReactElement } from 'react';
+import React, { useState, ChangeEvent, useEffect, Fragment } from 'react';
 import JogController, { PalletizerAxes } from "../../jogger/Jogger";
 // import SolidArrow, { ROTATION } from "./SolidArrow";
 import { get_machine_config } from "../../requests/requests";
@@ -250,6 +250,17 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         }
     };
 
+    const visit_taught_position = () => {
+        if (jogController !== null) {
+            console.log("Going to taught position", manualEntryCoordinate);
+            jogController.goToPoint(manualEntryCoordinate).then(() => { return; }).catch((e: any) => {
+                console.log("error visit_taught_position", e);
+            });
+        } else {
+            console.log("Jog Controller not initialized");
+        }
+    };
+
     const handleSelect = async () => {
         if (!hideName) {
             if (showManualEntry) {
@@ -294,6 +305,7 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
         };
     }
 
+
     return (
         <div className="Jogger">
             <JoggerHeader {...joggerHeaderProps} />
@@ -328,11 +340,18 @@ export default function Jogger({ selectAction, updateName, name, machineConfigId
                     <JoggerParameter {...distanceParams} />}
                 <div className="Select">
                     {(!hideName) &&
-                        <div className="SelectButton" onClick={handleSelect}>
-                            <span>
-                                {"Select Point"}
-                            </span>
-                        </div>
+                        <Fragment>
+                            <div className="SelectButton" onClick={handleSelect}>
+                                <span>
+                                    {"Select"}
+                                </span>
+                            </div>
+                            <div className="SelectButton" onClick={visit_taught_position}>
+                                <span>
+                                    {"Test"}
+                                </span>
+                            </div>
+                        </Fragment>
                     }
                 </div>
                 {showManualEntry ? <div> </div> :
@@ -456,5 +475,3 @@ function ManualEntry({ coordinate, updateCoordinate }: ManualEntryProps) {
         </div>
     );
 };
-
-
