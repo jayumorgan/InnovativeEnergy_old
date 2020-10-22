@@ -21,10 +21,7 @@ export interface IO {
 };
 
 export function defaultIO(): IO {
-    return {
-        On: [],
-        Off: []
-    };
+    return { On: [], Off: [] };
 };
 
 export function defaultIOState(): IOState {
@@ -49,6 +46,7 @@ interface IOCellProps {
 function IOCell({ index, ioController, state, handleSelectMachineMotion, handleSelectNetworkId, toggleSwitch, removeOutput, allMachines }: IOCellProps) {
 
     const [isTesting, setIsTesting] = useState<boolean>(false);
+
     const handleTest = () => {
         ioController.triggerTest(state).then(() => {
             setIsTesting(true);
@@ -57,6 +55,7 @@ function IOCell({ index, ioController, state, handleSelectMachineMotion, handleS
             console.log("Error trigger test", e);
         });
     };
+
     const handleStop = () => {
         ioController.triggerStop().then(() => {
             setIsTesting(false);
@@ -151,7 +150,6 @@ function IOCell({ index, ioController, state, handleSelectMachineMotion, handleS
     );
 };
 
-
 interface IOConfigProps {
     allMachines: MachineMotion[];
     io: IO;
@@ -167,10 +165,9 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
     const [ioControllers, setioControllers] = useState<IOController[]>([]);
 
     useEffect(() => {
-        let ios = allMachines.map((machine: MachineMotion) => {
+        setioControllers(allMachines.map((machine: MachineMotion) => {
             return new IOController(machine);
-        });
-        setioControllers(ios);
+        }));
     }, []);
 
     const [editingIOs, setEditingIOs] = useState<IOState[]>((() => {
@@ -188,14 +185,14 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
 
     let instruction: string = (currentStateStep) ? "Configure the digital outputs for active (suction on)" : "Configure the digital outputs for idle (suction off)";
 
-    let LeftButton: ButtonProps = {
+    const LeftButton: ButtonProps = {
         name: "Back",
         action: () => {
             handleBack();
         }
     };
 
-    let RightButton: ButtonProps = {
+    const RightButton: ButtonProps = {
         name: "Next",
         action: () => {
             let cp = { ...io };
@@ -204,8 +201,6 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
                 setIO(cp);
                 handleNext();
             } else {
-                // save them.
-                let cp = { ...io };
                 cp.Off = [...editingIOs];
                 setIO(cp);
                 setCurrentStateStep(true);
@@ -215,15 +210,14 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         enabled: true
     };
 
-
-    let AddButton: ButtonProps = {
+    const AddButton: ButtonProps = {
         name: "Add new output",
         action: () => {
             setEditingIOs([...editingIOs, defaultIOState()]);
         }
     };
 
-    let contentItemProps = {
+    const contentItemProps = {
         instruction,
         instructionNumber,
         LeftButton,
@@ -231,33 +225,33 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         AddButton
     } as any;
 
-    let removeOutput = (index: number) => () => {
+    const removeOutput = (index: number) => () => {
         let cp = [...editingIOs];
         cp.splice(index, 1);
         setEditingIOs([...cp]);
     };
 
-    let toggleSwitch = (i: number, j: number) => () => {
+    const toggleSwitch = (i: number, j: number) => () => {
         let cp = [...editingIOs];
         cp[i].Pins[j] = !(cp[i].Pins[j]);
         setEditingIOs([...cp]);
     };
 
-    let handleSelectMachineMotion = (io_index: number) => (e: ChangeEvent) => {
+    const handleSelectMachineMotion = (io_index: number) => (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         let cp = [...editingIOs];
         cp[io_index].MachineMotionIndex = val;
         setEditingIOs(cp);
     };
 
-    let handleSelectNetworkId = (io_index: number) => (e: ChangeEvent) => {
+    const handleSelectNetworkId = (io_index: number) => (e: ChangeEvent) => {
         let val: number = +(e.target as any).value;
         let cp = [...editingIOs];
         cp[io_index].NetworkId = val;
         setEditingIOs(cp);
     };
 
-    let ioCellAdditionalProps = {
+    const ioCellAdditionalProps = {
         handleSelectNetworkId,
         handleSelectMachineMotion,
         toggleSwitch,

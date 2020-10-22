@@ -13,7 +13,7 @@ const ALL_PIN_IDS: number[] = [0, 1, 2, 3];
 
 export interface IOOutputPin {
     MachineMotionIndex: number;
-    NetworkId: number; // 1,2,3
+    NetworkId: number; // 1, 2, 3
     PinId: number; // 0, 1, 2, 3
     PinVal: boolean;
 };
@@ -33,15 +33,13 @@ interface DetectionCellProps {
     state: IOOutputPin;
     allMachines: MachineMotion[];
     removeDetectionCell: () => void;
+    ioController: IOController;
 };
 
-
-function DetectionCell({ state, updateState, allMachines, removeDetectionCell }: DetectionCellProps) {
+function DetectionCell({ state, updateState, allMachines, removeDetectionCell, ioController }: DetectionCellProps) {
     const [currentPinValue, setCurrentPinValue] = useState<boolean>(false);
-    const [ioController, setIOController] = useState<IOController>(new IOController(allMachines[state.MachineMotionIndex]));
-    const [currentMMIndex, setCurrentMMIndex] = useState<number>(-1);
 
-    const handleIoValueUpdate = (device_id: number, s: IODeviceState) => {
+    ioController.machineMotion.ioValueUpdateCallback = (device_id: number, s: IODeviceState) => {
         console.log("IO Value callback!", s, device_id);
         if (device_id === state.NetworkId) {
             setCurrentPinValue(s[state.PinId]);
@@ -49,18 +47,13 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
     };
 
     useEffect(() => {
-        if (currentMMIndex !== state.MachineMotionIndex) {
-            ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
-            ioController.machineMotion.setIoValueUpdateCallback(handleIoValueUpdate);
-            ioController.detectInputState(state.NetworkId).then((v: vResponse) => {
-                const ioState = v.result as IODeviceState;
-                setCurrentPinValue(ioState[state.PinId]);
-            }).catch((e: any) => {
-                console.log("Error detect input state", e);
-            });
-            setCurrentMMIndex(state.MachineMotionIndex);
-        }
-    }, [ioController, state]);
+        ioController.setMachineMotion(allMachines[state.MachineMotionIndex]);
+        ioController.machineMotion.digitalRead(state.NetworkId, state.PinId).then((res: vResponse) => {
+            if (res.success) {
+                setCurrentPinValue(res.result as boolean);
+            }
+        }).catch((e) => { console.log(e); });
+    }, []);
 
     const updateNetworkId = (e: ChangeEvent) => {
         let NetworkId: number = changeEventToNumber(e);
@@ -84,8 +77,6 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
         s.PinVal = !(s.PinVal);
         updateState(s);
     };
-
-    console.log("Current Pin Value: ", currentPinValue);
 
     return (
         <div className="DetectionCellContainer">
@@ -152,7 +143,7 @@ function DetectionCell({ state, updateState, allMachines, removeDetectionCell }:
                     </div>
                     <div className="Value">
                         <span>
-                            {"0"}
+                            {currentPinValue ? "1" : "0"}
                         </span>
                     </div>
                 </div>
@@ -207,10 +198,12 @@ function defaultOuputPin(): IOOutputPin {
     };
 };
 
-
 export default function Detection({ handleNext, handleBack, instructionNumber, setDetection, box_detection, allMachines, isDetection }: DetectionProps) {
 
     const [detectionArray, setDetectionArray] = useState<IOOutputPin[]>(box_detection ? box_detection : [] as IOOutputPin[]);
+    const [ioControllers, setioControllers] = useState<IOController[]>(allMachines.map((m: MachineMotion) => {
+        return new IOController(m);
+    }));
 
     useEffect(() => {
         setDetectionArray(box_detection ? box_detection : [] as IOOutputPin[]);
@@ -274,10 +267,11 @@ export default function Detection({ handleNext, handleBack, instructionNumber, s
                                 updateState: updateCellAtIndex(i),
                                 state,
                                 allMachines,
-                                removeDetectionCell: removeCell(i)
+                                removeDetectionCell: removeCell(i),
+                                ioController: ioControllers[state.MachineMotionIndex]
                             };
                             return (
-                                <DetectionCell  {...cellProps} key={i} />
+                                <DetectionCell {...cellProps} key={i} />
                             );
                         })
                     }

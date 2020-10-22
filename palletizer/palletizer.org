@@ -117,7 +117,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Add positions to machine jogger.
 *** DONE Palletizer won't stop when returning to pick location.
 *** DONE Changing pick location does not update inside of layers (where the box is copied). This is stupid -- we should get pick location from box index.
-*** TODO In browser IO Monitoring doesn't work.
+*** DONE In browser IO Monitoring doesn't work.
 *** DONE Make sure that all teach screens, after deleting all, disables the next button (see Pallets.tsx (Right button))
 *** DONE Box Detection should be moved to Box Size Area (not the main thing.)
 *** DONE Box detection and monitoring label the same thing.
@@ -150,7 +150,7 @@ PALLETIZER -*- mode: org -*-
 ** TODO Actual.
 *** DONE Make sure stop works.
 *** DONE Single IO Selection.
-*** TODO Make sure IO's update on the UI.
+*** DONE Make sure IO's update on the UI.
 *** DONE Make sure that drag mechanics work.
 *** TODO Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently.
 *** DONE Path optimization fix (lateral approach).
@@ -194,7 +194,7 @@ PALLETIZER -*- mode: org -*-
 ** DONE Retry failed requests.
 ** DONE Go to taught position in jogger.
 ** DONE Drag and drop mechanics.
-** TODO In browser IO monitoring.
+** DONE In browser IO monitoring.
 ** TODO Current configuration mechanism (0 config bug).
 ** TODO Distribution of application.
 ** TODO MQTT try to reconnect.
