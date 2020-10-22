@@ -6,7 +6,7 @@ import {
 import { SavedMachineConfiguration } from "../parts/MachineConfig";
 
 const get_url = (url: string): string => {
-    return "" + url;
+    return url;
 };
 
 export function delete_config(id: number, is_machine: boolean) {
@@ -48,13 +48,12 @@ export function getConfigs() {
     });
 };
 
-
 export function get_machine_config(id: number): Promise<SavedMachineConfiguration> {
-    const url = get_url("/configs" + "/getmachine");
+    const url = get_url("/configs/getmachine");
     return new Promise<SavedMachineConfiguration>((resolve, reject) => {
         axios.post(url, { id }).then((res: any) => {
-            let data = res.data as any;
-            let config = JSON.parse(data.raw_json) as SavedMachineConfiguration;
+            const data = res.data as any;
+            const config = JSON.parse(data.raw_json) as SavedMachineConfiguration;
             resolve(config);
         }).catch((e: any) => {
             reject(e);
