@@ -195,9 +195,10 @@ PALLETIZER -*- mode: org -*-
 ** DONE Go to taught position in jogger.
 ** DONE Drag and drop mechanics.
 ** DONE In browser IO monitoring.
+** DONE Home on complete.
+** TODO MQTT try to reconnect.
 ** TODO Current configuration mechanism (0 config bug).
 ** TODO Distribution of application.
-** TODO MQTT try to reconnect.
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.
@@ -216,7 +217,6 @@ Server (18479):     at doWrite (/home/alex/mm-js-api/node_modules/readable-strea
 Server (18479):     at writeOrBuffer (/home/alex/mm-js-api/node_modules/readable-stream/lib/_stream_writable.js:417:5)
 Server (18479):     at Writable.write (/home/alex/mm-js-api/node_modules/readable-stream/lib/_stream_writable.js:334:11)
  
-** NOTE Gcode logs available at: debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-02.log 
-** NOW mm -log 
+** NOTE gCode logs available at: debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-02.log 
 ** debian@beaglebone:/var/lib/cloud9/vention-control/machineMotion/logs$ tail -f server-2020-09-22-04.log | grep "G[0-9]*\|M92"
-
+** NOW mm -log

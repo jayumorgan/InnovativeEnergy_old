@@ -513,7 +513,6 @@ export class Engine {
                 return mm_controller;
             });
 
-
             mms.forEach((m: MachineMotion) => {
                 const unboundEstopHandler = (estop: boolean) => {
                     return; // estop already triggered.
@@ -532,9 +531,7 @@ export class Engine {
                 m.bindEstopEvent(estopHandler);
             })
 
-
             my.mechanicalLayout.machines = mms;
-
             const ax = axes as any;
 
             Object.keys(ax).forEach((axis: string) => {
@@ -565,30 +562,29 @@ export class Engine {
             });
         } else {
             return Promise.reject("No machine configuration set.");
-            // return new Promise((_, reject) => {
-            //     reject("No machine configurations.");
-            // });;
         }
     };
 
     //-------Palletizer Sequence-------
     async startPalletizer(box_index: number): Promise<any> {
         const my = this;
-        //        my.__updateStatus(PALLETIZER_STATUS.RUNNING); // This is probably the problem.
+
         if (my.palletConfig !== null) {
             my.__stateReducer({
                 current_box: box_index + 1,
                 total_box: my.boxPathsForPallet.length
             });
         }
+
         return my.runPalletizerSequence(box_index).then(() => {
             let next_box_index = box_index + 1;
             if (my.palletConfig !== null && my.boxPathsForPallet.length > next_box_index) {
                 return my.startPalletizer(next_box_index);
             } else {
-                my.__updateStatus(PALLETIZER_STATUS.COMPLETE);
-                my.__handleInformation(INFO_TYPE.STATUS, "Cycle completed. Awaiting manual restart.");
-                return;
+                return my.executeHomingSequence().then(() => {
+                    my.__updateStatus(PALLETIZER_STATUS.COMPLETE);
+                    my.__handleInformation(INFO_TYPE.STATUS, "Cycle completed. Awaiting manual restart.");
+                });
             }
         });
     };
@@ -679,6 +675,7 @@ export class Engine {
                 resolve();
             }).catch((e: any) => {
                 reject("Failed to home axes. Verify that motion controller is running.");
+                log(e);
             })
         });
     };
@@ -700,7 +697,7 @@ export class Engine {
         const my = this;
         const { machines } = my.mechanicalLayout;
 
-        return Promise.all(machines.map((mm: MachineMotion) => {
+        return Promise.all(machines.map(async (mm: MachineMotion) => {
             return mm.emitHomeAll().then(() => {
                 return mm.waitForMotionCompletion();
             });
@@ -770,13 +767,11 @@ export class Engine {
             const move_action = async () => {
                 if (!last_speed.hasOwnProperty(id) || last_speed[id] != speed) {
                     last_speed[id] = speed;
-                    return mm.emitSpeed(speed).then(
-                        () => {
-                            return mm.emitAcceleration(acceleration).then(
-                                () => { return mm.emitCombinedAxesAbsoluteMove(axes, positions); }
-                            )
-                        }
-                    );
+                    return mm.emitSpeed(speed).then(async () => {
+                        return mm.emitAcceleration(acceleration).then(() => {
+                            return mm.emitCombinedAxesAbsoluteMove(axes, positions);
+                        });
+                    });
                 } else {
                     return mm.emitCombinedAxesAbsoluteMove(axes, positions);
                 }
@@ -846,7 +841,6 @@ export class Engine {
             return my.mechanicalLayout.machines[MachineMotionIndex].digitalWriteAll(NetworkId, Pins);
         }));
     };
-
 
     handleDetect(boxDetection: IOOutputPin[], retry_index: number = 0): Promise<boolean> {
         const my = this;
