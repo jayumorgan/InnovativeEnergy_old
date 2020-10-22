@@ -1,13 +1,12 @@
 import winston from "winston";
 import * as dotenv from "dotenv";
 import path from "path";
-import { Transports } from "winston/lib/winston/transports";
 
 dotenv.config();
 
 const LOG_FP: string | undefined = (() => {
     const env: string | undefined = process.env.ENVIRONMENT;
-    if (env && env === "PRODUCTION") { // Log.
+    if (env && env === "PRODUCTION" && false) { // Log.
         return path.join(__dirname, "..", "logs", "palletizer.log");
     }
 })();
@@ -36,10 +35,6 @@ export default function Logger(): LogFns {
     const engine_log = (...s: any[]) => {
         l.info({ location: "engine", msg: s });
     };
-
-    // const router_log = (...s: any[]) => {
-    //     l.info({ location: "router", msg: s });
-    // };
 
     return { db_log, engine_log };
 };

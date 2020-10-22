@@ -28,8 +28,9 @@ import {
     SpeedTypes,
     generateStandardPath
 } from "../optimizer/standard";
-
 import Logger, { log_fn } from "../log/log";
+
+
 const log: log_fn = Logger().engine_log;
 
 //---------------Environment Setup---------------
@@ -124,7 +125,6 @@ function numberToDrive(n: number): DriveType {
         };
     }
 };
-
 
 function defaultMechanicalLayout(): MechanicalLayout {
     return {
@@ -436,6 +436,8 @@ export class Engine {
         }).then(() => {
             return my.releaseAndReset();
         }).then(() => {
+            return my.bindEstopHandlers();
+        }).then(() => {
             my.__stateReducer({ cycle: my.palletizerState.cycle + 1 });
             return my.startPalletizer(my.startBox > 0 ? my.startBox - 1 : 0);
         }).catch((e: string) => {
@@ -478,10 +480,8 @@ export class Engine {
                 return m.releaseAndReset();
             });
 
-            Promise.all(ps).then(() => {
-                resolve(true);
-            }).catch((e: any) => {
-                if (retry_count <= 5) { // retry 5x.
+            const retry = () => {
+                if (retry_count < 5) { // retry 5x.
                     my.releaseAndReset(++retry_count).then((b: boolean) => {
                         resolve(b);
                     }).catch((e: string) => {
@@ -490,9 +490,52 @@ export class Engine {
                 } else {
                     reject("Unable to release estop. Verify that estop button is not locked.");
                 }
+            };
+
+            Promise.all(ps).then((vss: vResponse[][]) => {
+                // This is a hack that only check
+                const responses: boolean[] = vss.map((vs: vResponse[]) => {
+                    const estop_released = vs[0].result as boolean;
+                    const system_reset = vs[1].result as boolean;
+                    return estop_released && system_reset;
+                }).filter((v: boolean) => {
+                    return v;
+                });
+                if (responses.length > 0) {
+                    resolve(true);
+                } else {
+                    retry();
+                }
+            }).catch((e: any) => {
+                log(e);
+                retry();
             });
         });
     };
+
+    bindEstopHandlers() {
+        const my = this;
+        const mms = my.mechanicalLayout.machines;
+        mms.forEach((m: MachineMotion) => {
+            const unboundEstopHandler = (estop: boolean) => {
+                return; // estop already triggered.
+            };
+
+            const estopHandler = (estop: boolean) => {
+                if (estop) {
+                    m.bindEstopEvent(unboundEstopHandler);
+                    const handler = my.__handleEstop.bind(my);
+                    handler("Estop message is irrelevant");
+                } else {
+                    console.log("Estop released.");
+                }
+            };
+
+            m.bindEstopEvent(estopHandler);
+        });
+        return Promise.resolve();
+    }
+
 
     //-------Mechanical Configuration-------
     configureMachine(): Promise<boolean> {
@@ -512,24 +555,6 @@ export class Engine {
                 const mm_controller: MachineMotion = new MachineMotion(mm_config);
                 return mm_controller;
             });
-
-            mms.forEach((m: MachineMotion) => {
-                const unboundEstopHandler = (estop: boolean) => {
-                    return; // estop already triggered.
-                };
-
-                const estopHandler = (estop: boolean) => {
-                    if (estop) {
-                        m.bindEstopEvent(unboundEstopHandler);
-                        const handler = my.__handleEstop.bind(my);
-                        handler("Estop message is irrelevant");
-                    } else {
-                        console.log("Estop released.");
-                    }
-                };
-
-                m.bindEstopEvent(estopHandler);
-            })
 
             my.mechanicalLayout.machines = mms;
             const ax = axes as any;
@@ -551,13 +576,12 @@ export class Engine {
             my.mechanicalLayout.axes = axes;
             my.mechanicalLayout.io = io;
             my.mechanicalLayout.good_pick = good_pick;
-            return Promise.resolve(true);
 
             return new Promise((resolve, reject) => {
                 Promise.all(promises).then(() => {
                     resolve(true);
                 }).catch((e: any) => {
-                    reject("Failed to configure axes. Make sure that Machine Motion controllers are operational and machine configuration network information is correct.");
+                    reject("Failed to configure axes. Validate that Machine Motion controllers are operational and network information is correct.");
                 });
             });
         } else {
@@ -823,7 +847,7 @@ export class Engine {
         console.log("Picking");
         const my = this;
         my.cycleState = CycleState.PICK_IO;
-        let ios: IOState[] = my.mechanicalLayout.io.On;
+        const ios: IOState[] = my.mechanicalLayout.io.On;
         return my.__writeIO(ios);
     };
 
@@ -835,9 +859,10 @@ export class Engine {
     };
 
     __writeIO(ios: IOState[]) {
+        console.log("write io", ios);
         const my = this;
         return Promise.all(ios.map((state: IOState) => {
-            let { MachineMotionIndex, NetworkId, Pins } = state;
+            const { MachineMotionIndex, NetworkId, Pins } = state;
             return my.mechanicalLayout.machines[MachineMotionIndex].digitalWriteAll(NetworkId, Pins);
         }));
     };

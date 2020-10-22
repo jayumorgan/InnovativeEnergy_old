@@ -199,6 +199,7 @@ PALLETIZER -*- mode: org -*-
 ** TODO MQTT try to reconnect.
 ** TODO Current configuration mechanism (0 config bug).
 ** TODO Distribution of application.
+** TODO Use estop state to monitor for estop release..
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.
