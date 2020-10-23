@@ -199,13 +199,13 @@ PALLETIZER -*- mode: org -*-
 ** DONE Homing on start from box. (home if zero is a good metric).
 ** DONE Add in images.
 ** DONE The +3.5 height issue. (svg_props in Layouts.tsx)
+** DONE Add IO light.
 ** TODO MQTT attempt to reconnect.
 ** TODO Current configuration mechanism (What happens if there are no configurations).
 ** TODO Distribution of application.
 ** TODO CORS.
 ** TODO Startup script.
 ** TODO Sever static files.
-** TODO Add IO light.
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.
