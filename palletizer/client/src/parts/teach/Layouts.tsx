@@ -60,6 +60,7 @@ function getFractionalCoordinates(modelData: ModelData, outerWidth: number, oute
     const palletY = topY;
     const fractionX = (x - palletX) / w;
     const fractionY = (y - palletY) / l;
+
     return [fractionX, fractionY];
 };
 
@@ -108,8 +109,7 @@ export function CornerNumber(c: PALLETCORNERS) {
 
 
 //-------Lock to pallet-------
-// Pick your offset -- don't handle it here.
-const lockCoordinateEdges = (currentPosition: number, dimensionSize: number, fullDistance: number): number => {
+const lockToPallet = (currentPosition: number, dimensionSize: number, fullDistance: number): number => {
     const distanceUnit = fullDistance / (2 * 6);
     const thresholdDistance = distanceUnit / 3;
     const leftEdge = currentPosition - dimensionSize / 2;
@@ -160,7 +160,7 @@ const lockToNeighbor = (x: number, y: number, width: number, height: number, nb:
         rv[0] = nx_l - width;
     }
 
-    const bug_y = 3.5
+    const bug_y = 0 // Why is this?
 
     if (Math.abs(y_l - ny_l) < y_tol) { // bottom to bottom
         yflag = true;
@@ -237,12 +237,12 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
                     const [xn, yn] = lockToNeighbor(newR.x, newR.y, xWidth, yWidth, nb);
                     newR.x = xn;
                     newR.y = yn;
+
                 });
 
-                newR.x = lockCoordinateEdges(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
-                newR.y = lockCoordinateEdges(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
+                newR.x = lockToPallet(newR.x + xWidth / 2 - xl, xWidth, xh - xl) + xl;
+                newR.y = lockToPallet(newR.y + yWidth / 2 - yl, yWidth, yh - yl) + yl;
             }
-
             setRectangle(newR);
         }
     };
@@ -275,9 +275,7 @@ function DraggableRect({ rect, updatePosition, index, enabled, name, showName, x
 
     return (
         <Fragment>
-            <rect
-                {...rectangle} fill={fill} stroke={stroke} {...actions}
-            />
+            <rect {...rectangle} fill={fill} stroke={stroke} {...actions} />
             {showName &&
                 <text {...textProps}> {name} </text>}
         </Fragment>
@@ -359,7 +357,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
 
     const updateRectPosition = (index: number, nx: number, ny: number) => {
         if (boxes && updateModelBox) {
-            let [fractionX, fractionY] = getFractionalCoordinates(modelData, outerWidth, outerHeight, nx, ny);
+            let [fractionX, fractionY] = getFractionalCoordinates(modelData, outerWidth, outerHeight, nx, ny - svg_props.y);
             let box = boxes[index];
             let newBox = {
                 ...box,
@@ -369,14 +367,16 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 }
             } as BoxPositionObject;
 
+
             updateModelBox(newBox, index);
         }
     };
 
     let BoxSVGs: Rect[] = [];
+
     if (boxes) {
         BoxSVGs = boxes.map((b: BoxPositionObject) => {
-            let { position, box, rotated } = b;
+            const { position, box, rotated } = b;
             let x = w * position.x + topX + svg_props.x;
             let y = l * position.y + topY + svg_props.y;
             let { width, length } = box.dimensions;
@@ -387,6 +387,7 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
             const boxColor = String(COLORS.CLEAR_BOX);
             const strokeColor = String(COLORS.CARDBOARD);
 
+
             const boxprops: Rect = {
                 x,
                 y,
@@ -396,7 +397,6 @@ export function LayoutModel({ enableDrag, pallet, size, outerHeight, outerWidth,
                 stroke: strokeColor,
                 strokeWidth: 1
             };
-
             return boxprops;
         });
     }
@@ -842,7 +842,7 @@ export default function Layout({ instructionNumber, allBoxes, allPallets, setPal
     };
 
     const updateModelBox = (bpo: BoxPositionObject, index: number) => {
-        let newModels: BoxPositionObject[] = [...modelBoxes];
+        const newModels: BoxPositionObject[] = [...modelBoxes];
         newModels[index] = bpo;
         setModelBoxes(newModels);
     };

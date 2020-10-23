@@ -1,5 +1,6 @@
 PALLETIZER -*- mode: org -*-
 #+STARTUP: showall
+#+TODO: TODO TEST VERSION | DONE CANCELED
 
 ** DONE Optimizer:
 *** DONE Path Triangulation.
@@ -16,7 +17,7 @@ PALLETIZER -*- mode: org -*-
 *** DONE Top and bottom of box constraint.
 
 ** TODO Machine Configuration:
-*** TODO Allow extra drive for V2. 
+*** TODO Default extra drive for V2.
 
 ** DONE Pallet Configuration:
 *** DONE θ coordinate must be numerical.
@@ -147,12 +148,12 @@ PALLETIZER -*- mode: org -*-
 *** DONE Don't allow jogger on incomplete machine configuration.
 *** DONE Tailor height addition for top-of-box teach.
 
-** TODO Actual.
+** DONE Actual.
 *** DONE Make sure stop works.
 *** DONE Single IO Selection.
 *** DONE Make sure IO's update on the UI.
 *** DONE Make sure that drag mechanics work.
-*** TODO Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently.
+*** DONE Make sure that you can resume after an error (move a box, etc.). -- this is not the case currently. -- Use the start from box metric.
 *** DONE Path optimization fix (lateral approach).
 *** DONE Stop suction from the main page.
 *** DONE Sort out the estop controversy.
@@ -160,7 +161,6 @@ PALLETIZER -*- mode: org -*-
 *** DONE Picking from stack.
 *** DONE Manually modifying coordinates.
 *** DONE IO by pin (not by module).
-*** TODO Estop starting location (and action.)
 *** DONE Toggle suction from jogger / home screen.
 *** DONE Make sure that palletizer angle works.
 *** DONE Palletizer visualizer is in outer space for some reason -- not sure why.
@@ -196,15 +196,23 @@ PALLETIZER -*- mode: org -*-
 ** DONE Drag and drop mechanics.
 ** DONE In browser IO monitoring.
 ** DONE Home on complete.
-** TODO MQTT try to reconnect.
-** TODO Current configuration mechanism (0 config bug).
+** DONE Homing on start from box. (home if zero is a good metric).
+** DONE Add in images.
+** DONE The +3.5 height issue. (svg_props in Layouts.tsx)
+** TODO MQTT attempt to reconnect.
+** TODO Current configuration mechanism (What happens if there are no configurations).
 ** TODO Distribution of application.
-** TODO Use estop state to monitor for estop release..
-** TODO Homing on start from box. (home if zero is a good metric)
+** TODO CORS.
+** TODO Startup script.
+** TODO Sever static files.
+** TODO Add IO light.
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.
 ** TODO MM-app engine api.
+** TODO Use estop state to monitor for estop release..
+** TODO MM-APP-BUILDER
+** TODO Default drives.
 
 ** DONE This:
 Server (18479): SyntaxError: Unexpected number in JSON at position 1

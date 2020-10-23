@@ -6,7 +6,7 @@ import { IOState } from "./IO";
 import { ControlProps } from "../shared/shared";
 
 //---------------Images---------------
-import palletizerImage from "./images/PalletizerBlank.png";
+import palletizerImage from "./images/PalletizerAllAxes.png";
 
 //---------------Styles---------------
 import "./css/Summary.scss";

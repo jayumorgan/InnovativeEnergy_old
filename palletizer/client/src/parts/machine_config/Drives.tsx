@@ -10,13 +10,11 @@ import Ximage from "./images/PalletizerX.png";
 import Yimage from "./images/PalletizerY.png";
 import Zimage from "./images/PalletizerZ.png";
 import Thetaimage from "./images/PalletizerTheta.png";
-import Blankimage from "./images/PalletizerBlank.png";
+import Allimage from "./images/PalletizerAllAxes.png";
 
 import plus_icon from "../teach/images/plus.svg";
 //---------------Styles---------------
 import "./css/Drives.scss";
-
-
 
 export enum AXES {
     X,
@@ -232,13 +230,12 @@ export function DriveSummary({ Axes, handleEditAxis, Machines, noEdit }: DriveSu
             </div>
             <div className="DisplayContainer">
                 <div className="Display">
-                    <img src={Blankimage} />
+                    <img src={Allimage} />
                 </div>
             </div>
         </div>
     );
 };
-
 
 function getAllDrives(a: AxesConfiguration) {
     return [...a.X, ...a.Y, ...a.Z, ...a.θ];
