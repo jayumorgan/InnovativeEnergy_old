@@ -19,7 +19,7 @@
              border: $container-border;
              background-color: $desert-storm;
              @include flex-center();
-             max-height: 736px;
+             max-height: 712px;
 
              .StackScroll::-webkit-scrollbar {
                  display: none;
@@ -34,6 +34,7 @@
                  justify-content: flex-start;
                  overflow-y: scroll;
                  overflow-x: hidden;
+                 max-height: 703px;
 
                  .PalletLayout {
                      width: 100%;

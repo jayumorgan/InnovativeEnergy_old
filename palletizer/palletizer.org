@@ -200,6 +200,7 @@ PALLETIZER -*- mode: org -*-
 ** TODO Current configuration mechanism (0 config bug).
 ** TODO Distribution of application.
 ** TODO Use estop state to monitor for estop release..
+** TODO Homing on start from box. (home if zero is a good metric)
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.

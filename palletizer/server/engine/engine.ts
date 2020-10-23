@@ -617,7 +617,8 @@ export class Engine {
         let my = this;
 
         const homeIfZero = () => {
-            if (box_index === my.startBox) {
+            // Offset the normal position.
+            if (box_index === (my.startBox > 0 ? my.startBox - 1 : my.startBox)) {
                 return my.executeHomingSequence();
             } else {
                 return Promise.resolve();

@@ -349,6 +349,7 @@ $col-3 : 100% - $col-1 - $col-2;
             // height: 40vh;
             max-height: 40vh;
             font-size: $large-font;
+            overflow-y: hidden;
 
             // min-height: 100%;
             .InformationLog {

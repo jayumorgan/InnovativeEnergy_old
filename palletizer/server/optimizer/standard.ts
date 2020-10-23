@@ -97,7 +97,7 @@ function generatePathForBox(box: BoxCoordinate, z_top: number, lateralDirection?
         path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW));
         preRotated = raiseOverCoordinate(box.pickLocation, z_top);
         preRotated.θ = box.dropLocation.θ;
-        path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW, false));
+        path.push(addActionToCoordinate(preRotated, ActionTypes.NONE, SpeedTypes.SLOW, true));
     }
     //-------Move + Drop-------
     if (lateralDirection) {
