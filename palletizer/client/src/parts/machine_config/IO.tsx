@@ -18,10 +18,11 @@ export const ALL_NETWORK_IDS: number[] = [0, 1, 2];
 export interface IO {
     On: IOState[];
     Off: IOState[];
+    Complete: IOState[];
 };
 
 export function defaultIO(): IO {
-    return { On: [], Off: [] };
+    return { On: [], Off: [], Complete: [] };
 };
 
 export function defaultIOState(): IOState {
@@ -159,9 +160,21 @@ interface IOConfigProps {
     instructionNumber: number;
 };
 
+export enum IOSteps {
+    SUCTION_OFF = 0,
+    SUCTION_ON = 1,
+    COMPLETE_IO = 2
+};
+const IO_instructions: string[] = [
+    "Configure digital output for suction off",
+    "Configure digital output for suction on",
+    "Configure digital output for completion indicator"
+];
+
+
 export default function IOConfig({ io, allMachines, setIO, handleBack, handleNext, instructionNumber }: IOConfigProps) {
 
-    const [currentStateStep, setCurrentStateStep] = useState<boolean>(false);
+    const [currentStateStep, setCurrentStateStep] = useState<IOSteps>(IOSteps.SUCTION_OFF);
     const [ioControllers, setioControllers] = useState<IOController[]>([]);
 
     useEffect(() => {
@@ -170,20 +183,34 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         }));
     }, []);
 
-    const [editingIOs, setEditingIOs] = useState<IOState[]>((() => {
-        let curr: IOState[] = [];
-        if (currentStateStep) {
-            curr = [...io.On];
+    const orDefault = (s: IOState[]) => {
+        if (s && s.length > 0) {
+            return s;
         } else {
-            curr = [...io.Off];
+            return [defaultIOState()];
         }
-        if (curr.length === 0) {
-            curr.push(defaultIOState());
-        }
-        return curr;
-    })());
+    };
 
-    let instruction: string = (currentStateStep) ? "Configure the digital outputs for active (suction on)" : "Configure the digital outputs for idle (suction off)";
+    const getNextIOs = (cs: IOSteps) => {
+        switch (cs) {
+            case IOSteps.SUCTION_OFF: {
+                return orDefault(io.Off);
+            }
+            case IOSteps.SUCTION_ON: {
+                return orDefault(io.On);
+            }
+            case IOSteps.COMPLETE_IO: {
+                return orDefault(io.Complete);
+            }
+            default: {
+                return orDefault([]);
+            }
+        }
+    }
+
+    const [editingIOs, setEditingIOs] = useState<IOState[]>(getNextIOs(currentStateStep));
+
+    let instruction: string = IO_instructions[currentStateStep];
 
     const LeftButton: ButtonProps = {
         name: "Back",
@@ -192,19 +219,34 @@ export default function IOConfig({ io, allMachines, setIO, handleBack, handleNex
         }
     };
 
+    const changeStep = (s: IOSteps) => {
+        setCurrentStateStep(s);
+        setEditingIOs(getNextIOs(s));
+    };
+
     const RightButton: ButtonProps = {
         name: "Next",
         action: () => {
             let cp = { ...io };
-            if (currentStateStep) {
-                cp.On = [...editingIOs];
-                setIO(cp);
-                handleNext();
-            } else {
-                cp.Off = [...editingIOs];
-                setIO(cp);
-                setCurrentStateStep(true);
-                setEditingIOs(io.On.length > 0 ? [...io.On] : [defaultIOState()]);
+            switch (currentStateStep) {
+                case IOSteps.SUCTION_OFF: {
+                    cp.Off = [...editingIOs];
+                    setIO(cp);
+                    changeStep(currentStateStep + 1);
+                    break;
+                }
+                case IOSteps.SUCTION_ON: {
+                    cp.On = [...editingIOs];
+                    setIO(cp);
+                    changeStep(currentStateStep + 1);
+                    break;
+                }
+                case IOSteps.COMPLETE_IO: {
+                    cp.Complete = [...editingIOs];
+                    setIO(cp);
+                    handleNext();
+                    break;
+                }
             }
         },
         enabled: true

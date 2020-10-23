@@ -138,7 +138,8 @@ function defaultMechanicalLayout(): MechanicalLayout {
         },
         io: {
             On: [],
-            Off: []
+            Off: [],
+            Complete: []
         },
         good_pick: []
     } as MechanicalLayout;
@@ -606,6 +607,8 @@ export class Engine {
                 return my.startPalletizer(next_box_index);
             } else {
                 return my.executeHomingSequence().then(() => {
+                    return my.__completeIO();
+                }).then(() => {
                     my.__updateStatus(PALLETIZER_STATUS.COMPLETE);
                     my.__handleInformation(INFO_TYPE.STATUS, "Cycle completed. Awaiting manual restart.");
                 });
@@ -857,6 +860,12 @@ export class Engine {
         this.cycleState = CycleState.DROP_IO;
         let ios: IOState[] = this.mechanicalLayout.io.Off;
         return this.__writeIO(ios);
+    };
+
+    __completeIO() {
+        console.log("Complete Siren.");
+        const ios: IOState[] | undefined = this.mechanicalLayout.io.Complete; // in case old configs dont have this.
+        return this.__writeIO(ios ? ios : []);
     };
 
     __writeIO(ios: IOState[]) {

@@ -45,6 +45,7 @@ export interface IOOutputPin {
 export interface IO {
     On: IOState[];
     Off: IOState[];
+    Complete: IOState[]; // Completion indicator..
 };
 
 export interface MachineConfiguration {
