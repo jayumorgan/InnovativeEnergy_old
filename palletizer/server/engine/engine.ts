@@ -598,7 +598,7 @@ export class Engine {
             return;
         }
         const avg = this.timeIntervals.reduce((a: number, b: number) => { return a + b; }) / this.timeIntervals.length;
-        const tr = (my.boxPathsForPallet.length - bn) * avg;
+        const tr = Math.round((my.boxPathsForPallet.length - bn) * avg / 60);
         this.__stateReducer({ time: tr });
     }
 
