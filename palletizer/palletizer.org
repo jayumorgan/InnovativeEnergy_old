@@ -206,6 +206,7 @@ PALLETIZER -*- mode: org -*-
 ** TODO CORS.
 ** TODO Startup script.
 ** TODO Sever static files.
+** DONE Error message for bad pick.
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.

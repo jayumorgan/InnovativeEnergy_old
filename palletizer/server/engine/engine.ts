@@ -915,6 +915,9 @@ export class Engine {
                 if (detected) {
                     resolve(detected);
                 } else if (retry_index < 200) {
+                    if (retry_index === 1) {
+                        my.__handleInformation(INFO_TYPE.WARNING, "Suction pressure low, retrying pick. Verify pneumatics are operating correctly.");
+                    }
                     setTimeout(() => {
                         my.handleGoodPick(retry_index + 1).then((d: boolean) => {
                             resolve(d);
