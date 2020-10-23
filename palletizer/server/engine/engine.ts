@@ -180,6 +180,8 @@ export class Engine {
     startBox: number = 0;
     boxPathsForPallet: BoxPath[] = [];
     startTime: Date | null = null;
+    lastBoxTime: Date | null = null;
+    timeIntervals: number[] = [];
 
 
     __initTopics() {
@@ -590,6 +592,16 @@ export class Engine {
         }
     };
 
+    __updateTimeEstimate(bn: number) {
+        const my = this;
+        if (this.timeIntervals.length === 0) {
+            return;
+        }
+        const avg = this.timeIntervals.reduce((a: number, b: number) => { return a + b; }) / this.timeIntervals.length;
+        const tr = (my.boxPathsForPallet.length - bn) * avg;
+        this.__stateReducer({ time: tr });
+    }
+
     //-------Palletizer Sequence-------
     async startPalletizer(box_index: number): Promise<any> {
         const my = this;
@@ -600,8 +612,16 @@ export class Engine {
                 total_box: my.boxPathsForPallet.length
             });
         }
+        const now = new Date();
+        if (my.lastBoxTime !== null) {
+            const delta = (now.getTime() - my.lastBoxTime.getTime()) / 1000;
+            my.timeIntervals.push(delta);
+            my.__updateTimeEstimate(box_index);
+        }
 
-        return my.runPalletizerSequence(box_index).then(() => {
+        my.lastBoxTime = now;
+
+        return my.runPalletizerSequence(box_index).then(async () => {
             let next_box_index = box_index + 1;
             if (my.palletConfig !== null && my.boxPathsForPallet.length > next_box_index) {
                 return my.startPalletizer(next_box_index);
