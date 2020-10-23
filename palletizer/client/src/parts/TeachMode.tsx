@@ -201,6 +201,8 @@ export function GenerateFinalConfig(startingConfig: PalletConfiguration) {
     const { pallets } = config;
     let boxCoordinates: BoxCoordinates[] = [];
 
+    const stackShifts: number[] = new Array<number>(config.boxes.length).fill(0);
+
     pallets.forEach((p: PalletGeometry, palletIndex: number) => {
         const { Layouts, Stack, corner1, corner2, corner3 } = p;
         const palletHeight = (corner1.z + corner2.z + corner3.z) / 3;
@@ -218,7 +220,7 @@ export function GenerateFinalConfig(startingConfig: PalletConfiguration) {
             boxPositions.forEach((b: BoxPositionObject) => {
                 const { position, rotated } = b;
                 const box = config.boxes[b.index];
-                const { pickLocation } = box; // Get pick location from actual boxes.
+                const pickLocation = { ...box.pickLocation }; // Get pick location from actual boxes.
                 const { x, y } = position; // These are fractions from the left of the pallet.
 
                 let boxWidth = box.dimensions.width;
@@ -254,11 +256,15 @@ export function GenerateFinalConfig(startingConfig: PalletConfiguration) {
 
                 const θ_drop: number = (rotated ? 90 : 0) + φ_pallet;
                 let dropLocation: CoordinateRot = { ...averagePosition, θ: θ_drop };
-
                 let linearPathDistance: number = Norm(Subtract3D(pickLocation, dropLocation));
 
+                if (box.pickFromStack) { // If picking from stack, subtract a box height.
+                    pickLocation.z += box.dimensions.height * stackShifts[b.index];
+                    stackShifts[b.index]++;
+                }
+
                 boxCoordinates.push({
-                    pickLocation,
+                    pickLocation: { ...pickLocation },
                     dropLocation,
                     dimensions: box.dimensions,
                     boxIndex: b.index,
@@ -269,9 +275,6 @@ export function GenerateFinalConfig(startingConfig: PalletConfiguration) {
                 } as BoxCoordinates);
 
 
-                if (box.pickFromStack) { // If picking from stack, subtract a box height.
-                    config.boxes[b.index].pickLocation.z += box.dimensions.height;
-                }
             });
 
             if (stackIndex > 0) { // don't add if first row.
