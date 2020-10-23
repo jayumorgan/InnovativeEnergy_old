@@ -592,34 +592,34 @@ export class Engine {
         }
     };
 
-    __updateTimeEstimate(bn: number) {
+    __getTimeEstimate(bn: number) {
         const my = this;
         if (this.timeIntervals.length === 0) {
-            return;
+            return 0;
         }
         const avg = this.timeIntervals.reduce((a: number, b: number) => { return a + b; }) / this.timeIntervals.length;
         const tr = Math.round((my.boxPathsForPallet.length - bn) * avg / 60);
-        this.__stateReducer({ time: tr });
+        return tr;
     }
 
     //-------Palletizer Sequence-------
     async startPalletizer(box_index: number): Promise<any> {
         const my = this;
-
-        if (my.palletConfig !== null) {
-            my.__stateReducer({
-                current_box: box_index + 1,
-                total_box: my.boxPathsForPallet.length
-            });
-        }
         const now = new Date();
         if (my.lastBoxTime !== null) {
             const delta = (now.getTime() - my.lastBoxTime.getTime()) / 1000;
             my.timeIntervals.push(delta);
-            my.__updateTimeEstimate(box_index);
+            my.__getTimeEstimate(box_index);
         }
-
         my.lastBoxTime = now;
+
+        if (my.palletConfig !== null) {
+            my.__stateReducer({
+                current_box: box_index + 1,
+                total_box: my.boxPathsForPallet.length,
+                time: this.__getTimeEstimate(box_index)
+            });
+        }
 
         return my.runPalletizerSequence(box_index).then(async () => {
             let next_box_index = box_index + 1;

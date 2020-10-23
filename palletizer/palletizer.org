@@ -213,6 +213,7 @@ PALLETIZER -*- mode: org -*-
 ** TODO MM-app engine api.
 ** TODO Use estop state to monitor for estop release..
 ** TODO MM-APP-BUILDER
+** TODO Log usage on machine motion (all distance travelled).
 ** TODO Default drives.
 
 ** DONE This:
