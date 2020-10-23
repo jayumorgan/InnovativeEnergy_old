@@ -206,12 +206,14 @@ PALLETIZER -*- mode: org -*-
 ** TODO CORS.
 ** TODO Startup script.
 ** TODO Sever static files.
+** DONE Error message for bad pick.
 
 * TODO Future Items (insulfloor)
 ** TODO Convert to mm-app-engine.
 ** TODO MM-app engine api.
 ** TODO Use estop state to monitor for estop release..
 ** TODO MM-APP-BUILDER
+** TODO Log usage on machine motion (all distance travelled).
 ** TODO Default drives.
 
 ** DONE This:

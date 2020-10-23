@@ -180,6 +180,8 @@ export class Engine {
     startBox: number = 0;
     boxPathsForPallet: BoxPath[] = [];
     startTime: Date | null = null;
+    lastBoxTime: Date | null = null;
+    timeIntervals: number[] = [];
 
 
     __initTopics() {
@@ -590,18 +592,36 @@ export class Engine {
         }
     };
 
+    __getTimeEstimate(bn: number) {
+        const my = this;
+        if (this.timeIntervals.length === 0) {
+            return 0;
+        }
+        const avg = this.timeIntervals.reduce((a: number, b: number) => { return a + b; }) / this.timeIntervals.length;
+        const tr = Math.round((my.boxPathsForPallet.length - bn) * avg / 60);
+        return tr;
+    }
+
     //-------Palletizer Sequence-------
     async startPalletizer(box_index: number): Promise<any> {
         const my = this;
+        const now = new Date();
+        if (my.lastBoxTime !== null) {
+            const delta = (now.getTime() - my.lastBoxTime.getTime()) / 1000;
+            my.timeIntervals.push(delta);
+            my.__getTimeEstimate(box_index);
+        }
+        my.lastBoxTime = now;
 
         if (my.palletConfig !== null) {
             my.__stateReducer({
                 current_box: box_index + 1,
-                total_box: my.boxPathsForPallet.length
+                total_box: my.boxPathsForPallet.length,
+                time: this.__getTimeEstimate(box_index)
             });
         }
 
-        return my.runPalletizerSequence(box_index).then(() => {
+        return my.runPalletizerSequence(box_index).then(async () => {
             let next_box_index = box_index + 1;
             if (my.palletConfig !== null && my.boxPathsForPallet.length > next_box_index) {
                 return my.startPalletizer(next_box_index);
@@ -915,6 +935,9 @@ export class Engine {
                 if (detected) {
                     resolve(detected);
                 } else if (retry_index < 200) {
+                    if (retry_index === 1) {
+                        my.__handleInformation(INFO_TYPE.WARNING, "Suction pressure low, retrying pick. Verify pneumatics are operating correctly.");
+                    }
                     setTimeout(() => {
                         my.handleGoodPick(retry_index + 1).then((d: boolean) => {
                             resolve(d);
