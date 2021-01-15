@@ -1,0 +1,131 @@
+:root {
+    --success-color: #5bc47e;
+    --danger-color: #f30f0f;
+    --primary-color: #2b3e55;
+    --secondary-color: rgb(105, 122, 151);
+    --offwhite-color: #eff2f7;
+    --secondary-offwhite-color: #FAFAFA;
+    --text-color: #152B4B;
+    --border-color: #D1D1D1;
+}
+
+html {
+    font-size: 16px;
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    overflow-y: hidden;
+    font-family:Larsseit,Lato,Arial;
+}
+
+header {
+    padding: 1em;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+main {
+    position: relative;
+    flex: 1;
+    overflow-y: hidden;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.header-title > h1 {
+    color: white;
+    font-size: 20px;
+    padding: 0;
+    padding-left: 20px;
+    margin: 0;
+    font-variant: small-caps;
+}
+
+.header-title-image {
+    width: 28px;
+    height: 100%;
+}
+
+nav  {
+    border-bottom: 2px solid var(--border-color);
+    margin-left: 1em;
+    margin-right: 1em;
+    padding-top: 0.5em;
+}
+
+nav > button {
+    border: 0;
+    padding: 0.5em;
+    width: 128px;
+    background-color: white;
+    outline: none;
+}
+
+nav > button:hover {
+    cursor: pointer;
+}
+
+.nav-selected {
+    border-bottom: 4px solid rgb(91,196,126);
+    font-weight: bold;
+}
+
+#estop-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid white;
+    border-radius: 3px;
+    background-color: #F30F0F;
+    width: 118px;
+    height: 48px;
+    font-size: 22px;
+    padding: 13px;
+}
+
+#estop-button:hover {
+    box-shadow: 0 0 5px white;
+}
+
+#app-launcher-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 48px;
+    padding: 1em;
+    border: 1px solid white;
+    border-radius: 3px;
+    background-color: var(--primary-color);
+}
+
+#app-launcher-button > span:first-child {
+    padding-right: 0.25rem;
+}
+
+#app-launcher-button:hover {
+    background-color: var(--secondary-color);
+}
+
+#estop-button > span:first-child {
+    padding-right: 0.25rem;
+}
