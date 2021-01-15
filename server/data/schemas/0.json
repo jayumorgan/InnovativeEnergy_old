@@ -1,0 +1,202 @@
+{
+    "id": 0,
+    "name": "Machine",
+    "version": "0.1",
+    "timestamp": 0,
+    "schema": [
+        {
+            "name": "machineMotionList",
+            "type": [
+                {
+                    "name": "name",
+                    "type": 2,
+                    "isRequired": true,
+                    "defaultValue": "Machine Motion 1"
+                },
+                {
+                    "name": "type",
+                    "type": 1,
+                    "isRequired": true,
+                    "defaultValue": "V1",
+                    "options": [
+                        { "name": "V1", "value": "V1" },
+                        { "name": "V2", "value": "V2" }
+                    ]
+                },
+                {
+                    "name": "digitalOutputs",
+                    "isArray": true,
+                    "isRequired": false,
+                    "type": [
+                        {
+                            "name": "name",
+                            "type": 2,
+                            "isRequired": true,
+                            "defaultValue": "Output 1"
+                        },
+                        {
+                            "name": "ioModule",
+                            "type": 1,
+                            "isRequired": true,
+                            "defaultValue": 1
+                        },
+                        {
+                            "name": "pin0",
+                            "type": 3,
+                            "isRequired": true,
+                            "defaultValue": 1
+                        },
+                        {
+                            "name": "pin1",
+                            "type": 3,
+                            "isRequired": true,
+                            "defaultValue": 1
+                        },
+                        {
+                            "name": "pin2",
+                            "type": 3,
+                            "isRequired": true,
+                            "defaultValue": 1
+                        },
+                        {
+                            "name": "pin3",
+                            "type": 3,
+                            "isRequired": true,
+                            "defaultValue": 1
+                        }
+                    ]
+                },
+                {
+                    "name": "axes",
+                    "type": [
+                        {
+                            "name": "x",
+                            "isRequired": true,
+                            "isArray": true,
+                            "type": [
+                                {
+                                    "name": "number",
+                                    "type": 1,
+                                    "defaultValue": 1,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "type",
+                                    "type": 1,
+                                    "defaultValue": 8,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "direction",
+                                    "type": 2,
+                                    "defaultValue": "positive",
+                                    "isRequired": true,
+                                    "options": [
+                                        { "name": "Positive", "value": "positive" },
+                                        { "name": "Negative", "value": "negative" }
+                                    ]
+                                },
+                                {
+                                    "name": "microstep",
+                                    "type": 1,
+                                    "defaultValue": 8,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "gearbox",
+                                    "type": 3,
+                                    "defaultValue": false,
+                                    "isRequired": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "y",
+                            "isRequired": true,
+                            "isArray": true,
+                            "type": [
+                                {
+                                    "name": "number",
+                                    "type": 1,
+                                    "defaultValue": 1,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "type",
+                                    "type": 1,
+                                    "defaultValue": 8,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "direction",
+                                    "type": 2,
+                                    "defaultValue": "positive",
+                                    "isRequired": true,
+                                    "options": [
+                                        { "name": "Positive", "value": "positive" },
+                                        { "name": "Negative", "value": "negative" }
+                                    ]
+                                },
+                                {
+                                    "name": "microstep",
+                                    "type": 1,
+                                    "defaultValue": 8,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "gearbox",
+                                    "type": 3,
+                                    "defaultValue": false,
+                                    "isRequired": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "z",
+                            "isRequired": true,
+                            "isArray": true,
+                            "type": [
+                                {
+                                    "name": "number",
+                                    "type": 1,
+                                    "defaultValue": 1,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "type",
+                                    "type": 1,
+                                    "defaultValue": 8,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "direction",
+                                    "type": 2,
+                                    "defaultValue": "positive",
+                                    "isRequired": true,
+                                    "options": [
+                                        { "name": "Positive", "value": "positive" },
+                                        { "name": "Negative", "value": "negative" }
+                                    ]
+                                },
+                                {
+                                    "name": "microstep",
+                                    "type": 1,
+                                    "defaultValue": 8,
+                                    "isRequired": true
+                                },
+                                {
+                                    "name": "gearbox",
+                                    "type": 3,
+                                    "defaultValue": false,
+                                    "isRequired": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "isArray": true,
+            "isRequired": true
+        }
+    ]
+}

@@ -26,7 +26,7 @@ body {
     font-family:Larsseit,Lato,Arial;
 }
 
-header {
+body > header {
     padding: 1em;
     background-color: var(--primary-color);
     color: white;
@@ -128,4 +128,223 @@ nav > button:hover {
 
 #estop-button > span:first-child {
     padding-right: 0.25rem;
+}
+
+.v_layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.h_layout {
+    display: flex;
+    flex-direction: row;
+}
+
+.modal-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 250ms ease-in-out;
+    background-color:rgba(22,35,56,.8);
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-container {
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+}
+
+.modal-container > header {
+    flex: 1 1 100%;
+}
+
+.modal-container > header{
+    flex: 0 1 auto;
+    background-color: var(--offwhite-color);
+    padding: 0.5em 1em 0.5em 1em;
+    border-radius: 4px 4px 0px 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modal-container > header > h3 {
+    color: var(--text-color);
+    font-size: 1.5rem !important;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-container > header > * {
+    flex: 1 1 100%;
+}
+
+.modal-container > div {
+    padding: 0px 15px 10px;
+    flex: 1 1 100%;
+    overflow-y: auto;
+}
+
+.modal-container > footer {
+    flex: 0 1 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.content-panel {
+    border: 1px solid var(--border-color);
+    background-color: white;
+    border-radius: 2px;
+    margin: 1em;
+    flex: 1 1 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#schema-list {
+    display: block;
+    height: auto;
+    text-align: left;
+    list-style-type: none;
+    padding: 0.5rem;
+    overflow-y: auto;
+}
+
+#schema-list > li {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 4px;
+    border: 1px solid #d9d9d9;
+    background-color: #f3f3f3;
+    padding: 0.5rem;
+}
+
+#schema-list > li > button {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    text-decoration: none;
+    outline: inherit;
+    border: none;
+    background-color: inherit;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#schema-list > li > button:hover {
+    cursor: pointer;
+    border-bottom: 1px solid;
+}
+
+.schema-item-editor-list {
+    padding-left: 1rem;
+    list-style-type: none;
+}
+
+.schema-item-editor-list > li {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+/*
+    WIDGETS
+*/
+.widget-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-wrapper.inline {
+    flex-direction: row;
+    align-items: center;
+}
+
+.widget-wrapper > label {
+    font-weight: bold;
+    color: rgb(28, 52, 79);
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin: 0;
+    padding-right: 0.25rem;
+    font-weight: 700;
+}
+
+.widget-textbox > input {
+    outline: none;
+    font-size: 0.8rem;
+    height: 2rem;
+    width: 100%;
+    padding: 0.9rem;
+    border: 1px solid rgb(45, 58, 77);
+    border-radius: 3px;
+    background-color: white;
+    box-sizing: border-box;
+}
+
+.widget-select {
+    position: relative;
+    height: 2rem;
+    float: left;
+    font-size: 0.9rem;
+    color: rgb(28, 52, 79);
+}
+
+.widget-select > select {
+    appearance: none;
+    height: inherit;
+    display: block;
+    background-color: white;
+    width: 100%;
+    float: right;
+    padding: 0px 1.5rem 0px 0.5rem;
+    border: 1px solid rgb(45, 58, 77);
+    border-radius: 0.15rem;
+}
+
+.widget-select::after {
+    content: "";
+    font-size: 0.7rem;
+    font-family: "Font Awesome 5 Pro";
+    right: 11px;
+    height: inherit;
+    padding: 0px 0px 0px 8px;
+    position: absolute;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.widget-load-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.widget-load-overlay-blurred {
+    filter: blur(1px);
+}
+
+.widget-error {
+    font-size: 0.8rem;
+    color: red;
 }
