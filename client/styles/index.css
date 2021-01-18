@@ -130,6 +130,60 @@ nav > button:hover {
     padding-right: 0.25rem;
 }
 
+#configuration-content {
+    height: 100%;
+}
+
+.configuration-list {
+    display: block;
+    height: auto;
+    text-align: left;
+    list-style-type: none;
+    padding: 0.5rem;
+    overflow-y: auto;
+}
+
+.configuration-list-item {
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #d9d9d9;
+    background-color: #f3f3f3;
+    padding: 0.5rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.configuration-list-item button {
+    text-decoration: none;
+    outline: inherit;
+    border: none;
+    background-color: inherit;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.configuration-list-item button:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.configuration-list-item button.edit {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.configuration-list-item button.delete {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/*
+    Shared UI items
+*/
 .v_layout {
     display: flex;
     flex-direction: column;
@@ -184,7 +238,7 @@ nav > button:hover {
 
 .modal-container > header > h3 {
     color: var(--text-color);
-    font-size: 1.5rem !important;
+    font-size: 1.2rem !important;
     font-weight: bold;
     padding: 0;
     margin: 0;
@@ -234,98 +288,6 @@ nav > button:hover {
 
 .content-panel-body {
     flex: 1 1 100%;
-}
-
-#schema-list {
-    display: block;
-    height: auto;
-    text-align: left;
-    list-style-type: none;
-    padding: 0.5rem;
-    overflow-y: auto;
-}
-
-#schema-list > li {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 4px;
-    border: 1px solid #d9d9d9;
-    background-color: #f3f3f3;
-    padding: 0.5rem;
-}
-
-#schema-list > li > button {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-    text-decoration: none;
-    outline: inherit;
-    border: none;
-    background-color: inherit;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-#schema-list > li > button:hover {
-    cursor: pointer;
-    border-bottom: 1px solid;
-}
-
-.schema-item-editor-list {
-    padding-left: 1rem;
-    list-style-type: none;
-}
-
-.schema-item-editor-list > li > div {
-    position: relative;
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    border-left: 1px solid var(--border-color);
-    border-radius: 4px;
-}
-
-.schema-item-editor-list > li > div:hover {
-    border-color:  var(--primary-color);
-}
-
-.schema-path-label {
-    position: absolute;
-    top: -0.5rem;
-    left: 0.5rem;
-    font-size: 0.75rem;
-    opacity: 0;
-    color: var(--primary-color);
-    transition: opacity 100ms ease-in-out;
-}
-
-.schema-item-editor-list > li > div:hover > .schema-path-label {
-    opacity: 1;
-}
-
-.schema-add-member-button {
-    all: unset;
-    position: absolute;
-    bottom: 0rem;
-    left: 0.5rem;
-    color: var(--success-color);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.schema-add-member-button > i {
-    padding-right: 0.5rem;
-}
-
-.schema-add-member-button:hover {
-    cursor: pointer;
-}
-
-.schema-add-member-button:hover > span {
-    text-decoration: underline;
 }
 
 /*
@@ -580,4 +542,18 @@ nav > button:hover {
 .widget-button.primary.link:hover {
     background-color: inherit;
     border-bottom: 1px solid var(--primary-color);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.widget-spin-loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 1em;
+    height: 1em;
+    animation: spin 2s linear infinite;
 }

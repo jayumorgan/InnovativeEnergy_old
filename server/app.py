@@ -6,6 +6,7 @@ from threading import Thread
 import time
 from pathlib import Path
 import json
+import math
 
 class ConfigurationService:
     '''
@@ -13,24 +14,38 @@ class ConfigurationService:
     '''
     def __init__(self):
         self.__dataPath = os.path.join('.', 'data')
+        if not os.path.isdir(self.__dataPath):
+            os.mkdir(self.__dataPath)
+
         self.__configurationPath = os.path.join(self.__dataPath, 'configurations')
+        if not os.path.isdir(self.__configurationPath):
+            os.mkdir(self.__configurationPath)
+
+        self.__logger = logging.getLogger(__name__)
+
+    def createType(self, type):
+        typePath = os.path.join(self.__configurationPath, type)
+        if not os.path.isdir(typePath):
+            os.mkdir(typePath)
+
+        return True
 
     def create(self, type, name):
         typePath = os.path.join(self.__configurationPath, type)
         if not os.path.isdir(typePath):
             os.mkdir(typePath)
 
-        identifier = time.time()
+        identifier = math.trunc(time.time())
 
         newConfigurationData = {
             "type": type,
             "name": name,
-            "creationTimeSeconds": time.time(),
+            "creationTimeSeconds": identifier,
             "id": identifier,
             "payload": {}
         }
 
-        fullFilePath = os.path.join(typePath, str(identifier))
+        fullFilePath = os.path.join(typePath, str(identifier) + '.json')
 
         with open(fullFilePath, 'w') as f:
             f.write(json.dumps(newConfigurationData, indent=4))
@@ -43,37 +58,39 @@ class ConfigurationService:
             os.mkdir(typePath)
 
         configPath = os.path.join(typePath, id + '.json')
+        self.__logger.info('Deleting file at path: {}'.format(configPath))
         if not os.path.exists(configPath):
             return False
 
         os.remove(configPath)
         return True
 
-    def listConfigs(self, type):
-        retval = []
-        typePath = os.path.join(self.__configurationPath, type)
-        if not os.path.isdir(typePath):
-            os.mkdir(typePath)
+    def listConfigs(self):
+        typeToConfigurationMap = {}
 
-        for filename in os.listdir(typePath):
-            if not filename.endswith('.json'):
-                self.__logger.error('Unknown configuration file: ' + filename)
+        for typeName in os.listdir(self.__configurationPath):
+            typePath = os.path.join(self.__configurationPath, typeName)
+            if not os.path.isdir(typePath):
                 continue
 
-            fullFilePath = os.path.join(typePath, filename)
-            with open(fullFilePath) as f:
-                try:
-                    jsonContents = json.loads(f.read())
-                    identifier = jsonContents["id"]
-                    name = jsonContents["name"]
-                    retval.append({
-                        "id": identifier,
-                        "name": name
-                    })
-                except Exception as e:
-                    self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
+            typeToConfigurationMap[typeName] = []
 
-        return retval
+            for configName in os.listdir(typePath):
+                if not configName.endswith('.json'):
+                    self.__logger.error('Unknown configuration file: ' + configName)
+                    continue
+
+                configPath = os.path.join(typePath, configName)
+                with open(configPath) as f:
+                    try:
+                        jsonContents = json.loads(f.read())
+                        identifier = jsonContents["id"]
+                        name = jsonContents["name"]
+                        typeToConfigurationMap[typeName].append({ "id": identifier, "name": name })
+                    except Exception as e:
+                        self.__logger.exception('Failed to read file at path {}, exception: {}'.format(configPath, str(e)))
+
+        return typeToConfigurationMap
 
     def getConfiguration(self, type, identifier):
         typePath = os.path.join(self.__configurationPath, type)
@@ -92,27 +109,30 @@ class ConfigurationService:
             self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
             return (False, None)
 
-    def saveConfiguration(self, type, identifier, payload):
+    def saveConfiguration(self, type, identifier, name, payload):
         typePath = os.path.join(self.__configurationPath, type)
         if not os.path.isdir(typePath):
-            return Fals
+            self.__logger.error('Type path not defined')
+            return False
 
         fullFilePath = os.path.join(typePath, identifier + '.json')
         if not os.path.exists(fullFilePath):
+            self.__logger.error('File does not exist')
             return False
 
         try:
             with open(fullFilePath, 'r') as f:
                 existingContent = json.loads(f.read())
             
+            existingContent["name"] = name
             existingContent["payload"] = payload
             with open(fullFilePath, 'w') as f:
                 f.write(json.dumps(existingContent))
-                return False
+                return True
                 
         except Exception as e:
             self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
-            return True
+            return False
 
 
 class RestServer(Bottle):
@@ -130,6 +150,7 @@ class RestServer(Bottle):
         self.route('/<filepath:path>', callback=self.serveStatic)
 
         self.route('/configuration/create', method='POST', callback=self.createConfiguration)
+        self.route('/configuration/createType', callback=self.createType)
         self.route('/configuration/delete', method='DELETE', callback=self.deleteConfiguration)
         self.route('/configuration/list', callback=self.listConfigurations)
         self.route('/configuration', callback=self.getConfiguration)
@@ -141,6 +162,10 @@ class RestServer(Bottle):
     def serveStatic(self, filepath):
         self.__logger.info('Serving static file: {}'.format(filepath))
         return static_file(filepath, root=self.__clientDirectory)
+
+    def createType(self):
+        configurationType = request.query.type
+        self.__configurationService.createType(configurationType)
 
     def createConfiguration(self):
         configurationType = request.query.type
@@ -160,7 +185,7 @@ class RestServer(Bottle):
             abort(400, 'Unable to delete configuration: type={}, id={}'.format(configurationType, configurationId))
 
     def listConfigurations(self):
-        return { "configurationList": self.listConfigurations() }
+        return { "configurationList": self.__configurationService.listConfigs() }
 
     def getConfiguration(self):
         configurationType = request.query.type
@@ -175,8 +200,9 @@ class RestServer(Bottle):
     def saveConfiguration(self):
         configurationType = request.query.type
         configurationId = request.query.id
-        body = request.json()
-        if not self.__configurationService.saveConfiguration(configurationType, configurationId, body):
+        name = request.query.name
+        body = request.json
+        if not self.__configurationService.saveConfiguration(configurationType, configurationId, name, body):
             abort(400, 'Unable to save configuration')
         else:
             return 'OK'
