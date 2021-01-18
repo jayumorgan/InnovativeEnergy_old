@@ -7,61 +7,6 @@ import time
 from pathlib import Path
 import json
 
-class SchemaService:
-    def __init__(self):
-        self.__logger = logging.getLogger(__name__)
-        self.__dataPath = os.path.join('.', 'data')
-        self.__schemaPath = os.path.join(self.__dataPath, 'schemas')
-
-        if not os.path.isdir(self.__dataPath):
-            os.mkdir(self.__dataPath)
-
-        if not os.path.isdir(self.__schemaPath):
-            os.mkdir(self.__schemaPath)
-
-    def createSchema(self, name, schema):
-        pass
-
-    def deleteSchema(self, id):
-        pass
-
-    def updateSchema(self, id, schema):
-        pass
-
-    def tryGetSchema(self, id):
-        fullFilePath = os.path.join(self.__schemaPath, id + '.json')
-        with open(fullFilePath) as f:
-            try:
-                return (True, json.loads(f.read()))
-            except Exception as e:
-                self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
-        return (False, None)
-
-    def listSchemas(self):
-        schemas = []
-
-        for filename in os.listdir(self.__schemaPath):
-            if not filename.endswith('.json'):
-                self.__logger.error('Unknown schema file: ' + filename)
-                continue
-
-            fullFilePath = os.path.join(self.__schemaPath, filename)
-            with open(fullFilePath) as f:
-                try:
-                    jsonContents = json.loads(f.read())
-                    identifier = jsonContents["id"]
-                    name = jsonContents["name"]
-                    schemas.append({
-                        "id": identifier,
-                        "name": name
-                    })
-                except Exception as e:
-                    self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
-
-        return {
-            "schemas": schemas
-        }
-
 class ConfigurationService:
     '''
     Handles all configuration IO 
@@ -92,8 +37,82 @@ class ConfigurationService:
 
         return True
 
-    def delete(self, type, name):
-        pass
+    def delete(self, type, id):
+        typePath = os.path.join(self.__configurationPath, type)
+        if not os.path.isdir(typePath):
+            os.mkdir(typePath)
+
+        configPath = os.path.join(typePath, id + '.json')
+        if not os.path.exists(configPath):
+            return False
+
+        os.remove(configPath)
+        return True
+
+    def listConfigs(self, type):
+        retval = []
+        typePath = os.path.join(self.__configurationPath, type)
+        if not os.path.isdir(typePath):
+            os.mkdir(typePath)
+
+        for filename in os.listdir(typePath):
+            if not filename.endswith('.json'):
+                self.__logger.error('Unknown configuration file: ' + filename)
+                continue
+
+            fullFilePath = os.path.join(typePath, filename)
+            with open(fullFilePath) as f:
+                try:
+                    jsonContents = json.loads(f.read())
+                    identifier = jsonContents["id"]
+                    name = jsonContents["name"]
+                    retval.append({
+                        "id": identifier,
+                        "name": name
+                    })
+                except Exception as e:
+                    self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
+
+        return retval
+
+    def getConfiguration(self, type, identifier):
+        typePath = os.path.join(self.__configurationPath, type)
+        if not os.path.isdir(typePath):
+            return (False, None)
+
+        fullFilePath = os.path.join(typePath, identifier + '.json')
+        if not os.path.exists(fullFilePath):
+            return (False, None)
+
+        f = open(fullFilePath, 'r')
+
+        try:
+            return (True, json.loads(f.read()))
+        except Exception as e:
+            self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
+            return (False, None)
+
+    def saveConfiguration(self, type, identifier, payload):
+        typePath = os.path.join(self.__configurationPath, type)
+        if not os.path.isdir(typePath):
+            return Fals
+
+        fullFilePath = os.path.join(typePath, identifier + '.json')
+        if not os.path.exists(fullFilePath):
+            return False
+
+        try:
+            with open(fullFilePath, 'r') as f:
+                existingContent = json.loads(f.read())
+            
+            existingContent["payload"] = payload
+            with open(fullFilePath, 'w') as f:
+                f.write(json.dumps(existingContent))
+                return False
+                
+        except Exception as e:
+            self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
+            return True
 
 
 class RestServer(Bottle):
@@ -105,7 +124,6 @@ class RestServer(Bottle):
     
         self.__clientDirectory = os.path.join('..', 'client')
         self.__logger = logging.getLogger(__name__)
-        self.__schemaService = SchemaService()
         self.__configurationService = ConfigurationService()
 
         self.route('/', callback=self.index)
@@ -114,7 +132,7 @@ class RestServer(Bottle):
         self.route('/configuration/create', method='POST', callback=self.createConfiguration)
         self.route('/configuration/delete', method='DELETE', callback=self.deleteConfiguration)
         self.route('/configuration/list', callback=self.listConfigurations)
-        self.route('/configuration/<configurationType>', callback=self.getConfiguration)
+        self.route('/configuration', callback=self.getConfiguration)
         self.route('/configuration/save', method='POST', callback=self.saveConfiguration)
 
     def index(self):
@@ -128,21 +146,40 @@ class RestServer(Bottle):
         configurationType = request.query.type
         name = request.query.name
         if self.__configurationService.create(configurationType, name):
-            return True
+            return "OK"
         else:
             abort(400, 'Unable to save configuration: type={}, name={}'.format(configurationType, name))
 
     def deleteConfiguration(self):
-        pass
+        configurationType = request.query.type
+        configurationId = request.query.id
+
+        if self.__configurationService.delete(configurationType, configurationId):
+            return "OK"
+        else:
+            abort(400, 'Unable to delete configuration: type={}, id={}'.format(configurationType, configurationId))
 
     def listConfigurations(self):
-        pass
+        return { "configurationList": self.listConfigurations() }
 
-    def getConfiguration(self, configurationType):
-        pass
+    def getConfiguration(self):
+        configurationType = request.query.type
+        configurationId = request.query.id
+
+        (isSuccess, data) = self.__configurationService.getConfiguration(configurationType, configurationId)
+        if not isSuccess:
+            abort(400, 'Unable to read configuration')
+        else:
+            return data
 
     def saveConfiguration(self):
-        pass
+        configurationType = request.query.type
+        configurationId = request.query.id
+        body = request.json()
+        if not self.__configurationService.saveConfiguration(configurationType, configurationId, body):
+            abort(400, 'Unable to save configuration')
+        else:
+            return 'OK'
 
     def copyConfiguration(self):
         pass
