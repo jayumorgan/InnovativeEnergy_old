@@ -1,10 +1,61 @@
 /// <reference path="./js/jquery-3.5.1.min.js" />
 
 (function() {
+    /*********************************
+        Methods dealing with configuration IO
+    *********************************/
+    function lListConfigs() {
+        return fetch('/configuration/list').then(function(pResponse) { return pResponse.json(); });
+    }
 
-    /*
-    Application-level functionality
-    */
+    function lCreateConfig(pType, pName) {
+        return fetch(`/configuration/create?type=${encodeURIComponent(pType)}&name=${encodeURIComponent(pName)}`, { method: 'POST' }).then(function(pResponse) {
+            return pResponse.status === 200;
+        });
+    }
+
+    function lGetConfiguration(pType, pId) {
+        return fetch(`/configuration?type=${encodeURIComponent(pType)}&id=${encodeURIComponent(pId)}`).then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return pResponse.json();
+            } else {
+                return pResponse.text();
+            }
+        })
+    }
+
+    function lSaveConfiguration(pType, pId, pName, pPayload) {
+        return fetch(`/configuration/save?type=${encodeURIComponent(pType)}&id=${encodeURIComponent(pId)}&name=${encodeURIComponent(pName)}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pPayload)
+        }).then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return pResponse.text()
+            } else {
+                return pResponse.text();
+            }
+        })
+    }
+
+    function lDeleteConfiguration(pType, pId) {
+        return fetch(`/configuration/delete?type=${pType}&id=${pId}`, {
+            method: 'DELETE'
+        }).then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    /*********************************
+        Application-level functionality
+    *********************************/
 
     function lMain() {
         lOnGeneralTabClicked()
@@ -18,6 +69,23 @@
         $('#configuration-tab-button').removeClass('nav-selected');
         $('#general-content').css('display', 'inherit');
         $('#configuration-content').css('display', 'none');
+
+        let lSelectedConfigurationId;
+        lCreateConfigurationSelector('Runnable', false, 'Select a Config', undefined, function(pSelectedId) {
+            lSelectedConfigurationId = pSelectedId;
+        }).then(function(pSelector) {
+            if (pSelector !== undefined) {
+                $('#general-content-configuration-selector').append(pSelector)
+            }
+        });
+
+        $('#run-start-button').on('click', function() {
+
+        });
+
+        $('#run-stop-button').on('click', function() {
+
+        });
     }
 
     function lOnConfigurationTabClicked() {
@@ -25,64 +93,6 @@
         $('#configuration-tab-button').addClass('nav-selected');
         $('#configuration-content').css('display', 'inherit');
         $('#general-content').css('display', 'none');
-
-        /*********************************
-        Methods dealing with configuration IO
-        *********************************/
-        function lListConfigs() {
-            return fetch('/configuration/list').then(function(pResponse) { return pResponse.json(); });
-        }
-
-        function lCreateType(pType) {
-            return fetch(`/configuration/createType?type=${pType}`).then(function(pResponse) {
-                return pResponse.status === 200;
-            });
-        }
-
-        function lCreateConfig(pType, pName) {
-            return fetch(`/configuration/create?type=${pType}&name=${pName}`, { method: 'POST' }).then(function(pResponse) {
-                return pResponse.status === 200;
-            });
-        }
-
-        function lGetConfiguration(pType, pId) {
-            return fetch(`/configuration?type=${pType}&id=${pId}`).then(function(pResponse) {
-                if (pResponse.status === 200) {
-                    return pResponse.json();
-                } else {
-                    return pResponse.text();
-                }
-            })
-        }
-
-        function lSaveConfiguration(pType, pId, pName, pPayload) {
-            return fetch(`/configuration/save?type=${encodeURIComponent(pType)}&id=${encodeURIComponent(pId)}&name=${encodeURIComponent(pName)}`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(pPayload)
-            }).then(function(pResponse) {
-                if (pResponse.status === 200) {
-                    return pResponse.text()
-                } else {
-                    return pResponse.text();
-                }
-            })
-        }
-
-        function lDeleteConfiguration(pType, pId) {
-            return fetch(`/configuration/delete?type=${pType}&id=${pId}`, {
-                method: 'DELETE'
-            }).then(function(pResponse) {
-                if (pResponse.status === 200) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        }
 
         const lWrapper = $('#configuration-content').empty(),
             lContentPanel = $('<div>').addClass('content-panel').appendTo(lWrapper).css('height', '99%'),
@@ -271,6 +281,24 @@
 
         lSelect.val(pValue);
         return lWrapper;
+    }
+
+    function lCreateConfigurationSelector(pType, pInline, pLabel, pValue, pOnChange) {
+        return lListConfigs().then(function(pRetval) {
+            const lConfigurationList = pRetval.configurationList[pType];
+            if (!lConfigurationList) {
+                console.error('Failed to find configuration of type: ' + pType);
+                return undefined;
+            }
+
+            const lOptionsList = lConfigurationList.map(function(pItem) {
+                return { key: pItem.name, value: pItem.id };
+            })
+
+            return lSelect(pInline, pLabel, pValue, lOptionsList, function(pNewValue) {
+                pOnChange(Number(pNewValue));
+            })
+        });
     }
 
     function lCheckbox(pInline, pLabel, pDefaultValue, pOnChange) {

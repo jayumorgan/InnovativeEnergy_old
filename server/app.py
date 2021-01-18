@@ -23,13 +23,6 @@ class ConfigurationService:
 
         self.__logger = logging.getLogger(__name__)
 
-    def createType(self, type):
-        typePath = os.path.join(self.__configurationPath, type)
-        if not os.path.isdir(typePath):
-            os.mkdir(typePath)
-
-        return True
-
     def create(self, type, name):
         typePath = os.path.join(self.__configurationPath, type)
         if not os.path.isdir(typePath):
@@ -127,7 +120,7 @@ class ConfigurationService:
             existingContent["name"] = name
             existingContent["payload"] = payload
             with open(fullFilePath, 'w') as f:
-                f.write(json.dumps(existingContent))
+                f.write(json.dumps(existingContent, indent=4))
                 return True
                 
         except Exception as e:
@@ -150,7 +143,6 @@ class RestServer(Bottle):
         self.route('/<filepath:path>', callback=self.serveStatic)
 
         self.route('/configuration/create', method='POST', callback=self.createConfiguration)
-        self.route('/configuration/createType', callback=self.createType)
         self.route('/configuration/delete', method='DELETE', callback=self.deleteConfiguration)
         self.route('/configuration/list', callback=self.listConfigurations)
         self.route('/configuration', callback=self.getConfiguration)
@@ -162,10 +154,6 @@ class RestServer(Bottle):
     def serveStatic(self, filepath):
         self.__logger.info('Serving static file: {}'.format(filepath))
         return static_file(filepath, root=self.__clientDirectory)
-
-    def createType(self):
-        configurationType = request.query.type
-        self.__configurationService.createType(configurationType)
 
     def createConfiguration(self):
         configurationType = request.query.type

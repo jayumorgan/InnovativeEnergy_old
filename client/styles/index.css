@@ -130,6 +130,15 @@ nav > button:hover {
     padding-right: 0.25rem;
 }
 
+#general-content {
+}
+
+#general-content-configuration-selector {
+    padding-top: 1rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
 #configuration-content {
     height: 100%;
 }
@@ -286,8 +295,48 @@ nav > button:hover {
     flex: 0 1 auto;
 }
 
+.content-panel-button-group {
+    text-align: center;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 1rem;
+}
+
 .content-panel-body {
     flex: 1 1 100%;
+}
+
+.content-panel-button {
+    all: unset;
+    width: 150px;
+    height: 179px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.content-panel-button .icon-play,
+.content-panel-button .icon-pause,
+.content-panel-button .icon-stop {
+    font-size: 41px;
+    margin-bottom: 0.25rem;
+}
+
+.content-panel-button.start-button {
+    background-color: #1AC876;
+}
+
+.content-panel-button.stop-button {
+    background-color: var(--primary-color);
+}
+
+.content-panel-button.stop-button.running {
+    background-color: var(--danger-color);
 }
 
 /*
