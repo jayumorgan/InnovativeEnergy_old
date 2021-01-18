@@ -62,6 +62,39 @@ class SchemaService:
             "schemas": schemas
         }
 
+class ConfigurationService:
+    '''
+    Handles all configuration IO 
+    '''
+    def __init__(self):
+        self.__dataPath = os.path.join('.', 'data')
+        self.__configurationPath = os.path.join(self.__dataPath, 'configurations')
+
+    def create(self, type, name):
+        typePath = os.path.join(self.__configurationPath, type)
+        if not os.path.isdir(typePath):
+            os.mkdir(typePath)
+
+        identifier = time.time()
+
+        newConfigurationData = {
+            "type": type,
+            "name": name,
+            "creationTimeSeconds": time.time(),
+            "id": identifier,
+            "payload": {}
+        }
+
+        fullFilePath = os.path.join(typePath, str(identifier))
+
+        with open(fullFilePath, 'w') as f:
+            f.write(json.dumps(newConfigurationData, indent=4))
+
+        return True
+
+    def delete(self, type, name):
+        pass
+
 
 class RestServer(Bottle):
     '''
@@ -73,12 +106,16 @@ class RestServer(Bottle):
         self.__clientDirectory = os.path.join('..', 'client')
         self.__logger = logging.getLogger(__name__)
         self.__schemaService = SchemaService()
+        self.__configurationService = ConfigurationService()
 
         self.route('/', callback=self.index)
         self.route('/<filepath:path>', callback=self.serveStatic)
-        self.route('/schema/create', method='POST', callback=self.createNewSchema)
-        self.route('/schema', callback=self.getSchema)
-        self.route('/schema/list', callback=self.listSchemas)
+
+        self.route('/configuration/create', method='POST', callback=self.createConfiguration)
+        self.route('/configuration/delete', method='DELETE', callback=self.deleteConfiguration)
+        self.route('/configuration/list', callback=self.listConfigurations)
+        self.route('/configuration/<configurationType>', callback=self.getConfiguration)
+        self.route('/configuration/save', method='POST', callback=self.saveConfiguration)
 
     def index(self):
         return static_file('index.html', root=self.__clientDirectory)
@@ -87,23 +124,28 @@ class RestServer(Bottle):
         self.__logger.info('Serving static file: {}'.format(filepath))
         return static_file(filepath, root=self.__clientDirectory)
 
-    def createNewSchema(self):
+    def createConfiguration(self):
+        configurationType = request.query.type
         name = request.query.name
-        schema = request.json()
+        if self.__configurationService.create(configurationType, name):
+            return True
+        else:
+            abort(400, 'Unable to save configuration: type={}, name={}'.format(configurationType, name))
+
+    def deleteConfiguration(self):
         pass
 
-    def listSchemas(self):
-        return self.__schemaService.listSchemas()
+    def listConfigurations(self):
+        pass
 
-    def getSchema(self):
-        schemaId = request.query.id
-        (success, schema) = self.__schemaService.tryGetSchema(schemaId)
+    def getConfiguration(self, configurationType):
+        pass
 
-        if not success:
-            abort(400, 'Schema with id={} not found'.format(id))
-        else:
-            return schema
+    def saveConfiguration(self):
+        pass
 
+    def copyConfiguration(self):
+        pass
 
 class MachineAppLoop:
     '''

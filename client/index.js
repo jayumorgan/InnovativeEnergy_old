@@ -1,3 +1,5 @@
+/// <reference path="./js/jquery-3.5.1.min.js" />
+
 (function() {
 
     /*
@@ -34,6 +36,109 @@
         }
     }
 
+    function lSchemaEditor(pSchemaConfiguration) {
+        const lSchema = pSchemaConfiguration.schema,
+            lModal = lCreateModal(),
+            lModalBody = lModal.find('.modal-body').css('width', '960px').css('max-height', '512px').css('min-height', '640px'),
+            lFooter = lModal.find('footer'),
+            lFooterContent = $('<div>').addClass('widget-button-group').appendTo(lFooter),
+            lCloseButton = $('<button>').addClass('widget-button danger').text('Cancel').appendTo(lFooterContent).on('click', function() {
+                lModal.remove();
+            })
+            lSaveButton = $('<button>').addClass('widget-button primary').text('Save').appendTo(lFooterContent),
+            lSchemaItemList = $('<ul>').addClass('schema-item-editor-list').appendTo(lModalBody).css('padding-right', '1rem'),
+            lValueTypeOptions = [
+                { value: 1, key: "Number" },
+                { value: 2, key: "String" },
+                { value: 3, key: "Boolean" },
+                { value: 4, key: "Object" }
+            ];
+        
+        lModal.find('header').find('h3').text('Edit ' + pSchemaConfiguration.name + ' Schema (' + pSchemaConfiguration.id + ')');
+
+        const lCurrentPath = ['~'];
+
+        function lAddSchemaToBody(pSchema, pParentElement) {
+            const lSchemaEditorContainer = $('<li>').appendTo(pParentElement);
+            pSchema.forEach(function(pSchemaItem) {
+                lCurrentPath.push(pSchemaItem.name);
+
+                const lBreadcrumbIndex = lCurrentPath.length - 1,
+                    lItemWrapper = $('<div>').appendTo(lSchemaEditorContainer).addClass('grid-four'),
+                    lItemLabel = $('<label>').addClass('schema-path-label').appendTo(lItemWrapper).text(lCurrentPath.join(' > ')),
+                    lNameBox = lTextBox(false, 'Member Name',  pSchemaItem.name, function(pNewName) {
+                        pSchemaItem.name = pNewName;
+
+                        lItemWrapper.find('.schema-path-label').each(function(pSchemaIndex, pSchemaLabel) {
+                            const lSchemaLabelText = $(pSchemaLabel).text(),
+                                lSchemaLabelSplitText = lSchemaLabelText.split(' > ');
+
+                            lSchemaLabelSplitText[lBreadcrumbIndex] = pSchemaItem.name;
+                            $(pSchemaLabel).text(lSchemaLabelSplitText.join(' > '));
+                        });
+
+                    }).appendTo(lItemWrapper),
+                    lTypeBox = lSelect(false, 'Member Type', typeof(pSchemaItem.type) === "object" ? 4 : pSchemaItem.type, lValueTypeOptions, function(pNewType) {
+                        pNewType = Number(pNewType);
+                        if (pNewType === 4) {
+                            pSchemaItem.type = []
+                        } else {
+                            pSchemaItem.type = pNewType;
+                        }
+
+                        lUpdateDefaultValueEditor();
+                    }).appendTo(lItemWrapper),
+                    lUpdateDefaultValueEditor = function() {
+                        lDefaultValueWrapper.empty();
+                        switch (pSchemaItem.type) {
+                            case 1:
+                                lDefaultValueWrapper.append(lNumericTextbox(false, 'Default Value', pSchemaItem.defaultValue, function(pValue) {
+                                    pSchemaItem.defaultValue = Number(pValue);
+                                }));
+                                break;
+                            case 2:
+                                lDefaultValueWrapper.append(lTextBox(false, 'Default Value', pSchemaItem.defaultValue, function(pValue) {
+                                    pSchemaItem.defaultValue = pValue;
+                                }));
+                                break;
+                            case 3:
+                                lDefaultValueWrapper.append(lCheckbox(false, 'Default Value', pSchemaItem.defaultValue, function(pValue) {
+                                    pSchemaItem.defaultValue = Boolean(pValue);
+                                }));
+                                break;
+                            default:
+                                break;
+                        }
+                    },
+                    lDefaultValueWrapper = $('<div>').appendTo(lItemWrapper)
+                    lCheckMarkGroup = $('<div>').appendTo(lItemWrapper),
+                    lIsRequiredCheckbox = lCheckbox(false, 'Is Required', pSchemaItem.isRequired, function(pNewIsRequired) {
+                        pSchema.isRequired = Boolean(pNewIsRequired);
+                    }).appendTo(lCheckMarkGroup),
+                    lIsArrayCheckbox = lCheckbox(false, 'Is Array', pSchemaItem.isArray, function(pNewIsArray) {
+                        pSchema.isArray = Boolean(pNewIsArray);
+                    }).appendTo(lCheckMarkGroup),
+                    lHasOptions = lCheckbox(false, 'Has Options', pSchemaItem.options !== undefined, function(pValue) {
+                        pSchema.options = Boolean(pValue) ? [] : undefined;
+                    }).appendTo(lCheckMarkGroup),
+
+                lUpdateDefaultValueEditor();
+                    
+                if (typeof(pSchemaItem.type) === "object") {
+                    const lEditorListWrapper = $('<div>').css('grid-column-start', 1).css('grid-column-end', 5).appendTo(lItemWrapper),
+                        lSubSchemaList = $('<ul>').addClass('schema-item-editor-list').appendTo(lEditorListWrapper),
+                        lAddMemberButton = $('<button>').addClass('schema-add-member-button').append($('<i>').addClass('icon-add-plus'))
+                            .append($('<span>').text('Add Member')).appendTo(lItemWrapper);
+                    lAddSchemaToBody(pSchemaItem.type, lSubSchemaList);
+                };
+
+                lCurrentPath.pop();
+            });
+        }
+
+        lAddSchemaToBody(lSchema, lSchemaItemList);
+    }
+
     function lOnSchemaTabClicked() {
         $('#schema-tab-button').addClass('nav-selected');
         $('#general-tab-button').removeClass('nav-selected');
@@ -58,54 +163,7 @@
                 const lListItem = $('<li>').appendTo('#schema-list'),
                     lName = $('<span>').appendTo(lListItem).text(pSchemaInfo.name),
                     lEdit = $('<button>').appendTo(lListItem).text('Edit').on('click', function() {
-                        lGetSchema(pSchemaInfo.id).then(function(pSchemaConfiguration) {
-                            const lSchema = pSchemaConfiguration.schema,
-                                lModal = lCreateModal(),
-                                lModalBody = lModal.find('.modal-body').css('width', '800px').css('max-height', '512px').css('min-height', '640px'),
-                                lSchemaItemList = $('<ul>').addClass('schema-item-editor-list').appendTo(lModalBody).css('padding-right', '1rem'),
-                                lValueTypeOptions = [
-                                    { value: 1, key: "Number" },
-                                    { value: 2, key: "String" },
-                                    { value: 3, key: "Boolean" },
-                                    { value: 4, key: "Object" }
-                                ];
-                            
-                            lModal.find('header').find('h3').text('Edit ' + pSchemaConfiguration.name + ' Schema (' + pSchemaConfiguration.id + ')');
-
-                            function lAddSchemaToBody(pSchema, pParentElement) {
-                                const lSchemaEditorContainer = $('<li>').appendTo(pParentElement);
-                                pSchema.forEach(function(pSchemaItem) {
-                                    const lName = pSchemaItem.name,
-                                        lDefaultValue = pSchemaItem.defaultValue,
-                                        lType = pSchemaItem.type,
-                                        isRequired = pSchemaItem.isRequired,
-                                        lOptions = pSchemaItem.options,
-                                        lIsArray = pSchemaItem.isArray;
-
-                                    const lItemWrapper = $('<div>').appendTo(lSchemaEditorContainer),
-                                        lNameBox = lTextBox(false, 'Name', lName, function(pNewName) {
-                                            pSchemaItem.name = pNewName;
-                                        }).appendTo(lItemWrapper),
-                                        lTypeBox = lSelect(false, 'Type', typeof(lType) === "object" ? 4 : lType, lValueTypeOptions, function(pNewType) {
-                                            pNewType = Number(pNewType);
-                                            if (pNewType === 4) {
-                                                pSchemaItem.type = []
-                                            } else {
-                                                pSchemaItem.type = pNewType;
-                                            }
-                                        }).appendTo(lItemWrapper);
-                                        
-                                    if (typeof(lType) === "object") {
-                                        const lSubSchemaList = $('<ul>').addClass('schema-item-editor-list').appendTo(pParentElement);
-                                        lAddSchemaToBody(lType, lSubSchemaList);
-                                    } else {
-
-                                    }
-                                })
-                            }
-
-                            lAddSchemaToBody(lSchema, lSchemaItemList);
-                        })
+                        lGetSchema(pSchemaInfo.id).then(lSchemaEditor);
                     });
             })
         });
@@ -188,6 +246,18 @@
         return lWrapper;
     }
 
+    function lCheckbox(pInline, pLabel, pDefaultValue, pOnChange) {
+        const lWrapper = $('<label>').text(pLabel).addClass('widget-checkbox'),
+            lInputElement = $('<input>').attr('type', 'checkbox').attr('checked', pDefaultValue).appendTo(lWrapper),
+            lSpanElement = $('<span>').addClass('widget-checkmark').appendTo(lWrapper);
+
+        lInputElement.on('change', function(pEvent) {
+            pOnChange(lInputElement.val());
+        });
+
+        return lWrapper;
+    }
+
     function lUpdateSelectOptions(pSelect, pNewOptions, pSelectedValue) {
         const lSelect = pSelect.find('select');
 
@@ -203,10 +273,6 @@
         }
         
         lSelect.trigger('change');
-    }
-
-    function lCheckbox(pInline, pLabel, pDefaultValue, pOnChange) {
-
     }
 
     function lAppendError(pWidget, pError) {
