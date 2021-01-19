@@ -7,153 +7,13 @@ import time
 from pathlib import Path
 import json
 import math
+from machine_app import MachineAppEngine
+from services import ConfigurationService, RuntimeService
 
-class ConfigurationService:
-    '''
-    Handles all configuration IO 
-    '''
+class ConfigurationController:
     def __init__(self):
-        self.__dataPath = os.path.join('.', 'data')
-        if not os.path.isdir(self.__dataPath):
-            os.mkdir(self.__dataPath)
-
-        self.__configurationPath = os.path.join(self.__dataPath, 'configurations')
-        if not os.path.isdir(self.__configurationPath):
-            os.mkdir(self.__configurationPath)
-
-        self.__logger = logging.getLogger(__name__)
-
-    def create(self, type, name):
-        typePath = os.path.join(self.__configurationPath, type)
-        if not os.path.isdir(typePath):
-            os.mkdir(typePath)
-
-        identifier = math.trunc(time.time())
-
-        newConfigurationData = {
-            "type": type,
-            "name": name,
-            "creationTimeSeconds": identifier,
-            "id": identifier,
-            "payload": {}
-        }
-
-        fullFilePath = os.path.join(typePath, str(identifier) + '.json')
-
-        with open(fullFilePath, 'w') as f:
-            f.write(json.dumps(newConfigurationData, indent=4))
-
-        return True
-
-    def delete(self, type, id):
-        typePath = os.path.join(self.__configurationPath, type)
-        if not os.path.isdir(typePath):
-            os.mkdir(typePath)
-
-        configPath = os.path.join(typePath, id + '.json')
-        self.__logger.info('Deleting file at path: {}'.format(configPath))
-        if not os.path.exists(configPath):
-            return False
-
-        os.remove(configPath)
-        return True
-
-    def listConfigs(self):
-        typeToConfigurationMap = {}
-
-        for typeName in os.listdir(self.__configurationPath):
-            typePath = os.path.join(self.__configurationPath, typeName)
-            if not os.path.isdir(typePath):
-                continue
-
-            typeToConfigurationMap[typeName] = []
-
-            for configName in os.listdir(typePath):
-                if not configName.endswith('.json'):
-                    self.__logger.error('Unknown configuration file: ' + configName)
-                    continue
-
-                configPath = os.path.join(typePath, configName)
-                with open(configPath) as f:
-                    try:
-                        jsonContents = json.loads(f.read())
-                        identifier = jsonContents["id"]
-                        name = jsonContents["name"]
-                        typeToConfigurationMap[typeName].append({ "id": identifier, "name": name })
-                    except Exception as e:
-                        self.__logger.exception('Failed to read file at path {}, exception: {}'.format(configPath, str(e)))
-
-        return typeToConfigurationMap
-
-    def getConfiguration(self, type, identifier):
-        typePath = os.path.join(self.__configurationPath, type)
-        if not os.path.isdir(typePath):
-            return (False, None)
-
-        fullFilePath = os.path.join(typePath, identifier + '.json')
-        if not os.path.exists(fullFilePath):
-            return (False, None)
-
-        f = open(fullFilePath, 'r')
-
-        try:
-            return (True, json.loads(f.read()))
-        except Exception as e:
-            self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
-            return (False, None)
-
-    def saveConfiguration(self, type, identifier, name, payload):
-        typePath = os.path.join(self.__configurationPath, type)
-        if not os.path.isdir(typePath):
-            self.__logger.error('Type path not defined')
-            return False
-
-        fullFilePath = os.path.join(typePath, identifier + '.json')
-        if not os.path.exists(fullFilePath):
-            self.__logger.error('File does not exist')
-            return False
-
-        try:
-            with open(fullFilePath, 'r') as f:
-                existingContent = json.loads(f.read())
-            
-            existingContent["name"] = name
-            existingContent["payload"] = payload
-            with open(fullFilePath, 'w') as f:
-                f.write(json.dumps(existingContent, indent=4))
-                return True
-                
-        except Exception as e:
-            self.__logger.exception('Failed to read file at path {}, exception: {}'.format(fullFilePath, str(e)))
-            return False
-
-
-class RestServer(Bottle):
-    '''
-    RESTful server that handles control of the MachineApp and configuration IO
-    '''
-    def __init__(self):
-        super(RestServer, self).__init__()
-    
-        self.__clientDirectory = os.path.join('..', 'client')
-        self.__logger = logging.getLogger(__name__)
         self.__configurationService = ConfigurationService()
-
-        self.route('/', callback=self.index)
-        self.route('/<filepath:path>', callback=self.serveStatic)
-
-        self.route('/configuration/create', method='POST', callback=self.createConfiguration)
-        self.route('/configuration/delete', method='DELETE', callback=self.deleteConfiguration)
-        self.route('/configuration/list', callback=self.listConfigurations)
-        self.route('/configuration', callback=self.getConfiguration)
-        self.route('/configuration/save', method='POST', callback=self.saveConfiguration)
-
-    def index(self):
-        return static_file('index.html', root=self.__clientDirectory)
-        
-    def serveStatic(self, filepath):
-        self.__logger.info('Serving static file: {}'.format(filepath))
-        return static_file(filepath, root=self.__clientDirectory)
+        self.__logger = logging.getLogger(__name__)
 
     def createConfiguration(self):
         configurationType = request.query.type
@@ -198,26 +58,73 @@ class RestServer(Bottle):
     def copyConfiguration(self):
         pass
 
-class MachineAppLoop:
+class RuntimeController:
+    def __init__(self):
+        self.__runService = RuntimeService()
+        self.__logger = logging.getLogger(__name__)
+
+    def start(self):
+        configurationType = request.query.type
+        configurationId = request.query.id
+        if self.__runService.run(configurationType, configurationId):
+            return 'OK'
+        else:
+            abort(400, 'Unable to start the MachineApp')
+
+    def stop(self):
+        if self.__runService.stop():
+            return 'OK'
+        else:
+            abort(400, 'Failed to stop the MachineApp')
+
+    def pause(self):
+        if self.__runService.pause():
+            return 'OK'
+        else:
+            abort(400, 'Failed to pause the MachineApp')
+
+    def resume(self):
+        if self.__runService.resume():
+            return 'OK'
+        else:
+            abort(400, 'Failed to resume the MachineApp')
+
+    
+class RestServer(Bottle):
     '''
-    Primary loop of the MachineApp. The user will spend the majority of
-    their time writing code in this thread.
+    RESTful server that handles control of the MachineApp and configuration IO
     '''
     def __init__(self):
-        self.__thread = Thread(target=self.__runInternal, name="MachineAppLoop")
-        self.__thread.daemon = True
+        super(RestServer, self).__init__()
+    
+        self.__clientDirectory = os.path.join('..', 'client')
+        self.__logger = logging.getLogger(__name__)
+        self.__configurationController = ConfigurationController()
+        self.__runtimeController = RuntimeController()
 
-    def run(self):
-        self.__thread.start()
+        self.route('/', callback=self.index)
+        self.route('/<filepath:path>', callback=self.serveStatic)
 
-    def __runInternal(self):
-        while True:
-            time.sleep(0.16)
+        self.route('/configuration/create', method='POST', callback=self.__configurationController.createConfiguration)
+        self.route('/configuration/delete', method='DELETE', callback=self.__configurationController.deleteConfiguration)
+        self.route('/configuration/list', callback=self.__configurationController.listConfigurations)
+        self.route('/configuration', callback=self.__configurationController.getConfiguration)
+        self.route('/configuration/save', method='POST', callback=self.__configurationController.saveConfiguration)
+
+        self.route('/run/start', method='POST', callback=self.__runtimeController.start)
+        self.route('/run/stop', method='POST', callback=self.__runtimeController.stop)
+        self.route('/run/pause', method='POST', callback=self.__runtimeController.pause)
+        self.route('/run/resume', method='POST', callback=self.__runtimeController.resume)
+
+    def index(self):
+        return static_file('index.html', root=self.__clientDirectory)
+        
+    def serveStatic(self, filepath):
+        self.__logger.info('Serving static file: {}'.format(filepath))
+        return static_file(filepath, root=self.__clientDirectory)
 
 def run():
-    machineAppLoop = MachineAppLoop()
     restServer = RestServer()
-    machineAppLoop.run()
     restServer.run(host='localhost', port=3011)
 
 if __name__ == "__main__":
