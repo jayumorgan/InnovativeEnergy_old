@@ -1,7 +1,7 @@
-from services import ConfigurationService
 import logging
 import time
 from abc import ABC, abstractmethod
+from notifier import NotificationLevel, getNotifier
 
 class MachineAppState(ABC):
     '''
@@ -76,18 +76,8 @@ class CompleteState(MachineAppState):
 class MachineAppEngine:
     UPDATE_INTERVAL_SECONDS = 0.16
 
-    def __init__(self, configurationType, configurationId):
+    def __init__(self, configuration):
         self.__logger = logging.getLogger(__name__)                 # Logger used to output information to the local log file and console
-
-        self.__configurationService = ConfigurationService()        # Used to load configurations from disk
-        (foundConfiguration, configuration) = self.__configurationService.getConfiguration(configurationType, configurationId)
-
-        if not foundConfiguration:
-            self.__logger.error('Unable to load specified configuration: type={}, id={}'.format(configurationType, configurationId))
-            return
-
-        self.__logger.info('Loaded configuration. type={}, name={}, id={}'.format(configurationType, self.__configuration["name"], self.__configuration["id"]))
-
         self.__configuration = configuration["payload"]             # Python dictionary containing the loaded configuration
         self.__isRunning = True                                     # The MachineApp will execute while this flag is set
         self.__shouldStop = False                                   # Tells the MachineApp loop that it should stop on its next update
@@ -98,8 +88,7 @@ class MachineAppEngine:
         self.__defaultState = 'idle'                                # State that the application will begin in
         self.__currentState = None                                  # Active state of the engine
         self.__stateDictionary = self.buildStateDictionary()        # Mapping of state names to MachineAppState definitions
-
-        self.loop()                                                 # Start the update loop, which runs until the program is completed or stopped
+        self.__notifier = getNotifier()                             # Used to broadcast information to the Web App's console
 
     def buildStateDictionary(self):
         '''
@@ -118,6 +107,10 @@ class MachineAppEngine:
         Returns the implementation of MachineAppState that maps to the value of self.__currentState.
         If the mapping is invalid, we return None and log an error.
         '''
+        if self.__currentState == None:
+            self.__logger.error('Current state is none')
+            return None
+
         if not self.__currentState in self.__stateDictionary:
             self.__logger.error('Trying to retrieve an unknown state: {}'.format(self.__currentState))
             return None
@@ -132,15 +125,18 @@ class MachineAppEngine:
             self.__logger.error('Trying to move to an unknown state: {}'.format(newState))
             return False
 
-        prevState = self.getCurrentState()
-        if prevState != None:
-            prevState.onLeave()
+        if not self.__currentState == None:
+            prevState = self.getCurrentState()
+            if prevState != None:
+                prevState.onLeave()
 
         self.__currentState = newState
         nextState = self.getCurrentState()
 
         if nextState != None:
             nextState.onEnter()
+
+        self.__notifier.sendMessage(NotificationLevel.APP_STATE_CHANGE, 'Entered MachineApp state: {}'.format(newState))
 
         return True
 
@@ -149,6 +145,7 @@ class MachineAppEngine:
         '''
         Main loop of your MachineApp. Will run while the machine App is active
         '''
+        self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
 
         # Begin the Application by moving to the default state
         self.gotoState(self.__defaultState)
@@ -159,10 +156,12 @@ class MachineAppEngine:
                 self.__isRunning = False
 
             if self.__shouldPause:
+                self.__notifier.sendMessage(NotificationLevel.APP_PAUSE, 'MachineApp paused')
                 self.__shouldPause = False
                 self.__isPaused = True
 
             if self.__shouldResume:
+                self.__notifier.sendMessage(NotificationLevel.APP_RESUME, 'MachineApp resumed')
                 self.__shouldResume = False
                 self.__isPaused = False
 
@@ -178,7 +177,9 @@ class MachineAppEngine:
 
             time.sleep(MachineAppEngine.UPDATE_INTERVAL_SECONDS)
 
+        self.__logger.info('Exiting MachineApp loop')
         self.cleanup()
+        self.__notifier.sendMessage(NotificationLevel.APP_COMPLETE, 'MachineApp completed')
 
     def pause(self):
         '''
@@ -211,7 +212,7 @@ class MachineAppEngine:
         you implement any on-stop behavior in your MachineAppStates instead
         '''
         self.__logger.info('Stopping the MachineApp')
-        self.__shouldStop = False
+        self.__shouldStop = True
 
     def cleanup(self):
         '''

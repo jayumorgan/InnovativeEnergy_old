@@ -7,8 +7,8 @@ import time
 from pathlib import Path
 import json
 import math
-from machine_app import MachineAppEngine
-from services import ConfigurationService, RuntimeService
+from service import ConfigurationService, RuntimeService
+from notifier import initializeNotifier
 
 class ConfigurationController:
     def __init__(self):
@@ -124,13 +124,14 @@ class RestServer(Bottle):
         return static_file(filepath, root=self.__clientDirectory)
 
 def run():
+    initializeNotifier()
     restServer = RestServer()
     restServer.run(host='localhost', port=3011)
 
 if __name__ == "__main__":
     logging.basicConfig(
         format='%(asctime)s {%(name)s:%(lineno)d} (%(levelname)s) - %(message)s',
-        level=logging.DEBUG,
+        level=logging.INFO,
         handlers=[
             RotatingFileHandler('machine_app.log', mode='a', maxBytes=5*1024*1024,  backupCount=2, encoding=None, delay=0),
             logging.StreamHandler()

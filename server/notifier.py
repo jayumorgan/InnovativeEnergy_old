@@ -1,0 +1,118 @@
+import websockets
+import asyncio
+from threading import RLock, Thread
+import logging
+import json
+import time
+
+class NotificationLevel:
+    ''' 
+    Notification level determines how an item is visualized on the frontend.
+
+    Levels with the prefix 'APP' specify high-level state changes.
+    '''
+    APP_START           = 'app_start'
+    APP_COMPLETE        = 'app_complete'
+    APP_PAUSE           = 'app_pause'
+    APP_RESUME          = 'app_resume'
+    APP_STATE_CHANGE    = 'app_state_change'
+    INFO                = 'info'
+    WARNING             = 'warning'
+    ERROR               = 'error'
+
+
+class Notifier:
+    ''' Websocket server used to stream information about a run in progress to the web client '''
+    def __init__(self):
+        self.__logger = logging.getLogger(__name__)
+
+        thread = Thread(name='Notifier', target=self.__run, args=('127.0.0.1', '8081'))
+        thread.daemon = True
+        thread.start() 
+
+    def __run(self, ip, port):
+        self.__logger.info('Running the socket API on port {}'.format(port))
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        self.server = websockets.serve(self.handler, ip, port)
+        self.queue = []
+        self.clients = set()
+        self.lock = RLock()
+        
+        self.__logger.info('Websocket loop exiting.')
+        asyncio.get_event_loop().create_task(self.run())
+        asyncio.get_event_loop().run_until_complete(self.server)
+        asyncio.get_event_loop().run_forever()
+
+    async def handler(self, websocket, path):
+        self.clients.add(websocket)
+        try:
+            while True:
+                message = await websocket.recv()
+                pass
+        except websockets.ConnectionClosed:
+            pass
+        finally:
+            self.clients.remove(websocket)
+
+    async def run(self):
+        self.isRunning = True
+        while self.isRunning:
+            sendQueue = []
+            with self.lock:
+                sendQueue = self.queue.copy()
+                self.queue.clear()
+
+            for item in sendQueue:
+                jsonifiedMsg = json.dumps(item)
+                try:
+                    await asyncio.gather(
+                        *[ws.send(jsonifiedMsg) for ws in self.clients],
+                        return_exceptions=False
+                    )
+                except Exception as e:
+                    self.__logger.error('Exception while trying to send data: {}'.format(str(e)))
+
+            await asyncio.sleep(0.16)
+        
+        self.__logger.info('Websocket loop exiting.')
+            
+    def setDead(self):
+        self.isRunning = False
+
+    def sendMessage(self, level, message, customPayload=None):
+        '''
+        Broadcast a message to all connected clients
+
+        params:
+            level: str
+                Notification level defines how the data is visualized on the client
+            message: str
+                message to be shown on the client
+            customPayload: dict
+                (Optional) Custom data to be sent to the client, if any
+        '''
+
+        jsonMsg = {
+            "timeSeconds": time.time(),
+            "level": level,
+            "message": message,
+            "customPayload": customPayload
+        }
+
+        with self.lock:
+            self.queue.append(jsonMsg)
+
+globalNotifier = None
+
+def initializeNotifier():
+    global globalNotifier
+    globalNotifier = Notifier()
+
+def getNotifier():
+    ''' Retrieves the singleton instance of the global notifier '''
+    global globalNotifier
+    if globalNotifier == None:
+        globalNotifier = Notifier()
+
+    return globalNotifier

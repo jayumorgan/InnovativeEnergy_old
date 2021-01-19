@@ -21,39 +21,59 @@
         <button id="configuration-tab-button">Configuration</button>
       </nav>
       <main id="main-content">
-        <div id="general-content" class="h_layout">
-          <div class="h_layout">
-            <div class="content-panel">
-              <div class="content-panel-header">
-                Execute
+        <div id="general-content">
+          <div class="h_layout" style="height: 100%; ">
+            <div class="v_layout" style="height: 100%;width: 50%; flex: auto;">
+              <div class="h_layout" style="height: calc(60% - 2rem); flex: auto;">
+                <div class="content-panel">
+                  <div class="content-panel-header">
+                    Execute
+                  </div>
+                  <div class="content-panel-body">
+                    <div id="general-content-configuration-selector"></div>
+                    <div class="content-panel-button-group">
+                      <button class="content-panel-button start-button" id="run-start-button">
+                        <span class="icon-play"></span><div>START</div>
+                      </button>
+                      <button class="content-panel-button stop-button" id="run-stop-button">
+                        <span class="icon-stop"></span><div>STOP</div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="content-panel">
+                  <div class="content-panel-header">
+                    System Status
+                  </div>
+                  <div class="content-panel-body" id="custom-display">
+                  </div>
+                </div>
               </div>
-              <div class="content-panel-body">
-                <div id="general-content-configuration-selector"></div>
-                <div class="content-panel-button-group">
-                  <button class="content-panel-button start-button" id="run-start-button">
-                    <span class="icon-play"></span><div>START</div>
-                  </button>
-                  <button class="content-panel-button stop-button" id="run-stop-button">
-                    <span class="icon-stop"></span><div>STOP</div>
-                  </button>
+              <div class="content-panel" style="height: calc(40% - 2rem); flex: auto;">
+                <div class="content-panel-header">
+                  Information Console
+                </div>
+                <div class="content-panel-body" style="overflow-y: auto;">
+                  <table id="run-information-console">
+                    <tbody></tbody>
+                  </table>
                 </div>
               </div>
             </div>
-            <div class="content-panel">
-              <div class="content-panel-header">
-                System Status
+           
+            <div class="v_layout" style="height: 100%;width: 50%; flex: auto;">
+              <div class="content-panel">
+                <div class="content-panel-header">
+                  Custom Container
+                </div>
+                <div class="content-panel-body">
+                </div>
               </div>
-              <div class="content-panel-body">
               </div>
             </div>
           </div>
-          <div class="content-panel">
-            <div class="content-panel-header">
-              Run Info
-            </div>
-            <div class="content-panel-body">
-            </div>
-          </div>
+        </div>
+          
         </div>
         <div id="configuration-content">
         </div>
