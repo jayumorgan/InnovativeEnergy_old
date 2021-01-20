@@ -107,6 +107,10 @@ globalNotifier = None
 
 def initializeNotifier():
     global globalNotifier
+    if globalNotifier != None:
+        logging.error('Attempting to initialize the globalNotifier again')
+        return
+        
     globalNotifier = Notifier()
 
 def getNotifier():

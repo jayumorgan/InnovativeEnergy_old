@@ -182,12 +182,15 @@
                 break;
             }
             case 'info': {
+                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'warning': {
+                lAddMessageToConsole('fa fa-exclamation-triangle', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'error': {
+                lAddMessageToConsole('fa fa-exclamation-triangle', lTimeSeconds, lMessageStr);
                 break;
             }
         }
@@ -352,10 +355,23 @@
             });
 
             function lFillInEditor() {
-                const lEditorWrapper = $('<div>').appendTo(lBody).css('padding', '0.5rem'),
-                    lNameEditor = lTextBox(false, 'Name', lName, function(pName) {
+                const lEditorWrapper = $('<div>').appendTo(lBody).addClass('configuration-editor'),
+                    lNameEditor = lTextBox(false, 'Configuration Name', lName, function(pName) {
                         lName = pName;
+                    }).appendTo(lEditorWrapper),
+                    lWaitTimeEditor = lNumericTextbox(false, 'Wait Time Seconds', lConfiguration.waitTimeSeconds, function(pValue) {
+                        lConfiguration.waitTimeSeconds = pValue;
+                    }).appendTo(lEditorWrapper),
+                    lExampleCheckbox = lCheckbox(false, 'Example Checkbox', lConfiguration.exampleBool, function(pValue) {
+                        lConfiguration.exampleBool = Boolean(pValue);
+                    }).appendTo(lEditorWrapper),
+                    lExampleSelect = lSelect(false, 'Example Select', lConfiguration.exampleSelect, [
+                        { key: 'Option 1', value: 1 },
+                        { key: 'Option 2', value: 2 }
+                    ], function(pValue) {
+                        lConfiguration.exampleSelect = Number(pValue);
                     }).appendTo(lEditorWrapper);
+                    
             }
         }
 

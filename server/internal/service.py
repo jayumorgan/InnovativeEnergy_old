@@ -4,6 +4,7 @@ from threading import Thread
 import time
 import json
 from machine_app import MachineAppEngine
+import math
 
 class ConfigurationService:
     '''
@@ -200,12 +201,10 @@ class RuntimeService:
     '''
     Handles stateful requests to and form the main MachineApp update loop
     '''
-    def __init__(self):
-        self.machineApp = None
-
+    def __init__(self, machineApp: 'BaseMachineAppEngine'):
         self.__requestRunMachineApp = False             # If set to True, we will start the MachineApp's loop
         self.__logger = logging.getLogger(__name__)
-        self.__machineApp = None                        # MachineApp that is currently being run
+        self.__machineApp = machineApp                   # MachineApp that is currently being run
 
         self.__machineAppThread = Thread(target=self.__primaryThreadLoop, name="MachineAppUpdate", daemon=True)
         self.__machineAppThread.start()
@@ -219,12 +218,7 @@ class RuntimeService:
         '''
         while True:
             if self.__requestRunMachineApp:
-                if self.__machineApp == None:
-                    self.__logger.error('Machine app shoudld be initialized by now')
-                else:
-                    self.__machineApp.loop()
-                    self.__machineApp = None
-
+                self.__machineApp.loop()
                 self.__requestRunMachineApp = False
 
             time.sleep(0.5)
@@ -234,6 +228,10 @@ class RuntimeService:
             self.__logger.error('Cannot run start machine running while it is already set to start running')
             return False
 
+        if self.__machineApp == None:
+            self.__logger.error('MachineApp not initialized properly')
+            return False
+
         configurationService = ConfigurationService()        # Used to load configurations from disk
         (foundConfiguration, configuration) = configurationService.getConfiguration(configurationType, configurationId)
         if not foundConfiguration:
@@ -241,7 +239,7 @@ class RuntimeService:
             return False
 
         self.__logger.info('Loaded configuration. type={}, name={}, id={}'.format(configurationType, configuration["name"], configuration["id"]))
-        self.__machineApp = MachineAppEngine(configuration)
+        self.__machineApp.setConfiguration(configuration)
         self.__requestRunMachineApp = True
         return True
 
