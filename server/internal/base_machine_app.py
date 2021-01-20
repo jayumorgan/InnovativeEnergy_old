@@ -15,6 +15,10 @@ class MachineAppState(ABC):
         self.notifier = getNotifier()
 
     def onLoopStart(self, engine: 'BaseMachineAppEngine'):
+        '''
+        WARNING: Not to be overridden. Called when the engine loop starts to
+        properly set the configuration.
+        '''
         self.engine = engine
         self.configuration = self.engine.getConfiguration()
 
@@ -57,8 +61,10 @@ class MachineAppState(ABC):
         ''' 
         Called whenever we stop while we're in this state 
 
-        Default behavior: Do nothing
+        Default behavior: Reset the engine state to the beginning of the state machine
         '''
+
+        self.engine.resetState()
         pass
 
     def onEstop(self):
@@ -69,12 +75,13 @@ class MachineAppState(ABC):
         '''
         pass
 
-    def onEstopReleased(self, configuration):
+    def onEstopReleased(self):
         ''' 
         Called whenever we estop while we're in this state 
 
-        Default behavior: Do nothing
+        Default behavior: Reset the engine state to the beginning of the state machine
         '''
+        self.engine.resetState()
         pass
 
 class BaseMachineAppEngine(ABC):
@@ -84,25 +91,39 @@ class BaseMachineAppEngine(ABC):
     UPDATE_INTERVAL_SECONDS = 0.16
 
     def __init__(self):
-        self.configuration = None                                   # Python dictionary containing the loaded configuration payload
-        self.logger = logging.getLogger(__name__)                   # Logger used to output information to the local log file and console
-        self.isRunning = True                                       # The MachineApp will execute while this flag is set
-        self.__shouldStop = False                                   # Tells the MachineApp loop that it should stop on its next update
-        self.isPaused = False                                       # The machine app will not do any state updates while this flag is set
-        self.__shouldPause = False                                  # Tells the MachineApp loop that it should pause on its next update
-        self.__shouldResume = False                                 # Tells the MachineApp loop that it should resume on its next update
+        self.configuration  = None                                      # Python dictionary containing the loaded configuration payload
+        self.logger         = logging.getLogger(__name__)               # Logger used to output information to the local log file and console
+        self.__shouldStart  = False                                     # Tells the MachineApp loop that it should begin processing the state machine
+        self.isRunning      = False                                     # The MachineApp will execute while this flag is set
+        self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
+        self.isPaused       = False                                     # The machine app will not do any state updates while this flag is set
+        self.__shouldPause  = False                                     # Tells the MachineApp loop that it should pause on its next update
+        self.__shouldResume = False                                     # Tells the MachineApp loop that it should resume on its next update
+        self.__isEstopped   = False
 
-        self.__currentState = None                                  # Active state of the engine
-        self.__stateDictionary = self.buildStateDictionary()        # Mapping of state names to MachineAppState definitions
-        self.__notifier = getNotifier()                             # Used to broadcast information to the Web App's console
+        self.__currentState     = None                                  # Active state of the engine
+        self.__stateDictionary  = self.buildStateDictionary()           # Mapping of state names to MachineAppState definitions
+        self.__notifier         = getNotifier()                         # Used to broadcast information to the Web App's console
+
+        self.initialize()
         
-    def __resetState(self):
-        self.isRunning = True
+    def resetState(self):
+        self.isRunning = False
+        self.__shouldStart = False
         self.__shouldStop = False
         self.isPaused = False
         self.__shouldPause = False
         self.__shouldResume = False
         self.__currentState = self.getDefaultState()
+
+    @abstractmethod
+    def initialize(self):
+        '''
+        Called at startup of your MachineApp. This is where you will initialize your
+        MachineMotions, and set up any global variables that you'll need access to during
+        the duration of your program
+        '''
+        pass
 
     @abstractmethod
     def getDefaultState(self):
@@ -180,49 +201,83 @@ class BaseMachineAppEngine(ABC):
 
     def loop(self):
         '''
-        Main loop of your MachineApp. Will run while the machine App is active
+        Main loop of your MachineApp. If we set __shouldStart to True, the MachineApp begins processing
+        the nodes in its core loop.
         '''
-        for key, value in self.__stateDictionary.items():
-            value.onLoopStart(self)
+        while True:
+            if self.__shouldStart:              # Running start behavior
+                for key, value in self.__stateDictionary.items():
+                    value.onLoopStart(self)
 
-        self.__resetState()
+                self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
 
-        self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
+                # Begin the Application by moving to the default state
+                self.gotoState(self.getDefaultState())
+                self.isRunning = True
+                self.__shouldStart = False
+            else:
+                time.sleep(0.5)
+                continue
 
-        # Begin the Application by moving to the default state
-        self.gotoState(self.getDefaultState())
+            while self.isRunning:
+                if self.__shouldStop:           # Running stop behavior
+                    self.__shouldStop = False
+                    self.isRunning = False
 
-        while self.isRunning:
-            if self.__shouldStop:
-                self.__shouldStop = False
-                self.isRunning = False
+                    currentState = self.getCurrentState()
+                    if currentState != None:
+                        currentState.onStop()
 
-            if self.__shouldPause:
-                self.__notifier.sendMessage(NotificationLevel.APP_PAUSE, 'MachineApp paused')
-                self.__shouldPause = False
-                self.isPaused = True
+                    break
 
-            if self.__shouldResume:
-                self.__notifier.sendMessage(NotificationLevel.APP_RESUME, 'MachineApp resumed')
-                self.__shouldResume = False
-                self.isPaused = False
+                if self.__shouldPause:          # Running pause behavior
+                    self.__notifier.sendMessage(NotificationLevel.APP_PAUSE, 'MachineApp paused')
+                    self.__shouldPause = False
+                    self.isPaused = True
 
-            if self.isPaused:
+                    currentState = self.getCurrentState()
+                    if currentState != None:
+                        currentState.onPause()
+
+                if self.__shouldResume:         # Running resume behavior
+                    self.__notifier.sendMessage(NotificationLevel.APP_RESUME, 'MachineApp resumed')
+                    self.__shouldResume = False
+                    self.isPaused = False
+
+                    currentState = self.getCurrentState()
+                    if currentState != None:
+                        currentState.onResume()
+
+                if self.isPaused:
+                    time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
+                    continue
+
+                currentState = self.getCurrentState()
+                if currentState == None:
+                    self.logger.error('Currently in an invalid state')
+                    continue
+
+                currentState.update()
+
                 time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
-                continue
 
-            currentState = self.getCurrentState()
-            if currentState == None:
-                self.logger.error('Currently in an invalid state')
-                continue
+            self.logger.info('Exiting MachineApp loop')
+            self.__notifier.sendMessage(NotificationLevel.APP_COMPLETE, 'MachineApp completed')
 
-            currentState.update()
+    def start(self, configuration):
+        '''
+        Starts the MachineApp loop.
+        
+        Warning: Logic in here is happening in a different thread. You should only 
+        alter this behavior if you know what you are doing. It is recommended that
+        you implement any on-enter behavior in your MachineAppStates instead
+        '''
+        if self.isRunning:
+            return False
 
-            time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
-
-        self.logger.info('Exiting MachineApp loop')
-        self.__internalCleanup()
-        self.__notifier.sendMessage(NotificationLevel.APP_COMPLETE, 'MachineApp completed')
+        self.setConfiguration(configuration)
+        self.__shouldStart = True
+        return True
 
     def pause(self):
         '''
@@ -265,16 +320,6 @@ class BaseMachineAppEngine(ABC):
         alter this behavior if you know what you are doing. It is recommended that
         you implement any on-estop behavior in your MachineAppStates instead
         '''
+        self.__isEstopped = True
+
         pass
-
-    def __internalCleanup(self):
-        '''
-        Called when the program exits. Used to clean up your MachineApp so that you stop
-        in a nice state.
-        '''
-        currentState = self.getCurrentState()
-        if currentState != None:
-            currentState.onStop()
-
-        self.__currentState = None
-        self.cleanup()

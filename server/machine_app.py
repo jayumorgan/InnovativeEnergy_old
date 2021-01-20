@@ -1,5 +1,6 @@
 import logging
 import time
+from internal.fake_machine_motion import FakeMachineMotion
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
 
@@ -41,6 +42,10 @@ class CompleteState(MachineAppState):
         self.logger.info('Exiting the complete state')
 
 class MachineAppEngine(BaseMachineAppEngine):
+    def initialize(self):
+        self.horizontalMachineMotion = FakeMachineMotion()
+        self.verticalMachineMotion = FakeMachineMotion()
+
     def getDefaultState(self):
         return 'idle'
 

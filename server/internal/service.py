@@ -8,7 +8,6 @@ class RuntimeService:
     Handles stateful requests to and form the main MachineApp update loop
     '''
     def __init__(self, machineApp: 'BaseMachineAppEngine'):
-        self.__requestRunMachineApp = False             # If set to True, we will start the MachineApp's loop
         self.__logger = logging.getLogger(__name__)
         self.__machineApp = machineApp                   # MachineApp that is currently being run
 
@@ -22,24 +21,18 @@ class RuntimeService:
         of the program. Once that program finishes, it returns control to the loop below until
         another 'run' request arrives.
         '''
-        while True:
-            if self.__requestRunMachineApp:
-                self.__machineApp.loop()
-                self.__requestRunMachineApp = False
-
-            time.sleep(0.5)
+        self.__machineApp.loop()
 
     def run(self, configuration):
-        if self.__requestRunMachineApp:
-            self.__logger.error('Cannot run start machine running while it is already set to start running')
-            return False
-
         if self.__machineApp == None:
             self.__logger.error('MachineApp not initialized properly')
             return False
 
-        self.__machineApp.setConfiguration(configuration)
-        self.__requestRunMachineApp = True
+        if self.__machineApp.isRunning:
+            self.__logger.error('Cannot start MachineApp that is already running')
+            return False
+
+        self.__machineApp.start(configuration)
         return True
 
     def pause(self):
