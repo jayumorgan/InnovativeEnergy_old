@@ -13,22 +13,16 @@ class RestServer(Bottle):
     
         self.__clientDirectory = os.path.join('..', 'client')
         self.__logger = logging.getLogger(__name__)
-        #self.__configurationController = ConfigurationController()
         self.__runtimeController = RuntimeController(machineApp)
 
         self.route('/', callback=self.index)
         self.route('/<filepath:path>', callback=self.serveStatic)
 
-        #self.route('/configuration/create', method='POST', callback=self.__configurationController.createConfiguration)
-        #self.route('/configuration/delete', method='DELETE', callback=self.__configurationController.deleteConfiguration)
-        #self.route('/configuration/list', callback=self.__configurationController.listConfigurations)
-        #self.route('/configuration', callback=self.__configurationController.getConfiguration)
-        #self.route('/configuration/save', method='POST', callback=self.__configurationController.saveConfiguration)
-
         self.route('/run/start', method='POST', callback=self.__runtimeController.start)
         self.route('/run/stop', method='POST', callback=self.__runtimeController.stop)
         self.route('/run/pause', method='POST', callback=self.__runtimeController.pause)
         self.route('/run/resume', method='POST', callback=self.__runtimeController.resume)
+        self.route('/run/estop', method='POST', callback=self.__runtimeController.estop)
 
     def index(self):
         return static_file('index.html', root=self.__clientDirectory)

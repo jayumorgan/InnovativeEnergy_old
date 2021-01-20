@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
-from internal.notifier import getNotifier
+from internal.notifier import getNotifier, NotificationLevel
+import time
 
 class MachineAppState(ABC):
     '''
@@ -9,19 +10,17 @@ class MachineAppState(ABC):
     methods. See IdleState for an example.
     '''
     
-    def __init__(self, engine: 'MachineAppEngine'):
-        self.engine = engine
-        self.configuration = self.engine.configuration
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.notifier = getNotifier()
+
+    def onLoopStart(self, engine: 'BaseMachineAppEngine'):
+        self.engine = engine
+        self.configuration = self.engine.getConfiguration()
 
     @abstractmethod
     def onEnter(self):
         ''' Called whenever this state is entered'''
-        pass
-
-    def update(self):
-        ''' Called continuously while this state is active'''
         pass
 
     @abstractmethod
@@ -29,22 +28,53 @@ class MachineAppState(ABC):
         ''' Called when we're transitioning out of this state '''
         pass
 
+    def update(self):
+        '''
+        Called continuously while this state is active
+        
+        Default behavior: Do nothing
+        '''
+        pass
+
     def onPause(self):
-        ''' Called whenever we pause while we're in this state'''
+        '''
+        Called whenever we pause while we're in this state
+
+        Default behavior: Do nothing
+        
+        '''
         pass
 
     def onResume(self):
-        ''' Called whenever we resume while we're in this state'''
+        '''
+        Called whenever we resume while we're in this state
+        
+        Default behavior: Do nothing
+        '''
         pass
 
     def onStop(self):
-        ''' Called whenever we stop while we're in this state '''
+        ''' 
+        Called whenever we stop while we're in this state 
+
+        Default behavior: Do nothing
+        '''
         pass
 
     def onEstop(self):
+        ''' 
+        Called whenever we estop while we're in this state 
+
+        Default behavior: Do nothing
+        '''
         pass
 
-    def onEstopReleased(self):
+    def onEstopReleased(self, configuration):
+        ''' 
+        Called whenever we estop while we're in this state 
+
+        Default behavior: Do nothing
+        '''
         pass
 
 class BaseMachineAppEngine(ABC):
@@ -54,17 +84,25 @@ class BaseMachineAppEngine(ABC):
     UPDATE_INTERVAL_SECONDS = 0.16
 
     def __init__(self):
-        self.configuration = None                                  # Python dictionary containing the loaded configuration payload
+        self.configuration = None                                   # Python dictionary containing the loaded configuration payload
         self.logger = logging.getLogger(__name__)                   # Logger used to output information to the local log file and console
-        self.isRunning = True                                     # The MachineApp will execute while this flag is set
+        self.isRunning = True                                       # The MachineApp will execute while this flag is set
         self.__shouldStop = False                                   # Tells the MachineApp loop that it should stop on its next update
-        self.isPaused = False                                     # The machine app will not do any state updates while this flag is set
+        self.isPaused = False                                       # The machine app will not do any state updates while this flag is set
         self.__shouldPause = False                                  # Tells the MachineApp loop that it should pause on its next update
         self.__shouldResume = False                                 # Tells the MachineApp loop that it should resume on its next update
 
         self.__currentState = None                                  # Active state of the engine
         self.__stateDictionary = self.buildStateDictionary()        # Mapping of state names to MachineAppState definitions
         self.__notifier = getNotifier()                             # Used to broadcast information to the Web App's console
+        
+    def __resetState(self):
+        self.isRunning = True
+        self.__shouldStop = False
+        self.isPaused = False
+        self.__shouldPause = False
+        self.__shouldResume = False
+        self.__currentState = self.getDefaultState()
 
     @abstractmethod
     def getDefaultState(self):
@@ -85,6 +123,10 @@ class BaseMachineAppEngine(ABC):
     def cleanup(self):
         ''' Executed when the MachineApp loop exits '''
         pass
+
+    def getConfiguration(self):
+        ''' Returns the current configuration '''
+        return self.configuration
 
     def setConfiguration(self, configuration):
         ''' Set the configuration to the a python dictionary '''
@@ -140,6 +182,11 @@ class BaseMachineAppEngine(ABC):
         '''
         Main loop of your MachineApp. Will run while the machine App is active
         '''
+        for key, value in self.__stateDictionary.items():
+            value.onLoopStart(self)
+
+        self.__resetState()
+
         self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
 
         # Begin the Application by moving to the default state
@@ -161,7 +208,8 @@ class BaseMachineAppEngine(ABC):
                 self.isPaused = False
 
             if self.isPaused:
-                time.sleep(MachineAppEngine.UPDATE_INTERVAL_SECONDS)
+                time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
+                continue
 
             currentState = self.getCurrentState()
             if currentState == None:
@@ -170,7 +218,7 @@ class BaseMachineAppEngine(ABC):
 
             currentState.update()
 
-            time.sleep(MachineAppEngine.UPDATE_INTERVAL_SECONDS)
+            time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
 
         self.logger.info('Exiting MachineApp loop')
         self.__internalCleanup()
@@ -208,6 +256,16 @@ class BaseMachineAppEngine(ABC):
         '''
         self.logger.info('Stopping the MachineApp')
         self.__shouldStop = True
+
+    def estop(self):
+        '''
+        E-stops the MachineApp loop.
+        
+        Warning: Logic in here is happening in a different thread. You should only 
+        alter this behavior if you know what you are doing. It is recommended that
+        you implement any on-estop behavior in your MachineAppStates instead
+        '''
+        pass
 
     def __internalCleanup(self):
         '''

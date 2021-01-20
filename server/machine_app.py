@@ -1,6 +1,8 @@
 import logging
 import time
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
+from internal.notifier import NotificationLevel
+
 class IdleState(MachineAppState):
     '''
     Example of a MachineAppState.
@@ -44,8 +46,8 @@ class MachineAppEngine(BaseMachineAppEngine):
 
     def buildStateDictionary(self):
         stateDictionary = {
-            'idle': IdleState(self),
-            'complete': CompleteState(self)
+            'idle': IdleState(),
+            'complete': CompleteState()
         }
 
         return stateDictionary
