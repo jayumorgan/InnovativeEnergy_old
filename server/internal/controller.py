@@ -41,3 +41,20 @@ class RuntimeController:
             return 'OK'
         else:
             abort(400, 'Failed to estop the MachineApp')
+
+    def getEstop(self):
+        return self.__runService.getEstop()
+
+    def releaseEstop(self):
+        if self.__runService.releaseEstop():
+            return 'OK'
+        else:
+            abort(400, 'Failed to release estop')
+
+    def resetSystem(self):
+        if self.__runService.resetSystem():
+            return 'OK'
+        else:
+            abort(400, 'Failed to reset the system')
+
+    

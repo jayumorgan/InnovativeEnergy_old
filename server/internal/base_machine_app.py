@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from internal.notifier import getNotifier, NotificationLevel
 import time
+from internal.machine_motion_manager import MachineMotionManager
 
 class MachineAppState(ABC):
     '''
@@ -14,12 +15,13 @@ class MachineAppState(ABC):
         self.logger = logging.getLogger(__name__)
         self.notifier = getNotifier()
 
-    def onLoopStart(self, engine: 'BaseMachineAppEngine'):
+    def configure(self, engine: 'BaseMachineAppEngine'):
         '''
         WARNING: Not to be overridden. Called when the engine loop starts to
         properly set the configuration.
         '''
         self.engine = engine
+        self.machineMotionManager = self.engine.machineMotionManager
         self.configuration = self.engine.getConfiguration()
 
     @abstractmethod
@@ -93,17 +95,24 @@ class BaseMachineAppEngine(ABC):
     def __init__(self):
         self.configuration  = None                                      # Python dictionary containing the loaded configuration payload
         self.logger         = logging.getLogger(__name__)               # Logger used to output information to the local log file and console
-        self.__shouldStart  = False                                     # Tells the MachineApp loop that it should begin processing the state machine
+        
+        # High-Level State variables
         self.isRunning      = False                                     # The MachineApp will execute while this flag is set
-        self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
         self.isPaused       = False                                     # The machine app will not do any state updates while this flag is set
+        self.isEstopped           = False                               # Set whenever we are in the Estop state
+        self.__isSystemReleased   = False                               # Set whenever we release the system
+        
+        self.__shouldStart  = False                                     # Tells the MachineApp loop that it should begin processing the state machine
+        self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
         self.__shouldPause  = False                                     # Tells the MachineApp loop that it should pause on its next update
         self.__shouldResume = False                                     # Tells the MachineApp loop that it should resume on its next update
-        self.__isEstopped   = False
+        self.__shouldEstop          = True                              # Tells the update loop that we have entered the e-stop state
+        self.__shouldReleaseEstop   = False                             # Tells the update loop that we have released the e-stop and reset the system
 
-        self.__currentState     = None                                  # Active state of the engine
-        self.__stateDictionary  = self.buildStateDictionary()           # Mapping of state names to MachineAppState definitions
-        self.__notifier         = getNotifier()                         # Used to broadcast information to the Web App's console
+        self.__currentState         = None                              # Active state of the engine
+        self.__stateDictionary      = self.buildStateDictionary()       # Mapping of state names to MachineAppState definitions
+        self.__notifier             = getNotifier()                     # Used to broadcast information to the Web App's console
+        self.machineMotionManager = MachineMotionManager()              # Container for getting/setting/doing common things with multiple machine motions
 
         self.initialize()
         
@@ -205,9 +214,23 @@ class BaseMachineAppEngine(ABC):
         the nodes in its core loop.
         '''
         while True:
+            if self.__shouldEstop:
+                self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
+                self.__shouldEstop = False
+
+            if self.__shouldReleaseEstop:
+                if self.__isSystemReleased:
+                    self.__isSystemReleased = False
+                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP_RELEASE, 'MachineApp estop released')
+                    self.__shouldReleaseEstop = False
+
+                    currentState = self.getCurrentState()
+                    if currentState != None:
+                        currentState.onEstopReleased()
+
             if self.__shouldStart:              # Running start behavior
                 for key, value in self.__stateDictionary.items():
-                    value.onLoopStart(self)
+                    value.configure(self)
 
                 self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
 
@@ -216,10 +239,21 @@ class BaseMachineAppEngine(ABC):
                 self.isRunning = True
                 self.__shouldStart = False
             else:
-                time.sleep(0.5)
+                time.sleep(0.16)
                 continue
 
             while self.isRunning:
+                if self.__shouldEstop:          # Running E-Stop behavior
+                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine Estopped')
+                    self.__shouldEstop = False
+                    self.isRunning = False
+
+                    currentState = self.getCurrentState()
+                    if currentState != None:
+                        currentState.onEstop()
+
+                    break
+
                 if self.__shouldStop:           # Running stop behavior
                     self.__shouldStop = False
                     self.isRunning = False
@@ -320,6 +354,27 @@ class BaseMachineAppEngine(ABC):
         alter this behavior if you know what you are doing. It is recommended that
         you implement any on-estop behavior in your MachineAppStates instead
         '''
-        self.__isEstopped = True
+        self.isEstopped = True
+        self.__isSystemReleased = False
+        self.machineMotionManager.triggerEstop()
+        self.__shouldEstop = True
+        self.logger.info('Estop triggered')
+        return True
 
-        pass
+    def getEstop(self):
+        ''' Returns whether or not the machine is currently in estop '''
+        return self.isEstopped
+
+    def releaseEstop(self):
+        ''' Releases the estop of all machine motions '''
+        self.machineMotionManager.releaseEstop()
+        self.__isSystemReleased = True
+        self.logger.info('Estop released')
+        return True
+
+    def resetSystem(self):
+        ''' Resets the system for all machine motions '''
+        self.machineMotionManager.resetSystem()
+        self.__shouldReleaseEstop = True
+        self.logger.info('System reset')
+        return True

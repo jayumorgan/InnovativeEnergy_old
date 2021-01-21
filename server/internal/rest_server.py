@@ -23,6 +23,9 @@ class RestServer(Bottle):
         self.route('/run/pause', method='POST', callback=self.__runtimeController.pause)
         self.route('/run/resume', method='POST', callback=self.__runtimeController.resume)
         self.route('/run/estop', method='POST', callback=self.__runtimeController.estop)
+        self.route('/run/estop', method='GET', callback=self.__runtimeController.getEstop)
+        self.route('/run/releaseEstop', method='POST', callback=self.__runtimeController.releaseEstop)
+        self.route('/run/resetSystem', method='POST', callback=self.__runtimeController.resetSystem)
 
     def index(self):
         return static_file('index.html', root=self.__clientDirectory)

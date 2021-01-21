@@ -53,6 +53,46 @@
         })
     }
 
+    function lGetEstop() {
+        return fetch('/run/estop').then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    function lSetEstop() {
+        return fetch('/run/estop', { method: 'POST' }).then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    function lReleaseEstop() {
+        return fetch('/run/releaseEstop', { method: 'POST' }).then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    function lResetSystem() {
+        return fetch('/run/resetSystem', { method: 'POST' }).then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
     /******************************************************************
        General Tab
     ******************************************************************/
@@ -61,6 +101,7 @@
 
     function lMain() {
         $('#general-tab-button').on('click', lOnGeneralTabClicked);
+        $('#estop-button').on('click', lOnEstopClicked)
         
         lOnGeneralTabClicked();
         lConnectToSocket();
@@ -139,6 +180,16 @@
                 lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
                 break;
             }
+            case 'app_estop_set': {
+                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                lOnEstopSet();
+                break;
+            }
+            case 'app_estop_release': {
+                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                lOnEstopReleased();
+                break;
+            }
             case 'info': {
                 lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
                 break;
@@ -204,10 +255,59 @@
                 if (pSuccess) {
 
                 } else {
-
+                    // TODO: Show error
                 }
             })
         });
+    }
+
+     // Estop functionality
+    function lOnEstopClicked() {
+        console.log('Estop button clicked.');
+        lSetEstop().then(function(pSuccess) {
+            if (pSuccess) {
+
+            } else {
+                // TODO: Show error
+            }
+        })
+    }
+
+    function lOnEstopSet() {
+        if ($('#estop-modal').length > 0) {
+            return;
+        }
+
+        const lEstopModal = lCreateModal().attr('id', 'estop-modal'),
+            lEstopModalHeader = lEstopModal.find('h3').text('E-Stop Activated').prepend($('<i>').addClass('fa fa-exclamation-triangle').css('padding-right', '0.5rem')),
+            lBody = lEstopModal.find('.modal-body').addClass('v_layout').css('height', '100%').css('justify-content', 'center').css('align-items', 'center'),
+            lActionRequired = $('<div>').append($('<h3>').text('Action Required')).appendTo(lBody),
+            lEstopImage = $('<div>').appendTo($('<img>').attr('src', '/images/estop.png')).appendTo(lBody),
+            lFirstInfo = $('<div>').append($('<p>').text('Ensure your E-Stop buttons are released. Click to release software stop.')).appendTo(lBody),
+            lReleaseButton = $('<div>').append($('<button>').addClass('widget-button danger').text('RELEASE').on('click', function() {
+                lReleaseEstop().then(function(pSuccess) {
+                    if (pSuccess) {
+
+                    } else {
+                        // TODO: Show error
+                    }
+                })
+            })).appendTo(lBody),
+            lSecondInfo = $('<div>').append($('<p>').text('When ready, click to reset your machine')).appendTo(lBody),
+            lResetButton = $('<div>').append($('<button>').addClass('widget-button success').text('RESET').on('click', function() {
+                lResetSystem().then(function(pSuccess) {
+                    if (pSuccess) {
+
+                    } else {
+                        // TODO: Show error
+                    }
+                })
+            })).appendTo(lBody);
+
+    }
+
+    function lOnEstopReleased() {
+        $('#estop-modal').remove();
     }
     
     $(document).ready(lMain);

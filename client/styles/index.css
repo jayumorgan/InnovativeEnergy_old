@@ -179,6 +179,22 @@ nav > button:hover {
     padding: 0.25rem;
 }
 
+#app-launcher-button {
+    color: white;
+}
+
+#app-launcher-button:hover {
+    cursor: pointer;
+}
+
+#estop-button {
+    color: white;
+}
+
+#estop-button:hover {
+    cursor: pointer;
+}
+
 /*
     Shared UI items
 */

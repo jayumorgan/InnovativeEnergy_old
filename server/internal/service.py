@@ -62,3 +62,12 @@ class RuntimeService:
             return True
 
         return False
+
+    def getEstop(self):
+        return self.__machineApp.isEstopped()
+
+    def releaseEstop(self):
+        return self.__machineApp.releaseEstop()
+
+    def resetSystem(self):
+        return self.__machineApp.resetSystem()

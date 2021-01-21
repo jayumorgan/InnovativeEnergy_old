@@ -1,7 +1,7 @@
 from time import sleep
 import logging
 
-class FakeMachineMotion:
+class MachineMotion:
     def __init__(self, *args):
         self.args = args
         self.current_position = {

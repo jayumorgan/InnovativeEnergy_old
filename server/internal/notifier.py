@@ -16,6 +16,8 @@ class NotificationLevel:
     APP_PAUSE           = 'app_pause'
     APP_RESUME          = 'app_resume'
     APP_STATE_CHANGE    = 'app_state_change'
+    APP_ESTOP           = 'app_estop_set'
+    APP_ESTOP_RELEASE   = 'app_estop_release'
     INFO                = 'info'
     WARNING             = 'warning'
     ERROR               = 'error'
@@ -25,6 +27,8 @@ class Notifier:
     ''' Websocket server used to stream information about a run in progress to the web client '''
     def __init__(self):
         self.__logger = logging.getLogger(__name__)
+        self.lock = RLock()
+        self.queue = []
 
         thread = Thread(name='Notifier', target=self.__run, args=('127.0.0.1', '8081'))
         thread.daemon = True
@@ -35,9 +39,7 @@ class Notifier:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         self.server = websockets.serve(self.handler, ip, port)
-        self.queue = []
         self.clients = set()
-        self.lock = RLock()
         
         self.__logger.info('Websocket loop exiting.')
         asyncio.get_event_loop().create_task(self.run())
