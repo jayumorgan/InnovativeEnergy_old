@@ -156,28 +156,30 @@
                 lState = 'running';
                 $('#run-start-button').empty().append($('<span>').addClass('icon-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 $('#run-stop-button').addClass('running');
-                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                lAddMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_complete': {
                 lState = 'idle';
                 $('#run-start-button').empty().append($('<span>').addClass('icon-play')).append($('<div>').text('START')).removeClass('running');
                 $('#run-stop-button').removeClass('running').empty().append($('<span>').addClass('icon-stop')).append($('<div>').text('STOP'));
-                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                lAddMessageToConsole('icon-stop', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_pause': {
                 $('#run-start-button').empty().append($('<span>').addClass('icon-play')).append($('<div>').text('RESUME')).addClass('running');
                 lState = 'paused';
+                lAddMessageToConsole('icon-pause', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_resume': {
                 $('#run-start-button').empty().append($('<span>').addClass('icon-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 lState = 'running';
+                lAddMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_state_change': {
-                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                lAddMessageToConsole('fa fa-arrow-right', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_estop_set': {
@@ -203,6 +205,8 @@
                 break;
             }
         }
+
+        lOnNotificationReceived(lLevel, lMessageStr, lCustomPayload);
     }
 
     function lOnGeneralTabClicked() {

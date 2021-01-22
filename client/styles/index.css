@@ -142,10 +142,17 @@ nav > button:hover {
     overflow-y: hidden;
 }
 
+#general-configuration-editor-container {
+    overflow-y: hidden;
+}
+
 #general-configuration-editor {
+    height: calc(100% - 179px - 3rem);
+    overflow-y: auto;
     padding-top: 1rem;
     padding-left: 2rem;
     padding-right: 2rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 #run-information-console {

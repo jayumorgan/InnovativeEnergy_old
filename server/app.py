@@ -1,3 +1,5 @@
+#/usr/bin/python3
+
 from internal.rest_server import runServer
 from internal.notifier import initializeNotifier
 import logging

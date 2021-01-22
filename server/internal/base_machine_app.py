@@ -11,25 +11,25 @@ class MachineAppState(ABC):
     methods. See IdleState for an example.
     '''
     
-    def __init__(self):
+    def __init__(self, engine: 'BaseMachineAppEngine'):
         self.logger = logging.getLogger(__name__)
         self.notifier = getNotifier()
-
-    def configure(self, engine: 'BaseMachineAppEngine'):
-        '''
-        WARNING: Not to be overridden. Called when the engine loop starts to
-        properly set the configuration.
-        '''
         self.engine = engine
         self.machineMotionManager = self.engine.machineMotionManager
         self.configuration = self.engine.getConfiguration()
 
     @abstractmethod
-    def onEnter(self):
-        ''' Called whenever this state is entered'''
+    def onEnter(self, transitionData):
+        ''' 
+        Called whenever this state is entered
+
+        params:
+            transitionData: any
+                Data sent by the previous node in the state machine. Default is 'None'.
+        
+        '''
         pass
 
-    @abstractmethod
     def onLeave(self):
         ''' Called when we're transitioning out of this state '''
         pass
@@ -110,7 +110,7 @@ class BaseMachineAppEngine(ABC):
         self.__shouldReleaseEstop   = False                             # Tells the update loop that we have released the e-stop and reset the system
 
         self.__currentState         = None                              # Active state of the engine
-        self.__stateDictionary      = self.buildStateDictionary()       # Mapping of state names to MachineAppState definitions
+        self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
         self.__notifier             = getNotifier()                     # Used to broadcast information to the Web App's console
         self.machineMotionManager = MachineMotionManager()              # Container for getting/setting/doing common things with multiple machine motions
 
@@ -180,9 +180,16 @@ class BaseMachineAppEngine(ABC):
 
         return self.__stateDictionary[self.__currentState]
         
-    def gotoState(self, newState: str):
+    def gotoState(self, newState: str, optionalData = None):
         '''
         Updates the MachineAppEngine to the provided state
+
+        params:
+            newState: str
+                name of the state that you would like to transition to
+
+            optionalData: any
+                Optional payload that will be sent as a parameter to the 'onEnter' command
 
         returns:
             bool
@@ -197,13 +204,13 @@ class BaseMachineAppEngine(ABC):
             if prevState != None:
                 prevState.onLeave()
 
+        self.__notifier.sendMessage(NotificationLevel.APP_STATE_CHANGE, 'Entered MachineApp state: {}'.format(newState))
         self.__currentState = newState
         nextState = self.getCurrentState()
 
         if nextState != None:
-            nextState.onEnter()
+            nextState.onEnter(optionalData)
 
-        self.__notifier.sendMessage(NotificationLevel.APP_STATE_CHANGE, 'Entered MachineApp state: {}'.format(newState))
 
         return True
 
@@ -229,8 +236,7 @@ class BaseMachineAppEngine(ABC):
                         currentState.onEstopReleased()
 
             if self.__shouldStart:              # Running start behavior
-                for key, value in self.__stateDictionary.items():
-                    value.configure(self)
+                self.__stateDictionary = self.buildStateDictionary()
 
                 self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
 
@@ -291,6 +297,7 @@ class BaseMachineAppEngine(ABC):
                     self.logger.error('Currently in an invalid state')
                     continue
 
+                self.machineMotionManager.update()
                 currentState.update()
 
                 time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)

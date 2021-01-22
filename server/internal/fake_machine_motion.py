@@ -1,9 +1,11 @@
 from time import sleep
 import logging
+import paho.mqtt.client as mqtt
+import paho.mqtt.subscribe as MQTTsubscribe
 
 class MachineMotion:
-    def __init__(self, *args):
-        self.args = args
+    def __init__(self, ip):
+        self.ip = ip
         self.current_position = {
             1: 0,
             2: 0,
@@ -18,6 +20,25 @@ class MachineMotion:
         self._is_stopped = False
         self._complete_batching = False
         self.logger = logging.getLogger(__name__)
+        self.mqttEventCallback = None
+
+        self.myMqttClient = mqtt.Client()
+        self.myMqttClient.on_connect = self.__onConnect
+        self.myMqttClient.on_message = self.__onMessage
+        self.myMqttClient.on_disconnect = self.__onDisconnect
+        self.myMqttClient.connect(ip)
+        self.myMqttClient.loop_start()
+
+    def __onConnect(self, client, userData, flags, rc):
+        if rc == 0:
+            self.logger.info('Connected to mqtt')
+
+    def __onDisconnect(self, client, userData, rc):
+           self.logger.info("Disconnected with rtn code [%d]", rc)
+
+    def __onMessage(self, client, userData, msg):
+        if self.mqttEventCallback != None:
+            self.mqttEventCallback(msg.topic, msg.payload.decode('utf-8'))
 
     def stopMqtt(self):
         pass
@@ -132,4 +153,10 @@ class MachineMotion:
             return self.emitgCode("V6 P0")
 
     def bindeStopEvent(self, callback):
+        pass
+
+    def setContinuousMove(self, axis, speed, accel = None):
+        pass
+
+    def stopContinuousMove(self, axis, accel = None):
         pass
