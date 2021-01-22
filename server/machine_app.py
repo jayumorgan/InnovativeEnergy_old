@@ -22,7 +22,6 @@ class GreenLightState(MachineAppState):
         self.__durationSeconds  = self.configuration['greenTimer']
 
     def __onPedestrianButtonClicked(self, topic, msg):
-        print('Received topic!')
         if msg == 'true':
             self.engine.gotoState(self.__direction + '_yellow', { "doPestrianCrossing": True })
 
@@ -46,6 +45,7 @@ class GreenLightState(MachineAppState):
             self.engine.gotoState(self.__direction + '_yellow')
 
     def onLeave(self):
+        self.machineMotionManager.removeMqttCallback(self.__machineMotionName, 'pedestrian_crossing_topic', self.__onPedestrianButtonClicked)
         self.__machineMotion.stopContinuousMove(1)
 
 class YellowLightState(MachineAppState):
@@ -83,6 +83,7 @@ class YellowLightState(MachineAppState):
             self.engine.gotoState(self.__direction + '_red', self.__transitionData)
 
     def onLeave(self):
+        self.machineMotionManager.removeMqttCallback(self.__machineMotionName, 'pedestrian_crossing_topic', self.__onPedestrianButtonClicked)
         self.__machineMotion.stopContinuousMove(1)
 
 class RedLightState(MachineAppState):
