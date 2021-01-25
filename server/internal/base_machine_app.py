@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 import logging
 from internal.notifier import getNotifier, NotificationLevel
 import time
-from internal.machine_motion_manager import MachineMotionManager
 
 class MachineAppState(ABC):
     '''
@@ -12,21 +11,28 @@ class MachineAppState(ABC):
     '''
     
     def __init__(self, engine: 'BaseMachineAppEngine'):
+        '''
+        Constructor that initializes state that will remain consistent throguhout the
+        duration of your program. Please note that this state node is NOT active at
+        point of construction. Therefore, you should NOT do things like in the constructor
+        such as:
+
+        (1) Construct a MqttTopicSubscriber
+        (2) Impact the state of your GlobalApp in anyway
+        (3) Go to a new state
+        etc.
+
+        All of these behaviors should happen in onEnter instead.
+        '''
         self.logger = logging.getLogger(__name__)
         self.notifier = getNotifier()
         self.engine = engine
-        self.machineMotionManager = self.engine.machineMotionManager
         self.configuration = self.engine.getConfiguration()
 
     @abstractmethod
-    def onEnter(self, transitionData):
+    def onEnter(self):
         ''' 
         Called whenever this state is entered
-
-        params:
-            transitionData: any
-                Data sent by the previous node in the state machine. Default is 'None'.
-        
         '''
         pass
 
@@ -112,7 +118,6 @@ class BaseMachineAppEngine(ABC):
         self.__currentState         = None                              # Active state of the engine
         self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
         self.__notifier             = getNotifier()                     # Used to broadcast information to the Web App's console
-        self.machineMotionManager = MachineMotionManager()              # Container for getting/setting/doing common things with multiple machine motions
 
         self.initialize()
         
@@ -127,15 +132,23 @@ class BaseMachineAppEngine(ABC):
 
     @abstractmethod
     def initialize(self):
-        '''
-        Called at startup of your MachineApp. This is where you will initialize your
-        MachineMotions, and set up any global variables that you'll need access to during
-        the duration of your program
+        ''' 
+        Called at the start of the MachineApp. In this method, you will
+        initialize your machine motion instances and configure them. You
+        may also define variables that you'd like to access and manipulate
+        over the course of your MachineApp here.
         '''
         pass
 
     @abstractmethod
     def getDefaultState(self):
+        '''
+        Returns the state that your Application begins in when a run begins. This string MUST
+        map to a key in your state dictionary.
+
+        returns:
+            str
+        '''
         return None
 
     @abstractmethod
@@ -150,8 +163,32 @@ class BaseMachineAppEngine(ABC):
         return {}
 
     @abstractmethod
-    def cleanup(self):
-        ''' Executed when the MachineApp loop exits '''
+    def afterRun(self):
+        '''
+        Executed when execution of your MachineApp ends (i.e., when self.isRunning goes from True to False).
+        This could be due to an estop, stop event, or something else.
+
+        In this method, you can clean up any resources that you'd like to clean up, or do nothing at all.
+        '''
+        pass
+
+    @abstractmethod
+    def beforeRun(self):
+        '''
+        Called before every run of your MachineApp. This is where you might want to
+        reset to a default state.
+        '''
+        pass
+
+    @abstractmethod
+    def getMasterMachineMotion(self):
+        ''' 
+        Returns the master machine motion, which will be used for estopping,
+        releasing the estop, and resetting the system.
+        
+        returns:
+            MachineMotion
+        '''
         pass
 
     def getConfiguration(self):
@@ -180,17 +217,13 @@ class BaseMachineAppEngine(ABC):
 
         return self.__stateDictionary[self.__currentState]
         
-    def gotoState(self, newState: str, optionalData = None):
+    def gotoState(self, newState: str):
         '''
         Updates the MachineAppEngine to the provided state
 
         params:
             newState: str
                 name of the state that you would like to transition to
-
-            optionalData: any
-                Optional payload that will be sent as a parameter to the 'onEnter' command
-
         returns:
             bool
                 successfully moved to the new state
@@ -209,7 +242,7 @@ class BaseMachineAppEngine(ABC):
         nextState = self.getCurrentState()
 
         if nextState != None:
-            nextState.onEnter(optionalData)
+            nextState.onEnter()
 
 
         return True
@@ -220,6 +253,8 @@ class BaseMachineAppEngine(ABC):
         Main loop of your MachineApp. If we set __shouldStart to True, the MachineApp begins processing
         the nodes in its core loop.
         '''
+
+        # Outer Loop dealing with e-stops and start functionality
         while True:
             if self.__shouldEstop:
                 self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
@@ -236,6 +271,7 @@ class BaseMachineAppEngine(ABC):
                         currentState.onEstopReleased()
 
             if self.__shouldStart:              # Running start behavior
+                self.beforeRun()
                 self.__stateDictionary = self.buildStateDictionary()
 
                 self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
@@ -248,9 +284,11 @@ class BaseMachineAppEngine(ABC):
                 time.sleep(0.16)
                 continue
 
+
+            # Inner Loop running the actual MachineApp program
             while self.isRunning:
                 if self.__shouldEstop:          # Running E-Stop behavior
-                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine Estopped')
+                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
                     self.__shouldEstop = False
                     self.isRunning = False
 
@@ -297,13 +335,13 @@ class BaseMachineAppEngine(ABC):
                     self.logger.error('Currently in an invalid state')
                     continue
 
-                self.machineMotionManager.update()
                 currentState.update()
 
                 time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
 
             self.logger.info('Exiting MachineApp loop')
             self.__notifier.sendMessage(NotificationLevel.APP_COMPLETE, 'MachineApp completed')
+            self.afterRun()
 
     def start(self, configuration):
         '''
@@ -363,7 +401,8 @@ class BaseMachineAppEngine(ABC):
         '''
         self.isEstopped = True
         self.__isSystemReleased = False
-        self.machineMotionManager.triggerEstop()
+        masterMachineMotion = self.getMasterMachineMotion()
+        masterMachineMotion.triggerEstop()
         self.__shouldEstop = True
         self.logger.info('Estop triggered')
         return True
@@ -374,14 +413,16 @@ class BaseMachineAppEngine(ABC):
 
     def releaseEstop(self):
         ''' Releases the estop of all machine motions '''
-        self.machineMotionManager.releaseEstop()
+        masterMachineMotion = self.getMasterMachineMotion()
+        masterMachineMotion.releaseEstop()
         self.__isSystemReleased = True
         self.logger.info('Estop released')
         return True
 
     def resetSystem(self):
         ''' Resets the system for all machine motions '''
-        self.machineMotionManager.resetSystem()
+        masterMachineMotion = self.getMasterMachineMotion()
+        masterMachineMotion.resetSystem()
         self.__shouldReleaseEstop = True
         self.logger.info('System reset')
         return True

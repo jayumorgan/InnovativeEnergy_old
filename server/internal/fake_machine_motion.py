@@ -20,7 +20,7 @@ class MachineMotion:
         self._is_stopped = False
         self._complete_batching = False
         self.logger = logging.getLogger(__name__)
-        self.mqttEventCallback = None
+        self.mqttCallbacks = []
 
         self.myMqttClient = mqtt.Client()
         self.myMqttClient.on_connect = self.__onConnect
@@ -28,6 +28,13 @@ class MachineMotion:
         self.myMqttClient.on_disconnect = self.__onDisconnect
         self.myMqttClient.connect(ip)
         self.myMqttClient.loop_start()
+
+    def addMqttCallback(self, func):
+        if not func in self.mqttCallbacks:
+            self.mqttCallbacks.append(func)
+
+    def removeMqttCallback(self, func):
+        self.mqttCallbacks.remove(func)
 
     def __onConnect(self, client, userData, flags, rc):
         if rc == 0:
@@ -37,8 +44,8 @@ class MachineMotion:
            self.logger.info("Disconnected with rtn code [%d]", rc)
 
     def __onMessage(self, client, userData, msg):
-        if self.mqttEventCallback != None:
-            self.mqttEventCallback(msg.topic, msg.payload.decode('utf-8'))
+        for callback in self.mqttCallbacks:
+            callback(msg.topic, msg.payload.decode('utf-8'))
 
     def stopMqtt(self):
         pass

@@ -44,13 +44,19 @@ function buildEditor(pConfiguration) {
 
 /**
  * Message received from the Notifier on the backend
- * @param {NotificationLevel} pLevel 
+ * @param {NotificationLevel} pLevel
  * @param {string} pMessageStr 
  * @param {Object | None} pMessagePayload 
  */
-function lOnNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
+function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
     const lCustomContainer = $('#custom-container');
-    if (pLevel === 'app_start') { // Refresh the custom container when we start the app
+    if (pLevel === 'app_pause') {
+        lCustomContainer.css('filter', 'blur(5px)')
+    } else if (pLevel === 'app_resume') {
+        lCustomContainer.css('filter', 'none');
+    } else if (pLevel === 'app_complete') {
+        lCustomContainer.empty();
+    } else if (pLevel === 'app_start') { // Refresh the custom container when we start the app
         lCustomContainer.empty();
         const lHorizontalDistanceTravelled = $('<div>').addClass('distance-travelled-container')
                 .append($('<label>').text('Horizontal Distance Travelled'))

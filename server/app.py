@@ -8,9 +8,7 @@ from machine_app import MachineAppEngine
 
 def run():
     ''' Entry to the entire program '''
-    logging.info('___________________________________________________________________________')
-    logging.info('_________________________Starting your Machine App_________________________')
-    logging.info('___________________________________________________________________________')
+    logging.info('Starting your MachineApp')
 
     initializeNotifier()
     machineApp = MachineAppEngine()

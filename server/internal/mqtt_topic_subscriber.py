@@ -9,8 +9,16 @@ class MqttTopicSubscriber:
         self.__queue = []
         self.__callbacks = {}
         self.__machineMotion = machineMotion
-        self.__machineMotion.mqttEventCallback = self.__mqttEventCallback
+        self.__machineMotion.addMqttCallback(self.__mqttEventCallback)
         self.__logger = logging.getLogger(__name__)
+        self.__logger.info('Registered new MQTT callback')
+
+    def delete(self):
+        '''
+        Must be called when your Mqtt subscriber is no longer in use
+        '''
+        self.__machineMotion.removeMqttCallback(self.__mqttEventCallback)
+        self.__logger.info('Removed MQTT callback')
 
     def __mqttEventCallback(self, topic, msg):
         with self.__lock:
@@ -54,6 +62,10 @@ class MqttTopicSubscriber:
         self.__callbacks[topic].remove(callback)
 
     def update(self):
+        '''
+        If using the MQTT topic susbcriber, this must be called in the 'update'
+        method of your MachineAppState node to get the callback properly.
+        '''
         with self.__lock:
             processQueue = self.__queue.copy()
             self.__queue.clear()

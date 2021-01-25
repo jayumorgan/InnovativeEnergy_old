@@ -20,7 +20,10 @@
             } else {
                 return false;
             }
-        })
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
+        });
     }
 
     function lStopMachineApp() {
@@ -30,7 +33,10 @@
             } else {
                 return false;
             }
-        })
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
+        });
     }
 
     function lPauseMachineApp() {
@@ -40,7 +46,10 @@
             } else {
                 return false;
             }
-        })
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
+        });
     }
 
     function lResumeMachineApp() {
@@ -50,7 +59,10 @@
             } else {
                 return false;
             }
-        })
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
+        });
     }
 
     function lGetEstop() {
@@ -60,6 +72,9 @@
             } else {
                 return false;
             }
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
         });
     }
 
@@ -70,6 +85,9 @@
             } else {
                 return false;
             }
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
         });
     }
 
@@ -80,6 +98,9 @@
             } else {
                 return false;
             }
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
         });
     }
 
@@ -90,6 +111,9 @@
             } else {
                 return false;
             }
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return false;
         });
     }
 
@@ -99,6 +123,9 @@
 
     let lState = 'idle';
 
+    /**
+     * Entry to the JavaScript of the program
+     */
     function lMain() {
         $('#general-tab-button').on('click', lOnGeneralTabClicked);
         $('#estop-button').on('click', lOnEstopClicked)
@@ -107,6 +134,7 @@
         lConnectToSocket();
     }
     
+    // Connection to the notification Websocket
     let lWebsocketConnection = undefined;
     function lConnectToSocket() {
         console.log('Connecting to socket at ws://127.0.0.1:8081');
@@ -206,7 +234,7 @@
             }
         }
 
-        lOnNotificationReceived(lLevel, lMessageStr, lCustomPayload);
+        onNotificationReceived(lLevel, lMessageStr, lCustomPayload);
     }
 
     function lOnGeneralTabClicked() {
@@ -217,6 +245,7 @@
         $('#general-configuration-editor').empty().append(buildEditor(lRunTimeConfiguration));
 
         const lRunStartButton = $('#run-start-button').on('click', function() {
+            const lPreviousElementContents = lRunStartButton.html()
             lRunStartButton.empty();
             lRunStartButton.append($('<div>').addClass('widget-spin-loader'));
 
@@ -224,8 +253,10 @@
                 case 'idle': {
                     lStartMachineApp(lRunTimeConfiguration).then(function(pSuccess) {
                         if (pSuccess) {
+                            console.log('Successfully started the MachineApp');
                         } else {
-                            // TODO: Show error
+                            console.error('Failed to start the MachineApp');
+                            $('#run-start-button').empty().html(lPreviousElementContents);
                         }
                     });
                     break;
@@ -233,8 +264,10 @@
                 case 'running': {
                     lPauseMachineApp().then(function(pSuccess) {
                         if (pSuccess) {
+                            console.log('Successfully pause the MachineApp');
                         } else {
-                            // TODO: Show error
+                            console.error('Failed to pause the MachineApp');
+                            $('#run-start-button').empty().html(lPreviousElementContents);
                         }
                     });
                     break;
@@ -242,8 +275,10 @@
                 case 'paused': {
                     lResumeMachineApp().then(function(pSuccess) {
                         if (pSuccess) {
+                            console.log('Successfully resumed the MachineApp');
                         } else {
-                            // TODO: Show error
+                            console.error('Failed to resume the MachineApp');
+                            $('#run-start-button').empty().html(lPreviousElementContents);
                         }
                     });
                     break;
@@ -252,14 +287,20 @@
         });
 
         const lRunStopButton = $('#run-stop-button').on('click', function() {
+            if (lState === 'idle') {
+                console.warn('Cannot stop a MachineApp that is not running');
+                return;
+            }
+            const lPreviousElementContents = lRunStopButton.html();
             lRunStopButton.empty();
             lRunStopButton.append($('<div>').addClass('widget-spin-loader'));
 
             lStopMachineApp().then(function(pSuccess) {
                 if (pSuccess) {
-
+                    console.log('Successfully stopped the MachineApp');
                 } else {
-                    // TODO: Show error
+                    console.error('Failed to stop the machine app');
+                    lRunStopButton.empty().html(lPreviousElementContents);
                 }
             })
         });
@@ -270,9 +311,9 @@
         console.log('Estop button clicked.');
         lSetEstop().then(function(pSuccess) {
             if (pSuccess) {
-
+                console.log('Successfully sent the estop request');
             } else {
-                // TODO: Show error
+                console.error('Failed to estop');
             }
         })
     }
@@ -291,9 +332,9 @@
             lReleaseButton = $('<div>').append($('<button>').addClass('widget-button danger').text('RELEASE').on('click', function() {
                 lReleaseEstop().then(function(pSuccess) {
                     if (pSuccess) {
-
+                        console.log('Successfully released the estop');
                     } else {
-                        // TODO: Show error
+                        console.error('Failed to release the estop');
                     }
                 })
             })).appendTo(lBody),
@@ -301,9 +342,9 @@
             lResetButton = $('<div>').append($('<button>').addClass('widget-button success').text('RESET').on('click', function() {
                 lResetSystem().then(function(pSuccess) {
                     if (pSuccess) {
-
+                        console.log('Successfully reset the system');
                     } else {
-                        // TODO: Show error
+                        console.error('Failed to reset the system');
                     }
                 })
             })).appendTo(lBody);
