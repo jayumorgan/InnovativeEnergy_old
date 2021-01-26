@@ -130,3 +130,59 @@ The client is a simple web page that relies on JQuery to do some heavy lifting. 
 - `client/editor.js` - Contains all custom frontend logic
 - `client/widgets.js` - Contains widgets that are helpful for building forms
 - `client/styles/editor.css` - Contains all custom frontend styles
+
+### Configuration Editor
+As we said in the [server's configuration section](#runtime-configuration), you can publish a configuration to your MachineApp engine when you hit the "play" button. This configuration is defined entirely on the frontend in `client/editor.js`.
+
+As an example, let's pretend that we want to send up the "wait time in seconds" to the server for our fictitious "WaitingState" example (mentioned previously). In `client/editor.js`, we would implement the provided mehtods like so:
+```js
+function getDefaultConfiguration() {
+    return {
+        waitTimeSeconds: 3.0
+    }
+}
+
+function buildEditor(pConfiguration) {
+    const lEditorWrapper = $('<div>').addClass('configuration-editor'),
+        lFullSpeedEitor = lNumericTextbox(false, 'Wait Time (seconds)',  pConfiguration.waitTimeSeconds, function(pValue) {
+                pConfiguration.waitTimeSeconds = pValue;
+            }).appendTo(lEditorWrapper);
+
+    return lEditorWrapper;
+}
+```
+
+`getDefaultConfiguration` defines the data that we will send to the backend regardless of whether or not the user edits any of it in the editor. `buildEditor` constructs a user interface for our data using the widgets from `client/widgets.js`. 
+
+Now, on the backend in our "WaitingState", we might access the `waitTimeSeconds` variable like so:
+
+```python
+class WaitingState(MachineAppState):
+    def onEnter(self):
+        self.waitTimeSeconds = self.configuration["waitTimeSeconds"]
+    ...
+```
+
+### Updating the UI from Streamed Data
+As we explained in the [server's notifier section](#streaming-data-to-the-web-client-notifier), the server can stream data to the client while it is running via a WebSocket. The client establishes this connection in `client/index.js` when the page is loaded, so you won't have to worry about that part. When we receive a message from this connection, we first add it to the Information Console with an icon describing what type of message it is (this happens in `client/index.js`). We then hand off the message to the `onNotificationReceived` callback in `client/editor.js`. This is where you will implement any custom UI that you'd like to show for certain messages.
+
+For example, if our WaitingState from the previous section looked like this:
+```python
+class WaitingState(MachineAppState):
+    def onEnter(self):
+        self.waitTimeSeconds = self.configuration["waitTimeSeconds"]
+        self.notifier.sendMessage(NotificationLevel.INFO, 'Received wait time', { waitTimeSeconds: self.waitTimeSeconds })
+    ...
+```
+
+We could then implement the `onNotificationReceived` in `client/editor.js` like so to append the "waitTimeSeconds" variable to our custom container:
+```js
+function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
+    const lCustomContainer = $('#custom-container');
+    if (pMessagePayload.waitTimeSeconds) {
+        lCustomContainer.append($('<div>').text(pMessagePayload.waitTimeSeconds));
+    }
+}
+```
+
+Obviously you'd want to do something much fancier than this, but this should give you a general idea of how things work.
