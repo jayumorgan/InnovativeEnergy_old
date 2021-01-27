@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from internal.notifier import getNotifier, NotificationLevel
 import time
+from internal.mqtt_topic_subscriber import MqttTopicSubscriber
 
 class MachineAppState(ABC):
     '''
@@ -28,6 +29,48 @@ class MachineAppState(ABC):
         self.notifier = getNotifier()
         self.engine = engine
         self.configuration = self.engine.getConfiguration()
+
+        self.__mqttTopicSubscriberList = []
+
+    def gotoState(self, state):
+        '''
+        Updates the MachineAppEngine to the provided state
+
+        params:
+            newState: str
+                name of the state that you would like to transition to
+        returns:
+            bool
+                successfully moved to the new state
+        '''
+        return self.engine.gotoState(state)
+
+    def registerCallback(self, machineMotion: 'MachineMotion', topic: str, callback):
+        ''' 
+        Register a callback for a particular topic. Note that you should call removeCallback
+        when you are finished.
+
+        params:
+            machineMotion: MachineMotion
+                Machine whose MQTT topic you want to subscribe to
+
+            topic: str
+                MQTT topic that you'd like to subscribe to
+
+            callback: func(topic: str, msg: str) -> void
+                Callback that gets called when we receive data on that topic
+        '''
+        mqttSubscriber = None
+        for subscriber in self.__mqttTopicSubscriberList:
+            if subscriber.getMachineMotion() == machineMotion:
+                mqttSubscriber = subscriber
+                break
+
+        if mqttSubscriber == None:
+            mqttSubscriber = MqttTopicSubscriber(machineMotion)
+            self.__mqttTopicSubscriberList.append(mqttSubscriber)
+
+        mqttSubscriber.registerCallback(topic, callback)
 
     @abstractmethod
     def onEnter(self):
@@ -91,6 +134,26 @@ class MachineAppState(ABC):
         '''
         self.engine.resetState()
         pass
+
+    def updateCallbacks(self):
+        '''
+        Warning: For internal use only.
+
+        Updates all of the MQTT topic subscribers that you currently have active.
+        '''
+        for subscriber in self.__mqttTopicSubscriberList:
+            subscriber.update()
+
+    def freeCallbacks(self):
+        '''
+        Warning: For internal use only.
+
+        Deletes all of the MQTT topic subscribers that you currently have active.
+        '''
+        for subscriber in self.__mqttTopicSubscriberList:
+            subscriber.delete()
+
+        self.__mqttTopicSubscriberList.clear()
 
 class BaseMachineAppEngine(ABC):
     '''
@@ -236,6 +299,7 @@ class BaseMachineAppEngine(ABC):
             prevState = self.getCurrentState()
             if prevState != None:
                 prevState.onLeave()
+                prevState.freeCallbacks()
 
         self.__notifier.sendMessage(NotificationLevel.APP_STATE_CHANGE, 'Entered MachineApp state: {}'.format(newState))
         self.__currentState = newState
@@ -243,7 +307,6 @@ class BaseMachineAppEngine(ABC):
 
         if nextState != None:
             nextState.onEnter()
-
 
         return True
 
@@ -283,7 +346,6 @@ class BaseMachineAppEngine(ABC):
             else:
                 time.sleep(0.16)
                 continue
-
 
             # Inner Loop running the actual MachineApp program
             while self.isRunning:
@@ -335,6 +397,7 @@ class BaseMachineAppEngine(ABC):
                     self.logger.error('Currently in an invalid state')
                     continue
 
+                currentState.updateCallbacks()
                 currentState.update()
 
                 time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)

@@ -20,22 +20,22 @@ function getDefaultConfiguration() {
  */
 function buildEditor(pConfiguration) {
     const lEditorWrapper = $('<div>').addClass('configuration-editor'),
-        lFullSpeedEitor = lNumericTextbox(false, 'Conveyor Full Speed', pConfiguration.fullSpeed, function(pValue) {
+        lFullSpeedEitor = lNumericTextbox('Conveyor Full Speed', pConfiguration.fullSpeed, function(pValue) {
             pConfiguration.fullSpeed = pValue;
         }).appendTo(lEditorWrapper),
-        lSlowSpeedEditor = lNumericTextbox(false, 'Conveyor slow Speed', pConfiguration.slowSpeed, function(pValue) {
+        lSlowSpeedEditor = lNumericTextbox('Conveyor slow Speed', pConfiguration.slowSpeed, function(pValue) {
             pConfiguration.slowSpeed = pValue;
         }).appendTo(lEditorWrapper),
-        lGreenTimer = lNumericTextbox(false, 'Green Light Timer', pConfiguration.greenTimer, function(pValue) {
+        lGreenTimer = lNumericTextbox('Green Light Timer', pConfiguration.greenTimer, function(pValue) {
             pConfiguration.greenTimer = pValue;
         }).appendTo(lEditorWrapper),
-        lYellowTimer = lNumericTextbox(false, 'Yellow Light Timer', pConfiguration.yellowTimer, function(pValue) {
+        lYellowTimer = lNumericTextbox('Yellow Light Timer', pConfiguration.yellowTimer, function(pValue) {
             pConfiguration.yellowTimer = pValue;
         }).appendTo(lEditorWrapper),
-        lRedTimer = lNumericTextbox(false, 'Red Light Timer', pConfiguration.redTimer, function(pValue) {
+        lRedTimer = lNumericTextbox('Red Light Timer', pConfiguration.redTimer, function(pValue) {
             pConfiguration.redTimer = pValue;
         }).appendTo(lEditorWrapper),
-        lPedestrianTimer = lNumericTextbox(false, 'Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
+        lPedestrianTimer = lNumericTextbox('Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
             pConfiguration.pedestrianTimer = pValue;
         }).appendTo(lEditorWrapper);
 

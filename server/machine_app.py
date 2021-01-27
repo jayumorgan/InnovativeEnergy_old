@@ -5,12 +5,11 @@ import time
 from internal.fake_machine_motion import MachineMotion
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
-from internal.mqtt_topic_subscriber import MqttTopicSubscriber
 
 class EntryState(MachineAppState):
     def onEnter(self):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Entered entry state')
-        self.engine.gotoState('horizontal_green')
+        self.gotoState('horizontal_green')
 
 class GreenLightState(MachineAppState):
     def __init__(self, engine, machineMotion, direction):
@@ -25,7 +24,7 @@ class GreenLightState(MachineAppState):
         if msg == 'true':
             self.engine.isPedestrianButtonTriggered = True
             self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
-            self.engine.gotoState(self.__direction + '_yellow')
+            self.gotoState(self.__direction + '_yellow')
 
     def onEnter(self):
         self.__startTimeSeconds = time.time()
@@ -34,18 +33,14 @@ class GreenLightState(MachineAppState):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'green', "speed": self.__speed })
 
-        self.__mqttTopicSubscriber  = MqttTopicSubscriber(self.__machineMotion)
-        self.__mqttTopicSubscriber.registerCallback('pedestrian_crossing_topic', self.__onPedestrianButtonClicked)
+        self.registerCallback(self.__machineMotion, 'pedestrian_crossing_topic', self.__onPedestrianButtonClicked)
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
-            self.engine.gotoState(self.__direction + '_yellow')
-
-        self.__mqttTopicSubscriber.update()
+            self.gotoState(self.__direction + '_yellow')
 
     def onLeave(self):
         self.__machineMotion.stopContinuousMove(1)
-        self.__mqttTopicSubscriber.delete()
 
 
 class YellowLightState(MachineAppState):
@@ -69,18 +64,14 @@ class YellowLightState(MachineAppState):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'yellow', "speed": self.__speed })
 
-        self.__mqttTopicSubscriber  = MqttTopicSubscriber(self.__machineMotion)
-        self.__mqttTopicSubscriber.registerCallback('pedestrian_crossing_topic', self.__onPedestrianButtonClicked)
+        self.registerCallback(self.__machineMotion, 'pedestrian_crossing_topic', self.__onPedestrianButtonClicked)
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
-            self.engine.gotoState(self.__direction + '_red')
-
-        self.__mqttTopicSubscriber.update()
+            self.gotoState(self.__direction + '_red')
 
     def onLeave(self):
         self.__machineMotion.stopContinuousMove(1)
-        self.__mqttTopicSubscriber.delete()
 
 class RedLightState(MachineAppState):
     def __init__(self, engine, direction):
@@ -99,11 +90,11 @@ class RedLightState(MachineAppState):
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             if self.engine.isPedestrianButtonTriggered:
-                self.engine.gotoState('pedestrian_crossing')
+                self.gotoState('pedestrian_crossing')
             elif self.__direction == 'horizontal':
-                self.engine.gotoState('vertical_green')
+                self.gotoState('vertical_green')
             elif self.__direction == 'vertical':
-                self.engine.gotoState('horizontal_green')
+                self.gotoState('horizontal_green')
 
 class PedestrianCrossingState(MachineAppState):
     def __init__(self, engine):
@@ -119,7 +110,7 @@ class PedestrianCrossingState(MachineAppState):
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
-            self.engine.gotoState(self.__nextLightState)
+            self.gotoState(self.__nextLightState)
 
     def onLeave(self):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Pedestrians can NOT cross anymore', { 'pedestriansCrossing': False })

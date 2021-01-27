@@ -1,3 +1,6 @@
+/**
+ * Creates a Modal that gets appended to the main view
+ */
 function lCreateModal() {
     const lModalBackground = $('<div>').addClass('modal-background').appendTo($('#main-content')),
          lContainer = $('<div>').addClass('modal-container').appendTo(lModalBackground),
@@ -11,19 +14,14 @@ function lCreateModal() {
 
 /**
  * Creates a textbox widget
- * @param {Boolean} pInline 
  * @param {String} pLabel 
  * @param {String} pValue 
  * @param {function(value: String) => void} pOnChange 
  */
-function lTextBox(pInline, pLabel, pValue, pOnChange) {
+function lTextBox(pLabel, pValue, pOnChange) {
      const lWrapper = $('<div>').addClass('widget-wrapper').addClass('widget-textbox'),
          lLabel = pLabel ? $('<label>').text(pLabel).appendTo(lWrapper) : undefined,
          lInput = $('<input>').val(pValue).appendTo(lWrapper);
-
-     if (pInline) {
-         lWrapper.addClass('inline');
-     }
 
      if (pOnChange) {
          lInput.on('change', function() {
@@ -35,29 +33,13 @@ function lTextBox(pInline, pLabel, pValue, pOnChange) {
  }
 
  /**
-  * Creates a password textbox widget
-  * @param {Boolean} pInline 
-  * @param {String} pLabel 
-  * @param {String} pValue 
-  * @param {function(value: String) => void} pOnChange 
-  */
- function lPasswordBox(pInline, pLabel, pValue, pOnChange) {
-     const lTextBox = lTextBox(pInline, pLabel, pValue, pOnChange);
-     
-     lTextBox.find('input').attr('type', 'password');
-
-     return lTextBox;
- }
-
- /**
   * Creates a numeric textbox widget
-  * @param {Boolean} pInline 
   * @param {String} pLabel 
   * @param {Number} pValue 
   * @param {function(value: String) => void} pOnChange 
   */
- function lNumericTextbox(pInline, pLabel, pValue, pOnChange) {
-     const lTextbox = lTextBox(pInline, pLabel, pValue, function(pNewValue) {
+ function lNumericTextbox(pLabel, pValue, pOnChange) {
+     const lTextbox = lTextBox(pLabel, pValue, function(pNewValue) {
          const lNumVal = Number(pNewValue);
          if (isNaN(lNumVal)) {
              lTextbox.find('input').val(0);
@@ -73,21 +55,16 @@ function lTextBox(pInline, pLabel, pValue, pOnChange) {
 
  /**
   * Creates a dropdown selector
-  * @param {Boolean} pInline 
   * @param {String} pLabel 
   * @param {Number | String} pValue 
   * @param {Array<{ key: String, value: String | number }} pOptionsList
   * @param {function(value: String) => void} pOnChange 
   */
- function lSelect(pInline, pLabel, pValue, pOptionsList, pOnChange) {
+ function lSelect(pLabel, pValue, pOptionsList, pOnChange) {
      const lWrapper = $('<div>').addClass('widget-wrapper'),
          lLabel = $('<label>').text(pLabel).appendTo(lWrapper),
          lSelectWrapper = $('<div>').addClass('widget-select').appendTo(lWrapper),
          lSelect = $('<select>').appendTo(lSelectWrapper);
-
-     if (pInline) {
-         lWrapper.addClass('inline');
-     }
 
      lSelect.on('change', function() {
          pOnChange(lSelect.val());
@@ -104,12 +81,11 @@ function lTextBox(pInline, pLabel, pValue, pOnChange) {
 
  /**
   * Creates a checkbox widget
-  * @param {Boolean} pInline 
   * @param {String} pLabel 
   * @param {Boolean} pDefaultValue 
   * @param {function(value: Boolean) -> void} pOnChange 
   */
- function lCheckbox(pInline, pLabel, pDefaultValue, pOnChange) {
+ function lCheckbox(pLabel, pDefaultValue, pOnChange) {
      const lWrapper = $('<label>').text(pLabel).addClass('widget-checkbox'),
          lInputElement = $('<input>').attr('type', 'checkbox').attr('checked', pDefaultValue).appendTo(lWrapper),
          lSpanElement = $('<span>').addClass('widget-checkmark').appendTo(lWrapper);

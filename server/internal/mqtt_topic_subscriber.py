@@ -13,6 +13,9 @@ class MqttTopicSubscriber:
         self.__logger = logging.getLogger(__name__)
         self.__logger.info('Registered new MQTT callback')
 
+    def getMachineMotion(self):
+        return self.__machineMotion
+
     def delete(self):
         '''
         Must be called when your Mqtt subscriber is no longer in use
