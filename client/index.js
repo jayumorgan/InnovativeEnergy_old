@@ -65,6 +65,19 @@
         });
     }
 
+    function lGetMachineAppState() {
+        return fetch('/run/state').then(function(pResponse) {
+            if (pResponse.status === 200) {
+                return pResponse.json();
+            } else {
+                return undefined;
+            }
+        }).catch(function(pReason) {
+            console.exception('Failed to process request', pReason);
+            return undefined;
+        });
+    }
+
     function lGetEstop() {
         return fetch('/run/estop').then(function(pResponse) {
             if (pResponse.status === 200) {
@@ -134,8 +147,31 @@
         $('#app-launcher-button').on('click', onAppLauncherClicked);
         
         lOnGeneralTabClicked();
-        lConnectToSocket();
 
+        lGetMachineAppState().then(function(pState) {
+            if (pState === undefined) {
+                console.error('Failed to load the initial MachineApp state');
+                return;
+            }
+
+            if (pState.isRunning) {
+                lOnUpdateMessageReceived({
+                    timeSeconds: Date.now(),
+                    level: 'app_start',
+                    message: 'MachineApp is running'
+                });
+                
+                if (pState.isPaused) {
+                    lOnUpdateMessageReceived({
+                        timeSeconds: Date.now(),
+                        level: 'app_pause',
+                        message: 'MachineApp is paused'
+                    });
+                }
+            }
+        });
+
+        lConnectToSocket();
         lGetEstop().then(function(pIsSet) {
             if (pIsSet) {
                 console.log('Estop is active.');

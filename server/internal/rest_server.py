@@ -28,6 +28,7 @@ class RestServer(Bottle):
         self.route('/run/estop', method='GET', callback=self.getEstop)
         self.route('/run/releaseEstop', method='POST', callback=self.releaseEstop)
         self.route('/run/resetSystem', method='POST', callback=self.resetSystem)
+        self.route('/run/state', method='GET', callback=self.getState)
 
         self.__machineApp = machineApp                   # MachineApp that is currently being run
         self.__machineAppThread = Thread(target=self.__primaryThreadLoop, name="MachineAppUpdate", daemon=True)
@@ -108,6 +109,12 @@ class RestServer(Bottle):
             return 'OK'
         else:
             abort(400, 'Failed to reset the system')
+
+    def getState(self):
+        return {
+            "isRunning": self.__machineApp.isRunning,
+            "isPaused": self.__machineApp.isPaused
+        }
 
 def runServer(machineApp: 'BaseMachineAppEngine'):
     restServer = RestServer(machineApp)
