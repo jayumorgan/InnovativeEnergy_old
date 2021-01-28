@@ -16,7 +16,8 @@ class MachineAppEngine(BaseMachineAppEngine):
             dict<str, MachineAppState>
         '''
         stateDictionary = {
-            'entry'                 : EntryState(self),
+            'homing'                : HomingState(self),
+            'move_to_start'         : MoveToInitialPositionState(self),
             'horizontal_green'      : GreenLightState(self, self.primaryMachineMotion, 'horizontal'),
             'horizontal_yellow'     : YellowLightState(self, self.primaryMachineMotion, 'horizontal'),
             'horizontal_red'        : RedLightState(self, 'horizontal'),
@@ -36,7 +37,7 @@ class MachineAppEngine(BaseMachineAppEngine):
         returns:
             str
         '''
-        return 'entry'
+        return 'homing'
     
     def initialize(self):
         ''' 
@@ -115,13 +116,16 @@ class HomingState(MachineAppState):
         self.gotoState('horizontal_green')
 
     def onResume(self):
-        self.gotoState('entry')
+        self.gotoState('homing')
 
 class MoveToInitialPositionState(MachineAppState):
     def onEnter(self):
         self.engine.primaryMachineMotion.emitSpeed(25)
         self.engine.primaryMachineMotion.emitCombinedAxisRelativeMove([1, 2], ['positive', 'positive'], [250, 250])
         self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to the start position')
+
+    def onResume(self):
+        self.gotoState('homing')
 
 class GreenLightState(MachineAppState):
     def __init__(self, engine, machineMotion, direction):
@@ -131,6 +135,7 @@ class GreenLightState(MachineAppState):
         self.__direction            = direction
         self.__speed                = self.configuration['fullSpeed']
         self.__durationSeconds      = self.configuration['greenTimer']
+        self.__axis                 = 2 if self.__direction == 'vertical' else 1
 
     def onEnter(self):
         self.__startTimeSeconds = time.time()
@@ -138,7 +143,7 @@ class GreenLightState(MachineAppState):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'green', "speed": self.__speed })
 
-        self.engine.primaryMachineMotion.emitRelativeMove(2 if self.__direction == 'vertical' else 1, 'positive', self.__speed)
+        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
 
         def __onPedestrianButtonClicked(topic, msg):
             if msg == 'true':
@@ -153,8 +158,19 @@ class GreenLightState(MachineAppState):
             self.gotoState(self.__direction + '_yellow')
 
     def onLeave(self):
-        pass
+        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
 
+    def onPause(self):
+        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+
+    def onStop(self):
+        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+
+    def onResume(self):
+        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+
+    def onEstop(self):
+        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
 
 class YellowLightState(MachineAppState):
     def __init__(self, engine, machineMotion, direction):
@@ -164,6 +180,7 @@ class YellowLightState(MachineAppState):
         self.__direction            = direction
         self.__speed                = self.configuration['slowSpeed']
         self.__durationSeconds      = self.configuration['yellowTimer']
+        self.__axis                 = 2 if self.__direction == 'vertical' else 1
 
     def onEnter(self):
         self.__startTimeSeconds = time.time()
@@ -171,7 +188,7 @@ class YellowLightState(MachineAppState):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'yellow', "speed": self.__speed })
 
-        self.engine.primaryMachineMotion.emitRelativeMove(2 if self.__direction == 'vertical' else 1, 'positive', self.__speed)
+        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
 
         def __onPedestrianButtonClicked(topic, msg):
             if msg == 'true':
@@ -185,7 +202,19 @@ class YellowLightState(MachineAppState):
             self.gotoState(self.__direction + '_red')
 
     def onLeave(self):
-        pass
+        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+
+    def onPause(self):
+        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+
+    def onStop(self):
+        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+
+    def onResume(self):
+        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+
+    def onEstop(self):
+        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
 
 class RedLightState(MachineAppState):
     def __init__(self, engine, direction):
