@@ -373,8 +373,13 @@ class MachineMotion :
 
         # Verify argument type to avoid sending garbage in the GCODE
         self._restrictInputValue("axis", axis, AXIS_NUMBER)
-        if not isinstance(speed, (int, long, float)) : raise Exception('Error in speed variable type')
-        if not isinstance(accel, (int, long, float)) : raise Exception('Error in accel variable type')
+
+        if sys.version_info[0] < 3 :
+            if not isinstance(speed, (int, long, float)) : raise Exception('Error in speed variable type')
+            if not isinstance(accel, (int, long, float)) : raise Exception('Error in accel variable type')
+        else:
+            if not isinstance(speed, (int, float)) : raise Exception('Error in speed variable type')
+            if not isinstance(accel, (int, float)) : raise Exception('Error in accel variable type')
 
         # set motor to speed mode
         reply = self.myGCode.__emit__("V5 " + self.getAxisName(axis) + "2")
@@ -410,7 +415,10 @@ class MachineMotion :
 
         # Verify argument type to avoid sending garbage in the GCODE
         self._restrictInputValue("axis", axis, AXIS_NUMBER)
-        if not isinstance(accel, (int, long, float)) : raise Exception('Error in accel variable type')
+        if sys.version_info[0] < 3 :
+            if not isinstance(accel, (int, long, float)) : raise Exception('Error in accel variable type')
+        else:
+            if not isinstance(accel, (int, float)) : raise Exception('Error in accel variable type')
 
         # Send speed command with accel
         reply = self.myGCode.__emit__("V4 S0" + " A" + str(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
@@ -1682,14 +1690,17 @@ class MachineMotion :
             self.digitalInputs[device][pin]= value
             return
         elif (deviceType == 'encoder'):
-            device = int( topicParts[2] )
-            position_type = topicParts[3]
-            position = float( msg.payload )
-            if position_type == ENCODER_TYPE.real_time :
-                self.myEncoderRealtimePositions[device] = position
-            elif position_type == ENCODER_TYPE.stable :
-                self.myEncoderStablePositions[device] = position
-            return
+            try:
+                device = int( topicParts[2] )
+                position_type = topicParts[3]
+                position = float( msg.payload )
+                if position_type == ENCODER_TYPE.real_time :
+                    self.myEncoderRealtimePositions[device] = position
+                elif position_type == ENCODER_TYPE.stable :
+                    self.myEncoderStablePositions[device] = position
+                return
+            except:
+                return
 
         elif (topicParts[0] == MQTT.PATH.ESTOP) :
             if (topicParts[1] == "status") :
@@ -1727,6 +1738,9 @@ class MachineMotion :
     def addMqttCallback(self, func):
         if not func in self.mqttCallbacks:
             self.mqttCallbacks.append(func)
+
+    def removeMqttCallback(self, func):
+        self.mqttCallbacks.remove(func)
 
     def registerInput(self, name, digitalIo, pin):
         self.__registeredInputMap[name] = 'devices/io-expander/' + str(digitalIo) + '/available/' + str(pin)

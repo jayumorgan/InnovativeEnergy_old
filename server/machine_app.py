@@ -2,7 +2,7 @@
 
 import logging
 import time
-from internal.fake_machine_motion import MachineMotion
+from internal.machine_motion import MachineMotion
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
 
@@ -20,8 +20,8 @@ class MachineAppEngine(BaseMachineAppEngine):
             'horizontal_green'      : GreenLightState(self, self.primaryMachineMotion, 'horizontal'),
             'horizontal_yellow'     : YellowLightState(self, self.primaryMachineMotion, 'horizontal'),
             'horizontal_red'        : RedLightState(self, 'horizontal'),
-            'vertical_green'        : GreenLightState(self, self.secondaryMachineMotion, 'vertical'),
-            'vertical_yellow'       : YellowLightState(self, self.secondaryMachineMotion, 'vertical'),
+            'vertical_green'        : GreenLightState(self, self.primaryMachineMotion, 'vertical'),
+            'vertical_yellow'       : YellowLightState(self, self.primaryMachineMotion, 'vertical'),
             'vertical_red'          : RedLightState(self, 'vertical'),
             'pedestrian_crossing'   : PedestrianCrossingState(self)
         }
@@ -48,7 +48,7 @@ class MachineAppEngine(BaseMachineAppEngine):
         and configure them. You may also define variables that you'd like to access 
         and manipulate over the course of your MachineApp here.
         '''
-        self.primaryMachineMotion = MachineMotion('127.0.0.1')
+        self.primaryMachineMotion = MachineMotion('192.168.7.2')
         self.primaryMachineMotion.configAxis(1, 8, 250)
         self.primaryMachineMotion.configAxis(2, 8, 250)
         self.primaryMachineMotion.configAxis(3, 8, 250)
@@ -57,13 +57,9 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.primaryMachineMotion.configAxisDirection(3, 'positive')
         self.primaryMachineMotion.registerInput('push_button_1', 1, 1)
 
-        self.secondaryMachineMotion = MachineMotion('127.0.0.1')
-        self.secondaryMachineMotion.configAxis(1, 8, 250)
-        self.secondaryMachineMotion.configAxis(2, 8, 250)
-        self.secondaryMachineMotion.configAxis(3, 8, 250)
-        self.secondaryMachineMotion.configAxisDirection(1, 'positive')
-        self.secondaryMachineMotion.configAxisDirection(2, 'positive')
-        self.secondaryMachineMotion.configAxisDirection(3, 'positive')
+        self.primaryMachineMotion.releaseEstop()
+        self.primaryMachineMotion.resetSystem()
+        self.primaryMachineMotion.emitStop()
 
         self.isPedestrianButtonTriggered = False
         self.nextLightDirection = 'horizontal'
@@ -96,6 +92,11 @@ class MachineAppEngine(BaseMachineAppEngine):
 
 class EntryState(MachineAppState):
     def onEnter(self):
+        self.engine.primaryMachineMotion.emitHomeAll()
+        self.engine.primaryMachineMotion.emitSpeed(25)
+        self.engine.primaryMachineMotion.emitRelativeMove(1, 'positive', 250)
+        self.engine.primaryMachineMotion.emitRelativeMove(2, 'positive', 250)
+        self.engine.primaryMachineMotion.waitForMotionCompletion()
         self.notifier.sendMessage(NotificationLevel.INFO, 'Entered entry state')
         self.gotoState('horizontal_green')
 
@@ -108,27 +109,28 @@ class GreenLightState(MachineAppState):
         self.__speed                = self.configuration['fullSpeed']
         self.__durationSeconds      = self.configuration['greenTimer']
 
-    def __onPedestrianButtonClicked(self, topic, msg):
-        if msg == 'true':
-            self.engine.isPedestrianButtonTriggered = True
-            self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
-            self.gotoState(self.__direction + '_yellow')
-
     def onEnter(self):
         self.__startTimeSeconds = time.time()
         self.logger.info('{} direction entered the GREEN light state'.format(self.__direction))
-        self.__machineMotion.setContinuousMove(1, self.__speed)
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'green', "speed": self.__speed })
 
-        self.registerCallback(self.__machineMotion, self.__machineMotion.getInputTopic('push_button_1'), self.__onPedestrianButtonClicked)
+        self.engine.primaryMachineMotion.emitRelativeMove(2 if self.__direction == 'vertical' else 1, 'positive', self.__speed)
+
+        def __onPedestrianButtonClicked(topic, msg):
+            if msg == 'true':
+                self.engine.isPedestrianButtonTriggered = True
+                self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
+                self.gotoState(self.__direction + '_yellow')
+
+        self.registerCallback(self.__machineMotion, self.__machineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             self.gotoState(self.__direction + '_yellow')
 
     def onLeave(self):
-        self.__machineMotion.stopContinuousMove(1)
+        pass
 
 
 class YellowLightState(MachineAppState):
@@ -143,23 +145,24 @@ class YellowLightState(MachineAppState):
     def onEnter(self):
         self.__startTimeSeconds = time.time()
         self.logger.info('{} direction entered the YELLOW light state'.format(self.__direction))
-        self.__machineMotion.setContinuousMove(1, self.__speed)
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'yellow', "speed": self.__speed })
 
-        def __onPedestrianButtonClicked(self, topic, msg):
+        self.engine.primaryMachineMotion.emitRelativeMove(2 if self.__direction == 'vertical' else 1, 'positive', self.__speed)
+
+        def __onPedestrianButtonClicked(topic, msg):
             if msg == 'true':
                 self.engine.isPedestrianButtonTriggered = True
                 self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
 
-        self.registerCallback(self.__machineMotion, self.__machineMotion.getInputTopic('push_button_1'), self.__onPedestrianButtonClicked)
+        self.registerCallback(self.__machineMotion, self.__machineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             self.gotoState(self.__direction + '_red')
 
     def onLeave(self):
-        self.__machineMotion.stopContinuousMove(1)
+        pass
 
 class RedLightState(MachineAppState):
     def __init__(self, engine, direction):

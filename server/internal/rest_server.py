@@ -92,7 +92,10 @@ class RestServer(Bottle):
             abort(400, 'Failed to estop the MachineApp')
 
     def getEstop(self):
-        return self.__machineApp.isEstopped()
+        if self.__machineApp.getEstop():
+            return 'true'
+        else:
+            return 'false'
 
     def releaseEstop(self):
         if self.__machineApp.releaseEstop():

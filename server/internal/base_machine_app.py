@@ -169,7 +169,6 @@ class BaseMachineAppEngine(ABC):
         self.isRunning      = False                                     # The MachineApp will execute while this flag is set
         self.isPaused       = False                                     # The machine app will not do any state updates while this flag is set
         self.isEstopped           = False                               # Set whenever we are in the Estop state
-        self.__isSystemReleased   = False                               # Set whenever we release the system
         
         self.__shouldStart  = False                                     # Tells the MachineApp loop that it should begin processing the state machine
         self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
@@ -310,12 +309,12 @@ class BaseMachineAppEngine(ABC):
 
         return True
 
-
     def loop(self):
         '''
         Main loop of your MachineApp. If we set __shouldStart to True, the MachineApp begins processing
         the nodes in its core loop.
         '''
+        self.getMasterMachineMotion().bindeStopEvent(self.__setEstopped)
 
         # Outer Loop dealing with e-stops and start functionality
         while True:
@@ -324,14 +323,12 @@ class BaseMachineAppEngine(ABC):
                 self.__shouldEstop = False
 
             if self.__shouldReleaseEstop:
-                if self.__isSystemReleased:
-                    self.__isSystemReleased = False
-                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP_RELEASE, 'MachineApp estop released')
-                    self.__shouldReleaseEstop = False
+                self.__notifier.sendMessage(NotificationLevel.APP_ESTOP_RELEASE, 'MachineApp estop released')
+                self.__shouldReleaseEstop = False
 
-                    currentState = self.getCurrentState()
-                    if currentState != None:
-                        currentState.onEstopReleased()
+                currentState = self.getCurrentState()
+                if currentState != None:
+                    currentState.onEstopReleased()
 
             if self.__shouldStart:              # Running start behavior
                 self.beforeRun()
@@ -454,6 +451,18 @@ class BaseMachineAppEngine(ABC):
         self.logger.info('Stopping the MachineApp')
         self.__shouldStop = True
 
+    def __setEstopped(self, isEstopped):
+        ''' Callback when we receive an e-stop event '''
+        if isEstopped:
+            if not self.isEstopped:
+                self.isEstopped = True
+                self.__shouldEstop = True
+                self.logger.info('Estop triggered')
+        else:
+            self.__shouldReleaseEstop = True
+            self.isEstopped = False
+            self.logger.info('System reset')
+
     def estop(self):
         '''
         E-stops the MachineApp loop.
@@ -462,12 +471,8 @@ class BaseMachineAppEngine(ABC):
         alter this behavior if you know what you are doing. It is recommended that
         you implement any on-estop behavior in your MachineAppStates instead
         '''
-        self.isEstopped = True
-        self.__isSystemReleased = False
         masterMachineMotion = self.getMasterMachineMotion()
         masterMachineMotion.triggerEstop()
-        self.__shouldEstop = True
-        self.logger.info('Estop triggered')
         return True
 
     def getEstop(self):
@@ -478,7 +483,6 @@ class BaseMachineAppEngine(ABC):
         ''' Releases the estop of all machine motions '''
         masterMachineMotion = self.getMasterMachineMotion()
         masterMachineMotion.releaseEstop()
-        self.__isSystemReleased = True
         self.logger.info('Estop released')
         return True
 
@@ -486,6 +490,4 @@ class BaseMachineAppEngine(ABC):
         ''' Resets the system for all machine motions '''
         masterMachineMotion = self.getMasterMachineMotion()
         masterMachineMotion.resetSystem()
-        self.__shouldReleaseEstop = True
-        self.logger.info('System reset')
         return True

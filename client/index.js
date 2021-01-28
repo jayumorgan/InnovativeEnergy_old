@@ -68,7 +68,9 @@
     function lGetEstop() {
         return fetch('/run/estop').then(function(pResponse) {
             if (pResponse.status === 200) {
-                return true;
+                return pResponse.text().then(function(pText) {
+                    return pText === 'true';
+                });
             } else {
                 return false;
             }
@@ -132,6 +134,13 @@
         
         lOnGeneralTabClicked();
         lConnectToSocket();
+
+        lGetEstop().then(function(pIsSet) {
+            if (pIsSet) {
+                console.log('Estop is active.');
+                lOnEstopSet();
+            }
+        });
     }
     
     // Connection to the notification Websocket
