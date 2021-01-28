@@ -1,5 +1,5 @@
 /// <reference path="./js/jquery-3.5.1.min.js" />
-/// <reference path="./editor.js" />
+/// <reference path="./ui.js" />
 /// <reference path="./widgets.js" />
 
 (function() {

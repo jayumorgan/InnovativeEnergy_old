@@ -29,6 +29,8 @@ class MachineMotion:
         self.myMqttClient.connect(ip)
         self.myMqttClient.loop_start()
 
+        self.__registeredInputMap = {}
+
     def addMqttCallback(self, func):
         if not func in self.mqttCallbacks:
             self.mqttCallbacks.append(func)
@@ -104,7 +106,7 @@ class MachineMotion:
     def digitalRead(self, deviceNetworkId, pin):
         return 0
 
-    def configAxisDirection(self, axes, directions):
+    def configAxisDirection(self, axis, direction):
         pass
 
     def emitHome(self, accel):
@@ -167,3 +169,12 @@ class MachineMotion:
 
     def stopContinuousMove(self, axis, accel = None):
         pass
+
+    def registerInput(self, name, digitalIo, pin):
+        self.__registeredInputMap[name] = 'devices/io-expander/' + str(digitalIo) + '/available/' + str(pin)
+
+    def getInputTopic(self, name):
+        if not name in self.__registeredInputMap:
+            return None
+
+        return self.__registeredInputMap[name]
