@@ -141,12 +141,12 @@
     /**
      * Entry to the JavaScript of the program
      */
-    function lMain() {
-        $('#general-tab-button').on('click', lOnGeneralTabClicked);
-        $('#estop-button').on('click', lOnEstopClicked)
+    function main() {
+        $('#general-tab-button').on('click', onGeneralTabClicked);
+        $('#estop-button').on('click', onEstopClicked)
         $('#app-launcher-button').on('click', onAppLauncherClicked);
         
-        lOnGeneralTabClicked();
+        onGeneralTabClicked();
 
         lGetMachineAppState().then(function(pState) {
             if (pState === undefined) {
@@ -155,14 +155,14 @@
             }
 
             if (pState.isRunning) {
-                lOnUpdateMessageReceived({
+                onUpdateMessageReceived({
                     timeSeconds: Date.now(),
                     level: 'app_start',
                     message: 'MachineApp is running'
                 });
                 
                 if (pState.isPaused) {
-                    lOnUpdateMessageReceived({
+                    onUpdateMessageReceived({
                         timeSeconds: Date.now(),
                         level: 'app_pause',
                         message: 'MachineApp is paused'
@@ -171,18 +171,18 @@
             }
         });
 
-        lConnectToSocket();
+        connectToSocket();
         lGetEstop().then(function(pIsSet) {
             if (pIsSet) {
                 console.log('Estop is active.');
-                lOnEstopSet();
+                onEstopSet();
             }
         });
     }
     
     // Connection to the notification Websocket
     let lWebsocketConnection = undefined;
-    function lConnectToSocket() {
+    function connectToSocket() {
         console.log('Connecting to socket at ws://127.0.0.1:8081');
         lWebsocketConnection = new WebSocket('ws://127.0.0.1:8081');
         lWebsocketConnection.onopen = function(pEvent) {
@@ -191,21 +191,21 @@
         lWebsocketConnection.onclose = function(pEvent) {
             console.log('Websocket connect closed', pEvent);
             const lTimeout = setTimeout(function() { 
-                lConnectToSocket();
+                connectToSocket();
                 clearInterval(lTimeout);
             }, 5000);
         };
         lWebsocketConnection.onmessage = function(pEvent) {
             const lMessageData = JSON.parse(pEvent.data);
             console.log('Received message from the socket connection', lMessageData);
-            lOnUpdateMessageReceived(lMessageData);
+            onUpdateMessageReceived(lMessageData);
         };
         lWebsocketConnection.onerror = function(pEvent) {
             console.error('Encountered error in websocket', pEvent);
         };
     }
 
-    function lAddMessageToConsole(pIcon, pTime, pMessage) {
+    function addMessageToConsole(pIcon, pTime, pMessage) {
         const lDateTime = new Date(pTime),
             lRow = $('<tr>').prependTo($('#run-information-console')),
             lIcon = $('<td>').append($('<div>').addClass(pIcon)).appendTo(lRow),
@@ -219,7 +219,7 @@
              }).text('Dismiss').addClass('widget-button primary link')).appendTo(lRow);
     }
 
-    function lOnUpdateMessageReceived(pMessageData) {
+    function onUpdateMessageReceived(pMessageData) {
         const lTimeSeconds = pMessageData.timeSeconds,
             lLevel = pMessageData.level,
             lMessageStr = pMessageData.message,
@@ -230,52 +230,52 @@
                 lState = 'running';
                 $('#run-start-button').empty().append($('<span>').addClass('icon-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 $('#run-stop-button').addClass('running');
-                lAddMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
+                addMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_complete': {
                 lState = 'idle';
                 $('#run-start-button').empty().append($('<span>').addClass('icon-play')).append($('<div>').text('START')).removeClass('running');
                 $('#run-stop-button').removeClass('running').empty().append($('<span>').addClass('icon-stop')).append($('<div>').text('STOP'));
-                lAddMessageToConsole('icon-stop', lTimeSeconds, lMessageStr);
+                addMessageToConsole('icon-stop', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_pause': {
                 $('#run-start-button').empty().append($('<span>').addClass('icon-play')).append($('<div>').text('RESUME')).addClass('running');
                 lState = 'paused';
-                lAddMessageToConsole('icon-pause', lTimeSeconds, lMessageStr);
+                addMessageToConsole('icon-pause', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_resume': {
                 $('#run-start-button').empty().append($('<span>').addClass('icon-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 lState = 'running';
-                lAddMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
+                addMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_state_change': {
-                lAddMessageToConsole('fa fa-arrow-right', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-arrow-right', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_estop_set': {
-                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
-                lOnEstopSet();
+                addMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                onEstopSet();
                 break;
             }
             case 'app_estop_release': {
-                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
-                lOnEstopReleased();
+                addMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                onEstopReleased();
                 break;
             }
             case 'info': {
-                lAddMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'warning': {
-                lAddMessageToConsole('fa fa-exclamation-triangle', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-exclamation-triangle', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'error': {
-                lAddMessageToConsole('fa fa-exclamation-triangle', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-exclamation-triangle', lTimeSeconds, lMessageStr);
                 break;
             }
         }
@@ -283,7 +283,7 @@
         onNotificationReceived(lLevel, lMessageStr, lCustomPayload);
     }
 
-    function lOnGeneralTabClicked() {
+    function onGeneralTabClicked() {
         $('#general-tab-button').addClass('nav-selected');
         $('#general-content').css('display', 'inherit');
 
@@ -353,7 +353,7 @@
     }
 
      // Estop functionality
-    function lOnEstopClicked() {
+    function onEstopClicked() {
         console.log('Estop button clicked.');
         lSetEstop().then(function(pSuccess) {
             if (pSuccess) {
@@ -364,7 +364,7 @@
         })
     }
 
-    function lOnEstopSet() {
+    function onEstopSet() {
         if ($('#estop-modal').length > 0) {
             return;
         }
@@ -397,7 +397,7 @@
 
     }
 
-    function lOnEstopReleased() {
+    function onEstopReleased() {
         $('#estop-modal').remove();
     }
 
@@ -406,5 +406,5 @@
         location.href = `${window.location.origin.substring(0, window.location.origin.lastIndexOf(':'))}:8000`;
     }
     
-    $(document).ready(lMain);
+    $(document).ready(main);
 })()

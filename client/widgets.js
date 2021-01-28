@@ -18,7 +18,7 @@ function lCreateModal() {
  * @param {String} pValue 
  * @param {function(value: String) => void} pOnChange 
  */
-function lTextBox(pLabel, pValue, pOnChange) {
+function textbox(pLabel, pValue, pOnChange) {
      const lWrapper = $('<div>').addClass('widget-wrapper').addClass('widget-textbox'),
          lLabel = pLabel ? $('<label>').text(pLabel).appendTo(lWrapper) : undefined,
          lInput = $('<input>').val(pValue).appendTo(lWrapper);
@@ -38,8 +38,8 @@ function lTextBox(pLabel, pValue, pOnChange) {
   * @param {Number} pValue 
   * @param {function(value: String) => void} pOnChange 
   */
- function lNumericTextbox(pLabel, pValue, pOnChange) {
-     const lTextbox = lTextBox(pLabel, pValue, function(pNewValue) {
+ function numericInput(pLabel, pValue, pOnChange) {
+     const lTextbox = textbox(pLabel, pValue, function(pNewValue) {
          const lNumVal = Number(pNewValue);
          if (isNaN(lNumVal)) {
              lTextbox.find('input').val(0);
@@ -60,21 +60,21 @@ function lTextBox(pLabel, pValue, pOnChange) {
   * @param {Array<{ key: String, value: String | number }} pOptionsList
   * @param {function(value: String) => void} pOnChange 
   */
- function lSelect(pLabel, pValue, pOptionsList, pOnChange) {
+ function selectInput(pLabel, pValue, pOptionsList, pOnChange) {
      const lWrapper = $('<div>').addClass('widget-wrapper'),
          lLabel = $('<label>').text(pLabel).appendTo(lWrapper),
          lSelectWrapper = $('<div>').addClass('widget-select').appendTo(lWrapper),
-         lSelect = $('<select>').appendTo(lSelectWrapper);
+         lInput = $('<select>').appendTo(lSelectWrapper);
 
-     lSelect.on('change', function() {
-         pOnChange(lSelect.val());
+     lInput.on('change', function() {
+         pOnChange(lInput.val());
      });
      
      pOptionsList.forEach(function(pOption) {
-         $('<option>').text(pOption.key).attr('value', pOption.value).appendTo(lSelect);
+         $('<option>').text(pOption.key).attr('value', pOption.value).appendTo(lInput);
      });
 
-     lSelect.val(pValue);
+     lInput.val(pValue);
      return lWrapper;
  }
 
@@ -85,7 +85,7 @@ function lTextBox(pLabel, pValue, pOnChange) {
   * @param {Boolean} pDefaultValue 
   * @param {function(value: Boolean) -> void} pOnChange 
   */
- function lCheckbox(pLabel, pDefaultValue, pOnChange) {
+ function checkbox(pLabel, pDefaultValue, pOnChange) {
      const lWrapper = $('<label>').text(pLabel).addClass('widget-checkbox'),
          lInputElement = $('<input>').attr('type', 'checkbox').attr('checked', pDefaultValue).appendTo(lWrapper),
          lSpanElement = $('<span>').addClass('widget-checkmark').appendTo(lWrapper);
@@ -103,21 +103,21 @@ function lTextBox(pLabel, pValue, pOnChange) {
   * @param {Array<{ key: String, value: String | number }} pNewOptions 
   * @param {String | Number} pSelectedValue 
   */
- function lUpdateSelectOptions(pSelect, pNewOptions, pSelectedValue) {
-     const lSelect = pSelect.find('select');
+ function updateSelectOptions(pSelect, pNewOptions, pSelectedValue) {
+     const selectInput = pSelect.find('select');
 
      pSelect.find('option').remove();
      pNewOptions.forEach(function(pOption) {
-         $('<option>').text(pOption.key).attr('value', pOption.value).appendTo(lSelect);
+         $('<option>').text(pOption.key).attr('value', pOption.value).appendTo(selectInput);
      });
 
      if (pNewOptions.find(function(pExisting) { return pExisting.value == pSelectedValue; })) {
-         lSelect.val(pSelectedValue);
+         selectInput.val(pSelectedValue);
      } else if (pNewOptions.length > 0) {
-         lSelect.val(pNewOptions[0].value);
+         selectInput.val(pNewOptions[0].value);
      }
      
-     lSelect.trigger('change');
+     selectInput.trigger('change');
  }
 
  /**
@@ -125,7 +125,7 @@ function lTextBox(pLabel, pValue, pOnChange) {
   * @param {JQuery<HTMLElement>} pWidget 
   * @param {String} pError 
   */
- function lAppendError(pWidget, pError) {
+ function appendError(pWidget, pError) {
      return $('<div>').addClass('widget-error').appendTo(pWidget).text(pError);
  }
 
@@ -133,6 +133,6 @@ function lTextBox(pLabel, pValue, pOnChange) {
   * Clear an error on any of the widgets
   * @param {JQuery<HTMLElement>} pWidget 
   */
- function lClearError(pWidget) {
+ function clearError(pWidget) {
      pWidget.find('.widget-error').remove();
  }

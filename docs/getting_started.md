@@ -144,7 +144,7 @@ function getDefaultConfiguration() {
 
 function buildEditor(pConfiguration) {
     const lEditorWrapper = $('<div>').addClass('configuration-editor'),
-        lFullSpeedEitor = lNumericTextbox('Wait Time (seconds)',  pConfiguration.waitTimeSeconds, function(pValue) {
+        lFullSpeedEitor = numericInput('Wait Time (seconds)',  pConfiguration.waitTimeSeconds, function(pValue) {
                 pConfiguration.waitTimeSeconds = pValue;
             }).appendTo(lEditorWrapper);
 

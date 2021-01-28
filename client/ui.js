@@ -20,22 +20,22 @@ function getDefaultConfiguration() {
  */
 function buildEditor(pConfiguration) {
     const lEditorWrapper = $('<div>').addClass('configuration-editor'),
-        lFullSpeedEitor = lNumericTextbox('Conveyor Full Speed', pConfiguration.fullSpeed, function(pValue) {
+        lFullSpeedEitor = numericInput('Conveyor Full Speed', pConfiguration.fullSpeed, function(pValue) {
             pConfiguration.fullSpeed = pValue;
         }).appendTo(lEditorWrapper),
-        lSlowSpeedEditor = lNumericTextbox('Conveyor slow Speed', pConfiguration.slowSpeed, function(pValue) {
+        lSlowSpeedEditor = numericInput('Conveyor slow Speed', pConfiguration.slowSpeed, function(pValue) {
             pConfiguration.slowSpeed = pValue;
         }).appendTo(lEditorWrapper),
-        lGreenTimer = lNumericTextbox('Green Light Timer', pConfiguration.greenTimer, function(pValue) {
+        lGreenTimer = numericInput('Green Light Timer', pConfiguration.greenTimer, function(pValue) {
             pConfiguration.greenTimer = pValue;
         }).appendTo(lEditorWrapper),
-        lYellowTimer = lNumericTextbox('Yellow Light Timer', pConfiguration.yellowTimer, function(pValue) {
+        lYellowTimer = numericInput('Yellow Light Timer', pConfiguration.yellowTimer, function(pValue) {
             pConfiguration.yellowTimer = pValue;
         }).appendTo(lEditorWrapper),
-        lRedTimer = lNumericTextbox('Red Light Timer', pConfiguration.redTimer, function(pValue) {
+        lRedTimer = numericInput('Red Light Timer', pConfiguration.redTimer, function(pValue) {
             pConfiguration.redTimer = pValue;
         }).appendTo(lEditorWrapper),
-        lPedestrianTimer = lNumericTextbox('Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
+        lPedestrianTimer = numericInput('Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
             pConfiguration.pedestrianTimer = pValue;
         }).appendTo(lEditorWrapper);
 

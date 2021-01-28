@@ -1,8 +1,13 @@
 #/usr/bin/python3
 
+IS_DEVELOPMENT = True
+
 import logging
 import time
-from internal.machine_motion import MachineMotion
+if IS_DEVELOPMENT:
+    from internal.fake_machine_motion import MachineMotion
+else:
+    from internal.machine_motion import MachineMotion
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
 
@@ -49,7 +54,7 @@ class MachineAppEngine(BaseMachineAppEngine):
         and configure them. You may also define variables that you'd like to access 
         and manipulate over the course of your MachineApp here.
         '''
-        self.primaryMachineMotion = MachineMotion('192.168.7.2')
+        self.primaryMachineMotion = MachineMotion('127.0.0.1')
         self.primaryMachineMotion.configAxis(1, 8, 250)
         self.primaryMachineMotion.configAxis(2, 8, 250)
         self.primaryMachineMotion.configAxis(3, 8, 250)
