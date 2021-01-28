@@ -131,6 +131,7 @@
     function lMain() {
         $('#general-tab-button').on('click', lOnGeneralTabClicked);
         $('#estop-button').on('click', lOnEstopClicked)
+        $('#app-launcher-button').on('click', onAppLauncherClicked);
         
         lOnGeneralTabClicked();
         lConnectToSocket();
@@ -362,6 +363,11 @@
 
     function lOnEstopReleased() {
         $('#estop-modal').remove();
+    }
+
+    // Going to the control center
+    function onAppLauncherClicked() {
+        location.href = `${window.location.origin.substring(0, window.location.origin.lastIndexOf(':'))}:8000`;
     }
     
     $(document).ready(lMain);
