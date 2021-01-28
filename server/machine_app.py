@@ -64,6 +64,24 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.isPedestrianButtonTriggered = False
         self.nextLightDirection = 'horizontal'
 
+    def onStop(self):
+        '''
+        Called when a stop is requested from the REST API. 99% of the time, you will
+        simply call 'emitStop' on all of your machine motions in this methiod.
+
+        Warning: This logic is happening in a separate thread.
+        '''
+        self.primaryMachineMotion.emitStop()
+
+    def onPause(self):
+        '''
+        Called when a pause is requested from the REST API. 99% of the time, you will
+        simply call 'emitStop' on all of your machine motions in this methiod.
+        
+        Warning: This logic is happening in a separate thread.
+        '''
+        self.primaryMachineMotion.emitStop()
+
     def beforeRun(self):
         '''
         Called before every run of your MachineApp. This is where you might want to
@@ -90,15 +108,20 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         return self.primaryMachineMotion
 
-class EntryState(MachineAppState):
+class HomingState(MachineAppState):
     def onEnter(self):
         self.engine.primaryMachineMotion.emitHomeAll()
-        self.engine.primaryMachineMotion.emitSpeed(25)
-        self.engine.primaryMachineMotion.emitRelativeMove(1, 'positive', 250)
-        self.engine.primaryMachineMotion.emitRelativeMove(2, 'positive', 250)
-        self.engine.primaryMachineMotion.waitForMotionCompletion()
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Entered entry state')
+        self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to home')
         self.gotoState('horizontal_green')
+
+    def onResume(self):
+        self.gotoState('entry')
+
+class MoveToInitialPositionState(MachineAppState):
+    def onEnter(self):
+        self.engine.primaryMachineMotion.emitSpeed(25)
+        self.engine.primaryMachineMotion.emitCombinedAxisRelativeMove([1, 2], ['positive', 'positive'], [250, 250])
+        self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to the start position')
 
 class GreenLightState(MachineAppState):
     def __init__(self, engine, machineMotion, direction):

@@ -243,6 +243,26 @@ class BaseMachineAppEngine(ABC):
         pass
 
     @abstractmethod
+    def onStop(self):
+        '''
+        Called when a stop is requested from the REST API. 99% of the time, you will
+        simply call 'emitStop' on all of your machine motions in this methiod.
+
+        Warning: This logic is happening in a separate thread.
+        '''
+        pass
+
+    @abstractmethod
+    def onPause(self):
+        '''
+        Called when a pause is requested from the REST API. 99% of the time, you will
+        simply call 'emitStop' on all of your machine motions in this methiod.
+        
+        Warning: This logic is happening in a separate thread.
+        '''
+        pass
+
+    @abstractmethod
     def getMasterMachineMotion(self):
         ''' 
         Returns the master machine motion, which will be used for estopping,
