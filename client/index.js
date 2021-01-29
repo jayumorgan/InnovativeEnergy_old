@@ -403,7 +403,7 @@
 
     // Going to the control center
     function onAppLauncherClicked() {
-        location.href = `${window.location.origin.substring(0, window.location.origin.lastIndexOf(':'))}:8000`;
+        location.href = `${window.location.protocol}//${window.location.hostname}`;
     }
     
     $(document).ready(main);
