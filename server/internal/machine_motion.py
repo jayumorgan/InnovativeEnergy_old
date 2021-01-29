@@ -1491,7 +1491,7 @@ class MachineMotion :
 
         def mqttResponse() :
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE, retained = False, hostname = self.IP).payload)
+            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_RELEASE_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
 
             return
 
@@ -1525,7 +1525,7 @@ class MachineMotion :
 
         def mqttResponse() :
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE, retained = False, hostname = self.IP).payload)
+            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_SYSTEMRESET_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
 
             return
 
@@ -1672,7 +1672,7 @@ class MachineMotion :
         if (deviceType == 'io-expander'):
             device = int( topicParts[2] )
             if (topicParts[3] == 'available'):
-                availability = json.loads(msg.payload)
+                availability = json.loads(msg.payload.decode('utf-8'))
                 if (availability):
                     self.myIoExpanderAvailabilityState[device-1] = True
                     return
@@ -1682,7 +1682,7 @@ class MachineMotion :
             pin = int( topicParts[4] )
             if ( not self.isIoExpanderInputIdValid(device, pin) ):
                 return
-            value  = int( msg.payload )
+            value  = int( msg.payload.decode('utf-8') )
             if (not hasattr(self, 'digitalInputs')):
                 self.digitalInputs = {}
             if (not device in self.digitalInputs):
@@ -1693,7 +1693,7 @@ class MachineMotion :
             try:
                 device = int( topicParts[2] )
                 position_type = topicParts[3]
-                position = float( msg.payload )
+                position = float( msg.payload.decode('utf-8') )
                 if position_type == ENCODER_TYPE.real_time :
                     self.myEncoderRealtimePositions[device] = position
                 elif position_type == ENCODER_TYPE.stable :
@@ -1704,18 +1704,18 @@ class MachineMotion :
 
         elif (topicParts[0] == MQTT.PATH.ESTOP) :
             if (topicParts[1] == "status") :
-                self.eStopEvent(json.loads(msg.payload))
+                self.eStopEvent(json.loads(msg.payload.decode('utf-8')))
             return
 
         elif (topicParts[0] == MQTT.PATH.AUX_PORT_POWER) :
             if (topicParts[2] == "status") :
                 aux_port = int( topicParts[1] )
-                self.brakeStatus_control[aux_port-1] = msg.payload
+                self.brakeStatus_control[aux_port-1] = msg.payload.decode('utf-8')
 
         elif (topicParts[0] == MQTT.PATH.AUX_PORT_SAFETY) :
             if (topicParts[2] == "status") :
                 aux_port = int( topicParts[1] )
-                self.brakeStatus_safety[aux_port-1] = msg.payload
+                self.brakeStatus_safety[aux_port-1] = msg.payload.decode('utf-8')
 
         return
 

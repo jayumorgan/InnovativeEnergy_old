@@ -125,4 +125,4 @@ class RestServer(Bottle):
 
 def runServer(machineApp: 'BaseMachineAppEngine'):
     restServer = RestServer(machineApp)
-    restServer.run(host='localhost', port=3011)
+    restServer.run(host='0.0.0.0', port=3011)
