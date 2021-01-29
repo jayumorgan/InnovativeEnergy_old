@@ -1,15 +1,15 @@
 #/usr/bin/python3
 
-IS_DEVELOPMENT = True
-
+from env import IS_DEVELOPMENT
 import logging
 import time
+from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
+from internal.notifier import NotificationLevel
+
 if IS_DEVELOPMENT:
     from internal.fake_machine_motion import MachineMotion
 else:
     from internal.machine_motion import MachineMotion
-from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
-from internal.notifier import NotificationLevel
 
 class MachineAppEngine(BaseMachineAppEngine):
     def buildStateDictionary(self):

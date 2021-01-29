@@ -19,6 +19,7 @@ class RestServer(Bottle):
 
         # Set up callbacks
         self.route('/', callback=self.index)
+        self.route('/ping', callback=self.ping)
         self.route('/<filepath:path>', callback=self.serveStatic)
         self.route('/run/start', method='POST', callback=self.start)
         self.route('/run/stop', method='POST', callback=self.stop)
@@ -42,6 +43,12 @@ class RestServer(Bottle):
         another 'run' request arrives.
         '''
         self.__machineApp.loop()
+
+    def ping(self):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+        return 'pong'
 
     def index(self):
         return static_file('index.html', root=self.__clientDirectory)
