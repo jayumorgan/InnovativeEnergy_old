@@ -166,6 +166,7 @@ class BaseMachineAppEngine(ABC):
         self.logger         = logging.getLogger(__name__)               # Logger used to output information to the local log file and console
         
         # High-Level State variables
+        self.__isAlive      = True                                      # Set to True so long as the application has not been killed
         self.isRunning      = False                                     # The MachineApp will execute while this flag is set
         self.isPaused       = False                                     # The machine app will not do any state updates while this flag is set
         self.isEstopped           = False                               # Set whenever we are in the Estop state
@@ -337,7 +338,7 @@ class BaseMachineAppEngine(ABC):
         self.getMasterMachineMotion().bindeStopEvent(self.__setEstopped)
 
         # Outer Loop dealing with e-stops and start functionality
-        while True:
+        while self.__isAlive:
             if self.__shouldEstop:
                 self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
                 self.__shouldEstop = False
@@ -511,3 +512,12 @@ class BaseMachineAppEngine(ABC):
         masterMachineMotion = self.getMasterMachineMotion()
         masterMachineMotion.resetSystem()
         return True
+
+    def kill(self):
+        ''' 
+        Destroys this instance of MachineApp. The instance can only be destroyed if we
+        are not running the MachineApp.
+
+        Warning: Do not use.
+        '''
+        self.__isAlive      = False

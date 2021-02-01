@@ -6,6 +6,8 @@ from threading import Thread
 from pathlib import Path
 import json
 from machine_app import MachineAppEngine
+from internal.notifier import getNotifier
+import signal
 
 class RestServer(Bottle):
     '''
@@ -32,6 +34,8 @@ class RestServer(Bottle):
         self.route('/run/releaseEstop', method='POST', callback=self.releaseEstop)
         self.route('/run/resetSystem', method='POST', callback=self.resetSystem)
         self.route('/run/state', method='GET', callback=self.getState)
+
+        self.route('/kill', method='GET', callback=self.kill)
 
         
     def __startMachineApp(self):
@@ -133,6 +137,12 @@ class RestServer(Bottle):
             "isRunning": self.__machineApp.isRunning,
             "isPaused": self.__machineApp.isPaused
         }
+
+    def kill(self):
+        getNotifer().setDead()
+        self.__machineApp.kill()
+        os.kill(os.getpid(), signal.SIGTERM)
+        return 'OK'
 
 def runServer(machineApp: 'BaseMachineAppEngine'):
     restServer = RestServer(machineApp)
