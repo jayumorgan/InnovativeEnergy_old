@@ -6,7 +6,7 @@ from threading import Thread
 from pathlib import Path
 import json
 from machine_app import MachineAppEngine
-from internal.notifier import getNotifier
+from internal.notifier import getNotifier, NotificationLevel
 import signal
 
 class RestServer(Bottle):
@@ -17,6 +17,7 @@ class RestServer(Bottle):
         super(RestServer, self).__init__()
     
         self.__clientDirectory = os.path.join('..', 'client')
+        self.__serverDirectory = os.path.join('.')
         self.__logger = logging.getLogger(__name__)
         self.__machineApp = machineApp                   # MachineApp that is currently being run
         self.__isAppRunning = False
@@ -36,6 +37,7 @@ class RestServer(Bottle):
         self.route('/run/state', method='GET', callback=self.getState)
 
         self.route('/kill', method='GET', callback=self.kill)
+        self.route('/logs', method='GET', callback=self.getLog)
 
         
     def __startMachineApp(self):
@@ -71,6 +73,9 @@ class RestServer(Bottle):
     def serveStatic(self, filepath):
         self.__logger.info('Serving static file: {}'.format(filepath))
         return static_file(filepath, root=self.__clientDirectory)
+
+    def getLog(self):
+        return static_file('machine_app.log', root=self.__serverDirectory)
 
     def start(self):
         configuration = request.json
