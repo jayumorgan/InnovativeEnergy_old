@@ -53,6 +53,18 @@ Taking our example from before, a `MachineAppEngine` that handles those two stat
 class MachineAppEngine(BaseMachineAppEngine):
     def initialize(self):
         self.machineMotion = MachineMotion('127.0.0.1')
+        self.machineMotion.configAxis(1, 8, 250)
+        self.machineMotion.configAxis(2, 8, 250)
+        self.machineMotion.configAxis(3, 8, 250)
+        self.machineMotion.configAxisDirection(1, 'positive')
+        self.machineMotion.configAxisDirection(2, 'positive')
+        self.machineMotion.configAxisDirection(3, 'positive')
+
+    def onStop(self):
+        self.machineMotion.emitStop()
+
+    def onPause(self):
+        self.machineMotion.emitStop()
 
     def beforeRun(self):
         pass
@@ -82,7 +94,7 @@ On top of doing some straightforward logic via a state machine, you may want to 
 
 To do this, you have access to a `MachineAppState.configuration` and `MachineAppEngine.configuration` while your state machien is active. This configuration is a python dictionary that is sent up by the frontend when you click the "play" button. We will explain how this data is defined in the [Client](#client) section later on.
 
-### Reacting to Inputs (MqttTopicSubscriber)
+### Reacting to Inputs
 Oftentimes in a MachineApp, you'll want to do something when an input is triggered. For example, we might want to change our state only when an operator pushes a button. The MachineApp template fulfills this requirement by providing you with the `MachineAppState.registerCallback`. This function takes as its parameters (1) the machine motion whose topics you want to subscribe to, (2) the topic that you want to subscribe to, and (3) a callback to be invoked when we receive data on that topic.
 
 You can either pass the topic directly, or, alternatively, get the topic of a particular input by its registered name. To register an input for a particualr machine motion, you can do the following in `server/machine_app.py`:
