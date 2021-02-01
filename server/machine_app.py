@@ -1,12 +1,12 @@
 #/usr/bin/python3
 
-from env import IS_DEVELOPMENT
+from env import env
 import logging
 import time
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
 
-if IS_DEVELOPMENT:
+if env.IS_DEVELOPMENT:
     from internal.fake_machine_motion import MachineMotion
 else:
     from internal.machine_motion import MachineMotion
