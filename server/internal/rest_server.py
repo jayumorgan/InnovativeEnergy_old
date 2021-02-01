@@ -139,7 +139,7 @@ class RestServer(Bottle):
         }
 
     def kill(self):
-        getNotifer().setDead()
+        getNotifier().setDead()
         self.__machineApp.kill()
         os.kill(os.getpid(), signal.SIGTERM)
         return 'OK'
