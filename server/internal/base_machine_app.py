@@ -332,6 +332,7 @@ class BaseMachineAppEngine(ABC):
         Main loop of your MachineApp. If we set __shouldStart to True, the MachineApp begins processing
         the nodes in its core loop.
         '''
+        self.logger.info('Starting the main MachineApp loop')
         self.initialize()
         self.getMasterMachineMotion().bindeStopEvent(self.__setEstopped)
 

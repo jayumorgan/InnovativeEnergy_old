@@ -1458,7 +1458,7 @@ class MachineMotion :
 
         def mqttResponse() :
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE, retained = False, hostname = self.IP).payload)
+            return_value = json.loads(MQTTsubscribe.simple(MQTT.PATH.ESTOP_TRIGGER_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
 
             return
 
