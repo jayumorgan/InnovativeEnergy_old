@@ -30,7 +30,7 @@ class Notifier:
         self.lock = RLock()
         self.queue = []
 
-        thread = Thread(name='Notifier', target=self.__run, args=('127.0.0.1', '8081'))
+        thread = Thread(name='Notifier', target=self.__run, args=('0.0.0.0', '8081'))
         thread.daemon = True
         thread.start() 
 

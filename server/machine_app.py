@@ -54,6 +54,8 @@ class MachineAppEngine(BaseMachineAppEngine):
         and configure them. You may also define variables that you'd like to access 
         and manipulate over the course of your MachineApp here.
         '''
+        self.logger.info('Running initialization')
+        
         self.primaryMachineMotion = MachineMotion('127.0.0.1')
         self.primaryMachineMotion.configAxis(1, 8, 250)
         self.primaryMachineMotion.configAxis(2, 8, 250)
@@ -62,11 +64,7 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.primaryMachineMotion.configAxisDirection(2, 'positive')
         self.primaryMachineMotion.configAxisDirection(3, 'positive')
         self.primaryMachineMotion.registerInput('push_button_1', 1, 1)
-
-        self.primaryMachineMotion.releaseEstop()
-        self.primaryMachineMotion.resetSystem()
-        self.primaryMachineMotion.emitStop()
-
+    
         self.isPedestrianButtonTriggered = False
         self.nextLightDirection = 'horizontal'
 

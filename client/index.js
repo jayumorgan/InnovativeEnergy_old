@@ -183,8 +183,9 @@
     // Connection to the notification Websocket
     let lWebsocketConnection = undefined;
     function connectToSocket() {
-        console.log('Connecting to socket at ws://127.0.0.1:8081');
-        lWebsocketConnection = new WebSocket('ws://127.0.0.1:8081');
+        const lWebsocketConnName = `ws://${window.location.hostname}:8081`;
+        console.log('Connecting to socket at ' + lWebsocketConnName);
+        lWebsocketConnection = new WebSocket(lWebsocketConnName);
         lWebsocketConnection.onopen = function(pEvent) {
             console.log('Websocket is online');
         };

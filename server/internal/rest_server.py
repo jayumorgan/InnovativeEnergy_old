@@ -16,6 +16,8 @@ class RestServer(Bottle):
     
         self.__clientDirectory = os.path.join('..', 'client')
         self.__logger = logging.getLogger(__name__)
+        self.__machineApp = machineApp                   # MachineApp that is currently being run
+        self.__isAppRunning = False
 
         # Set up callbacks
         self.route('/', callback=self.index)
@@ -31,7 +33,12 @@ class RestServer(Bottle):
         self.route('/run/resetSystem', method='POST', callback=self.resetSystem)
         self.route('/run/state', method='GET', callback=self.getState)
 
-        self.__machineApp = machineApp                   # MachineApp that is currently being run
+        
+    def __startMachineApp(self):
+        if self.__isAppRunning:
+            return
+        
+        self.__isAppRunning = True
         self.__machineAppThread = Thread(target=self.__primaryThreadLoop, name="MachineAppUpdate", daemon=True)
         self.__machineAppThread.start()
         
@@ -51,6 +58,10 @@ class RestServer(Bottle):
         return 'pong'
 
     def index(self):
+        # When someone first requests the Index file, we start the thread. This ensures that the machine is actually online
+        # so that we can do machine specific configuration in MachineAppEngine::initialize
+        self.__logger.info('Handling index file request')
+        self.__startMachineApp()
         return static_file('index.html', root=self.__clientDirectory)
         
     def serveStatic(self, filepath):
@@ -125,4 +136,4 @@ class RestServer(Bottle):
 
 def runServer(machineApp: 'BaseMachineAppEngine'):
     restServer = RestServer(machineApp)
-    restServer.run(host='0.0.0.0', port=3011)
+    restServer.run(host='0.0.0.0', port=3011, server='paste')
