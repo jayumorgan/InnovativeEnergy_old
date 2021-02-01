@@ -1,8 +1,8 @@
 # Getting Started
 The Machine App Template should enable you to quickly get the business logic of your application up and running without having to worry about all of the busy-work it takes to glue things together. The goal of this document is to help you better understand the framework that you'll be developing in. The code itself is highly documented, so feel free to explore the project to learn more about the functionality of individual classes and methods. The files that you should care to understand are:
 - `server/machine_app.py`: Contains the main business logic of your program as a state machine
-- `client/editor.js`: Contains the web application code that you are encouraged to edit (Of course you can edit other files as well, but it is recommended that you stay here)
-- `client/styles/editor.css`: The style sheet for the custom JavaScript that you write
+- `client/ui.js`: Contains the web application code that you are encouraged to edit (Of course you can edit other files as well, but it is recommended that you stay here)
+- `client/styles/ui.css`: The style sheet for the custom JavaScript that you write
 
 At a high-level, the Machine App Template is split into two parts: 
 1. A python server that runs the business logic of your program
@@ -32,7 +32,7 @@ class WaitingState(MachineAppState):
     
     def update(self):
         if time.time() - self.startTimeSeconds > 3.0:
-            self.engine.gotoState('DoingSomething')
+            self.gotoState('DoingSomething')
 
     def onLeave(self):
         self.logger.info('Left waiting state')
@@ -43,7 +43,7 @@ class DoingSomethingState(MachineAppState):
     ...etc
 ```
 
-Going between states is as easy invoking the `self.engine.gotoState` method with the name of the state that you'd like to transition to. Any other business logic simply gets implemented by overriding the defined methods.
+Going between states is as easy invoking the `self.gotoState` method with the name of the state that you'd like to transition to. Any other business logic simply gets implemented by overriding the defined methods.
 
 #### State Machine Implementation (MachineAppEngine)
 Now that we know how to build our separate state nodes, we need to put them altogether in our state machine, also known as the `MachineAppEngine` in `server/machine_app.py`. This class is the heart of your MachineApp. It fields requests from the REST server and manages the state transitions of your application. All of the interactions with the REST server are abstracted way by its superclass called `BaseMachineAppEngine` in `server/internal/base_machine_app.py` (Note: You should never have to touch `BaseMachineAppEngine`, unless you know what you're doing).
@@ -83,28 +83,32 @@ On top of doing some straightforward logic via a state machine, you may want to 
 To do this, you have access to a `MachineAppState.configuration` and `MachineAppEngine.configuration` while your state machien is active. This configuration is a python dictionary that is sent up by the frontend when you click the "play" button. We will explain how this data is defined in the [Client](#client) section later on.
 
 ### Reacting to Inputs (MqttTopicSubscriber)
-Oftentimes in a MachineApp, you'll want to do something when an input is triggered. For example, we might want to change our state only when an operator pushes a button. The MachineApp template fulfills this requirement by providing you with the `MqttTopicSubscriber` class, located in `server/internal/mqtt_topic_subscriber.py`. 
+Oftentimes in a MachineApp, you'll want to do something when an input is triggered. For example, we might want to change our state only when an operator pushes a button. The MachineApp template fulfills this requirement by providing you with the `MachineAppState.registerCallback`. This function takes as its parameters (1) the machine motion whose topics you want to subscribe to, (2) the topic that you want to subscribe to, and (3) a callback to be invoked when we receive data on that topic.
 
-A simple example of how the topic subscriber might be used in a state machine node is shown below:
+You can either pass the topic directly, or, alternatively, get the topic of a particular input by its registered name. To register an input for a particualr machine motion, you can do the following in `server/machine_app.py`:
+```python
+class MachineAppEngine(BaseMachineAppEngine):
+    def initialize(self):
+        self.machineMotion = MachineMotion('127.0.0.1')
+        # ... Configure your axes and whatnot ...
+        self.machineMotion.registerInput('push_button_1', 1, 1)  # Registering IO module 1 and pin 1 to the name 'push_button_1'
+
+    ... etc
+```
+
+Then, in your MachineAppState, you can wait on this push button as shown below:
 
 ```python
 class WaitingOnInputState(MachineAppState):
     def onEnter(self):
-        self.__mqttTopicSubscriber  = MqttTopicSubscriber(self.__machineMotion)
-        self.__mqttTopicSubscriber.registerCallback('button_clicked_topic', self__onMqttMessageReceived)
+        self.registerCallback(self.engine.machineMotion, self.engine.machineMotion.getInputTopic('push_button_1'), self__onMqttMessageReceived)
 
     def __onMqttMessageReceived(self, topic, msg):
-        if topic == 'button_clicked_topic' and msg == 'true':
-            self.engine.gotoState('ButtonClickedState')
-    
-    def update(self):
-        self.__mqttTopicSubscriber.update()
-
-    def onLeave(self):
-        self.__mqttTopicSubscriber.delete()
+        if msg == 'true':
+            self.gotoState('ButtonClickedState')
 ```
 
-This state machine node waits for a message containing "true" to be publiushed to the fictitious `button_clicked_topic` topic. Note that we call `MqttTopicSubscriber.update` in this node's `update` method. This call to `update` ensures data flowing from MQTT gets copied to the MachineApp state thread without any problems. Also note that we call `MqttTopicSubscriber.delete` in the node's `onLeave` method so that we don't leave MQTT callbacks dangling in-between nodes.
+This state machine node waits for a message containing "true" to be published to the fictitious `push_button_1` input. We could, alternatively, pass an MQTT topic directly to the `MachineAppState.registerCallback` function.
 
 ### Streaming Data to the Web Client (Notifier)
 The last piece of the server that you'll be interacting with is the `Notifier`, located in `server/internal/notifier.py`. The `Notifier` provides you with a mechanism for streaming data directly to the web client over a websocket. You can see that streamed data in the "Information Console" panel on the frontend. Each `MachineAppState` that you initialize has a reference to the global notifier by default, so you should never have to worry about constructing one yourself.
@@ -119,7 +123,7 @@ class WaitingState(MachineAppState):
     def update(self):
         if time.time() - self.startTimeSeconds > 3.0:
             self.notifier.sendMessage(NotificationLevel.INFO, '3 seconds are up!', { 'waitedFor': 3 })
-            self.engine.gotoState('DoingSomething')
+            self.gotoState('DoingSomething')
 
     def onLeave(self):
         self.logger.info('Left waiting state')
@@ -127,14 +131,14 @@ class WaitingState(MachineAppState):
 
 ## Client
 The client is a simple web page that relies on JQuery to do some heavy lifting. It is served up as three separate JavaScript files and two separate CSS files by the Python http server. The files that you should concern yourself with mostly are:
-- `client/editor.js` - Contains all custom frontend logic
+- `client/ui.js` - Contains all custom frontend logic
 - `client/widgets.js` - Contains widgets that are helpful for building forms
-- `client/styles/editor.css` - Contains all custom frontend styles
+- `client/styles/ui.css` - Contains all custom frontend styles
 
 ### Configuration Editor
-As we said in the [server's configuration section](#runtime-configuration), you can publish a configuration to your MachineApp engine when you hit the "play" button. This configuration is defined entirely on the frontend in `client/editor.js`.
+As we said in the [server's configuration section](#runtime-configuration), you can publish a configuration to your MachineApp engine when you hit the "play" button. This configuration is defined entirely on the frontend in `client/ui.js`.
 
-As an example, let's pretend that we want to send up the "wait time in seconds" to the server for our fictitious "WaitingState" example (mentioned previously). In `client/editor.js`, we would implement the provided mehtods like so:
+As an example, let's pretend that we want to send up the "wait time in seconds" to the server for our fictitious "WaitingState" example (mentioned previously). In `client/ui.js`, we would implement the provided mehtods like so:
 ```js
 function getDefaultConfiguration() {
     return {
@@ -164,7 +168,7 @@ class WaitingState(MachineAppState):
 ```
 
 ### Updating the UI from Streamed Data
-As we explained in the [server's notifier section](#streaming-data-to-the-web-client-notifier), the server can stream data to the client while it is running via a WebSocket. The client establishes this connection in `client/index.js` when the page is loaded, so you won't have to worry about that part. When we receive a message from this connection, we first add it to the Information Console with an icon describing what type of message it is (this happens in `client/index.js`). We then hand off the message to the `onNotificationReceived` callback in `client/editor.js`. This is where you will implement any custom UI that you'd like to show for certain messages.
+As we explained in the [server's notifier section](#streaming-data-to-the-web-client-notifier), the server can stream data to the client while it is running via a WebSocket. The client establishes this connection in `client/index.js` when the page is loaded, so you won't have to worry about that part. When we receive a message from this connection, we first add it to the Information Console with an icon describing what type of message it is (this happens in `client/index.js`). We then hand off the message to the `onNotificationReceived` callback in `client/ui.js`. This is where you will implement any custom UI that you'd like to show for certain messages.
 
 For example, if our WaitingState from the previous section looked like this:
 ```python
@@ -175,7 +179,7 @@ class WaitingState(MachineAppState):
     ...
 ```
 
-We could then implement the `onNotificationReceived` in `client/editor.js` like so to append the "waitTimeSeconds" variable to our custom container:
+We could then implement the `onNotificationReceived` in `client/ui.js` like so to append the "waitTimeSeconds" variable to our custom container:
 ```js
 function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
     const lCustomContainer = $('#custom-container');
