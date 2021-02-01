@@ -180,8 +180,6 @@ class BaseMachineAppEngine(ABC):
         self.__currentState         = None                              # Active state of the engine
         self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
         self.__notifier             = getNotifier()                     # Used to broadcast information to the Web App's console
-
-        self.initialize()
         
     def resetState(self):
         self.isRunning = False
@@ -334,6 +332,7 @@ class BaseMachineAppEngine(ABC):
         Main loop of your MachineApp. If we set __shouldStart to True, the MachineApp begins processing
         the nodes in its core loop.
         '''
+        self.initialize()
         self.getMasterMachineMotion().bindeStopEvent(self.__setEstopped)
 
         # Outer Loop dealing with e-stops and start functionality
