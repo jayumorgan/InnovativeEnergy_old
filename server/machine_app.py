@@ -6,16 +6,26 @@ import time
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
 
+'''
+If we are in development mode (i.e. running locally), we initialize a mocked instance of machine motion.
+This fake MachineMotion interface is used ONLY when developing locally on your own machine motion, so
+that you have a good idea of whether or not your application properly builds.
+''' 
 if env.IS_DEVELOPMENT:
     from internal.fake_machine_motion import MachineMotion
 else:
     from internal.machine_motion import MachineMotion
 
 class MachineAppEngine(BaseMachineAppEngine):
+    ''' Manages and orchestrates your MachineAppStates '''
+
     def buildStateDictionary(self):
         '''
         Builds and returns a dictionary that maps state names to MachineAppState.
         The MachineAppState class wraps callbacks for stateful transitions in your MachineApp.
+
+        Note that this dictionary is built when your application starts, not when you click the
+        'Play' button.
 
         returns:
             dict<str, MachineAppState>
@@ -23,11 +33,11 @@ class MachineAppEngine(BaseMachineAppEngine):
         stateDictionary = {
             'homing'                : HomingState(self),
             'move_to_start'         : MoveToInitialPositionState(self),
-            'horizontal_green'      : GreenLightState(self, self.primaryMachineMotion, 'horizontal'),
-            'horizontal_yellow'     : YellowLightState(self, self.primaryMachineMotion, 'horizontal'),
+            'horizontal_green'      : GreenLightState(self, 'horizontal'),
+            'horizontal_yellow'     : YellowLightState(self, 'horizontal'),
             'horizontal_red'        : RedLightState(self, 'horizontal'),
-            'vertical_green'        : GreenLightState(self, self.primaryMachineMotion, 'vertical'),
-            'vertical_yellow'       : YellowLightState(self, self.primaryMachineMotion, 'vertical'),
+            'vertical_green'        : GreenLightState(self, 'vertical'),
+            'vertical_yellow'       : YellowLightState(self, 'vertical'),
             'vertical_red'          : RedLightState(self, 'vertical'),
             'pedestrian_crossing'   : PedestrianCrossingState(self)
         }
@@ -56,6 +66,7 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         self.logger.info('Running initialization')
         
+        # Create and configure your machine motion instances
         self.primaryMachineMotion = MachineMotion('127.0.0.1')
         self.primaryMachineMotion.configAxis(1, 8, 250)
         self.primaryMachineMotion.configAxis(2, 8, 250)
@@ -63,8 +74,17 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.primaryMachineMotion.configAxisDirection(1, 'positive')
         self.primaryMachineMotion.configAxisDirection(2, 'positive')
         self.primaryMachineMotion.configAxisDirection(3, 'positive')
-        self.primaryMachineMotion.registerInput('push_button_1', 1, 1)
+        self.primaryMachineMotion.registerInput('push_button_1', 1, 1)  # Register an input with the provided name
+
+        self.secondaryMachineMotion = MachineMotion('127.0.0.1')
+        self.secondaryMachineMotion.configAxis(1, 8, 250)
+        self.secondaryMachineMotion.configAxis(2, 8, 250)
+        self.secondaryMachineMotion.configAxis(3, 8, 250)
+        self.secondaryMachineMotion.configAxisDirection(1, 'positive')
+        self.secondaryMachineMotion.configAxisDirection(2, 'positive')
+        self.secondaryMachineMotion.configAxisDirection(3, 'positive')
     
+        # Setup your global variables
         self.isPedestrianButtonTriggered = False
         self.nextLightDirection = 'horizontal'
 
@@ -73,23 +93,26 @@ class MachineAppEngine(BaseMachineAppEngine):
         Called when a stop is requested from the REST API. 99% of the time, you will
         simply call 'emitStop' on all of your machine motions in this methiod.
 
-        Warning: This logic is happening in a separate thread.
+        Warning: This logic is happening in a separate thread. EmitStops are allowed in
+        this method.
         '''
         self.primaryMachineMotion.emitStop()
+        self.secondaryMachineMotion.emitStop()
 
     def onPause(self):
         '''
         Called when a pause is requested from the REST API. 99% of the time, you will
         simply call 'emitStop' on all of your machine motions in this methiod.
         
-        Warning: This logic is happening in a separate thread.
+        Warning: This logic is happening in a separate thread. EmitStops are allowed in
+        this method.
         '''
         self.primaryMachineMotion.emitStop()
+        self.secondaryMachineMotion.emitStop()
 
     def beforeRun(self):
         '''
-        Called before every run of your MachineApp. This is where you might want to
-        reset to a default state.
+        Called before every run of your MachineApp. This is where you might want to reset to a default state.
         '''
         self.isPedestrianButtonTriggered = False
         self.nextLightDirection = 'horizontal'
@@ -113,6 +136,9 @@ class MachineAppEngine(BaseMachineAppEngine):
         return self.primaryMachineMotion
 
 class HomingState(MachineAppState):
+    '''
+    Homes our primary machine motion, and sends a message when complete.
+    '''
     def onEnter(self):
         self.engine.primaryMachineMotion.emitHomeAll()
         self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to home')
@@ -122,67 +148,81 @@ class HomingState(MachineAppState):
         self.gotoState('homing')
 
 class MoveToInitialPositionState(MachineAppState):
+    '''
+    Moves our X and Y axes to their initial position.
+    '''
     def onEnter(self):
         self.engine.primaryMachineMotion.emitSpeed(25)
         self.engine.primaryMachineMotion.emitCombinedAxisRelativeMove([1, 2], ['positive', 'positive'], [250, 250])
         self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to the start position')
 
     def onResume(self):
+        '''
+        When we resume after pausing at this stage, we return to the 'homing' state
+        '''
         self.gotoState('homing')
 
 class GreenLightState(MachineAppState):
-    def __init__(self, engine, machineMotion, direction):
+    ''' Runs the green-light behavior for the given direction '''
+    def __init__(self, engine, direction):
         super().__init__(engine)
 
-        self.__machineMotion        = machineMotion
         self.__direction            = direction
         self.__speed                = self.configuration['fullSpeed']
         self.__durationSeconds      = self.configuration['greenTimer']
+        self.__machineMotion        = self.engine.primaryMachineMotion if self.__direction == 'horizontal' else self.engine.secondaryMachineMotion
         self.__axis                 = 2 if self.__direction == 'vertical' else 1
 
     def onEnter(self):
-        self.__startTimeSeconds = time.time()
         self.logger.info('{} direction entered the GREEN light state'.format(self.__direction))
+        
+        # Record the time that we entered this state
+        self.__startTimeSeconds = time.time()
+
+        # Inform the frontend's console that we've entered this state
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'green', "speed": self.__speed })
 
-        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+        # Set the axis moving
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
+        # Register a callback that gets set when the push button is clicked
         def __onPedestrianButtonClicked(topic, msg):
             if msg == 'true':
                 self.engine.isPedestrianButtonTriggered = True
                 self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
                 self.gotoState(self.__direction + '_yellow')
 
-        self.registerCallback(self.__machineMotion, self.__machineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
+        self.registerCallback(self.engine.primaryMachineMotion, self.engine.primaryMachineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
 
-    def update(self):
+    def update(self): # This method gets called every 0.16 seconds
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             self.gotoState(self.__direction + '_yellow')
 
-    def onLeave(self):
-        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+    def onLeave(self):      # Stop the continuous move when we leave this state
+        self.__machineMotion.stopContinuousMove(self.__axis)
 
-    def onPause(self):
-        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+    def onPause(self):      # Stop the continuous move when we pause in this state
+        self.__machineMotion.stopContinuousMove(self.__axis)
 
-    def onStop(self):
-        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+    def onStop(self):       # Stop the continuous move when we receive a stop in this state
+        self.__machineMotion.stopContinuousMove(self.__axis)
 
-    def onResume(self):
-        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+    def onResume(self):     # Restart the continuous move when we receive a 
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
-    def onEstop(self):
-        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+    def onEstop(self):      # Stop the continuous move when we receive an e-stop in this state
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
 class YellowLightState(MachineAppState):
-    def __init__(self, engine, machineMotion, direction):
+    ''' Runs the yellow-light behavior for the given direction '''
+    def __init__(self, engine, direction):
         super().__init__(engine)
 
-        self.__machineMotion        = machineMotion
         self.__direction            = direction
         self.__speed                = self.configuration['slowSpeed']
         self.__durationSeconds      = self.configuration['yellowTimer']
+        self.__machineMotion        = self.engine.primaryMachineMotion if self.__direction == 'horizontal' else self.engine.secondaryMachineMotion
         self.__axis                 = 2 if self.__direction == 'vertical' else 1
 
     def onEnter(self):
@@ -191,35 +231,36 @@ class YellowLightState(MachineAppState):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'yellow', "speed": self.__speed })
 
-        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
         def __onPedestrianButtonClicked(topic, msg):
             if msg == 'true':
                 self.engine.isPedestrianButtonTriggered = True
                 self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
 
-        self.registerCallback(self.__machineMotion, self.__machineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
+        self.registerCallback(self.engine.primaryMachineMotion, self.engine.primaryMachineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             self.gotoState(self.__direction + '_red')
 
     def onLeave(self):
-        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+        self.__machineMotion.stopContinuousMove(self.__axis)
 
     def onPause(self):
-        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+        self.__machineMotion.stopContinuousMove(self.__axis)
 
     def onStop(self):
-        self.engine.primaryMachineMotion.stopContinuousMove(self.__axis)
+        self.__machineMotion.stopContinuousMove(self.__axis)
 
     def onResume(self):
-        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
     def onEstop(self):
-        self.engine.primaryMachineMotion.setContinuousMove(self.__axis, self.__speed)
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
 class RedLightState(MachineAppState):
+    ''' Runs the red light state for the given direction '''
     def __init__(self, engine, direction):
         super().__init__(engine)
 
@@ -234,6 +275,10 @@ class RedLightState(MachineAppState):
         self.__startTimeSeconds = time.time()
         
     def update(self):
+        # After the provided stop light duration, we go to the pedestrian_crossing state
+        # if the global variable on the engine is set to true. Otherwise, we try and go
+        # to the next valid green light state.
+
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             if self.engine.isPedestrianButtonTriggered:
                 self.gotoState('pedestrian_crossing')
@@ -243,12 +288,10 @@ class RedLightState(MachineAppState):
                 self.gotoState('horizontal_green')
 
 class PedestrianCrossingState(MachineAppState):
-    def __init__(self, engine):
-        super().__init__(engine)
-
-        self.__durationSeconds  = self.configuration['pedestrianTimer']
+    ''' Runs the pedestrian crossing state '''
 
     def onEnter(self):
+        self.__durationSeconds  = self.configuration['pedestrianTimer']
         self.logger.info('Pedestrian crossing initialized')
         self.notifier.sendMessage(NotificationLevel.INFO, 'Pedestrians can now cross', { 'pedestriansCrossing': True })
         self.__nextLightState = self.engine.nextLightDirection + '_green'

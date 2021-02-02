@@ -27,8 +27,8 @@ def run():
                 else:
                     break
         except Exception as e:
-            # File not found, let's run anyway
-            pass
+            logging.info('Not starting the MachineApp.')
+            time.sleep(60 * 60) # Sleep for one hour
     else:
         logging.info('Running in development mode')
 
