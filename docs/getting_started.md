@@ -46,7 +46,7 @@ class DoingSomethingState(MachineAppState):
 Going between states is as easy invoking the `self.gotoState` method with the name of the state that you'd like to transition to. Any other business logic simply gets implemented by overriding the defined methods.
 
 #### State Machine Implementation (MachineAppEngine)
-Now that we know how to build our separate state nodes, we need to put them altogether in our state machine, also known as the `MachineAppEngine` in `server/machine_app.py`. This class is the heart of your MachineApp. It fields requests from the REST server and manages the state transitions of your application. All of the interactions with the REST server are abstracted way by its superclass called `BaseMachineAppEngine` in `server/internal/base_machine_app.py` (Note: You should never have to touch `BaseMachineAppEngine`, unless you know what you're doing).
+Now that we know how to build discrete state nodes, we need to put them together in the state machine, also known as the `MachineAppEngine`, in `server/machine_app.py`. This class is the heart of your MachineApp. It fields requests from the REST server and manages the state transitions of your application. All of the interactions with the REST server are abstracted way by its superclass called `BaseMachineAppEngine` in `server/internal/base_machine_app.py` (Note: You should never have to touch `BaseMachineAppEngine`, unless you know what you're doing).
 
 Taking our example from before, a `MachineAppEngine` that handles those two states might look something like:
 ```python
@@ -92,10 +92,10 @@ A minimal example defines the states that we're using in `buildStateDictionary`,
 ### Runtime Configuration
 On top of doing some straightforward logic via a state machine, you may want to specify some configurable data to your MachineApp at runtime. This is a very common facet of any MachineApp. For example, you may want to send up things like how many times a loop should run, or how long we should wait in our `WaitingState`, etc. 
 
-To do this, you have access to a `MachineAppState.configuration` and `MachineAppEngine.configuration` while your state machien is active. This configuration is a python dictionary that is sent up by the frontend when you click the "play" button. We will explain how this data is defined in the [Client](#client) section later on.
+To do this, you have access to a `MachineAppState::configuration` and `MachineAppEngine::configuration` while your state machine is running. This is a python dictionary that is sent up by the frontend when you click the "play" button. We will explain how this data is defined in the [Client](#client) section later on.
 
 ### Reacting to Inputs
-Oftentimes in a MachineApp, you'll want to do something when an input is triggered. For example, we might want to change our state only when an operator pushes a button. The MachineApp template fulfills this requirement by providing you with the `MachineAppState.registerCallback`. This function takes as its parameters (1) the machine motion whose topics you want to subscribe to, (2) the topic that you want to subscribe to, and (3) a callback to be invoked when we receive data on that topic.
+Oftentimes in a MachineApp, you'll want to do something when an input is triggered. For example, we might want to change our state only when an operator pushes a button. The MachineApp template provides you with the `MachineAppState::registerCallback` method. This method takes as its parameters (1) the machine motion whose topics you want to subscribe to, (2) the topic that you want to subscribe to, and (3) a callback to be invoked when we receive data on that topic.
 
 You can either pass the topic directly, or, alternatively, get the topic of a particular input by its registered name. To register an input for a particualr machine motion, you can do the following in `server/machine_app.py`:
 ```python
@@ -113,19 +113,19 @@ Then, in your MachineAppState, you can wait on this push button as shown below:
 ```python
 class WaitingOnInputState(MachineAppState):
     def onEnter(self):
-        self.registerCallback(self.engine.machineMotion, self.engine.machineMotion.getInputTopic('push_button_1'), self__onMqttMessageReceived)
-
-    def __onMqttMessageReceived(self, topic, msg):
-        if msg == 'true':
-            self.gotoState('ButtonClickedState')
+        def __onMqttMessageReceived( topic, msg):
+            if msg == 'true':
+                self.gotoState('ButtonClickedState')
+                
+        self.registerCallback(self.engine.machineMotion, self.engine.machineMotion.getInputTopic('push_button_1'), __onMqttMessageReceived)
 ```
 
-This state machine node waits for a message containing "true" to be published to the fictitious `push_button_1` input. We could, alternatively, pass an MQTT topic directly to the `MachineAppState.registerCallback` function.
+This state machine node waits for a message containing "true" to be published to the fictitious `push_button_1` input. We could, alternatively, pass an MQTT topic directly to the `MachineAppState::registerCallback` method in place of the result of `MachineMotion::getInputTopic`.
 
 ### Streaming Data to the Web Client (Notifier)
-The last piece of the server that you'll be interacting with is the `Notifier`, located in `server/internal/notifier.py`. The `Notifier` provides you with a mechanism for streaming data directly to the web client over a websocket. You can see that streamed data in the "Information Console" panel on the frontend. Each `MachineAppState` that you initialize has a reference to the global notifier by default, so you should never have to worry about constructing one yourself.
+The final part of the server that you'll use is the `Notifier`, located in `server/internal/notifier.py`. The `Notifier` provides you with a simple mechanism for streaming data directly to the web client over a WebSocket. This streamed data is presented to you in the "Information Console" panel on the frontend. Each `MachineAppState` that you initialize has a reference to the global notifier by default, so you should never construct one yourself.
 
-For example, if we  take our `WaitingState` mentioned earlier, we may want to send out information to the client when the 3 second timeout is up. An implementation of that would look something like this:
+As an example, if we  take our `WaitingState` mentioned earlier, we may want to send out a notification to the client after the 3 second timeout is up. An implementation of that would look something like this:
 ```python
 class WaitingState(MachineAppState):
     def onEnter(self):
@@ -134,7 +134,7 @@ class WaitingState(MachineAppState):
     
     def update(self):
         if time.time() - self.startTimeSeconds > 3.0:
-            self.notifier.sendMessage(NotificationLevel.INFO, '3 seconds are up!', { 'waitedFor': 3 })
+            self.notifier.sendMessage(NotificationLevel.INFO, '3 seconds are up!', { 'waitedFor': 3 }) # This message is sent to the client
             self.gotoState('DoingSomething')
 
     def onLeave(self):

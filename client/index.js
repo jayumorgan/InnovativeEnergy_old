@@ -142,11 +142,10 @@
      * Entry to the JavaScript of the program
      */
     function main() {
-        $('#general-tab-button').on('click', onGeneralTabClicked);
         $('#estop-button').on('click', onEstopClicked)
         $('#app-launcher-button').on('click', onAppLauncherClicked);
         
-        onGeneralTabClicked();
+        showContent();
 
         lGetMachineAppState().then(function(pState) {
             if (pState === undefined) {
@@ -284,10 +283,7 @@
         onNotificationReceived(lLevel, lMessageStr, lCustomPayload);
     }
 
-    function onGeneralTabClicked() {
-        $('#general-tab-button').addClass('nav-selected');
-        $('#general-content').css('display', 'inherit');
-
+    function showContent() {
         const lRunTimeConfiguration = getDefaultConfiguration();
         $('#general-configuration-editor').empty().append(buildEditor(lRunTimeConfiguration));
 

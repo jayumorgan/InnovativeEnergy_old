@@ -74,28 +74,6 @@ main {
     height: 100%;
 }
 
-nav  {
-    border-bottom: 2px solid var(--border-color);
-    padding-top: 0.5em;
-}
-
-nav > button {
-    border: 0;
-    padding: 0.5em;
-    width: 128px;
-    background-color: white;
-    outline: none;
-}
-
-nav > button:hover {
-    cursor: pointer;
-}
-
-.nav-selected {
-    border-bottom: 4px solid rgb(91,196,126);
-    font-weight: bold;
-}
-
 #estop-button {
     display: flex;
     flex-direction: row;
