@@ -179,12 +179,10 @@ class GreenLightState(MachineAppState):
         # Record the time that we entered this state
         self.__startTimeSeconds = time.time()
 
-        # Inform the frontend's console that we've entered this state
+        # Inform the frontend's console that we've entered this state. See Notifier::sendMessage for more information
+        # on the parameters defined here.
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'green', "speed": self.__speed })
-
-        # Set the axis moving
-        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
         # Register a callback that gets set when the push button is clicked
         def __onPedestrianButtonClicked(topic, msg):
@@ -195,7 +193,10 @@ class GreenLightState(MachineAppState):
 
         self.registerCallback(self.engine.primaryMachineMotion, self.engine.primaryMachineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
 
-    def update(self): # This method gets called every 0.16 seconds
+        # Set the axis moving
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
+
+    def update(self):   # This method gets called every 0.16 seconds
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:
             self.gotoState(self.__direction + '_yellow')
 
@@ -231,14 +232,14 @@ class YellowLightState(MachineAppState):
         self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'yellow', "speed": self.__speed })
 
-        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
-
         def __onPedestrianButtonClicked(topic, msg):
             if msg == 'true':
                 self.engine.isPedestrianButtonTriggered = True
                 self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
 
         self.registerCallback(self.engine.primaryMachineMotion, self.engine.primaryMachineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
+        
+        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
     def update(self):
         if time.time() - self.__startTimeSeconds >= self.__durationSeconds:

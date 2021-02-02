@@ -17,8 +17,8 @@ The purpose of this project is to provide users with a framework upon which they
 
 ## Development Environment Recommendation
 We recommend building your program in Visual Studio Code with the following extensions:
-- Python by Microsoft - Provides debugging support and a seamless way to manage multiple versions of Python
-- Python for VSCode - Provides autocompletion recommendations for Python
+1. Python by Microsoft - Provides debugging support and a seamless way to manage multiple versions of Python
+2. Python for VSCode - Provides autocompletion recommendations for Python
 
 With these extensions installed, you will be able to run the server in `Debug` mode by clicking the debug button in Visual Studio's side bar, selecting `Application` from the dropdown, and clicking the playing button. Running in debug mode will allow you to set breakpoints and inspect the state of your application at run time.
 

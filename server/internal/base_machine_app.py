@@ -169,7 +169,7 @@ class BaseMachineAppEngine(ABC):
         self.__isAlive      = True                                      # Set to True so long as the application has not been killed
         self.isRunning      = False                                     # The MachineApp will execute while this flag is set
         self.isPaused       = False                                     # The machine app will not do any state updates while this flag is set
-        self.isEstopped           = False                               # Set whenever we are in the Estop state
+        self.isEstopped     = False                                     # Set whenever we are in the Estop state
         
         self.__shouldStart  = False                                     # Tells the MachineApp loop that it should begin processing the state machine
         self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
