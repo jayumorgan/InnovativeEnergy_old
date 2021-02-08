@@ -96,8 +96,7 @@ function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
             },
             lHorizontalLightIndicator = lCreateLightIndicator('Horizontal Traffic Light').appendTo(lLightContainer).attr('id', 'horizontal-light-indicator'),
             lVerticalLightIndicator = lCreateLightIndicator('Vertical Traffic Light').appendTo(lLightContainer).attr('id', 'vertical-light-indicator'),
-            lPedestrianLight = lCreatePedestrianLight().appendTo(lLightContainer).attr('id', 'pedestrian-light-indicator'),
-            lImageNotifier = $('<img>').attr('id', 'custom-container-image').appendTo(lCustomContainer);
+            lPedestrianLight = lCreatePedestrianLight().appendTo(lLightContainer).attr('id', 'pedestrian-light-indicator');
     }
 
     if (pMessagePayload == undefined) {
@@ -109,8 +108,6 @@ function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
         speed = pMessagePayload.speed,
         lPedestriansCrossing = pMessagePayload.pedestriansCrossing;
         
-    let lImageRotation = 0,
-        lImgSrc = undefined;
     if (lDirection && lColor) {
         let lTrafficLight = undefined;
 
@@ -121,7 +118,6 @@ function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
             }
             case 'vertical': {
                 lTrafficLight = $('#vertical-light-indicator');
-                lImageRotation = 90;
                 break;
             }
         }
@@ -132,21 +128,18 @@ function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
                     lTrafficLight.find('.green-light-indicator').prop('checked', true);
                     lTrafficLight.find('.red-light-indicator').prop('checked', false);
                     lTrafficLight.find('.yellow-light-indicator').prop('checked', false);
-                    lImgSrc = '/images/green_light.gif';
                     break;
                 }
                 case 'yellow': {
                     lTrafficLight.find('.green-light-indicator').prop('checked', false);
                     lTrafficLight.find('.red-light-indicator').prop('checked', false);
                     lTrafficLight.find('.yellow-light-indicator').prop('checked', true);
-                    lImgSrc = '/images/yellow_light.gif';
                     break;
                 }
                 case 'red': {
                     lTrafficLight.find('.green-light-indicator').prop('checked', false);
                     lTrafficLight.find('.red-light-indicator').prop('checked', true);
                     lTrafficLight.find('.yellow-light-indicator').prop('checked', false);
-                    lImgSrc = '/images/red_light.gif';
                     break;
                 }
             }
@@ -154,10 +147,5 @@ function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
     } else if (lPedestriansCrossing !== undefined) {
         $('#pedestrian-light-indicator').find('.no-go-indicator').prop('checked', !lPedestriansCrossing);
         $('#pedestrian-light-indicator').find('.go-indicator').prop('checked', lPedestriansCrossing)
-        lImgSrc = '/images/street_crossing.gif';
-    }
-
-    if (lImgSrc) {
-        $('#custom-container-image').empty().prop('src', lImgSrc).css('transform', 'rotate(' + lImageRotation + 'deg)');
     }
 }
