@@ -228,28 +228,28 @@
         switch (lLevel) {
             case 'app_start': {
                 lState = 'running';
-                $('#run-start-button').empty().append($('<span>').addClass('icon-pause')).append($('<div>').text('PAUSE')).addClass('running');
+                $('#run-start-button').empty().append($('<span>').addClass('fa fa-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 $('#run-stop-button').addClass('running');
-                addMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-play', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_complete': {
                 lState = 'idle';
-                $('#run-start-button').empty().append($('<span>').addClass('icon-play')).append($('<div>').text('START')).removeClass('running');
-                $('#run-stop-button').removeClass('running').empty().append($('<span>').addClass('icon-stop')).append($('<div>').text('STOP'));
-                addMessageToConsole('icon-stop', lTimeSeconds, lMessageStr);
+                $('#run-start-button').empty().append($('<span>').addClass('fa fa-play')).append($('<div>').text('START')).removeClass('running');
+                $('#run-stop-button').removeClass('running').empty().append($('<span>').addClass('fa fa-stop')).append($('<div>').text('STOP'));
+                addMessageToConsole('fa fa-stop', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_pause': {
-                $('#run-start-button').empty().append($('<span>').addClass('icon-play')).append($('<div>').text('RESUME')).addClass('running');
+                $('#run-start-button').empty().append($('<span>').addClass('fa fa-play')).append($('<div>').text('RESUME')).addClass('running');
                 lState = 'paused';
-                addMessageToConsole('icon-pause', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-pause', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_resume': {
-                $('#run-start-button').empty().append($('<span>').addClass('icon-pause')).append($('<div>').text('PAUSE')).addClass('running');
+                $('#run-start-button').empty().append($('<span>').addClass('fa fa-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 lState = 'running';
-                addMessageToConsole('icon-play', lTimeSeconds, lMessageStr);
+                addMessageToConsole('fa fa-play', lTimeSeconds, lMessageStr);
                 break;
             }
             case 'app_state_change': {
