@@ -1743,7 +1743,7 @@ class MachineMotion :
         self.mqttCallbacks.remove(func)
 
     def registerInput(self, name, digitalIo, pin):
-        self.__registeredInputMap[name] = 'devices/io-expander/' + str(digitalIo) + '/available/' + str(pin)
+        self.__registeredInputMap[name] = 'devices/io-expander/' + str(digitalIo) + '/digital-input/' + str(pin)
 
     def getInputTopic(self, name):
         if not name in self.__registeredInputMap:
