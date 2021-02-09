@@ -328,9 +328,7 @@ main {
     cursor: pointer;
 }
 
-.content-panel-button .icon-play,
-.content-panel-button .icon-pause,
-.content-panel-button .icon-stop {
+.content-panel-button .fa {
     font-size: 41px;
     margin-bottom: 0.25rem;
 }
