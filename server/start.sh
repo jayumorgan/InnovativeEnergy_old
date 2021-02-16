@@ -1,3 +1,3 @@
-cd /var/lib/cloud9/mm-applications/app_template/server
+cd /var/lib/cloud9/mm-machineapp-template/server
 
 ./_start.sh&
