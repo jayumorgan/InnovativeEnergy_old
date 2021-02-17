@@ -48,7 +48,7 @@ function textbox(pLabel, pValue, pOnChange) {
          pOnChange(lNumVal);
      });
 
-     lTextbox.find('input').css('text-align', 'right');
+     lTextbox.find('input').css('text-align', 'right').attr('type', 'number');
 
      return lTextbox;
  }
@@ -91,7 +91,7 @@ function textbox(pLabel, pValue, pOnChange) {
          lSpanElement = $('<span>').addClass('widget-checkmark').appendTo(lWrapper);
 
      lInputElement.on('change', function(pEvent) {
-         pOnChange(Boolean(lInputElement.val()));
+         pOnChange(Boolean(lInputElement.prop('checked')));
      });
 
      return lWrapper;

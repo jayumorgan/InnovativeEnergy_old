@@ -1,4 +1,5 @@
 /// <reference path="./js/jquery-3.5.1.min.js" />
+/// <reference path="./js/kbd.js" />
 /// <reference path="./ui.js" />
 /// <reference path="./widgets.js" />
 
@@ -142,6 +143,7 @@
      * Entry to the JavaScript of the program
      */
     function main() {
+        const lIsPendant = window.location.hostname === '192.168.5.2';
         $('#estop-button').on('click', onEstopClicked)
         $('#app-launcher-button').on('click', onAppLauncherClicked);
         
@@ -177,6 +179,14 @@
                 onEstopSet();
             }
         });
+
+        if (lIsPendant) {
+            // If we're on the pendant, we want to show the software keyboard
+            // whenever someone touches an input. To do this, we scan the DOM
+            // every 250 ms to add the keyboard if it is not present.
+            keyboard_init();
+            setInterval(keyboard_pre_bind, 250);
+        }
     }
     
     // Connection to the notification Websocket
