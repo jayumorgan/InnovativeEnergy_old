@@ -7,8 +7,8 @@
     /******************************************************************
         Runtime API
     ******************************************************************/
-    function lStartMachineApp(pConfiguration) {
-        return fetch(`/run/start`, {
+    function lStartMachineApp(pConfiguration, pInStepperMode) {
+        return fetch(`/run/start?stateStepperMode=${pInStepperMode ? 'true' : 'false'}`, {
             method: 'POST',
             body: JSON.stringify(pConfiguration),
             headers: {
@@ -240,6 +240,7 @@
                 lState = 'running';
                 $('#run-start-button').empty().append($('<span>').addClass('fa fa-pause')).append($('<div>').text('PAUSE')).addClass('running');
                 $('#run-stop-button').addClass('running');
+                $('#run-debug-button').attr('disabled', 'disabled');
                 addMessageToConsole('fa fa-play', lTimeSeconds, lMessageStr);
                 break;
             }
@@ -247,6 +248,7 @@
                 lState = 'idle';
                 $('#run-start-button').empty().append($('<span>').addClass('fa fa-play')).append($('<div>').text('START')).removeClass('running');
                 $('#run-stop-button').removeClass('running').empty().append($('<span>').addClass('fa fa-stop')).append($('<div>').text('STOP'));
+                $('#run-debug-button').removeAttr('disabled');
                 addMessageToConsole('fa fa-stop', lTimeSeconds, lMessageStr);
                 break;
             }
@@ -304,7 +306,7 @@
 
             switch (lState) {
                 case 'idle': {
-                    lStartMachineApp(lRunTimeConfiguration).then(function(pSuccess) {
+                    lStartMachineApp(lRunTimeConfiguration, false).then(function(pSuccess) {
                         if (pSuccess) {
                             console.log('Successfully started the MachineApp');
                         } else {
@@ -331,6 +333,24 @@
                             console.log('Successfully resumed the MachineApp');
                         } else {
                             console.error('Failed to resume the MachineApp');
+                            $('#run-start-button').empty().html(lPreviousElementContents);
+                        }
+                    });
+                    break;
+                }
+            }
+        });
+
+        const lRunDebugButton = $('#run-debug-button').on('click', function() {
+            switch (lState) {
+                case 'idle': {
+                    lRunStartButton.empty();
+                    lRunStartButton.append($('<div>').addClass('widget-spin-loader'));
+                    lStartMachineApp(lRunTimeConfiguration, true).then(function(pSuccess) {
+                        if (pSuccess) {
+                            console.log('Successfully started the MachineApp');
+                        } else {
+                            console.error('Failed to start the MachineApp');
                             $('#run-start-button').empty().html(lPreviousElementContents);
                         }
                     });

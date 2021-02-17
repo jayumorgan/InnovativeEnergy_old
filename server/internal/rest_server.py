@@ -78,6 +78,7 @@ class RestServer(Bottle):
         return static_file('machine_app.log', root=self.__serverDirectory)
 
     def start(self):
+        inStateStepperMode = (request.params['stateStepperMode'] == 'true') if 'stateStepperMode' in request.params else False
         configuration = request.json
         if self.__machineApp == None:
             self.__logger.error('MachineApp not initialized properly')
@@ -88,7 +89,7 @@ class RestServer(Bottle):
             abort(400, 'MachineApp is already running')
             return False
 
-        self.__machineApp.start(configuration)
+        self.__machineApp.start(inStateStepperMode, configuration)
         return 'OK'
 
     def stop(self):

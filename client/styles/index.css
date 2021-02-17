@@ -141,6 +141,12 @@ main {
     height: 100%;
 }
 
+#general-configuration-editor-container  > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 #general-configuration-editor {
     overflow-y: auto;
     padding-left: 1rem;
@@ -313,7 +319,7 @@ main {
     text-align: center;
     display: flex;
     justify-content: space-evenly;
-    padding: 1rem;
+    padding: 0.5rem;
     align-items: center;
 }
 
@@ -350,6 +356,25 @@ main {
 
 .content-panel-button.stop-button.running {
     background-color: var(--danger-color);
+}
+
+.content-panel-button.debug-button {
+    width: 260px;
+    height: 60px;
+    font-size: 1rem;
+    background-color: orange;
+}
+
+.content-panel-button.debug-button .fa {
+    font-size: 32px;
+}
+
+.content-panel-button.debug-button:disabled {
+    opacity: 0.5;
+}
+
+.content-panel-button.debug-button:disabled:hover {
+    cursor: default;
 }
 
 /*
