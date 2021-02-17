@@ -178,7 +178,7 @@ class BaseMachineAppEngine(ABC):
         self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
         self.__shouldPause  = False                                     # Tells the MachineApp loop that it should pause on its next update
         self.__shouldResume = False                                     # Tells the MachineApp loop that it should resume on its next update
-        self.__shouldEstop          = True                              # Tells the update loop that we have entered the e-stop state
+        self.__shouldEstop          = False                             # Tells the update loop that we have entered the e-stop state
         self.__shouldReleaseEstop   = False                             # Tells the update loop that we have released the e-stop and reset the system
 
         self.__currentState         = None                              # Active state of the engine
@@ -363,6 +363,8 @@ class BaseMachineAppEngine(ABC):
         self.logger.info('Starting the main MachineApp loop')
         self.initialize()
         self.getMasterMachineMotion().bindeStopEvent(self.__setEstopped)
+        self.__setEstopped(self.getMasterMachineMotion().isEstopped())
+            
 
         # Outer Loop dealing with e-stops and start functionality
         while self.__isAlive:
