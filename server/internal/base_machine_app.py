@@ -45,7 +45,7 @@ class MachineAppState(ABC):
         '''
         return self.engine.gotoState(state)
 
-    def registerCallback(self, machineMotion: 'MachineMotion', topic: str, callback):
+    def registerCallback(self, machineMotion: 'MachineMotion', ioName: str, callback):
         ''' 
         Register a callback for a particular topic. Note that you should call removeCallback
         when you are finished.
@@ -54,8 +54,8 @@ class MachineAppState(ABC):
             machineMotion: MachineMotion
                 Machine whose MQTT topic you want to subscribe to
 
-            topic: str
-                MQTT topic that you'd like to subscribe to
+            ioName: str
+                Friendly IO name that you would like to subscribe to
 
             callback: func(topic: str, msg: str) -> void
                 Callback that gets called when we receive data on that topic
@@ -70,7 +70,7 @@ class MachineAppState(ABC):
             mqttSubscriber = MqttTopicSubscriber(machineMotion)
             self.__mqttTopicSubscriberList.append(mqttSubscriber)
 
-        mqttSubscriber.registerCallback(topic, callback)
+        mqttSubscriber.registerCallback(machineMotion.getInputTopic(ioName), callback)
 
     @abstractmethod
     def onEnter(self):
