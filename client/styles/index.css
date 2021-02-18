@@ -19,7 +19,7 @@ body {
     padding: 0;
     margin: 0;
     background-color: white;
-    overflow-y: hidden;
+    overflow-y: auto;
     font-family:Lato,Arial;
 }
 
@@ -29,7 +29,7 @@ body {
     display: flex;
     flex-direction: column;
     font-size: 16px;
-    overflow-y: hidden;
+    overflow-y: auto;
     margin-left: auto;
     margin-right: auto;
     position: relative;
@@ -141,13 +141,26 @@ main {
     height: 100%;
 }
 
+#general-configuration-editor-container  > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 #general-configuration-editor {
-    height: calc(100% - 179px - 3rem);
     overflow-y: auto;
-    padding-top: 1rem;
     padding-left: 1rem;
     padding-right: 1rem;
     border-bottom: 1px solid var(--border-color);
+}
+
+.configuration-editor {
+    height: 100%;
+}
+
+.configuration-editor .widget-wrapper {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 #run-information-console {
@@ -306,7 +319,7 @@ main {
     text-align: center;
     display: flex;
     justify-content: space-evenly;
-    padding: 1rem;
+    padding: 0.5rem;
     align-items: center;
 }
 
@@ -343,6 +356,25 @@ main {
 
 .content-panel-button.stop-button.running {
     background-color: var(--danger-color);
+}
+
+.content-panel-button.debug-button {
+    width: 260px;
+    height: 60px;
+    font-size: 1rem;
+    background-color: orange;
+}
+
+.content-panel-button.debug-button .fa {
+    font-size: 32px;
+}
+
+.content-panel-button.debug-button:disabled {
+    opacity: 0.5;
+}
+
+.content-panel-button.debug-button:disabled:hover {
+    cursor: default;
 }
 
 /*

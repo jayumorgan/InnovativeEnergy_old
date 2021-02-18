@@ -319,6 +319,7 @@ class MachineMotion :
 
         #Set callback to default until user initialize it
         self.eStopCallback = emptyCallBack
+        self.__isEstopped = False
 
         # Initializing axis parameters
         self.steps_mm = ["Axis 0 does not exist", "notInitialized", "notInitialized", "notInitialized"]
@@ -1446,8 +1447,12 @@ class MachineMotion :
     # @return : call to callback function
 
     def eStopEvent(self, status) :
+        self.__isEstopped = status
         self.eStopCallback(status)
         return
+
+    def isEstopped(self):
+        return self.__isEstopped
 
     def triggerEstop (self) :
         '''
@@ -1548,7 +1553,6 @@ class MachineMotion :
             return return_value
 
         return return_value
-
 
     def bindeStopEvent (self, callback_function) :
         '''

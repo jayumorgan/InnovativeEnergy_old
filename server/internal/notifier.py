@@ -21,6 +21,7 @@ class NotificationLevel:
     INFO                = 'info'
     WARNING             = 'warning'
     ERROR               = 'error'
+    IO_STATE            = 'io_state'
 
 
 class Notifier:

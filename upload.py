@@ -2,7 +2,7 @@
 import logging
 import subprocess
 
-CLOUD9_DIRECTORY_BASE = 'debian@192.168.7.2:/var/lib/cloud9/mm-applications/app_template'
+CLOUD9_DIRECTORY_BASE = 'debian@192.168.7.2:/var/lib/cloud9/mm-machineapp-template'
 
 def run():
     # Upload your new program to the server

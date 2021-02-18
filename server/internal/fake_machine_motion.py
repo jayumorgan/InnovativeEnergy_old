@@ -187,3 +187,6 @@ class MachineMotion:
             return None
 
         return self.__registeredInputMap[name]
+
+    def isEstopped(self):
+        return False
