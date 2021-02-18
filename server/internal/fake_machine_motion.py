@@ -52,6 +52,9 @@ class MachineMotion:
     def stopMqtt(self):
         pass
 
+    def waitForMotionCompletion(self):
+        pass
+
     def configAxis(self, axis, uStep, mechGain):
         pass
 
@@ -66,6 +69,12 @@ class MachineMotion:
     def resetSystem(self):
         pass
 
+    def lockBrake(self, aux, safety):
+        pass
+
+    def unlockBrake(self, aux, safety):
+        pass
+
     def emitSpeed(self, speed):
         pass
 
@@ -73,7 +82,7 @@ class MachineMotion:
         pass
 
     def waitForMotionCompletion(self):
-        sleep(0.1)
+        sleep(5)
         
     def emitStop(self):
         self.logger.debug("Please Stop...")

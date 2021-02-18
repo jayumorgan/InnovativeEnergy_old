@@ -180,7 +180,7 @@ class BaseMachineAppEngine(ABC):
 
         self.__currentState         = None                              # Active state of the engine
         self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
-        self.__notifier             = getNotifier()                     # Used to broadcast information to the Web App's console
+        self.notifier               = getNotifier()                     # Used to broadcast information to the Web App's console
         
     def resetState(self):
         self.isRunning = False
@@ -319,7 +319,7 @@ class BaseMachineAppEngine(ABC):
                 prevState.onLeave()
                 prevState.freeCallbacks()
 
-        self.__notifier.sendMessage(NotificationLevel.APP_STATE_CHANGE, 'Entered MachineApp state: {}'.format(newState))
+        self.notifier.sendMessage(NotificationLevel.APP_STATE_CHANGE, 'Entered MachineApp state: {}'.format(newState))
         self.__currentState = newState
         nextState = self.getCurrentState()
 
@@ -340,11 +340,11 @@ class BaseMachineAppEngine(ABC):
         # Outer Loop dealing with e-stops and start functionality
         while self.__isAlive:
             if self.__shouldEstop:
-                self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
+                self.notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
                 self.__shouldEstop = False
 
             if self.__shouldReleaseEstop:
-                self.__notifier.sendMessage(NotificationLevel.APP_ESTOP_RELEASE, 'MachineApp estop released')
+                self.notifier.sendMessage(NotificationLevel.APP_ESTOP_RELEASE, 'MachineApp estop released')
                 self.__shouldReleaseEstop = False
 
                 currentState = self.getCurrentState()
@@ -355,7 +355,7 @@ class BaseMachineAppEngine(ABC):
                 self.beforeRun()
                 self.__stateDictionary = self.buildStateDictionary()
 
-                self.__notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
+                self.notifier.sendMessage(NotificationLevel.APP_START, 'MachineApp started')
 
                 # Begin the Application by moving to the default state
                 self.gotoState(self.getDefaultState())
@@ -368,7 +368,7 @@ class BaseMachineAppEngine(ABC):
             # Inner Loop running the actual MachineApp program
             while self.isRunning:
                 if self.__shouldEstop:          # Running E-Stop behavior
-                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
+                    self.notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
                     self.__shouldEstop = False
                     self.isRunning = False
 
@@ -389,7 +389,7 @@ class BaseMachineAppEngine(ABC):
                     break
 
                 if self.__shouldPause:          # Running pause behavior
-                    self.__notifier.sendMessage(NotificationLevel.APP_PAUSE, 'MachineApp paused')
+                    self.notifier.sendMessage(NotificationLevel.APP_PAUSE, 'MachineApp paused')
                     self.__shouldPause = False
                     self.isPaused = True
 
@@ -398,7 +398,7 @@ class BaseMachineAppEngine(ABC):
                         currentState.onPause()
 
                 if self.__shouldResume:         # Running resume behavior
-                    self.__notifier.sendMessage(NotificationLevel.APP_RESUME, 'MachineApp resumed')
+                    self.notifier.sendMessage(NotificationLevel.APP_RESUME, 'MachineApp resumed')
                     self.__shouldResume = False
                     self.isPaused = False
 
@@ -421,7 +421,7 @@ class BaseMachineAppEngine(ABC):
                 time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
 
             self.logger.info('Exiting MachineApp loop')
-            self.__notifier.sendMessage(NotificationLevel.APP_COMPLETE, 'MachineApp completed')
+            self.notifier.sendMessage(NotificationLevel.APP_COMPLETE, 'MachineApp completed')
             self.afterRun()
 
     def start(self, configuration):
