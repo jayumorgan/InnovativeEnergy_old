@@ -5,7 +5,7 @@ import time
 from threading import Thread
 from pathlib import Path
 import json
-from machine_app import MachineAppEngine
+from internal.machine_app_subprocess import MachineAppSubprocess
 from internal.notifier import getNotifier, NotificationLevel
 import signal
 
@@ -13,14 +13,15 @@ class RestServer(Bottle):
     '''
     RESTful server that handles control of the MachineApp and configuration IO
     '''
-    def __init__(self, machineApp: 'BaseMachineAppEngine'):
+    def __init__(self):
         super(RestServer, self).__init__()
     
         self.__clientDirectory = os.path.join('..', 'client')
         self.__serverDirectory = os.path.join('.')
         self.__logger = logging.getLogger(__name__)
-        self.__machineApp = machineApp                   # MachineApp that is currently being run
-        self.__isAppRunning = False
+        self.__subprocess = MachineAppSubprocess()
+        self.isRunning = False # TODO: Correctly update these
+        self.isPaused = False
 
         # Set up callbacks
         self.route('/', callback=self.index)
@@ -38,25 +39,7 @@ class RestServer(Bottle):
 
         self.route('/kill', method='GET', callback=self.kill)
         self.route('/logs', method='GET', callback=self.getLog)
-
         
-    def __startMachineApp(self):
-        if self.__isAppRunning:
-            return
-        
-        self.__isAppRunning = True
-        self.__machineAppThread = Thread(target=self.__primaryThreadLoop, name="MachineAppUpdate", daemon=True)
-        self.__machineAppThread.start()
-        
-    def __primaryThreadLoop(self):
-        '''
-        Internal loop running on it's own thread. When a user requests for a MachineApp to
-        start running, the loop handles all control to the MachineAppEngine for the duration
-        of the program. Once that program finishes, it returns control to the loop below until
-        another 'run' request arrives.
-        '''
-        self.__machineApp.loop()
-
     def ping(self):
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
@@ -64,10 +47,7 @@ class RestServer(Bottle):
         return 'pong'
 
     def index(self):
-        # When someone first requests the Index file, we start the thread. This ensures that the machine is actually online
-        # so that we can do machine specific configuration in MachineAppEngine::initialize
         self.__logger.info('Handling index file request')
-        self.__startMachineApp()
         return static_file('index.html', root=self.__clientDirectory)
         
     def serveStatic(self, filepath):
@@ -80,51 +60,41 @@ class RestServer(Bottle):
     def start(self):
         inStateStepperMode = (request.params['stateStepperMode'] == 'true') if 'stateStepperMode' in request.params else False
         configuration = request.json
-        if self.__machineApp == None:
-            self.__logger.error('MachineApp not initialized properly')
-            abort(400, 'MachineApp uninitialize')
-            return
-
-        if self.__machineApp.isRunning:
-            abort(400, 'MachineApp is already running')
-            return False
-
-        self.__machineApp.start(inStateStepperMode, configuration)
+        
+        self.__subprocess.start(inStateStepperMode, configuration)
         return 'OK'
 
     def stop(self):
-        if self.__machineApp != None:
-            self.__machineApp.stop()
+        if self.__subprocess.writeToSubprocess({ 'request': 'stop' }):
             return 'OK'
         else:
             abort(400, 'Failed to stop the MachineApp')
 
     def pause(self):
-        if self.__machineApp != None:
-            self.__machineApp.pause()
+        if self.__subprocess.writeToSubprocess({ 'request': 'pause' }):
             return 'OK'
         else:
             abort(400, 'Failed to pause the MachineApp')
 
     def resume(self):
-        if self.__machineApp != None:
-            self.__machineApp.resume()
+        if self.__subprocess.writeToSubprocess({ 'request': 'resume' }):
             return 'OK'
         else:
             abort(400, 'Failed to resume the MachineApp')
 
+    # TODO: All E-Stop functionality should be handles on this process
     def estop(self):
-        if self.__machineApp != None:
-            self.__machineApp.estop()
+        #if self.__subprocess.writeToSubprocess({ 'request': 'estop' }):
+            #self.__machineApp.estop()
             return 'OK'
-        else:
-            abort(400, 'Failed to estop the MachineApp')
+        #else:
+        #    abort(400, 'Failed to estop the MachineApp')
 
     def getEstop(self):
-        if self.__machineApp.getEstop():
-            return 'true'
-        else:
-            return 'false'
+        #if self.__machineApp.getEstop():
+        #    return 'true'
+        #else:
+        return 'false'
 
     def releaseEstop(self):
         if self.__machineApp.releaseEstop():
@@ -133,15 +103,15 @@ class RestServer(Bottle):
             abort(400, 'Failed to release estop')
 
     def resetSystem(self):
-        if self.__machineApp.resetSystem():
-            return 'OK'
-        else:
-            abort(400, 'Failed to reset the system')
+        #if self.__machineApp.resetSystem():
+        return 'OK'
+        #else:
+        #   abort(400, 'Failed to reset the system')
 
     def getState(self):
         return {
-            "isRunning": self.__machineApp.isRunning,
-            "isPaused": self.__machineApp.isPaused
+            "isRunning": self.isRunning,
+            "isPaused": self.isPaused
         }
 
     def kill(self):
@@ -150,6 +120,6 @@ class RestServer(Bottle):
         os.kill(os.getpid(), signal.SIGTERM)
         return 'OK'
 
-def runServer(machineApp: 'BaseMachineAppEngine'):
-    restServer = RestServer(machineApp)
+def runServer():
+    restServer = RestServer()
     restServer.run(host='0.0.0.0', port=3011, server='paste')

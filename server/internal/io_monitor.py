@@ -1,4 +1,5 @@
-from internal.notifier import getNotifier, NotificationLevel
+from internal.notifier import NotificationLevel
+from internal.interprocess_message import sendNotification
 
 class IOValue:
     def __init__(self, name, device, pin):
@@ -25,7 +26,6 @@ class IOMonitor:
     '''
 
     def __init__(self, machineMotion):
-        self.__notifier = getNotifier()
         self.__machineMotion = machineMotion
 
         self.__monitorList = []
@@ -91,5 +91,5 @@ class IOMonitor:
         for monitorItem in self.__monitorList:
             if monitorItem.isEqual(device, pin):
                 monitorItem.state = value
-                self.__notifier.sendMessage(NotificationLevel.IO_STATE, '', monitorItem.toJson())
+                sendNotification(NotificationLevel.IO_STATE, '', monitorItem.toJson())
                 break

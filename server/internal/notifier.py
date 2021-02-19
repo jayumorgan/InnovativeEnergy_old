@@ -25,6 +25,7 @@ class NotificationLevel:
 
 
 class Notifier:
+
     ''' Websocket server used to stream information about a run in progress to the web client '''
     def __init__(self):
         self.__logger = logging.getLogger(__name__)
@@ -42,7 +43,6 @@ class Notifier:
         self.server = websockets.serve(self.handler, ip, port)
         self.clients = set()
         
-        self.__logger.info('Websocket loop exiting.')
         asyncio.get_event_loop().create_task(self.run())
         asyncio.get_event_loop().run_until_complete(self.server)
         asyncio.get_event_loop().run_forever()
@@ -82,6 +82,7 @@ class Notifier:
             
     def setDead(self):
         self.isRunning = False
+        self.__logger.info('Websocket server set to die')
 
     def sendMessage(self, level, message, customPayload=None):
         '''

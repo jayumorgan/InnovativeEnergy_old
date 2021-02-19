@@ -5,6 +5,8 @@ import logging
 import time
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
 from internal.notifier import NotificationLevel
+from internal.interprocess_message import sendNotification
+from internal.io_monitor import IOMonitor
 
 '''
 If we are in development mode (i.e. running locally), we initialize a mocked instance of machine motion.
@@ -76,6 +78,9 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.primaryMachineMotion.configAxisDirection(3, 'positive')
         self.primaryMachineMotion.registerInput('push_button_1', 1, 1)  # Register an input with the provided name
 
+        self.primaryIoMonitor = IOMonitor(self.primaryMachineMotion)
+        self.primaryIoMonitor.startMonitoring('push_button_1', 1, 1)
+
         self.secondaryMachineMotion = MachineMotion('127.0.0.1')
         self.secondaryMachineMotion.configAxis(1, 8, 250)
         self.secondaryMachineMotion.configAxis(2, 8, 250)
@@ -141,7 +146,7 @@ class HomingState(MachineAppState):
     '''
     def onEnter(self):
         self.engine.primaryMachineMotion.emitHomeAll()
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to home')
+        sendNotification(NotificationLevel.INFO, 'Moving to home')
         self.gotoState('horizontal_green')
 
     def onResume(self):
@@ -154,7 +159,7 @@ class MoveToInitialPositionState(MachineAppState):
     def onEnter(self):
         self.engine.primaryMachineMotion.emitSpeed(25)
         self.engine.primaryMachineMotion.emitCombinedAxisRelativeMove([1, 2], ['positive', 'positive'], [250, 250])
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Moving to the start position')
+        sendNotification(NotificationLevel.INFO, 'Moving to the start position')
 
     def onResume(self):
         '''
@@ -181,7 +186,7 @@ class GreenLightState(MachineAppState):
 
         # Inform the frontend's console that we've entered this state. See Notifier::sendMessage for more information
         # on the parameters defined here.
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
+        sendNotification(NotificationLevel.INFO, 'Set light to GREEN for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'green', "speed": self.__speed })
 
         # Register a callback that gets set when the push button is clicked
@@ -191,7 +196,7 @@ class GreenLightState(MachineAppState):
                 self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
                 self.gotoState(self.__direction + '_yellow')
 
-        self.registerCallback(self.engine.primaryMachineMotion, self.engine.primaryMachineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
+        self.registerCallback(self.engine.primaryMachineMotion, 'push_button_1', __onPedestrianButtonClicked)
 
         # Set the axis moving
         self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
@@ -229,7 +234,7 @@ class YellowLightState(MachineAppState):
     def onEnter(self):
         self.__startTimeSeconds = time.time()
         self.logger.info('{} direction entered the YELLOW light state'.format(self.__direction))
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
+        sendNotification(NotificationLevel.INFO, 'Set light to YELLOW for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'yellow', "speed": self.__speed })
 
         def __onPedestrianButtonClicked(topic, msg):
@@ -237,7 +242,7 @@ class YellowLightState(MachineAppState):
                 self.engine.isPedestrianButtonTriggered = True
                 self.engine.nextLightDirection = 'vertical' if self.__direction == 'horizontal' else 'horizontal'
 
-        self.registerCallback(self.engine.primaryMachineMotion, self.engine.primaryMachineMotion.getInputTopic('push_button_1'), __onPedestrianButtonClicked)
+        self.registerCallback(self.engine.primaryMachineMotion, 'push_button_1', __onPedestrianButtonClicked)
         
         self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
@@ -270,7 +275,7 @@ class RedLightState(MachineAppState):
         
     def onEnter(self):
         self.logger.info('{} direction entered the RED light state'.format(self.__direction))
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Set light to RED for {} conveyor'.format(self.__direction), 
+        sendNotification(NotificationLevel.INFO, 'Set light to RED for {} conveyor'.format(self.__direction), 
             { "direction": self.__direction, "color": 'red', "speed": 0 })
 
         self.__startTimeSeconds = time.time()
@@ -294,7 +299,7 @@ class PedestrianCrossingState(MachineAppState):
     def onEnter(self):
         self.__durationSeconds  = self.configuration['pedestrianTimer']
         self.logger.info('Pedestrian crossing initialized')
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Pedestrians can now cross', { 'pedestriansCrossing': True })
+        sendNotification(NotificationLevel.INFO, 'Pedestrians can now cross', { 'pedestriansCrossing': True })
         self.__nextLightState = self.engine.nextLightDirection + '_green'
         self.__startTimeSeconds = time.time()
 
@@ -303,6 +308,6 @@ class PedestrianCrossingState(MachineAppState):
             self.gotoState(self.__nextLightState)
 
     def onLeave(self):
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Pedestrians can NOT cross anymore', { 'pedestriansCrossing': False })
+        sendNotification(NotificationLevel.INFO, 'Pedestrians can NOT cross anymore', { 'pedestriansCrossing': False })
         self.engine.isPedestrianButtonTriggered = False
 

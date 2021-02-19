@@ -194,7 +194,7 @@
     function connectToSocket() {
         const lWebsocketConnName = `ws://${window.location.hostname}:8081`;
         console.log('Connecting to socket at ' + lWebsocketConnName);
-        lWebsocketConnection = new WebSocket(lWebsocketConnName);
+        lWebsocketConnection = new WebSocket(lWebsocketConnName,);
         lWebsocketConnection.onopen = function(pEvent) {
             console.log('Websocket is online');
         };
@@ -203,7 +203,7 @@
             const lTimeout = setTimeout(function() { 
                 connectToSocket();
                 clearInterval(lTimeout);
-            }, 5000);
+            }, 250);
         };
         lWebsocketConnection.onmessage = function(pEvent) {
             const lMessageData = JSON.parse(pEvent.data);
