@@ -26,7 +26,12 @@ class NotificationLevel:
 
 class Notifier:
 
-    ''' Websocket server used to stream information about a run in progress to the web client '''
+    ''' 
+    Websocket server used to stream information about a run in progress to the web client
+
+    For internal use only! If you plan to send notifications 
+    
+    '''
     def __init__(self):
         self.__logger = logging.getLogger(__name__)
         self.lock = RLock()

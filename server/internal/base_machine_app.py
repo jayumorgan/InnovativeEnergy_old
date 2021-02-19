@@ -4,7 +4,6 @@ from internal.notifier import NotificationLevel
 from internal.interprocess_message import sendNotification
 import time
 from internal.mqtt_topic_subscriber import MqttTopicSubscriber
-from internal.interprocess_message import sendSubprocessToParentMsg, SubprocessToParentMessage
 
 # TODO: Hacky wait to ensure that all print statements are immediately flushed up to the super-process
 import functools

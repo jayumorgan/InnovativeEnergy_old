@@ -13,7 +13,7 @@ import functools
 print = functools.partial(print, flush=True)
 
 def run():
-    ''' Entry to the entire program '''
+    '''  Entry to the MachineApp subprocess '''
     machineApp = MachineAppEngine()
 
     # First, gather the runtime parameters from the commandline arguments

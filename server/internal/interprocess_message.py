@@ -8,7 +8,7 @@ class SubprocessToParentMessage:
     NONE            = 0
     NOTIFICATION    = 1
 
-def sendSubprocessToParentMsg(type, data = None):
+def __sendSubprocessToParentMsg(type, data = None):
     '''
     Sends a message to the parent process
     '''
@@ -28,7 +28,7 @@ def sendNotification(level, message, customPayload=None):
             customPayload: dict
                 (Optional) Custom data to be sent to the client, if any
     '''
-    sendSubprocessToParentMsg(SubprocessToParentMessage.NOTIFICATION, {
+    __sendSubprocessToParentMsg(SubprocessToParentMessage.NOTIFICATION, {
         "timeSeconds": time.time(),
         "level": level,
         "message": message,
