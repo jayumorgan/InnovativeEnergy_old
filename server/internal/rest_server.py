@@ -2,12 +2,15 @@ import logging
 from bottle import Bottle, request, response, abort, static_file
 import os
 import time
+import threading
 from threading import Thread
 from pathlib import Path
 import json
 from internal.machine_app_subprocess import MachineAppSubprocess
 from internal.notifier import getNotifier, NotificationLevel
 import signal
+import paho.mqtt.subscribe as MQTTsubscribe
+import paho.mqtt.client as mqtt
 
 class RestServer(Bottle):
     '''
@@ -20,6 +23,7 @@ class RestServer(Bottle):
         self.__serverDirectory = os.path.join('.')
         self.__logger = logging.getLogger(__name__)
         self.__subprocess = MachineAppSubprocess()
+        self.__estopManager = EstopManager()
         self.isRunning = False # TODO: Correctly update these
         self.isPaused = False
 
@@ -61,52 +65,52 @@ class RestServer(Bottle):
         inStateStepperMode = (request.params['stateStepperMode'] == 'true') if 'stateStepperMode' in request.params else False
         configuration = request.json
         
-        self.__subprocess.start(inStateStepperMode, configuration)
-        return 'OK'
+        if self.__subprocess.start(inStateStepperMode, configuration):
+            self.isRunning = True
+            return 'OK'
+        else:
+            abort(400, 'Failed to start the MachineApp')
 
     def stop(self):
-        if self.__subprocess.writeToSubprocess({ 'request': 'stop' }):
+        if self.__subprocess.sendMsgToSubprocess({ 'request': 'stop' }):
             return 'OK'
         else:
             abort(400, 'Failed to stop the MachineApp')
 
     def pause(self):
-        if self.__subprocess.writeToSubprocess({ 'request': 'pause' }):
+        if self.__subprocess.sendMsgToSubprocess({ 'request': 'pause' }):
             return 'OK'
         else:
             abort(400, 'Failed to pause the MachineApp')
 
     def resume(self):
-        if self.__subprocess.writeToSubprocess({ 'request': 'resume' }):
+        if self.__subprocess.sendMsgToSubprocess({ 'request': 'resume' }):
             return 'OK'
         else:
             abort(400, 'Failed to resume the MachineApp')
 
     # TODO: All E-Stop functionality should be handles on this process
     def estop(self):
-        #if self.__subprocess.writeToSubprocess({ 'request': 'estop' }):
-            #self.__machineApp.estop()
+        if self.__estopManager.estop():
+            self.__subprocess.terminate()
             return 'OK'
-        #else:
-        #    abort(400, 'Failed to estop the MachineApp')
+        else:
+            abort(400, 'Failed to estop the MachineApp')
 
     def getEstop(self):
-        #if self.__machineApp.getEstop():
-        #    return 'true'
-        #else:
-        return 'false'
+        return self.__estopManager.getEstop()
 
     def releaseEstop(self):
-        if self.__machineApp.releaseEstop():
+        if self.__estopManager.release():
             return 'OK'
         else:
             abort(400, 'Failed to release estop')
 
     def resetSystem(self):
-        #if self.__machineApp.resetSystem():
-        return 'OK'
-        #else:
-        #   abort(400, 'Failed to reset the system')
+        if self.__estopManager.reset():
+            return 'OK'
+        else:
+           abort(400, 'Failed to reset the system')
 
     def getState(self):
         return {
@@ -119,6 +123,146 @@ class RestServer(Bottle):
         self.__machineApp.kill()
         os.kill(os.getpid(), signal.SIGTERM)
         return 'OK'
+
+class MQTTPATHS :
+    ESTOP = "estop"
+    ESTOP_STATUS = ESTOP + "/status"
+    ESTOP_TRIGGER_REQUEST = ESTOP + "/trigger/request"
+    ESTOP_TRIGGER_RESPONSE = ESTOP + "/trigger/response"
+    ESTOP_RELEASE_REQUEST = ESTOP + "/release/request"
+    ESTOP_RELEASE_RESPONSE = ESTOP + "/release/response"
+    ESTOP_SYSTEMRESET_REQUEST = ESTOP + "/systemreset/request"
+    ESTOP_SYSTEMRESET_RESPONSE = ESTOP + "/systemreset/response"
+
+class EstopManager:
+    TIMEOUT = 10.0
+
+    '''
+    Small class that subscribes/publishes to MQTT eStop events 
+    to control the current state of the estop.
+    '''
+    def __init__(self):
+        self.__isEstopped = False
+        self.__notifier = getNotifier()
+        self.__mqttClient = mqtt.Client()
+        self.__logger = logging.getLogger(__name__)
+        self.__mqttClient.on_connect = self.__onConnect
+        self.__mqttClient.on_message = self.__onMessage
+        self.__mqttClient.on_disconnect = self.__onDisconnect
+        self.IP = '127.0.0.1'
+        self.__mqttClient.connect(self.IP)
+        self.__mqttClient.loop_start()
+
+    def __onConnect(self, client, userData, flags, rc):
+        if rc == 0:
+            self.__mqttClient.subscribe(MQTTPATHS.ESTOP_STATUS)
+
+    def __onMessage(self, client, userData, msg):
+        topicParts = msg.topic.split('/')
+        deviceType = topicParts[1]
+
+        if (topicParts[0] == MQTTPATHS.ESTOP) :
+            if (topicParts[1] == "status") :
+                self.__isEstopped = json.loads(msg.payload.decode('utf-8'))
+
+                if self.__isEstopped:
+                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP, 'Machine is in estop')
+                else:
+                    self.__notifier.sendMessage(NotificationLevel.APP_ESTOP_RELEASE, 'Estop Released')
+
+    def __onDisconnect(self, client, userData, rc):
+        logging.info("Disconnected with rtn code [%d]"% (rc))
+        return
+
+    def estop(self):
+        return_value = False
+
+        def mqttResponse() :
+            # Wait for response
+            return_value = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_TRIGGER_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+
+            return
+
+        mqttResponseThread = threading.Thread(target = mqttResponse)
+        mqttResponseThread.daemon = True
+        mqttResponseThread.start()
+
+        # Adding a delay to make sure MQTT simple function is launched before publish is made. Quick fix from bug on App. Launcher.
+        time.sleep(0.2)
+
+        # Publish trigger request on MQTT
+        self.__mqttClient.publish(MQTTPATHS.ESTOP_TRIGGER_REQUEST, "message is not important")
+
+        mqttResponseThread.join(EstopManager.TIMEOUT)
+
+        if mqttResponseThread.isAlive() :
+            self.__logger.error('MQTT response timeout.')
+            return False
+        else :
+            return return_value
+
+        return return_value
+
+    def release(self):
+        return_value = False
+
+        def mqttResponse() :
+            # Wait for response
+            return_value = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_RELEASE_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+
+            return
+
+        mqttResponseThread = threading.Thread(target = mqttResponse)
+        mqttResponseThread.daemon = True
+        mqttResponseThread.start()
+
+        # Adding a delay to make sure MQTT simple function is launched before publish is made. Quick fix from bug on App. Launcher.
+        time.sleep(0.2)
+
+        # Publish release request on MQTT
+        self.__mqttClient.publish(MQTTPATHS.ESTOP_RELEASE_REQUEST, "message is not important")
+
+        mqttResponseThread.join(EstopManager.TIMEOUT)
+
+        if mqttResponseThread.isAlive() :
+            self.__logger.error('MQTT response timeout.')
+            return False
+        else :
+            return return_value
+
+        return return_value
+
+    def reset(self):
+        return_value = False
+
+        def mqttResponse() :
+            # Wait for response
+            return_value = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_SYSTEMRESET_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+
+            return
+
+        mqttResponseThread = threading.Thread(target = mqttResponse)
+        mqttResponseThread.daemon = True
+        mqttResponseThread.start()
+
+        # Adding a delay to make sure MQTT simple function is launched before publish is made. Quick fix from bug on App. Launcher.
+        time.sleep(0.2)
+
+        # Publish reset system request on MQTT
+        self.__mqttClient.publish(MQTTPATHS.ESTOP_SYSTEMRESET_REQUEST, "message is not important")
+
+        mqttResponseThread.join(EstopManager.TIMEOUT)
+
+        if mqttResponseThread.isAlive() :
+            self.__logger.error('MQTT response timeout.')
+            return False
+        else :
+            return return_value
+
+        return return_value
+
+    def getEstop(self):
+        return self.__isEstopped
 
 def runServer():
     restServer = RestServer()

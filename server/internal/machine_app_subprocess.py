@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import os
 import io
 from threading import Thread
@@ -9,6 +10,10 @@ from internal.interprocess_message import SubprocessToParentMessage
 from internal.notifier import getNotifier
 
 class MachineAppSubprocess:
+    '''
+    Manages the lifetime of the MachineApp subprocess, forwards stdin commands and stdout information.
+    '''
+
     def __init__(self):
         self.__isRunning = False
         self.__subprocess = None
@@ -22,7 +27,13 @@ class MachineAppSubprocess:
         self.__stdthread.start() 
 
     def start(self, inStateStepperMode, configuration):
-        command = [ 'python', 'run_machine_app.py' ]
+        '''
+        Starts running the MachineApp in a new process
+        '''
+        if self.__isRunning == True:
+            return False
+
+        command = [ sys.executable, 'run_machine_app.py' ]
         command.append('--configuration')
         command.append(json.dumps(configuration))
         if inStateStepperMode:
@@ -33,7 +44,10 @@ class MachineAppSubprocess:
 
         return True
 
-    def writeToSubprocess(self, data):
+    def sendMsgToSubprocess(self, data):
+        '''
+        Write a JSON payload to stdin  of the child process
+        '''
         if self.__subprocess == None:
             return False
 
@@ -42,9 +56,18 @@ class MachineAppSubprocess:
         return True
 
     def __update(self):
+        '''
+        Used to forward notifier messages from the child process to the client. This enables us to not
+        have to constantly disconnect/reconnect to the child process' websocket whenever the user pressed
+        start or stop.
+
+        We also catch standard 'print' outputs here too, and print them out to the parent process' console.
+        '''
         while True:          # Waiting to receive the start command, will sleep in the meantime
             while self.__isRunning:  # Received start and waiting on the subprocess stdout
-                if self.__subprocess == None or self.__subprocess.stdout.closed:
+                if self.__subprocess == None or self.__subprocess.poll() != None or self.__subprocess.stdout.closed:
+                    self.__isRunning = False
+                    self.__logger.info('Subprocess is no longer active')
                     continue
 
                 while self.__subprocess != None and self.__subprocess.stdout != None and self.__subprocess.stdout.readable():
@@ -67,18 +90,22 @@ class MachineAppSubprocess:
                     except:
                         print(line)
 
-                #time.sleep(1.0)
-
             time.sleep(1.0)
 
 
-    def stop(self):
+    def terminate(self):
+        '''
+        Terminates the subprocess immediately
+
+        returns:
+            bool
+                Successfully terminated a running application or not
+        '''
         if self.__subprocess == None:
             return False
 
-        self.__isRunning = False
-
         self.__subprocess.terminate()
         self.__subprocess = None
+        return True
 
         

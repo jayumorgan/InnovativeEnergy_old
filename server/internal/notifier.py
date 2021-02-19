@@ -48,6 +48,7 @@ class Notifier:
         asyncio.get_event_loop().run_forever()
 
     async def handler(self, websocket, path):
+        self.__logger.info('Received new client.')
         self.clients.add(websocket)
         try:
             while True:

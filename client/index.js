@@ -203,7 +203,7 @@
             const lTimeout = setTimeout(function() { 
                 connectToSocket();
                 clearInterval(lTimeout);
-            }, 250);
+            }, 5000);
         };
         lWebsocketConnection.onmessage = function(pEvent) {
             const lMessageData = JSON.parse(pEvent.data);
@@ -344,15 +344,16 @@
         const lRunDebugButton = $('#run-debug-button').on('click', function() {
             switch (lState) {
                 case 'idle': {
-                    lRunStartButton.empty();
-                    lRunStartButton.append($('<div>').addClass('widget-spin-loader'));
+                    const lPreviousElementContents = lRunDebugButton.html()
+                    lRunDebugButton.empty();
+                    lRunDebugButton.append($('<div>').addClass('widget-spin-loader'));
                     lStartMachineApp(lRunTimeConfiguration, true).then(function(pSuccess) {
                         if (pSuccess) {
                             console.log('Successfully started the MachineApp');
                         } else {
                             console.error('Failed to start the MachineApp');
-                            $('#run-start-button').empty().html(lPreviousElementContents);
                         }
+                        lRunDebugButton.empty().html(lPreviousElementContents);
                     });
                     break;
                 }
