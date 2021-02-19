@@ -271,6 +271,13 @@
             case 'app_estop_set': {
                 addMessageToConsole('fa fa-info-circle', lTimeSeconds, lMessageStr);
                 onEstopSet();
+
+                if (lState === 'running' || lState === 'paused') {
+                    $('#run-start-button').empty().append($('<span>').addClass('fa fa-play')).append($('<div>').text('START')).removeClass('running');
+                    $('#run-stop-button').removeClass('running').empty().append($('<span>').addClass('fa fa-stop')).append($('<div>').text('STOP'));
+                    $('#run-debug-button').removeAttr('disabled');
+                    lState = 'idle';
+                }
                 break;
             }
             case 'app_estop_release': {
