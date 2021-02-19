@@ -175,12 +175,12 @@ class EstopManager:
         return
 
     def estop(self):
-        return_value = False
+        return_value = { 'value': False }
 
         def mqttResponse() :
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_TRIGGER_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
-
+            return_value['value'] = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_TRIGGER_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+        
             return
 
         mqttResponseThread = threading.Thread(target = mqttResponse)
@@ -199,16 +199,16 @@ class EstopManager:
             self.__logger.error('MQTT response timeout.')
             return False
         else :
-            return return_value
+            return return_value['value']
 
-        return return_value
+        return return_value['value']
 
     def release(self):
-        return_value = False
+        return_value = { 'value': False }
 
         def mqttResponse() :
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_RELEASE_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+            return_value['value'] = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_RELEASE_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
 
             return
 
@@ -228,16 +228,16 @@ class EstopManager:
             self.__logger.error('MQTT response timeout.')
             return False
         else :
-            return return_value
+            return return_value['value']
 
-        return return_value
+        return return_value['value']
 
     def reset(self):
-        return_value = False
+        return_value = { 'value': False }
 
         def mqttResponse() :
             # Wait for response
-            return_value = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_SYSTEMRESET_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
+            return_value['value'] = json.loads(MQTTsubscribe.simple(MQTTPATHS.ESTOP_SYSTEMRESET_RESPONSE, retained = False, hostname = self.IP).payload.decode('utf-8'))
 
             return
 
@@ -257,12 +257,12 @@ class EstopManager:
             self.__logger.error('MQTT response timeout.')
             return False
         else :
-            return return_value
+            return return_value['value']
 
-        return return_value
+        return return_value['value']
 
     def getEstop(self):
-        return self.__isEstopped
+        return 'true' if self.__isEstopped else 'false'
 
 def runServer():
     restServer = RestServer()
