@@ -6,6 +6,10 @@ import time
 from internal.mqtt_topic_subscriber import MqttTopicSubscriber
 from internal.interprocess_message import sendSubprocessToParentMsg, SubprocessToParentMessage
 
+# TODO: Hacky wait to ensure that all print statements are immediately flushed up to the super-process
+import functools
+print = functools.partial(print, flush=True)
+
 class MachineAppState(ABC):
     '''
     Abstract class that defines a MachineAppState. If you want to create a new state,
@@ -115,25 +119,6 @@ class MachineAppState(ABC):
 
         Default behavior: Reset the engine state to the beginning of the state machine
         '''
-
-        self.engine.resetState()
-        pass
-
-    def onEstop(self):
-        ''' 
-        Called whenever we estop while we're in this state 
-
-        Default behavior: Do nothing
-        '''
-        pass
-
-    def onEstopReleased(self):
-        ''' 
-        Called whenever we estop while we're in this state 
-
-        Default behavior: Reset the engine state to the beginning of the state machine
-        '''
-        self.engine.resetState()
         pass
 
     def updateCallbacks(self):
@@ -169,7 +154,6 @@ class BaseMachineAppEngine(ABC):
         # High-Level State variables
         self.isRunning              = False                             # The MachineApp will execute while this flag is set
         self.isPaused               = False                             # The machine app will not do any state updates while this flag is set
-        self.isEstopped             = False                             # Set whenever we are in the Estop state
         self.__nextRequestedState   = None                              # If set, we will transition into the provided state
         self.__inStateStepperMode   = False                             # If True, the engine will enter a Pause state in between each state transition
         self.__hasPausedForStepper  = False                             # Keeps track of whether or not we have allowed stepper mode to pause the app between transitions
@@ -177,20 +161,10 @@ class BaseMachineAppEngine(ABC):
         self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
         self.__shouldPause  = False                                     # Tells the MachineApp loop that it should pause on its next update
         self.__shouldResume = False                                     # Tells the MachineApp loop that it should resume on its next update
-        self.__shouldEstop          = False                             # Tells the update loop that we have entered the e-stop state
         self.__shouldReleaseEstop   = False                             # Tells the update loop that we have released the e-stop and reset the system
 
         self.__currentState         = None                              # Active state of the engine
         self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
-        
-    def resetState(self):
-        self.isRunning = False
-        self.__shouldStop = False
-        self.isPaused = False
-        self.__shouldPause = False
-        self.__shouldResume = False
-        self.__hasPausedForStepper  = False 
-        self.__currentState = self.getDefaultState()
 
     @abstractmethod
     def initialize(self):
@@ -245,31 +219,21 @@ class BaseMachineAppEngine(ABC):
     @abstractmethod
     def onStop(self):
         '''
-        Called when a stop is requested from the REST API. 99% of the time, you will
-        simply call 'emitStop' on all of your machine motions in this methiod.
-
-        Warning: This logic is happening in a separate thread.
+        Called when a stop is requested from the REST API.
         '''
         pass
 
     @abstractmethod
     def onPause(self):
         '''
-        Called when a pause is requested from the REST API. 99% of the time, you will
-        simply call 'emitStop' on all of your machine motions in this methiod.
-        
-        Warning: This logic is happening in a separate thread.
+        Called when a pause is requested from the REST API.
         '''
         pass
 
     @abstractmethod
-    def getMasterMachineMotion(self):
-        ''' 
-        Returns the master machine motion, which will be used for estopping,
-        releasing the estop, and resetting the system.
-        
-        returns:
-            MachineMotion
+    def onResume(self):
+        '''
+        Called when a resume is requested from the REST API.
         '''
         pass
 
@@ -358,35 +322,21 @@ class BaseMachineAppEngine(ABC):
         sendNotification(NotificationLevel.APP_START, 'MachineApp started')
         self.logger.info('Starting the main MachineApp loop')
 
-        # Configure otu run time
+        # Configure run time variables
         self.__inStateStepperMode = inStateStepperMode
         self.configuration = configuration
+        self.isRunning = True
 
+        # Run initialization sequence
         self.initialize()
         self.beforeRun()
-
-        #self.getMasterMachineMotion().bindeStopEvent(self.__setEstopped)
-        #self.__setEstopped(self.getMasterMachineMotion().isEstopped())
         self.__stateDictionary = self.buildStateDictionary()
-
 
         # Begin the Application by moving to the default state
         self.gotoState(self.getDefaultState())
-        self.isRunning = True
 
         # Inner Loop running the actual MachineApp program
         while self.isRunning:
-            if self.__shouldEstop:          # Running E-Stop behavior
-                sendNotification(NotificationLevel.APP_ESTOP, 'Machine is in estop')
-                self.__shouldEstop = False
-                self.isRunning = False
-
-                currentState = self.getCurrentState()
-                if currentState != None:
-                    currentState.onEstop()
-
-                break
-
             if self.__shouldStop:           # Running stop behavior
                 self.__shouldStop = False
                 self.isRunning = False
@@ -421,6 +371,8 @@ class BaseMachineAppEngine(ABC):
                 self.isPaused = False
 
                 if not self.__hasPausedForStepper: # Only do resume behavior if we're not doing the stepper-mandated pause
+                    self.onResume()
+
                     currentState = self.getCurrentState()
                     if currentState != None:
                         currentState.onResume()
@@ -480,44 +432,3 @@ class BaseMachineAppEngine(ABC):
         '''
         self.logger.info('Stopping the MachineApp')
         self.__shouldStop = True
-
-    def __setEstopped(self, isEstopped):
-        ''' Callback when we receive an e-stop event '''
-        if isEstopped:
-            if not self.isEstopped:
-                self.isEstopped = True
-                self.__shouldEstop = True
-                self.logger.info('Estop triggered')
-        else:
-            self.__shouldReleaseEstop = True
-            self.isEstopped = False
-            self.logger.info('System reset')
-
-    def estop(self):
-        '''
-        E-stops the MachineApp loop.
-        
-        Warning: Logic in here is happening in a different thread. You should only 
-        alter this behavior if you know what you are doing. It is recommended that
-        you implement any on-estop behavior in your MachineAppStates instead
-        '''
-        masterMachineMotion = self.getMasterMachineMotion()
-        masterMachineMotion.triggerEstop()
-        return True
-
-    def getEstop(self):
-        ''' Returns whether or not the machine is currently in estop '''
-        return self.isEstopped
-
-    def releaseEstop(self):
-        ''' Releases the estop of all machine motions '''
-        masterMachineMotion = self.getMasterMachineMotion()
-        masterMachineMotion.releaseEstop()
-        self.logger.info('Estop released')
-        return True
-
-    def resetSystem(self):
-        ''' Resets the system for all machine motions '''
-        masterMachineMotion = self.getMasterMachineMotion()
-        masterMachineMotion.resetSystem()
-        return True

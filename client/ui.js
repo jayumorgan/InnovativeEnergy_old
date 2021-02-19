@@ -38,6 +38,12 @@ function buildEditor(pConfiguration) {
         lPedestrianTimer = numericInput('Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
             pConfiguration.pedestrianTimer = pValue;
         }).appendTo(lEditorWrapper);
+        numericInput('Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
+            pConfiguration.pedestrianTimer = pValue;
+        }).appendTo(lEditorWrapper),
+        numericInput('Pedestrian Light Timer', pConfiguration.pedestrianTimer, function(pValue) {
+            pConfiguration.pedestrianTimer = pValue;
+        }).appendTo(lEditorWrapper);
 
     return lEditorWrapper;
 }
@@ -94,12 +100,33 @@ function onNotificationReceived(pLevel, pMessageStr, pMessagePayload) {
 
                 return lLightIndicator;
             },
+            lCreateButtonDownStatus = function() {
+                const lContainer = $('<div>').addClass('v_layout').addClass('light-container'),
+                    lLabel = $('<label>').appendTo(lContainer).text('Button State'),
+                    lNo = $('<div>').appendTo(lContainer)
+                        .append($('<input>').attr('type', 'radio').addClass('pedestrian-btn-no').prop('checked', true))
+                        .append($('<label>').text('Pedestrian Btn Not Clicked')),
+                    lYes = $('<div>').appendTo(lContainer)
+                        .append($('<input>').attr('type', 'radio').addClass('pedestrian-btn-yes'))
+                        .append($('<label>').text('Pedestrian Btn Clicked'));
+
+                return lContainer;
+            },
             lHorizontalLightIndicator = lCreateLightIndicator('Horizontal Traffic Light').appendTo(lLightContainer).attr('id', 'horizontal-light-indicator'),
             lVerticalLightIndicator = lCreateLightIndicator('Vertical Traffic Light').appendTo(lLightContainer).attr('id', 'vertical-light-indicator'),
-            lPedestrianLight = lCreatePedestrianLight().appendTo(lLightContainer).attr('id', 'pedestrian-light-indicator');
+            lPedestrianLight = lCreatePedestrianLight().appendTo(lLightContainer).attr('id', 'pedestrian-light-indicator'),
+            lButtonDownStatus = lCreateButtonDownStatus().attr('id', 'button-state-indicator').appendTo(lLightContainer);
     }
 
     if (pMessagePayload == undefined) {
+        return;
+    }
+
+    if (pLevel === 'io_state') {
+        if (pMessagePayload.name === 'push_button_1') {
+            $('#button-state-indicator').find('.pedestrian-btn-no').prop('checked', pMessagePayload.value !== 'true');
+            $('#button-state-indicator').find('.pedestrian-btn-yes').prop('checked', pMessagePayload.value === 'true');
+        }
         return;
     }
 

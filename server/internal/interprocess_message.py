@@ -1,22 +1,20 @@
 import time
 import json
+import sys
+import logging
 
 class SubprocessToParentMessage:
     ''' Messages sent from the Subprocess to the parent process '''
     NONE            = 0
     NOTIFICATION    = 1
 
-class ParentToSubprocessMessage:
-    ''' Messages sent from the parent to the subprocess '''
-    NONE    = 0
-    STOP    = 1
-    PAUSE   = 2
-    RESUME  = 3
-    ESTOP   = 4
-
 def sendSubprocessToParentMsg(type, data = None):
+    '''
+    Sends a message to the parent process
+    '''
     msg = json.dumps({ 'type': type, 'data': data })
-    print(msg + '\n')
+    sys.stdout.write(msg + '\n')
+    sys.stdout.flush()
 
 def sendNotification(level, message, customPayload=None):
     '''

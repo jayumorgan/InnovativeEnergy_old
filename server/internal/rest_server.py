@@ -24,8 +24,7 @@ class RestServer(Bottle):
         self.__logger = logging.getLogger(__name__)
         self.__subprocess = MachineAppSubprocess()
         self.__estopManager = EstopManager()
-        self.isRunning = False # TODO: Correctly update these
-        self.isPaused = False
+        self.isPaused = False                   # TODO: It would be better to no track isPaused here
 
         # Set up callbacks
         self.route('/', callback=self.index)
@@ -66,25 +65,27 @@ class RestServer(Bottle):
         configuration = request.json
         
         if self.__subprocess.start(inStateStepperMode, configuration):
-            self.isRunning = True
             return 'OK'
         else:
             abort(400, 'Failed to start the MachineApp')
 
     def stop(self):
         if self.__subprocess.sendMsgToSubprocess({ 'request': 'stop' }):
+            self.isPaused = False
             return 'OK'
         else:
             abort(400, 'Failed to stop the MachineApp')
 
     def pause(self):
         if self.__subprocess.sendMsgToSubprocess({ 'request': 'pause' }):
+            self.isPaused = True
             return 'OK'
         else:
             abort(400, 'Failed to pause the MachineApp')
 
     def resume(self):
         if self.__subprocess.sendMsgToSubprocess({ 'request': 'resume' }):
+            self.isPaused = False
             return 'OK'
         else:
             abort(400, 'Failed to resume the MachineApp')
@@ -93,6 +94,7 @@ class RestServer(Bottle):
     def estop(self):
         if self.__estopManager.estop():
             self.__subprocess.terminate()
+            self.isPaused = False
             return 'OK'
         else:
             abort(400, 'Failed to estop the MachineApp')
@@ -114,7 +116,7 @@ class RestServer(Bottle):
 
     def getState(self):
         return {
-            "isRunning": self.isRunning,
+            "isRunning": self.__subprocess.isRunning(),
             "isPaused": self.isPaused
         }
 

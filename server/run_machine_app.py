@@ -8,17 +8,22 @@ import time
 import json
 from threading import Thread
 
+# TODO: Hacky wait to ensure that all print statements are immediately flushed up to the super-process
+import functools
+print = functools.partial(print, flush=True)
+
 def run():
     ''' Entry to the entire program '''
     machineApp = MachineAppEngine()
 
     # First, gather the runtime parameters from the commandline arguments
     configuration = {}
+    with open('./internal/configuration.json', 'r') as f:
+        configuration = json.loads(f.read())
+
     inStateStepperMode = False
     for argIdx in range(len(sys.argv)):
-        if sys.argv[argIdx] == '--configuration':
-            configuration = json.loads(sys.argv[argIdx + 1])
-        elif sys.argv[argIdx] == '--inStateStepperMode':
+        if sys.argv[argIdx] == '--inStateStepperMode':
             inStateStepperMode = True
 
     # Next, start the subprocess stdin listener. This will allow the Rest server to tell it to do things
@@ -58,7 +63,6 @@ def run():
     sys.exit()
 
 if __name__ == "__main__":
-
     # Note: All logging here will be outputted to stdout, so that the parent process
     # (aka the Rest Server) can pick it up, and output it to the proper logs.
     logging.basicConfig(

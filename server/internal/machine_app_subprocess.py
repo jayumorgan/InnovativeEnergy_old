@@ -33,12 +33,14 @@ class MachineAppSubprocess:
         if self.__isRunning == True:
             return False
 
+        with open('./internal/configuration.json', 'w') as f:
+            f.write(json.dumps(configuration, indent=4))
+
         command = [ sys.executable, 'run_machine_app.py' ]
-        command.append('--configuration')
-        command.append(json.dumps(configuration))
         if inStateStepperMode:
             command.append('--inStateStepperMode')
 
+        self.__logger.info('Attempting to run subprocess: {}'.format(' '.join(command)))
         self.__subprocess = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         self.__isRunning = True
 
@@ -104,8 +106,9 @@ class MachineAppSubprocess:
         if self.__subprocess == None:
             return False
 
-        self.__subprocess.terminate()
+        self.__subprocess.kill()
         self.__subprocess = None
         return True
 
-        
+    def isRunning(self):
+        return self.__isRunning

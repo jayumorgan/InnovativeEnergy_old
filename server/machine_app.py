@@ -97,9 +97,6 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         Called when a stop is requested from the REST API. 99% of the time, you will
         simply call 'emitStop' on all of your machine motions in this methiod.
-
-        Warning: This logic is happening in a separate thread. EmitStops are allowed in
-        this method.
         '''
         self.primaryMachineMotion.emitStop()
         self.secondaryMachineMotion.emitStop()
@@ -108,12 +105,12 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         Called when a pause is requested from the REST API. 99% of the time, you will
         simply call 'emitStop' on all of your machine motions in this methiod.
-        
-        Warning: This logic is happening in a separate thread. EmitStops are allowed in
-        this method.
         '''
         self.primaryMachineMotion.emitStop()
         self.secondaryMachineMotion.emitStop()
+
+    def onResume(self):
+        pass
 
     def beforeRun(self):
         '''
@@ -130,15 +127,6 @@ class MachineAppEngine(BaseMachineAppEngine):
         In this method, you can clean up any resources that you'd like to clean up, or do nothing at all.
         '''
         pass
-
-    def getMasterMachineMotion(self):
-        '''
-        Returns the primary machine motion that will be used for estop events.
-
-        returns:
-            MachineMotion
-        '''
-        return self.primaryMachineMotion
 
 class HomingState(MachineAppState):
     '''
@@ -217,9 +205,6 @@ class GreenLightState(MachineAppState):
     def onResume(self):     # Restart the continuous move when we receive a 
         self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
-    def onEstop(self):      # Stop the continuous move when we receive an e-stop in this state
-        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
-
 class YellowLightState(MachineAppState):
     ''' Runs the yellow-light behavior for the given direction '''
     def __init__(self, engine, direction):
@@ -260,9 +245,6 @@ class YellowLightState(MachineAppState):
         self.__machineMotion.stopContinuousMove(self.__axis)
 
     def onResume(self):
-        self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
-
-    def onEstop(self):
         self.__machineMotion.setContinuousMove(self.__axis, self.__speed)
 
 class RedLightState(MachineAppState):

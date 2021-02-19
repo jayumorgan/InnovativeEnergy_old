@@ -71,10 +71,7 @@ class MachineAppEngine(BaseMachineAppEngine):
 
     def afterRun(self):
         pass
-
-    def getMasterMachineMotion(self):
-        return self.machineMotion
-
+    
     def getDefaultState(self):
         return 'Waiting'
 
