@@ -124,8 +124,7 @@ class RestServer(Bottle):
         }
 
     def kill(self):
-        getNotifier().setDead()
-        self.__machineApp.kill()
+        self.__subprocess.terminate()
         os.kill(os.getpid(), signal.SIGTERM)
         return 'OK'
 
@@ -296,7 +295,7 @@ class MachineAppSubprocessManager:
         with open('./internal/configuration.json', 'w') as f:
             f.write(json.dumps(configuration, indent=4))
 
-        command = [ sys.executable, 'run_machine_app.py' ]
+        command = [ sys.executable, 'subapp.py' ]
         if inStateStepperMode:
             command.append('--inStateStepperMode')
 
