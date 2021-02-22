@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
-from internal.notifier import NotificationLevel
-from internal.interprocess_message import sendNotification
+from internal.notifier import NotificationLevel, sendNotification
 import time
 from internal.mqtt_topic_subscriber import MqttTopicSubscriber
 
@@ -18,17 +17,8 @@ class MachineAppState(ABC):
     
     def __init__(self, engine: 'BaseMachineAppEngine'):
         '''
-        Constructor that initializes state that will remain consistent throguhout the
-        duration of your program. Please note that this state node is NOT active at
-        point of construction. Therefore, you should NOT do things like in the constructor
-        such as:
-
-        (1) Construct a MqttTopicSubscriber
-        (2) Impact the state of your GlobalApp in anyway
-        (3) Go to a new state
-        etc.
-
-        All of these behaviors should happen in onEnter instead.
+        Constructor will be executed when you click the Play button. This will be executed
+        only ONCE at the beginning of your entire program.
         '''
         self.logger = logging.getLogger(__name__)
         self.engine = engine
@@ -150,25 +140,25 @@ class BaseMachineAppEngine(ABC):
         self.configuration  = None                                      # Python dictionary containing the loaded configuration payload
         self.logger         = logging.getLogger(__name__)               # Logger used to output information to the local log file and console
         
-        # High-Level State variables
-        self.isRunning              = False                             # The MachineApp will execute while this flag is set
-        self.isPaused               = False                             # The machine app will not do any state updates while this flag is set
+        # High-Level state variables
+        self.__isRunning              = False                           # The MachineApp will execute while this flag is set
+        self.__isPaused               = False                           # The machine app will not do any state updates while this flag is set
+        self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
+        self.__currentState         = None                              # Active state of the engine
         self.__nextRequestedState   = None                              # If set, we will transition into the provided state
         self.__inStateStepperMode   = False                             # If True, the engine will enter a Pause state in between each state transition
         self.__hasPausedForStepper  = False                             # Keeps track of whether or not we have allowed stepper mode to pause the app between transitions
         
+        # Transitional state variables
         self.__shouldStop   = False                                     # Tells the MachineApp loop that it should stop on its next update
         self.__shouldPause  = False                                     # Tells the MachineApp loop that it should pause on its next update
         self.__shouldResume = False                                     # Tells the MachineApp loop that it should resume on its next update
-        self.__shouldReleaseEstop   = False                             # Tells the update loop that we have released the e-stop and reset the system
 
-        self.__currentState         = None                              # Active state of the engine
-        self.__stateDictionary      = {}                                # Mapping of state names to MachineAppState definitions
 
     @abstractmethod
     def initialize(self):
         ''' 
-        Called at the start of the MachineApp. In this method, you will
+        Called when you hit play. In this method, you will
         initialize your machine motion instances and configure them. You
         may also define variables that you'd like to access and manipulate
         over the course of your MachineApp here.
@@ -200,18 +190,10 @@ class BaseMachineAppEngine(ABC):
     @abstractmethod
     def afterRun(self):
         '''
-        Executed when execution of your MachineApp ends (i.e., when self.isRunning goes from True to False).
+        Executed when execution of your MachineApp ends (i.e., when self.__isRunning goes from True to False).
         This could be due to an estop, stop event, or something else.
 
         In this method, you can clean up any resources that you'd like to clean up, or do nothing at all.
-        '''
-        pass
-
-    @abstractmethod
-    def beforeRun(self):
-        '''
-        Called before every run of your MachineApp. This is where you might want to
-        reset to a default state.
         '''
         pass
 
@@ -315,7 +297,7 @@ class BaseMachineAppEngine(ABC):
         '''
         Main loop of your MachineApp.
         '''
-        if self.isRunning:
+        if self.__isRunning:
             return False
 
         sendNotification(NotificationLevel.APP_START, 'MachineApp started')
@@ -324,21 +306,20 @@ class BaseMachineAppEngine(ABC):
         # Configure run time variables
         self.__inStateStepperMode = inStateStepperMode
         self.configuration = configuration
-        self.isRunning = True
+        self.__isRunning = True
 
         # Run initialization sequence
         self.initialize()
-        self.beforeRun()
         self.__stateDictionary = self.buildStateDictionary()
 
         # Begin the Application by moving to the default state
         self.gotoState(self.getDefaultState())
 
         # Inner Loop running the actual MachineApp program
-        while self.isRunning:
+        while self.__isRunning:
             if self.__shouldStop:           # Running stop behavior
                 self.__shouldStop = False
-                self.isRunning = False
+                self.__isRunning = False
 
                 self.onStop()
 
@@ -355,7 +336,7 @@ class BaseMachineAppEngine(ABC):
                     sendNotification(NotificationLevel.APP_PAUSE, 'MachineApp paused')
 
                 self.__shouldPause = False
-                self.isPaused = True
+                self.__isPaused = True
 
                 if not self.__hasPausedForStepper: # Only do pause behavior if we're not doing the stepper-mandated pause
                     self.onPause()
@@ -367,7 +348,7 @@ class BaseMachineAppEngine(ABC):
             if self.__shouldResume:         # Running resume behavior
                 sendNotification(NotificationLevel.APP_RESUME, 'MachineApp resumed')
                 self.__shouldResume = False
-                self.isPaused = False
+                self.__isPaused = False
 
                 if not self.__hasPausedForStepper: # Only do resume behavior if we're not doing the stepper-mandated pause
                     self.onResume()
@@ -376,7 +357,7 @@ class BaseMachineAppEngine(ABC):
                     if currentState != None:
                         currentState.onResume()
 
-            if self.isPaused:               # While paused, don't do anything
+            if self.__isPaused:               # While paused, don't do anything
                 time.sleep(BaseMachineAppEngine.UPDATE_INTERVAL_SECONDS)
                 continue
 

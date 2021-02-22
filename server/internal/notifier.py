@@ -4,6 +4,7 @@ from threading import RLock, Thread
 import logging
 import json
 import time
+from internal.interprocess_message import sendSubprocessToParentMsg, SubprocessToParentMessage
 
 class NotificationLevel:
     ''' 
@@ -22,6 +23,25 @@ class NotificationLevel:
     WARNING             = 'warning'
     ERROR               = 'error'
     IO_STATE            = 'io_state'
+
+def sendNotification(level, message, customPayload=None):
+    '''
+        Broadcast a message to all connected clients
+
+        params:
+            level: str
+                Notification level defines how the data is visualized on the client
+            message: str
+                message to be shown on the client
+            customPayload: dict
+                (Optional) Custom data to be sent to the client, if any
+    '''
+    sendSubprocessToParentMsg(SubprocessToParentMessage.NOTIFICATION, {
+        "timeSeconds": time.time(),
+        "level": level,
+        "message": message,
+        "customPayload": customPayload
+    })
 
 
 class Notifier:

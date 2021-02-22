@@ -1,5 +1,4 @@
-from internal.notifier import NotificationLevel
-from internal.interprocess_message import sendNotification
+from internal.notifier import NotificationLevel, sendNotification
 
 class IOValue:
     def __init__(self, name, device, pin):

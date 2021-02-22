@@ -17,6 +17,8 @@ The server itself can be thought of as three different parts:
 
 As a user of our template, you should only ever have to deal with the first item on this list, but it is good to be aware that the other parts exist, in case your app requires you touch them.
 
+Although you will probably not need to deal with it, please be aware that your MachineApp will run as a subprocess of the Rest Server. The containerizes your MachineApp, allowing you to kill it at any time via e-stop. This also allows you to get a fresh instance of your MachineApp when you hit play.
+
 ### State Machine
 #### State Machine Node (MachineAppState)
 At it's core, the server is a state machine made up of state nodes (i.e. `MachineAppState`s). Each node defines some behavior for each type of state transition. The following image demonstrates the lifecycle of a single node in our state machine:
@@ -65,9 +67,6 @@ class MachineAppEngine(BaseMachineAppEngine):
 
     def onPause(self):
         self.machineMotion.emitStop()
-
-    def beforeRun(self):
-        pass
 
     def afterRun(self):
         pass
@@ -120,7 +119,7 @@ class WaitingOnInputState(MachineAppState):
 This state machine node waits for a message containing "true" to be published to the fictitious `push_button_1` input. We could, alternatively, pass an MQTT topic directly to the `MachineAppState::registerCallback` method in place of the result of `MachineMotion::getInputTopic`.
 
 ### Streaming Data to the Web Client (Notifier)
-The final part of the server that you'll use is the `Notifier`, located in `server/internal/notifier.py`. The `Notifier` provides you with a simple mechanism for streaming data directly to the web client over a WebSocket. This streamed data is presented to you in the "Information Console" panel on the frontend. Each `MachineAppState` that you initialize has a reference to the global notifier by default, so you should never construct one yourself.
+To send a message to the Web Client from your server, use the `sendNotification` function provided in `internal/notifiier.py`. This streamed data is presented to the frontend in the "Information Console" panel. Each `MachineAppState` that you initialize has a reference to the global notifier by default, so you should never construct one yourself.
 
 As an example, if we  take our `WaitingState` mentioned earlier, we may want to send out a notification to the client after the 3 second timeout is up. An implementation of that would look something like this:
 ```python
@@ -131,7 +130,7 @@ class WaitingState(MachineAppState):
     
     def update(self):
         if time.time() - self.startTimeSeconds > 3.0:
-            self.notifier.sendMessage(NotificationLevel.INFO, '3 seconds are up!', { 'waitedFor': 3 }) # This message is sent to the client
+            sendNotification(NotificationLevel.INFO, '3 seconds are up!', { 'waitedFor': 3 }) # This message is sent to the client
             self.gotoState('DoingSomething')
 
     def onLeave(self):
@@ -184,7 +183,7 @@ For example, if our WaitingState from the previous section looked like this:
 class WaitingState(MachineAppState):
     def onEnter(self):
         self.waitTimeSeconds = self.configuration["waitTimeSeconds"]
-        self.notifier.sendMessage(NotificationLevel.INFO, 'Received wait time', { waitTimeSeconds: self.waitTimeSeconds })
+        sendNotification(NotificationLevel.INFO, 'Received wait time', { waitTimeSeconds: self.waitTimeSeconds })
     ...
 ```
 

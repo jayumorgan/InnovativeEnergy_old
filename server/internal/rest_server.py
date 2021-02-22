@@ -300,7 +300,7 @@ class MachineAppSubprocessManager:
             command.append('--inStateStepperMode')
 
         self.__logger.info('Attempting to run subprocess: {}'.format(' '.join(command)))
-        self.__subprocess = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        self.__subprocess = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         self.__isRunning = True
 
         return True

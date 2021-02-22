@@ -4,8 +4,7 @@ from env import env
 import logging
 import time
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
-from internal.notifier import NotificationLevel
-from internal.interprocess_message import sendNotification
+from internal.notifier import NotificationLevel, sendNotification
 from internal.io_monitor import IOMonitor
 
 '''
@@ -58,9 +57,7 @@ class MachineAppEngine(BaseMachineAppEngine):
     
     def initialize(self):
         ''' 
-        Called when the program starts. Note this is only called ONCE
-        in the lifetime of your MachineApp. If you want to execute behavior
-        every time you click start, see 'beforeRun'.
+        Called when you press play in the UI.
         
         In this method, you will initialize your machine motion instances 
         and configure them. You may also define variables that you'd like to access 
@@ -111,13 +108,6 @@ class MachineAppEngine(BaseMachineAppEngine):
 
     def onResume(self):
         pass
-
-    def beforeRun(self):
-        '''
-        Called before every run of your MachineApp. This is where you might want to reset to a default state.
-        '''
-        self.isPedestrianButtonTriggered = False
-        self.nextLightDirection = 'horizontal'
 
     def afterRun(self):
         '''
