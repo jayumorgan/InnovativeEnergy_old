@@ -12,6 +12,7 @@ import sys
 import signal
 from internal.notifier import getNotifier, NotificationLevel
 from internal.interprocess_message import SubprocessToParentMessage
+from machine_app import MachineAppEngine
 import paho.mqtt.subscribe as MQTTsubscribe
 import paho.mqtt.client as mqtt
 
@@ -98,6 +99,12 @@ class RestServer(Bottle):
         if self.__estopManager.estop():
             self.__subprocess.terminate()
             self.isPaused = False
+
+            # Create a temporary MachineAppEngine and call onEstop
+            temporaryApp = MachineAppEngine()
+            temporaryApp.initialize()
+            temporaryApp.onEstop()
+
             return 'OK'
         else:
             abort(400, 'Failed to estop the MachineApp')

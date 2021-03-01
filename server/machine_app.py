@@ -76,7 +76,7 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.primaryMachineMotion.registerInput('push_button_1', 1, 1)  # Register an input with the provided name
 
         self.primaryIoMonitor = IOMonitor(self.primaryMachineMotion)
-        self.primaryIoMonitor.startMonitoring('push_button_1', 1, 1)
+        self.primaryIoMonitor.startMonitoring('push_button_1', True, 1, 1)
 
         self.secondaryMachineMotion = MachineMotion('127.0.0.1')
         self.secondaryMachineMotion.configAxis(1, 8, 250)
@@ -105,6 +105,14 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         self.primaryMachineMotion.emitStop()
         self.secondaryMachineMotion.emitStop()
+
+    def onEstop(self):
+        '''
+        Called AFTER the MachineMotion has been estopped. Please note that any state
+        that you were using will no longer be available at this point. You should
+        most likely reset all IOs to the OFF position in this method.
+        '''
+        pass
 
     def onResume(self):
         pass

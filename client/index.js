@@ -230,6 +230,7 @@
     }
 
     function onUpdateMessageReceived(pMessageData) {
+        console.log(pMessageData);
         const lTimeSeconds = pMessageData.timeSeconds,
             lLevel = pMessageData.level,
             lMessageStr = pMessageData.message,

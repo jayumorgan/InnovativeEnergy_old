@@ -218,6 +218,15 @@ class BaseMachineAppEngine(ABC):
         '''
         pass
 
+    @abstractmethod
+    def onEstop(self):
+        '''
+        Called AFTER the MachineMotion has been estopped. Please note that any state
+        that you were using will no longer be available at this point. You should
+        most likely reset all IOs to the OFF position in this method.
+        '''
+        pass
+
     def getConfiguration(self):
         ''' Returns the current configuration '''
         return self.configuration
