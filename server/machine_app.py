@@ -4,7 +4,7 @@ from env import env
 import logging
 import time
 from internal.base_machine_app import MachineAppState, BaseMachineAppEngine
-#new aka different from original get clairification 
+#new from template needed in this program 
 from internal.notifier import NotificationLevel, sendNotification, getNotifier
 from internal.io_monitor import IOMonitor
 from sensor import Sensor
@@ -36,21 +36,16 @@ class MachineAppEngine(BaseMachineAppEngine):
         returns:
             dict<str, MachineAppState>
         '''
+	
         stateDictionary = {
             'Initialize'            : InitializeState(self),
             'Feed_New_Roll'         : FeedNewRollState(self),
-            'Roll' 					: Roll(self),
-			'Clamp'    			    : Clamp(self),
-            'Cut'          		    : Cut(self),
-			'Home'                  : HomingState(self), #home state rollers need to be down
-			
-			#'Move_Ballscrew'        : BallScrewState(self),
-            #'Initial_Stretch'       : InitialStretchState(self),
-            #'Regrip1'               : Regrip1State(self),
-            #'Droop_Stretch'         : DroopStretchState(self),
-            #'Pre_Vehicle_Arrives'   : PreVehicleArrivesState(self),            
-            #'Vehicle_Arrives'       : VehicleArrivesState(self),
-            #'Remove_Material'       : RemoveMaterialState(self),
+            'Roll' 		    : Roll(self),
+	    'Clamp'     	    : Clamp(self),
+            'Cut'          	    : Cut(self),
+	    'Home'                  : HomingState(self), #home state rollers need to be down
+	    #First_Roll state needs to be added	
+	    
             
         }
 
@@ -79,83 +74,49 @@ class MachineAppEngine(BaseMachineAppEngine):
         self.logger.info('Running initialization')
         
         # Create and configure your machine motion instances
-        mm_IP = '192.168.7.2' #does this need to be in quotes or should I make it a float?
-		self.MachineMotion = MachineMotion('192.168.7.2') #would this be the IP number？
-        
+        mm_IP = '192.168.7.2' 
+	self.MachineMotion = MachineMotion(mm_IP) 
 		
-		'''
-		self.MachineMotion.configAxis(1, 8, 250) #is this axis, speed, ???
-        self.MachineMotion.configAxis(2, 8, 250)
+	'''
+	example code below
+	self.MachineMotion.configAxis(1, 8, 250) #refer to API and ASD. 1 is axis, 8 is microstep (keep), 250 is mechanical gain. 319.186mm is mechanical gain for the rollers
+        self.MachineMotion.configAxis(2, 8, 250) 
         self.MachineMotion.configAxis(3, 8, 250)
         self.MachineMotion.configAxisDirection(1, 'positive')
         self.MachineMotion.configAxisDirection(2, 'positive')
         self.MachineMotion.configAxisDirection(3, 'positive')
         self.MachineMotion.registerInput('push_button_1', 1, 1)  # Register an input with the provided name #I do not understand this
-		'''
+	'''
 
-       
-    
-        # Setup your global variables
-		'''
-		What would be global variables???? Length? Number of sheets? time? Are the below global variables?
-		'''
-		
-		# Timing Belts 
-        self.timing_belt_axis = 1
-        self.MachineMotion.configAxis(self.timing_belt_axis, 8, 150/5)
+	# Timing Belts 
+        self.timing_belt_axis = 1 #is this the actuator number?
+        self.MachineMotion.configAxis(self.timing_belt_axis, 8, 150/5) #150 is for mechanical gain for timing belt. If gearbox used then divide by 5
         self.MachineMotion.configAxisDirection(self.timing_belt_axis, 'positive')
 		
+	#Rollers
+	self.roller_axisf = 2
+	self.MachineMotion.configAxis(self.roller_axis, 8, 319.186) #need to update last two spots
+	self.MachineMotion.configAxisDirection(self.roller_axis, 'positive')
+	
+	#pneumatics
 		
-		#pneumatics
-		
-		dio1 = mm_IP
+	dio1 = mm_IP
         dio2 = mm_IP
 		
-		self.roller_pneumatic = Pneumatic("Roller Pneumatic", ipAddress=dio2, networkId=2, pushPin=2, pullPin=3) #I will need to find actual pin numbers
-        
-		self.plate_pneumatic = Pneumatic("Plate Pneumatic", ipAddress=dio2, networkId=2, pushPin=0, pullPin=1)
-		
-		self.knife_pneumatic = Pneumatic("Knife Pneumatic", ipAddress=dio1, networkId=1, pushPin=0, pullPin=1)
-		
-		 # for now all IO are on the same MM, but in the future may need to have iomonitor on each mm with an IO
-		 
-        self.iomonitor = IOMonitor(self.MachineMotion)
-        self.iomonitor.startMonitoring("roller_down_cmb", False, 1, 1) #unsure of the false/true but guess numbers after refer to push/pull pins
-		self.iomonitor.startMonitoring("roller_down_fbk", True, 1, 0)
-		self.iomonitor.startMonitoring("roller_up_cmb", False, 1, 0)
-		self.iomonitor.startMonitoring("roller_up_fbk", True, 1, 1)
-
-		
-		self.iomonitor.startMonitoring("plate_down_cmb", False, 1, 3)
-		self.iomonitor.startMonitoring("plate_down_fbk", True, 1, 2)
-		self.iomonitor.startMonitoring("plate_up_cmb", False, 1, 2)
-		self.iomonitor.startMonitoring("plate_up_fbk", True, 1, 3)
-		
-		self.iomonitor.startMonitoring("knife_out_cmb", False, 1, 3)#don't actually know the pins yet
-		self.iomonitor.startMonitoring("knife_out_fbk", True, 1, 2)
-		self.iomonitor.startMonitoring("knife_in_cmb", False, 1, 2)
-		self.iomonitor.startMonitoring("knife_in_fbk", True, 1, 3)
-		
-		
-		
-			#what is the difference between the fbk and cmd in example code
-		'''	
-        self.iomonitor.startMonitoring("return_roller_down_fbk", True, 1, 0)
-        self.iomonitor.startMonitoring("return_roller_up_cmd", False, 1, 0)
-        self.iomonitor.startMonitoring("return_roller_up_fbk", True, 1, 1)
-        self.iomonitor.startMonitoring("mobile_release_cmd", False, 1, 3)
-        self.iomonitor.startMonitoring("mobile_released_fbk", True, 1, 2)
-        self.iomonitor.startMonitoring("mobile_clamp_cmd", False, 1, 2)
-        self.iomonitor.startMonitoring("mobile_clamped_fbk", True, 1, 3)
-        self.iomonitor.startMonitoring("fixed_clamp_cmd", False, 2, 1)
-        self.iomonitor.startMonitoring("fixed_clamped_fbk", True, 2, 0)
-        self.iomonitor.startMonitoring("fixed_release_cmd", False, 2, 0)
-        self.iomonitor.startMonitoring("fixed_released_fbk", True, 2, 1)
-        self.iomonitor.startMonitoring("hot_wire_cmd", False, 2, 3)
-        self.iomonitor.startMonitoring("air_nozzle_cmd", False, 3, 1)
-        self.iomonitor.startMonitoring("air_master_cmd", False, 3, 0)
-		'''
-		
+	self.knife_pneumatic = Pneumatic("Knife Pneumatic", ipAddress=dio1, networkId=1, pushPin=0, pullPin=1) #will need to update if this changes once dovetail arrives	
+	self.roller_pneumatic = Pneumatic("Roller Pneumatic", ipAddress=dio2, networkId=2, pushPin=0, pullPin=1) #I will need to find actual pin numbers #also what is difference between pushPin and pullPin
+        self.plate_pneumatic = Pneumatic("Plate Pneumatic", ipAddress=dio2, networkId=2, pushPin=2, pullPin=3)
+    	
+	#outputs
+	self.knife_output = Digital_Out("Knife Output", ipAddress=dio1, networkId=1, pin=0) #double check correct when knife installed
+	
+        # Setup your global variables
+	Length = input() #this will need to be tied to the UI
+	Num_of_sheets = input() #this will need to be tied to the UI
+	Roller_speed = 100 
+	Roller_accel = 100
+	TimingBelt_speed = 900
+	TimingBelt_accel = 850
 		
 
     def onStop(self):
@@ -167,6 +128,10 @@ class MachineAppEngine(BaseMachineAppEngine):
         this method.
         '''
         self.MachineMotion.emitStop()
+	self.knife_output.low() #knife goes down
+	#self.roller_pneumatic.release() #this will release the pneumatics and lower the rollers
+	#self.roller_pneumatic.pull() #double check 
+	self.MachineMotion.emitHome(self.timing_belt_axis) #knife goes to home
        
     def onPause(self):
         '''
@@ -183,7 +148,16 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         Called before every run of your MachineApp. This is where you might want to reset to a default state.
         '''
-		pass
+	
+	#Can I add below?
+	'''
+	#check if there is a roll
+	self.knife_output.low()
+	self.roller_pneumatic.pull()
+	self.plate_pneumatic.pull()
+	self.engine.MachineMotion.emitHome(self.timing_belt_axis)
+	'''
+	pass
 		
        #should I use beforeRun(self) or afterRun(self)? I don't really understand this part
 	
@@ -205,81 +179,146 @@ class MachineAppEngine(BaseMachineAppEngine):
         '''
         return self.MachineMotion
 
-
-#Need some sort of code to tie into UI to take in inputs
-#Length = input()
-#Num_Sheets = input()		
+	
 		
-class Home(MachineAppState): #explain this line. what does machineappstate come from
-	'''
-	Homes our primary machine motion, and sends a message when complete.
-	'''
-	def onEnter(self):
-		self.engine.MachineMotion.emitHomeAll() #Need explaination 
-		self.notifier.sendMessage(NotificationLevel.INFO,'Moving to home')
-		self.gotoState('Feed_New_Roll')
-		
-	def onResume(self):
-		self.gotoState('Home')
 
 class Feed_New_Roll(MachineAppState):
 	''' Starts with the clamps up to feed roll'''
-	#do I need def __init__
 	
+	def __init__(self, engine):
+        	super().__init__(engine)
+
 	def onEnter(self):
-		#set rollers up
-		#pause wait for input. when input received 
-		#set rollers down
+		#check if there is a roll
+		self.knife_output.low()
+		self.roller_pneumatic.pull()
+		self.plate_pneumatic.pull()
+		self.engine.MachineMotion.emitHome(self.timing_belt_axis)
+		#wait for input. need to add UI button. When input received, 'Roll Loaded' 
+		self.roller_pneumatic.push()
+		#if flag set = 1 called First Roll
+		#possibly add code to first roll state
 		
 		self.gotoState('Roll')
 	
-	def update(self): #not sure what this is for
+	def update(self): 
 		pass	
-			
+	
+	
+class Home(MachineAppState): 
+	'''
+	Homes our primary machine motion, and sends a message when complete.
+	'''
+	def __init__(self, engine):
+        	super().__init__(engine)
+
+	def onEnter(self):
+		self.knife_output.low()
+		self.MachineMotion.waitForMotionCompletion() #is this correct usage?
+		self.engine.MachineMotion.emitAbsoluteMove(self.timing_belt_axis,0) #moves timing belt to Home position (0)
+		#self.notifier.sendMessage(NotificationLevel.INFO,'Moving to home')
+		self.roller_pneumatic.release()
+		
+		self.gotoState('Roll')
+		
+	#def onResume(self):
+	#	self.gotoState('Initialize')	#I don't remember why this is here
+	
+	def update(self): 
+		pass	
+	
 			
 class Roll(MachineAppState):
     '''
     Activate rollers to roll material
     '''
     def __init__(self, engine):
-        super().__init__(engine) #what is super? is it important?
+        super().__init__(engine) 
 
     def onEnter(self):
-   		machinemotion.emitRelativeMove(axis,distance) #will need to find out axis and create input variable for distance
-		self.gotoState('Clamp')
+	#check sensor to see if there is still a roll
+	'''
+	If there is a roll then continue, 
+	if not,
+	self.MachineMotion.emitStop()
+	self.gotoState('Feed_New_Roll')
+	'''
+	#check last cut to see if it was finished
+	#if not, create pop up notification to check last cut
+	
+	'''
+	if self.roller_pneumatic.pull() = false:
+		self.roller_pneumatic.push()
+		self.roller_pneumatic.release()
+	elif self.plate_pneumatic.pull() = false:
+		self.plate_pneumatic.pull()
+	elif self.knife_output.low() = false:
+		self.knife_output.low()
+	
+	'''
+	
+	self.engine.MachineMotion.emitAbsoluteMove(self.timing_belt_axis,0)
+	self.engine.MachineMotion.emitSpeed(Roller_speed)
+	self.engine.MachineMotion.emitAcceleration(Roller_accel)
+   	self.engine.MachineMotion.emitRelativeMove(self.roller_axis,distance) #Distance will be pulled from Global Variable Length input
+	self.engine.MachineMotion.waitForMotionCompletion()
+	self.gotoState('Clamp')
 
     def update(self):
         pass
 		
 		
 class Clamp(MachineAppState):
-	def __init__(self, engine):
+    def __init__(self, engine):
         super().__init__(engine) 
 
     def onEnter(self):
-   		#clamp goes down
-		self.gotoState('Cut')
+	#check sensor to see if there is still a roll
+	'''
+	If there is a roll then continue, 
+	if not,
+	self.MachineMotion.emitStop()
+	self.gotoState('Feed_New_Roll')
+	'''
+	#check last cut to see if it was finished
+	#if not, create pop up notification to check last cut
+	
+	'''
+	if self.knife_output.low() = false
+		self.knife_output.low()
+	'''
+	
+	self.engine.MachineMotion.emitAbsoluteMove(self.timing_belt_axis,0)
+   	self.plate_pneumatic.push()
+	self.MachineMotion.waitForMotionCompletion() #is this correct?
+	self.gotoState('Cut')
 
     def update(self):
         pass
 
 
 class Cut(MachineAppState):
-	def __init__(self, engine):
+    def __init__(self, engine):
         super().__init__(engine) 
 		
     def onEnter(self):
-   		#activate pneumatic knife to go out
-		#timing belt move
+   	self.engine.MachineMotion.emitAbsoluteMove(self.timing_belt_axis,0)
+	self.knife_output.high() #is this correct to bring knife up?
+	self.engine.MachineMotion.emitSpeed(TimingBelt_speed)
+	self.engine.MachineMotion.emitAcceleration(TimingBelt_accel)
+	self.engine.MachineMotion.emitRelativeMove(self.timing_belt_axis, "positive",1900) 
+        self.engine.MachineMotion.waitForMotionCompletion()
+	self.knife_output.low()
 		
-		#Num_Sheets - 1
+	#Num_Sheets - 1
 		
-		#if Num_Sheets > 0:
+	#if Num_Sheets > 0:
 		
 		self.gotoState('Home')
 		
-		#else:
-			#stop
+	#else:
+		#self.engine.stop()
+	
 
     def update(self):
         pass
