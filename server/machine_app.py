@@ -90,7 +90,7 @@ class MachineAppEngine(BaseMachineAppEngine):
 
 	# Timing Belts 
         self.timing_belt_axis = 1 #is this the actuator number?
-        self.MachineMotion.configAxis(self.timing_belt_axis, 8, 150/5) #150 is for mechanical gain for timing belt. If gearbox used then divide by 5
+        self.MachineMotion.configAxis(self.timing_belt_axis, 8, 150) #150 is for mechanical gain for timing belt. If gearbox used then divide by 5
         self.MachineMotion.configAxisDirection(self.timing_belt_axis, 'positive')
 		
 	#Rollers
