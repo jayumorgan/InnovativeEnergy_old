@@ -78,7 +78,7 @@ class MachineAppEngine(BaseMachineAppEngine):
 	self.MachineMotion = MachineMotion(mm_IP) 
 		
 	'''
-	example code below
+	example code below shows how to configure Axis (the actuator #)
 	self.MachineMotion.configAxis(1, 8, 250) #refer to API and ASD. 1 is axis, 8 is microstep (keep), 250 is mechanical gain. 319.186mm is mechanical gain for the rollers
         self.MachineMotion.configAxis(2, 8, 250) 
         self.MachineMotion.configAxis(3, 8, 250)
